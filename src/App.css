@@ -46,6 +46,9 @@ body {
  background: #eaeaea;
  border-left: 1px solid #000;
 }
+input {
+ color: #000 !important;
+}
 /* end of navigation */
 
 /* signin and signup form styles */

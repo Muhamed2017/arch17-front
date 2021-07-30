@@ -4,6 +4,7 @@ import { Container, Col, Row } from "react-bootstrap";
 import { FaLinkedinIn, FaFacebookF } from "react-icons/fa";
 import { AiFillWechat } from "react-icons/ai";
 import { connect } from "react-redux";
+import { isNotEmptyString } from "@formiz/validations";
 import {
  signupEmailPassword,
  signupFacebook,
@@ -52,6 +53,12 @@ const Register = (props) => {
             id="lname"
             type="text"
             name="lname"
+            validation={[
+             {
+              rule: isNotEmptyString(),
+              message: "This field is required",
+             },
+            ]}
             placeholder="Last name"
             onChange={(e) => setLname(e.target.value)}
            />
