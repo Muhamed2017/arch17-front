@@ -7,7 +7,7 @@ import {
  FaGoogle,
  FaAppleAlt,
 } from "react-icons/fa";
-import { AiFillWechat } from "react-icons/ai";
+// import { AiFillWechat } from "react-icons/ai";
 import { connect } from "react-redux";
 import { isNotEmptyString } from "@formiz/validations";
 import {

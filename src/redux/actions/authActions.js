@@ -1,6 +1,6 @@
 
 import * as actions from '../constants'
-import { auth, googleProvider, facebookProvider, linkedinProvider} from './../../firebase';
+import { auth, googleProvider, facebookProvider} from './../../firebase';
 
 export const emailPasswordSignup = ()=>({
     type:actions.SIGNUP_EMAIL_PASSWORD_REQUEST
