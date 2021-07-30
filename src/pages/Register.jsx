@@ -3,36 +3,24 @@ import Form from "react-bootstrap/Form";
 import { Container, Col, Row } from "react-bootstrap";
 import { FaLinkedinIn, FaFacebookF } from "react-icons/fa";
 import { AiFillWechat } from "react-icons/ai";
-
-// import { connect } from "react-redux";
-// import { initFacebookSdk } from "../../facebook";
-// import { registerUser } from "./../../redux/actions/AuthActionCreator";
-
-const Register = ({ dispatchRegisterAction }) => {
+import { connect } from "react-redux";
+import {
+ signupEmailPassword,
+ signupFacebook,
+} from "../redux/actions/authActions";
+import HashLoader from "react-spinners/HashLoader";
+const Register = (props) => {
  const [fname, setFname] = useState("");
  const [lname, setLname] = useState("");
  const [email, setEmail] = useState("");
  const [password, setPassword] = useState("");
- const [password_confirmation, setPasswordConfirmation] = useState("");
 
- const handleSubmit = (event) => {
-  dispatchRegisterAction(
-   fname,
-   lname,
-   email,
-   password,
-   password_confirmation,
-   () => {
-    console.warn("Created");
-   },
-
-   (message) => console.log("Error: " + message)
-  );
+ const handleRegularSignup = () => {
+  props.dispatchRegularSignup(`${fname} ${lname}`, email, password);
+  console.log(props.isLoggedIn);
  };
-
  return (
   <React.Fragment>
-   {/* <Navigation /> */}
    <div id="wrapper" className="auth-form">
     <Container fluid>
      <Row className="justify-content-md-center">
@@ -41,6 +29,7 @@ const Register = ({ dispatchRegisterAction }) => {
        md={{ span: 8 }}
        sm={{ span: 10 }}
        className="m-auto p-5 bg-white rounded"
+       style={{ position: "relative" }}
       >
        <div className="heading">
         <h2>Welcome to Arch17</h2>
@@ -48,7 +37,7 @@ const Register = ({ dispatchRegisterAction }) => {
        </div>
        <Form noValidate>
         <Form.Group>
-         <Form.Row>
+         <Row>
           <Col>
            <Form.Control
             placeholder="First name"
@@ -67,7 +56,7 @@ const Register = ({ dispatchRegisterAction }) => {
             onChange={(e) => setLname(e.target.value)}
            />
           </Col>
-         </Form.Row>
+         </Row>
         </Form.Group>
         <Form.Group>
          <Form.Control
@@ -85,43 +74,37 @@ const Register = ({ dispatchRegisterAction }) => {
           onChange={(e) => setPassword(e.target.value)}
          />
         </Form.Group>
-        <Form.Group>
-         <Form.Control
-          name="password_confirmation"
-          id="password_confirmation"
-          type="password"
-          placeholder="Confirm Password"
-          onChange={(e) => setPasswordConfirmation(e.target.value)}
-         />
-        </Form.Group>
         <button
          className="coninue-btn regular-auth"
-         type="submit"
          onClick={(e) => {
           e.preventDefault();
-          handleSubmit();
+          handleRegularSignup();
          }}
         >
-         Continue
+         {props.loading ? (
+          <>
+           Logging
+           <HashLoader color="#ffffff" loading={true} css={{}} size={35} />
+          </>
+         ) : (
+          <>Continue</>
+         )}
         </button>
 
         <div className="form-separator"></div>
         <button
          className="coninue-btn facebook-auth"
-         //   onClick={this.facebook}
-         //   type="submit"
-         //   onClick={this.handleFacebookAuth}
+         onClick={(e) => {
+          e.preventDefault();
+          props.dispatchFacebookSignup();
+         }}
         >
          <span>
           <FaFacebookF />
          </span>
          Continue With Facebook
         </button>
-        <button
-         className="coninue-btn linkedin-auth"
-         //   onClick={}
-         type="submit"
-        >
+        <button className="coninue-btn linkedin-auth" type="submit">
          <span>
           <FaLinkedinIn />
          </span>{" "}
@@ -157,24 +140,16 @@ const Register = ({ dispatchRegisterAction }) => {
   </React.Fragment>
  );
 };
-
-// const mapDispatchToProps = (dispatch) => ({
-//  dispatchRegisterAction: (
-//   fname,
-//   lname,
-//   email,
-//   password,
-//   password_confirmation,
-//   onSuccess,
-//   onError
-//  ) =>
-//   dispatch(
-//    registerUser(
-//     { fname, lname, email, password, password_confirmation },
-//     onSuccess,
-//     onError
-//    )
-//   ),
-// });
-// export default connect(null, mapDispatchToProps)(Signup);
-export default Register;
+const mapDispatchToProps = (dispatch) => ({
+ dispatchRegularSignup: (fullName, email, password) =>
+  dispatch(signupEmailPassword(fullName, email, password)),
+ //  dispatchLogOut: () => dispatch(logginOut()),
+ dispatchFacebookSignup: () => dispatch(signupFacebook()),
+});
+const mapStateToProps = (state) => {
+ return {
+  isLoggedIn: state.regularUser.isLoggedIn,
+  loading: state.regularUser.loading,
+ };
+};
+export default connect(mapStateToProps, mapDispatchToProps)(Register);

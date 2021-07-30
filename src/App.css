@@ -11,9 +11,24 @@ body {
 .m-t-global {
  margin-top: 15%;
 }
+/* forms normalization */
+.form-control:focus {
+ color: #ddd;
+ background-color: #fff;
+ border-color: #acada8 !important;
+ outline: 0;
+ box-shadow: none !important;
+}
+
 /* navigation styles */
 .navbar-border-bottom {
  border-bottom: 1px solid #f0f0f0;
+}
+#basic-navbar-nav {
+ justify-content: space-between;
+}
+.navbar-light .navbar-nav .nav-link {
+ color: rgba(0, 0, 0, 1) !important;
 }
 #test-name {
  padding: 8px;
@@ -52,7 +67,9 @@ body {
  font-family: sans-serif;
  font-size: 1.2rem;
 }
-
+.auth-form .form-group {
+ margin-bottom: 18px;
+}
 .form-separator {
  background-color: #66666671;
  height: 1px;
@@ -398,32 +415,33 @@ ul#shop-upps span {
 
 #add-product-one {
  font-family: "Roboto";
- max-width: 800px;
- margin: 80px auto;
+ background: #fff;
  color: #000;
- /* text-align: center; */
+ min-height: 90vh;
 }
+.add-wrapper {
+ max-width: 800px;
+ margin: 0px auto;
+ padding-top: 80px;
+}
+
 .light-head {
  font-size: 4rem;
  width: 80%;
  font-weight: 100;
  margin-bottom: 30px;
- /* text-align: center; */
 }
 .product-kinds {
  display: grid;
- /* text-align: center; */
  grid-template-columns: repeat(3, auto);
  grid-gap: 15px;
- /* justify-content: center; */
- /* padding: 0 30px; */
 }
 
 .product-kinds button {
  background: transparent;
  border: none;
  border-radius: 3px;
-
+ color: #000;
  /* color: #5d5d5d; */
  padding: 5px;
  font-weight: 400;
@@ -431,12 +449,32 @@ ul#shop-upps span {
  max-width: 190px;
  transition: background 200ms ease-in-out;
 }
+.product-kinds a {
+ color: #000;
+ text-decoration: none;
+ max-width: 190px;
+ background: transparent;
+ border: none;
+ border-radius: 3px;
+ padding: 5px;
+ font-weight: 400;
+ text-align: left;
+ max-width: 190px;
+ transition: background 200ms ease-in-out;
+}
+.product-kinds a:hover {
+ background: #e41e15;
+ color: #fff;
+}
 .product-kinds button:hover {
  background: #e41e15;
  color: #fff;
 }
 #add-product-wrapper {
  font-family: "Roboto";
+}
+#add-product-wrapper .react-tabs__tab-panel {
+ box-shadow: none;
 }
 .react-tabs__tab-list {
  border-bottom: none !important;
@@ -460,6 +498,7 @@ ul#shop-upps span {
 .react-tabs__tab {
  overflow: hidden;
  min-width: 50px;
+ border: unset !important;
 }
 .react-tabs__tab--selected {
  border: 0 !important;
@@ -484,11 +523,13 @@ ul#shop-upps span {
 button.save-product-step-btn {
  background: #e41e15;
  min-width: 170px;
- min-height: 20px;
+ min-height: 30px;
  color: #fff;
  position: absolute;
  border: none;
  padding: 4px 0;
+
+ /* padding: 8px ​0px 5px 0px; */
  right: 0px;
  bottom: 12px;
  border-radius: 3px;
@@ -904,7 +945,7 @@ td svg {
  position: absolute;
  height: 80px;
  width: 80px;
- opacity: 0;
+ /* opacity: 0; */
  cursor: pointer;
 }
 .upload-head {
@@ -1041,7 +1082,7 @@ span.learn-more {
  .container-sm,
  .container-xl,
  .container-fluid {
-  max-width: 1366px !important;
+  max-width: 1266px !important;
  }
 }
 .none-descktop {
@@ -1402,16 +1443,13 @@ h4.project-name {
  margin-right: 0 !important;
  max-width: 1280px !important;
 }
-/* .store-tabs { */
-/* max-width: 1280px; */
-/* } */
 .unmargin-row {
  margin: 0 !important;
  padding-left: 40px;
 }
-/* #prand-page { */
-/* font-family: "Roboto"; */
-/* } */
+#prand-page {
+ font-family: "Roboto";
+}
 
 .loc-desc {
  color: #747474;
