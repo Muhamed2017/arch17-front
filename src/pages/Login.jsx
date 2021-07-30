@@ -4,7 +4,12 @@ import { Container, Col, Row } from "react-bootstrap";
 import { FaLinkedinIn, FaFacebookF } from "react-icons/fa";
 import { AiFillWechat } from "react-icons/ai";
 import { connect } from "react-redux";
-import { signinEmailPassword } from "../redux/actions/authActions";
+import {
+ signinEmailPassword,
+ signupFacebook,
+} from "../redux/actions/authActions";
+import HashLoader from "react-spinners/HashLoader";
+
 // import { loginUser } from "./../../redux/actions/AuthActionCreator";
 const Login = (props) => {
  const [email, setEmail] = useState("");
@@ -58,11 +63,25 @@ const Login = (props) => {
           handleRegularSignup();
          }}
         >
-         Continue
+         {/* Continue */}
+         {props.loading ? (
+          <>
+           Logging
+           <HashLoader color="#ffffff" loading={true} css={{}} size={35} />
+          </>
+         ) : (
+          <>Continue</>
+         )}
         </button>
 
         <div className="form-separator"></div>
-        <button className="coninue-btn facebook-auth" type="submit">
+        <button
+         className="coninue-btn facebook-auth"
+         onClick={(e) => {
+          e.preventDefault();
+          props.dispatchFacebookSignup();
+         }}
+        >
          <span>
           <FaFacebookF />
          </span>
@@ -105,5 +124,6 @@ const Login = (props) => {
 const mapDispatchToProps = (dispatch) => ({
  dispatchRegularSignup: (email, password) =>
   dispatch(signinEmailPassword(email, password)),
+ dispatchFacebookSignup: () => dispatch(signupFacebook()),
 });
 export default connect(null, mapDispatchToProps)(Login);
