@@ -23,7 +23,8 @@ const app = firebase.initializeApp({
 
 export const auth= app.auth();
 
-export const  googleProvider = new firebase.auth.GoogleAuthProvider();
+export const googleProvider = new firebase.auth.GoogleAuthProvider();
+// export const linkedinProvider = new firebase.auth.LinkedinAuthProvider();
 
 // export const twitterProvider = new firebase.auth.TwitterAuthProvider();
 // export const phoneProvider = new firebase.auth.PhoneAuthProvider();

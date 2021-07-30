@@ -1,12 +1,18 @@
 import React, { useState } from "react";
 import Form from "react-bootstrap/Form";
 import { Container, Col, Row } from "react-bootstrap";
-import { FaLinkedinIn, FaFacebookF } from "react-icons/fa";
+import {
+ FaLinkedinIn,
+ FaFacebookF,
+ FaAppleAlt,
+ FaGoogle,
+} from "react-icons/fa";
 import { AiFillWechat } from "react-icons/ai";
 import { connect } from "react-redux";
 import {
  signinEmailPassword,
  signupFacebook,
+ signupGoogle,
 } from "../redux/actions/authActions";
 import HashLoader from "react-spinners/HashLoader";
 
@@ -93,12 +99,31 @@ const Login = (props) => {
          </span>{" "}
          Continue With Linkedin
         </button>
-        <button className="coninue-btn wechat-auth" type="submit">
+        {/* <button className="coninue-btn wechat-auth" type="submit">
          <span>
           <AiFillWechat />
          </span>
          Continue With WeChat
+        </button> */}
+        <button className="coninue-btn apple-auth">
+         <span>
+          <FaAppleAlt />
+         </span>
+         Continue With Apple
         </button>
+        <button
+         className="coninue-btn google-auth"
+         onClick={(e) => {
+          e.preventDefault();
+          props.dispatchGoogleSignup();
+         }}
+        >
+         <span>
+          <FaGoogle />
+         </span>
+         Continue With Google
+        </button>
+
         <div className="terms">
          <p>
           By clicking on Continue you agreed to <span>Terms of use</span> and
@@ -125,5 +150,6 @@ const mapDispatchToProps = (dispatch) => ({
  dispatchRegularSignup: (email, password) =>
   dispatch(signinEmailPassword(email, password)),
  dispatchFacebookSignup: () => dispatch(signupFacebook()),
+ dispatchGoogleSignup: () => dispatch(signupGoogle()),
 });
 export default connect(null, mapDispatchToProps)(Login);

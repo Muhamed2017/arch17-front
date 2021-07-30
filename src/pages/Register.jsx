@@ -1,13 +1,20 @@
 import React, { useState } from "react";
 import Form from "react-bootstrap/Form";
 import { Container, Col, Row } from "react-bootstrap";
-import { FaLinkedinIn, FaFacebookF } from "react-icons/fa";
+import {
+ FaLinkedinIn,
+ FaFacebookF,
+ FaGoogle,
+ FaAppleAlt,
+} from "react-icons/fa";
 import { AiFillWechat } from "react-icons/ai";
 import { connect } from "react-redux";
 import { isNotEmptyString } from "@formiz/validations";
 import {
  signupEmailPassword,
  signupFacebook,
+ signupGoogle,
+ //  signupLinkedin,
 } from "../redux/actions/authActions";
 import HashLoader from "react-spinners/HashLoader";
 const Register = (props) => {
@@ -111,17 +118,54 @@ const Register = (props) => {
          </span>
          Continue With Facebook
         </button>
-        <button className="coninue-btn linkedin-auth" type="submit">
+        <button
+         className="coninue-btn linkedin-auth"
+         disabled={true}
+         onClick={(e) => {
+          //   e.preventDefault();
+          //   props.dispatchLinkedinSignup();
+         }}
+        >
          <span>
           <FaLinkedinIn />
          </span>{" "}
          Continue With Linkedin
         </button>
-        <button className="coninue-btn wechat-auth" type="submit">
+        {/* <button
+         className="coninue-btn wechat-auth"
+         onClick={(e) => {
+          e.preventDefault();
+          props.dispatchGoogleSignup();
+         }}
+        >
          <span>
           <AiFillWechat />
          </span>
          Continue With WeChat
+        </button> */}
+        <button
+         className="coninue-btn apple-auth"
+         onClick={(e) => {
+          //   e.preventDefault();
+          //   props.dispatchGoogleSignup();
+         }}
+        >
+         <span>
+          <FaAppleAlt />
+         </span>
+         Continue With Apple
+        </button>
+        <button
+         className="coninue-btn google-auth"
+         onClick={(e) => {
+          e.preventDefault();
+          props.dispatchGoogleSignup();
+         }}
+        >
+         <span>
+          <FaGoogle />
+         </span>
+         Continue With Google
         </button>
         <div className="terms">
          <p>
@@ -152,6 +196,8 @@ const mapDispatchToProps = (dispatch) => ({
   dispatch(signupEmailPassword(fullName, email, password)),
  //  dispatchLogOut: () => dispatch(logginOut()),
  dispatchFacebookSignup: () => dispatch(signupFacebook()),
+ dispatchGoogleSignup: () => dispatch(signupGoogle()),
+ //  dispatchLinkedinSignup: () => dispatch(signupLinkedin()),
 });
 const mapStateToProps = (state) => {
  return {

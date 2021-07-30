@@ -1,6 +1,6 @@
 
 import * as actions from '../constants'
-import { auth, googleProvider, facebookProvider} from './../../firebase';
+import { auth, googleProvider, facebookProvider, linkedinProvider} from './../../firebase';
 
 export const emailPasswordSignup = ()=>({
     type:actions.SIGNUP_EMAIL_PASSWORD_REQUEST
@@ -27,10 +27,20 @@ export const googleSignup = user => ({
 export const facebookSignupRequest =() => ({
     type: actions.FACEBOOK_SIGNUP_REQUEST
 })
+
 export const facebookSignupSuccess = user => ({
     type: actions.FACEBOOK_SIGNUP_REQUEST_SUCCESS,
     payload:user
 })
+export const linkedinSignupRequest = () => ({
+    type: actions.FACEBOOK_SIGNUP_REQUEST
+})
+
+export const linkedinSignupSuccess = (user) => ({
+    type: actions.FACEBOOK_SIGNUP_REQUEST,
+    payload:user
+})
+
 export const googleSignuoSuccess = user => ({
     type: actions.GOOGLE_SIGNUP_SUCCESS,
     payload: user
@@ -41,7 +51,6 @@ export const logout = ()=>{
         type: actions.LOGOUT
     }
 }
-
 
 export const signupEmailPassword= (fullName, email, password)=>{
     return (dispatch)=>{
@@ -112,6 +121,18 @@ export const signupFacebook= ()=>{
       })
   }  
 }
+// export const signupLinkedin = () => {
+//     return (dispatch) => {
+//         dispatch(linkedinSignupRequest());
+//         auth.signInWithPopup(linkedinProvider).then((userCredential) => {
+//             console.log(userCredential.user)
+//             dispatch(linkedinSignupSuccess(userCredential.user))
+//             setUserInfo(userCredential.user)
+//         }).catch((error) => {
+//             console.log(error.message)
+//         })
+//     }
+// }
 export const logginOut = () => {
     localStorage.removeItem('user');
     return (dispatch)=>{

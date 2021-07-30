@@ -123,6 +123,13 @@ button.facebook-auth {
 button.wechat-auth {
  background-color: #51c332;
 }
+button.google-auth {
+ background-color: #e75238;
+}
+button.apple-auth {
+ background-color: #313131;
+ margin-bottom: 15px;
+}
 /* .regular-auth, */
 .facebook-auth,
 .linkedin-auth,
