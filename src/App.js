@@ -1,5 +1,6 @@
 import React from 'react';
 import './App.css';
+import './Demo.css'
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
 import Register from './pages/Register';
 import Login from './pages/Login';
@@ -7,14 +8,12 @@ import AuthProvider from './contexts/AuthContext';
 import { connect } from 'react-redux';
 import NavigationBar from './components/NavigationBar';
 import { ChakraProvider } from "@chakra-ui/react"
-// import Kind from './pages/addProduct/Kind.jsx';
-// import AddProductWrapper from './pages/addProduct/AddProductWrapper';
-// import MultiStepForm from './pages/Form-Wrpper/MultiStepForm';
-// import TestUpload from './pages/TestUpload';
-// import Steper from './pages/Stepers';
-// import TestCrop from './pages/TestCrop';
-const  App=(props)=>{
+import AddProductWrapper from './pages/addProduct/AddProductWrapper';
+import TestUpload from './pages/TestUpload';
+import TestCrop from './pages/TestCrop';
+import FileUpload from './components/FileUpload';
 
+const  App=(props)=>{
   return (
     <ChakraProvider>
     <AuthProvider>
@@ -27,6 +26,18 @@ const  App=(props)=>{
               </Route>
               <Route path="/signin" exact>
                 {props.isLoggedIn ? <Redirect to="/" /> : <Login />}
+              </Route>
+              <Route path="/identity">
+                <AddProductWrapper />
+              </Route>
+              <Route path='/cropper' exact>
+                <TestUpload />
+              </Route>
+              <Route path='/cropper2' exact>
+                <TestCrop />
+              </Route>
+              <Route path="/dropzone" exact>
+                <FileUpload/>
               </Route>
             </Switch>
           </Router>

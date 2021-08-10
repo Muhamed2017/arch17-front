@@ -571,7 +571,38 @@ button.save-product-step-btn {
 .step-form .sub-label {
  color: #8b8b8b;
  font-size: 14px;
+ max-width: 120px;
 }
+.step-form .sub-label:nth-child(3),
+.step-form .sub-label:nth-child(4) {
+ text-align: right;
+}
+.css-1okebmr-indicatorSeparator {
+ display: none !important;
+}
+.step-form.identity .css-yk16xz-control,
+.step-form.identity .css-1a744tp-contorl {
+ box-shadow: none !important;
+}
+.css-g1d714-ValueContainer {
+ padding: 7px !important;
+ border: #8b8b8b !important;
+ box-shadow: none !important;
+}
+.step-form.identity .css-1pahdxg-control {
+ /* padding: 5px; */
+ border-color: #8b8b8b;
+ box-shadow: none;
+}
+/* .step-form.identity .css-26l3qy-menu div {
+ display: inline-block !important;
+ visibility: visible;
+ background-color: red;
+} */
+.step-form.identity .form-group {
+ margin-bottom: 25px;
+}
+
 /* option and price styling   */
 
 .step-head h5 {
@@ -602,6 +633,7 @@ th {
  min-width: 120px;
  text-align: center;
 }
+
 #options-wrapper table th span {
  padding: 2.5px;
  vertical-align: middle;
@@ -611,6 +643,7 @@ th {
 }
 #options-wrapper svg {
  color: #b4b4b4;
+ margin: auto;
 }
 #options-wrapper td input {
  width: 75px;
@@ -658,7 +691,7 @@ td svg {
  text-align: center;
  vertical-align: middle;
  border-radius: 50%;
- padding-top: 14px;
+ padding-top: 18px;
 }
 .add-option-btn svg {
  color: #fff !important;
@@ -736,6 +769,14 @@ td svg {
  grid-template-columns: repeat(6, 72px);
  justify-content: space-between;
 }
+#upload-directions svg {
+ margin: auto;
+}
+#upload-directions input {
+ opacity: 0;
+ position: absolute;
+ z-index: 2;
+}
 .pics-modal p {
  width: 487px;
  margin: auto;
@@ -773,12 +814,15 @@ td svg {
  border: 1px dashed #ccc;
  height: 72px;
  cursor: pointer;
- padding-top: 22px;
+ /* padding-top: 22px; */
  text-align: center;
 }
 #upload-directions div svg {
  font-size: 1.8rem;
  color: #ccc;
+ margin-top: 21px;
+ z-index: -1;
+ cursor: pointer;
 }
 #upload-directions input {
  width: 80px;
@@ -1011,6 +1055,7 @@ td svg {
  margin: auto;
  padding: 90px 120px;
  text-align: center;
+ position: relative;
 }
 .tab-form-content .tab-head h2 {
  color: #b4b4b4;
@@ -1038,6 +1083,9 @@ span.learn-more {
 }
 .file-icons-tabs {
  margin: 30px auto;
+}
+.file-icons-tabs span {
+ padding-top: 12.5px;
 }
 
 .red-bg,

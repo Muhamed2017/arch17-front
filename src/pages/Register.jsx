@@ -165,7 +165,7 @@ const Register = (props) => {
          <span>
           <FaGoogle />
          </span>
-         Continue With Google
+         Continue With Google {props.cout}
         </button>
         <div className="terms">
          <p>

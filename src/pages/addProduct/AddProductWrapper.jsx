@@ -2,15 +2,20 @@ import React, { useState, useEffect } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { FaCloudUploadAlt, FaPlus, FaTrashAlt } from "react-icons/fa";
 import "react-tabs/style/react-tabs.css";
+import { GO_TO_TAB_STEP } from "../../redux/constants";
+
 import Identity from "./Identity";
 import OptionsPrice from "./OptionsPrice";
 import ProductFiles from "./ProductFiles";
 import { connect } from "react-redux";
-import { productIdentity } from "../../redux/actions/addProductActions";
+import {
+ gotoTap,
+ productIdentity,
+} from "../../redux/actions/addProductActions";
+import UploadFiles from "./UploadFiles";
 
 const AddProductWrapper = (props) => {
  const [tabIndex, setTabIndex] = useState(props.tabIndex);
- const [selectedTab, setSelectedTan] = useState(0);
 
  const handleUpload = () => {
   console.log("uploaded");
@@ -48,7 +53,6 @@ const AddProductWrapper = (props) => {
 
  useEffect(() => {
   setTabIndex(props.tabIndex);
-  // setTabIndex(tabIndex);
  });
 
  Tabs.defaultProps = {
@@ -56,18 +60,18 @@ const AddProductWrapper = (props) => {
  };
  return (
   <div id="add-product-wrapper">
-   <Tabs onSelect={(index) => setTabIndex(index)}>
+   <Tabs OnSelect={(index) => setTabIndex(index)}>
     <div id="tabs-wrapper">
      <TabList>
       <Tab>1. Product Idntity</Tab>
       <Tab>2. Options & Price</Tab>
       <Tab>3. Product Description</Tab>
       <Tab>4. Files Uploads</Tab>
-      <Tab>5. Product Files</Tab>
+      <Tab>5. Product Preview</Tab>
       {/* <button
        className="save-product-step-btn"
        onClick={tabIndex === 1 ? props.dispatchAddIdentity : ClickNo}
-       //  onClick={() => handleIdentitySubmit()}
+        // onClick={() => handleIdentitySubmit()}
        style={{ background: loading ? "#B4B4B4" : "" }}
       >
        {loading ? (
@@ -93,7 +97,7 @@ const AddProductWrapper = (props) => {
      <ProductFiles />
     </TabPanel>
     <TabPanel>
-     <div className="step-form">
+     {/* <div className="step-form">
       <div className="step-head">
        <h2>Upload Product Files</h2>
        <p>CAD / 3D, and PDF files</p>
@@ -153,7 +157,8 @@ const AddProductWrapper = (props) => {
         </div>
        </div>
       </div>
-     </div>
+     </div> */}
+     <UploadFiles />
     </TabPanel>
     <TabPanel>SSSS</TabPanel>
    </Tabs>
@@ -191,11 +196,13 @@ const mapDispatchToProps = (dispatch) => ({
     is_for_kids
    )
   ),
+ //  dispatchGotoStep: s() => dispatch(gotoTap(step)),
 });
 
 const mapStateToProps = (state) => {
  return {
   tabIndex: state.addProduct.tabIndex,
+  // tabIndex: 1,
  };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(AddProductWrapper);

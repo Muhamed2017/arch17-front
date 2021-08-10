@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Form, Col, Row } from "react-bootstrap";
 import Select from "react-select";
-import axios from "axios";
+// import axios from "axios";
 import ReactFlagsSelect from "react-flags-select";
 import PulseLoader from "react-spinners/PulseLoader";
 import { productIdentity } from "../../redux/actions/addProductActions";
@@ -46,6 +46,7 @@ const SelectOptions = [
  { value: "strawberry", label: "Strawberry" },
  { value: "vanilla", label: "Vanilla" },
 ];
+
 const Identity = (props) => {
  const [name, setName] = useState(props.identity.name ?? "");
  const [category, setCategory] = useState("");
@@ -56,11 +57,13 @@ const Identity = (props) => {
  const [shape, setShape] = useState("");
  const [seats, setSeats] = useState("");
  const [style, setStyle] = useState("");
- const [productTags, setProductTags] = useState([]);
+ const [productTags, setProductTags] = useState([""]);
  const [country, setCountry] = useState("");
  const [is_outdoor, setOutdoor] = useState("yes");
- const [is_for_kids, setForKids] = useState("no");
- const [places_tags, setTags] = useState(["ssms", "MMMM"]);
+ const [product_file_kind, setFileType] = useState("");
+ const [is_for_kids, setForKids] = useState("");
+ const [places_tags, setTags] = useState([]);
+ const [places_tags_label, setTagsLabel] = useState([]);
  const onChangeCategory = (selectedOption) => {
   setCategory(selectedOption);
   console.log(`Option selected:`, selectedOption);
@@ -93,10 +96,24 @@ const Identity = (props) => {
   setMaterial(selectedOption);
   console.log(`Option selected:`, selectedOption);
  };
- const onChangeProductTags = (selectedOption) => {
-  setProductTags(selectedOption);
-  console.log(`Option selected:`, selectedOption);
+
+ const onChangeForKids = (value) => {
+  setForKids(value);
  };
+
+ const onChangeFileType = (value) => {
+  setFileType(value);
+ };
+
+ const onChangeProductTags = (selectedOption) => {
+  setTagsLabel(selectedOption);
+  setTags(
+   Array.isArray(places_tags_label) ? selectedOption.map((x) => x.value) : []
+  );
+
+  console.log(`Option selected:`, places_tags);
+ };
+
  const handleIdentitySubmit = (e) => {
   props.dispatchAddIdentity(
    name,
@@ -114,8 +131,9 @@ const Identity = (props) => {
    is_for_kids
   );
  };
+
  return (
-  <div className="step-form">
+  <div className="step-form identity">
    <button
     className="save-product-step-btn"
     style={{ top: "-110px", height: "20px" }}
@@ -139,6 +157,7 @@ const Identity = (props) => {
        <Col>
         <Form.Label>Product Name</Form.Label>
         <Form.Control
+         className="py-3"
          placeholder="Product name"
          value={name}
          onChange={(e) => {
@@ -151,7 +170,7 @@ const Identity = (props) => {
     </div>
     <div className="form-block">
      <Form.Group as={Row}>
-      <Form.Label column md={12}>
+      <Form.Label column md={12} className="mb-4">
        Product Category
       </Form.Label>
       <Form.Label column md={2} className="sub-label">
@@ -162,6 +181,16 @@ const Identity = (props) => {
         options={SelectOptions}
         value={category}
         onChange={onChangeCategory}
+        theme={(theme) => ({
+         ...theme,
+         colors: {
+          ...theme.colors,
+          primary25: "#f5f0f0",
+          primary: "#e41e15",
+          primary50: "#f5f0f0",
+         },
+        })}
+        // style={customStyles}
        />
       </Col>
       <Form.Label column md={2} className="sub-label">
@@ -172,21 +201,61 @@ const Identity = (props) => {
         options={SelectOptions}
         value={kind ?? ""}
         onChange={onChangeKind}
+        theme={(theme) => ({
+         ...theme,
+         colors: {
+          ...theme.colors,
+          primary25: "#f5f0f0",
+          primary: "#e41e15",
+          primary50: "#f5f0f0",
+         },
+        })}
        />
       </Col>
      </Form.Group>
      <Form.Group as={Row}>
-      <Form.Label column md={2} className="sub-label">
+      <Form.Label
+       column
+       md={2}
+       className="sub-label"
+       onClick={() => console.log(product_file_kind, is_for_kids, places_tags)}
+      >
        Type
       </Form.Label>
       <Col md={4}>
-       <Select options={SelectOptions} value={type} onChange={onChangeType} />
+       <Select
+        options={SelectOptions}
+        value={type}
+        onChange={onChangeType}
+        theme={(theme) => ({
+         ...theme,
+         colors: {
+          ...theme.colors,
+          primary25: "#f5f0f0",
+          primary: "#e41e15",
+          primary50: "#f5f0f0",
+         },
+        })}
+       />
       </Col>
       <Form.Label column md={2} className="sub-label">
        Shape
       </Form.Label>
       <Col md={4}>
-       <Select options={SelectOptions} value={shape} onChange={onChangeShape} />
+       <Select
+        options={SelectOptions}
+        value={shape}
+        onChange={onChangeShape}
+        theme={(theme) => ({
+         ...theme,
+         colors: {
+          ...theme.colors,
+          primary25: "#f5f0f0",
+          primary: "#e41e15",
+          primary50: "#f5f0f0",
+         },
+        })}
+       />
       </Col>
      </Form.Group>
      <Form.Group as={Row}>
@@ -194,7 +263,20 @@ const Identity = (props) => {
        Style
       </Form.Label>
       <Col md={4}>
-       <Select options={SelectOptions} value={style} onChange={onChangeStyle} />
+       <Select
+        options={SelectOptions}
+        value={style}
+        onChange={onChangeStyle}
+        theme={(theme) => ({
+         ...theme,
+         colors: {
+          ...theme.colors,
+          primary25: "#f5f0f0",
+          primary: "#e41e15",
+          primary50: "#f5f0f0",
+         },
+        })}
+       />
       </Col>
       <Form.Label column md={2} className="sub-label">
        Material
@@ -204,6 +286,15 @@ const Identity = (props) => {
         options={SelectOptions}
         value={material}
         onChange={onChangeMaterial}
+        theme={(theme) => ({
+         ...theme,
+         colors: {
+          ...theme.colors,
+          primary25: "#f5f0f0",
+          primary: "#e41e15",
+          primary50: "#f5f0f0",
+         },
+        })}
        />
       </Col>
      </Form.Group>
@@ -212,13 +303,39 @@ const Identity = (props) => {
        Base
       </Form.Label>
       <Col md={4}>
-       <Select options={SelectOptions} value={base} onChange={onChangeBase} />
+       <Select
+        options={SelectOptions}
+        value={base}
+        onChange={onChangeBase}
+        theme={(theme) => ({
+         ...theme,
+         colors: {
+          ...theme.colors,
+          primary25: "#f5f0f0",
+          primary: "#e41e15",
+          primary50: "#f5f0f0",
+         },
+        })}
+       />
       </Col>
       <Form.Label column md={2} className="sub-label">
        Seats
       </Form.Label>
       <Col md={4}>
-       <Select options={SelectOptions} value={seats} onChange={onChangeSeats} />
+       <Select
+        options={SelectOptions}
+        value={seats}
+        onChange={onChangeSeats}
+        theme={(theme) => ({
+         ...theme,
+         colors: {
+          ...theme.colors,
+          primary25: "#f5f0f0",
+          primary: "#e41e15",
+          primary50: "#f5f0f0",
+         },
+        })}
+       />
       </Col>
      </Form.Group>
     </div>
@@ -230,16 +347,20 @@ const Identity = (props) => {
       <Col md={1}>
        <Form.Check
         type="radio"
-        label="Yes"
-        name="formHorizontalRadios"
+        label="yes"
+        value="yes"
+        name="formHorizontalRadios1"
         id="formHorizontalRadios1"
+        onChange={(e) => onChangeForKids(e.target.value)}
        />
       </Col>
       <Col md={1}>
        <Form.Check
         type="radio"
         label="No"
-        name="formHorizontalRadios"
+        value="no"
+        onChange={(e) => onChangeForKids(e.target.value)}
+        name="formHorizontalRadios1"
         id="formHorizontalRadios2"
        />
       </Col>
@@ -275,16 +396,20 @@ const Identity = (props) => {
       <Form.Check
        type="radio"
        label="CAD"
-       name="formHorizontalRadios"
-       id="formHorizontalRadios1"
+       value="cad"
+       name="formHorizontalRadios3"
+       id="formHorizontalRadios3"
+       onChange={(e) => onChangeFileType(e.target.value)}
       />
      </Col>
      <Col md={1}>
       <Form.Check
        type="radio"
        label="3D"
-       name="formHorizontalRadios"
-       id="formHorizontalRadios2"
+       value="3d"
+       name="formHorizontalRadios3"
+       id="formHorizontalRadios4"
+       onChange={(e) => onChangeFileType(e.target.value)}
       />
      </Col>
      <Col md={12}>
@@ -301,7 +426,7 @@ const Identity = (props) => {
         closeMenuOnSelect={false}
         isMulti
         onChange={onChangeProductTags}
-        value={productTags}
+        value={places_tags_label}
         options={SelectOptions}
         styles={colourStyles}
        />
@@ -338,8 +463,10 @@ const mapDispatchToProps = (dispatch) => ({
   kind,
   style,
   places_tags,
+  // productTags,
   is_outdoor,
-  is_for_kids
+  is_for_kids,
+  product_file_kind
  ) =>
   dispatch(
    productIdentity(
@@ -354,7 +481,8 @@ const mapDispatchToProps = (dispatch) => ({
     style,
     places_tags,
     is_outdoor,
-    is_for_kids
+    is_for_kids,
+    product_file_kind
    )
   ),
 });

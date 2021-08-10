@@ -5,7 +5,7 @@ const initialState = {
     loading:false,
     identity:{},
     options:{},
-    tabIndex:0
+    tabIndex:2
 }
 
 export const AddProductReducer = (state= initialState, action)=>{
@@ -29,6 +29,11 @@ export const AddProductReducer = (state= initialState, action)=>{
                 currentStep: "description",
                 nextStep: "fileUploads",
                 LoadingSpinner: true
+            }
+        case actions.ADD_PRODUCT_NEXT_TAB:
+            return {
+                ...state,
+                tabIndex:state.tabIndex+1
             }
         default:
             return state;

@@ -1,100 +1,276 @@
-import React, { Component, useRef } from "react";
-import {
- FaCloudUploadAlt,
- FaPlus,
- FaTrashAlt,
- FaCube,
- FaArrowRight,
- FaArrowLeft,
- FaArrowDown,
- FaArrowUp,
-} from "react-icons/fa";
-import { Form, Col, Row, Modal, Button } from "react-bootstrap";
-import Cropper from "react-cropper";
+import React, { Component } from "react";
+import { FaPlus } from "react-icons/fa";
+import { Row, Modal, Button } from "react-bootstrap";
 import "cropperjs/dist/cropper.css";
-import slide4 from "../../../src/slide4.jpg";
+import { connect } from "react-redux";
+import OptionsRow from "./optionsRow";
+import PulseLoader from "react-spinners/PulseLoader";
+
+// import { ADD_ROW } from "./";
+import { ADD_PRODUCT_NEXT_TAB, ADD_ROW } from "../../redux/constants";
+import { nextTab } from "../../redux/actions/addProductActions";
+import axios from "axios";
+// const API = "https://arch17-apis.herokuapp.com/api/option-price/5";
+const API = "http://localhost:8000/api/option-price/1";
 
 class OptionsPrice extends Component {
  state = {
   src: "",
+  productPictures: [],
+  pics_modal: false,
+  material_modal: false,
+  size_modal: false,
+  price_modal: false,
+  offer_modal: false,
+  validation_modal: false,
+  validation_messages: [],
+  validate_size: false,
+  validate_price: false,
+  validate_offerPrice: false,
+  in_progress: false,
+  is_saved: false,
  };
 
- _crop() {
-  // image in dataUrl
-  console.log(this.cropper.getData());
+ componentDidUpdate() {
+  console.log(this.props);
  }
- onCropperInit = (cropper) => {
-  this.cropper = cropper;
- };
- onChange(e) {
-  e.preventDefault();
-  let files;
-  if (e.dataTransfer) {
-   files = e.dataTransfer.files;
-  } else if (e.target) {
-   files = e.target.files;
+ displayUploadField(fieldName, setThumbnail, thumbnail, icon) {
+  return (
+   <React.Fragment>
+    <label for={fieldName}>
+     {!thumbnail ? (
+      <div className="upload-box">{icon}</div>
+     ) : (
+      <img src={thumbnail} alt="" width={100} />
+     )}
+    </label>
+    <input
+     id={fieldName}
+     type="file"
+     style={{ display: "none" }}
+     onChange={setThumbnail}
+    />
+   </React.Fragment>
+  );
+ }
+ componentDidMount() {
+  // this.props.dispatch({ type: ADD_ROW });
+  const validRows = this.props.OptionsPrice.rows.filter((row) => !!row);
+  if (validRows.length < 1) {
+   this.props.dispatch({ type: ADD_ROW });
+   //  this.setState({ is_saved: false });
   }
-  const reader = new FileReader();
-  reader.onload = () => {
-   //   this.setState({ src: reader.result });
-   this.setState({ src: slide4 });
-  };
-  reader.readAsDataURL(files[0]);
  }
- state = {
-  modals: {
-   pics_modal: false,
-   material_modal: false,
-   size_modal: false,
-   price_modal: false,
-   offer_modal: false,
-  },
+ async addNewOptionRow() {
+  const validation_messages = [];
+  this.props.OptionsPrice.rows.map((row) => {
+   if (!row) return;
+   const { quantity, price, offerPrice, product_pics } = row;
+   const { L, W, H } = row?.size;
+   const { nameValidation, imageValidation } = row?.material;
+   if (!nameValidation)
+    validation_messages.push("material name at row#" + row.row_number);
+
+   if (!imageValidation)
+    validation_messages.push("material image at row#" + row.row_number);
+
+   if (!quantity) validation_messages.push("quantity at row#" + row.row_number);
+   if (!price && this.state.validate_price)
+    validation_messages.push("initial price at row#" + row.row_number);
+   if (!offerPrice && this.state.validate_offerPrice)
+    validation_messages.push("offer price at row#" + row.row_number);
+   if (!product_pics?.length)
+    validation_messages.push(
+     "upload at least one image of the product at row#" + row.row_number
+    );
+
+   if (!L && !W && !H && this.state.validate_size)
+    validation_messages.push(
+     "size (Length, Width, Height) at row#" + row.row_number
+    );
+  });
+
+  if (validation_messages.length > 0) {
+   this.setState({ validation_modal: true, validation_messages });
+   return;
+  } else {
+   this.setState({ is_saved: false });
+   this.props.dispatch({ type: ADD_ROW });
+   for (let row of this.props.OptionsPrice.rows) {
+    if (!row) continue;
+    await this.saveRow(row);
+   }
+  }
+ }
+
+ async saveAndContinue() {
+  const validation_messages = [];
+  console.log(this.state.in_progress);
+  console.log(this.state.is_saved);
+
+  this.props.OptionsPrice.rows.map((row) => {
+   if (!row) return;
+   const { quantity, price, offerPrice, product_pics } = row;
+   const { L, W, H } = row?.size;
+   const { nameValidation, imageValidation } = row?.material;
+   if (!nameValidation)
+    validation_messages.push("material name at row#" + row.row_number);
+
+   if (!imageValidation)
+    validation_messages.push("material image at row#" + row.row_number);
+
+   if (!quantity) validation_messages.push("quantity at row#" + row.row_number);
+   if (!price && this.state.validate_price)
+    validation_messages.push("initial price at row#" + row.row_number);
+   if (!offerPrice && this.state.validate_offerPrice)
+    validation_messages.push("offer price at row#" + row.row_number);
+   if (!product_pics?.length)
+    validation_messages.push(
+     "upload at least one image of the product at row#" + row.row_number
+    );
+
+   if (!L && !W && !H && this.state.validate_size)
+    validation_messages.push(
+     "size (Length, Width, Height) at row#" + row.row_number
+    );
+  });
+
+  if (validation_messages.length > 0) {
+   this.setState({ validation_modal: true, validation_messages });
+   return;
+  }
+  if (this.state.is_saved === false) {
+   //  this.props.dispatch({ type: ADD_ROW });
+   for (let row of this.props.OptionsPrice.rows) {
+    if (!row) continue;
+    await this.saveRow(row).then(() => {
+     this.props.dispatch({ type: ADD_PRODUCT_NEXT_TAB });
+    });
+    // this.props.dispatch({ type: ADD_PRODUCT_NEXT_TAB });
+   }
+  } else {
+   this.props.dispatch({ type: ADD_PRODUCT_NEXT_TAB });
+  }
+ }
+ //   {
+ //     "row_index": 1,
+ //     "row_number": 2,
+ //     "ver": 8,
+ //     "size": {
+ //         "H": 123,
+ //         "L": 123,
+ //         "W": 231
+ //     },
+ //     "material": {
+ //         "name": "123",
+ //         "image": "blob:http://localhost:3000/21af0a4f-3e7a-4cfa-ac30-09612c6d0a01",
+ //         "thumbnail": "blob:http://localhost:3000/21af0a4f-3e7a-4cfa-ac30-09612c6d0a01",
+ //         "nameValidation": true,
+ //         "imageValidation": true
+ //     },
+ //     "offerPrice": 12,
+ //     "price": 32,
+ //     "quantity": 312,
+ //     "product_pics": [
+ //         "blob:http://localhost:3000/e2436fc5-9026-4902-b92a-1bbf063514a7"
+ //     ]
+ // }
+ async convertImage(url) {
+  return new Promise((r, j) => {
+   fetch(url)
+    .then((res) => res.blob())
+    .then((imgFile) => {
+     r(imgFile);
+    });
+  });
+ }
+
+ dataURLtoFile(dataurl, filename) {
+  var arr = dataurl.split(","),
+   mime = arr[0].match(/:(.*?);/)[1],
+   bstr = atob(arr[1]),
+   n = bstr.length,
+   u8arr = new Uint8Array(n);
+
+  while (n--) {
+   u8arr[n] = bstr.charCodeAt(n);
+  }
+
+  return new File([u8arr], filename, { type: mime });
+ }
+
+ saveRow = async (row) => {
+  console.log(row);
+  this.setState({ in_progress: true });
+  const formData = new FormData();
+  for (let i = 0; i < row.product_pics.length; i++) {
+   formData.append(
+    `cover[${i}]`,
+    //  await this.convertImage(row.product_pics[i]));
+    this.dataURLtoFile(row.product_pics[i], "file")
+   );
+  }
+  formData.append(`material_pic`, await this.convertImage(row.material.image));
+  formData.append(`material_name`, row.material.name);
+  if (row.size)
+   formData.append(`size`, `${row.size.L}L ${row.size.W}W ${row.size.H}H`);
+  if (row.price) formData.append(`price`, row.price);
+  formData.append(`quantity`, row.quantity);
+  if (row.offerPrice) formData.append(`offer_price`, row.offerPrice);
+  for (var pair of formData.entries()) {
+   console.log(pair[0] + ", " + pair[1]);
+  }
+  return await axios
+   .post(API, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+   })
+   .then((data) => {
+    console.log(data);
+    this.setState({ in_progress: false });
+    this.setState({ is_saved: true });
+   })
+   .catch((err) => {
+    this.setState({ in_progress: false });
+    this.setState({ is_saved: false });
+   });
  };
 
- pics_open = () => {
-  this.setState({ pics_modal: true });
- };
+ hideValidationMessage() {
+  this.setState({ validation_messages: [], validation_modal: false });
+ }
 
- pics_close = () => {
-  this.setState({ pics_modal: false });
+ setValidation = (field) => {
+  this.setState({ [field]: !this.state[field] });
  };
-
- material_open = () => {
-  this.setState({ material_modal: true });
+ handleNextStep = (e) => {
+  this.props.dispatch({ type: ADD_PRODUCT_NEXT_TAB });
+  // this.setState({ material_modal: null });
  };
-
- material_close = () => {
-  this.setState({ material_modal: false });
- };
-
- size_open = () => {
-  this.setState({ size_modal: true });
- };
-
- size_close = () => {
-  this.setState({ size_modal: false });
- };
-
- price_open = () => {
-  this.setState({ price_modal: true });
- };
-
- price_close = () => {
-  this.setState({ price_modal: false });
- };
-
- offer_open = () => {
-  this.setState({ offer_modal: true });
- };
-
- offer_close = () => {
-  this.setState({ offer_modal: false });
- };
-
  render() {
   return (
    <React.Fragment>
     <div className="step-form">
+     <button
+      className="save-product-step-btn"
+      style={{
+       top: "-110px",
+       height: "20px",
+       background: this.state.in_progress ? "#B4B4B4" : "#E41E15",
+      }}
+      // onClick={this.handleNextStep}
+      onClick={this.saveAndContinue.bind(this)}
+     >
+      {this.state.in_progress ? (
+       <PulseLoader
+        style={{ height: "20px" }}
+        color="#ffffff"
+        loading={this.state.in_progress}
+        size={10}
+       />
+      ) : (
+       "Save & Continue"
+      )}
+     </button>
      <div className="step-head">
       <h5>Options & Price</h5>
      </div>
@@ -107,19 +283,28 @@ class OptionsPrice extends Component {
          <th>
           {" "}
           <span>
-           <input type="checkbox" />
+           <input
+            type="checkbox"
+            onClick={() => this.setValidation("validate_size")}
+           />
           </span>
           Size
          </th>
          <th>
           <span>
-           <input type="checkbox" />
+           <input
+            type="checkbox"
+            onClick={() => this.setValidation("validate_price")}
+           />
           </span>
           Price
          </th>
          <th>
           <span>
-           <input type="checkbox" />
+           <input
+            type="checkbox"
+            onClick={() => this.setValidation("validate_offerPrice")}
+           />
           </span>
           Offer Price
          </th>
@@ -127,34 +312,16 @@ class OptionsPrice extends Component {
          <th>Delete</th>
         </tr>
        </thead>
-       <tbody>
-        <tr>
-         <td onClick={this.pics_open}>
-          <FaCloudUploadAlt />
-          <div className="under-link underline">Upload Images</div>
-         </td>
-         <td>
-          <FaPlus onClick={this.material_open} />
-         </td>
-         <td>
-          <FaPlus onClick={this.size_open} />
-         </td>
-         <td>
-          <FaPlus onClick={this.price_open} />
-         </td>
-         <td>
-          <FaPlus onClick={this.offer_open} />
-         </td>
-         <td>
-          <Form.Control placeholder="" />
-         </td>
-         <td className="trash-icon">
-          <FaTrashAlt />
-         </td>
-        </tr>
-       </tbody>
+       {this.props.OptionsPrice.rows.map((row) => {
+        if (!row) return;
+        return (
+         <tbody>
+          <OptionsRow row_data={row} />
+         </tbody>
+        );
+       })}
       </table>
-      <div className="add-option-btn">
+      <div className="add-option-btn" onClick={this.addNewOptionRow.bind(this)}>
        <div className="icon">
         <FaPlus />
        </div>
@@ -163,231 +330,47 @@ class OptionsPrice extends Component {
      </div>
     </div>
 
-    <>
-     <Modal
-      id="price-request-modal"
-      className="arch-wide-modal product-modal pics-modal"
-      size="lg"
-      show={this.state.pics_modal}
-      onHide={() => this.pics_close()}
-      aria-labelledby="example-modal-sizes-title-lg"
-     >
-      <Modal.Header closeButton></Modal.Header>
-      <Modal.Body>
-       <div className="option-add-label">Product Picuters</div>
-       <div className="sub-head">
-        Choose the corresponding view of the photo you want to upload
+    <Modal
+     id="price-request-modal"
+     className="arch-wide-modal product-modal pics-modal"
+     size="lg"
+     show={this.state.validation_modal}
+     onHide={this.hideValidationMessage.bind(this)}
+     aria-labelledby="example-modal-sizes-title-lg"
+    >
+     <Modal.Header closeButton></Modal.Header>
+     <Modal.Body>
+      <div className="warning-text">WARNING!</div>
+      <div class="m-t-10 m-b-30"></div>
+      <div className="sub-head">
+       These options are missing, please complete them.
+      </div>
+      <ul className="sub-head">
+       {this.state?.validation_messages.map((msg) => (
+        <li>{msg}</li>
+       ))}
+      </ul>
+      <div as={Row} className="add-btn">
+       <div column md={12}>
+        <Button
+         variant="danger"
+         onClick={this.hideValidationMessage.bind(this)}
+        >
+         Okay!
+        </Button>
        </div>
-
-       <div className="img-box">
-        {/* <Cropper
-         src={slide4}
-         style={{ height: "100%", width: "100%" }}
-         // Cropper.js options
-         initialAspectRatio={16 / 9}
-         guides={false}
-         crop={this._crop.bind(this)}
-         onInitialized={this.onCropperInit}
-         crossOrigin="anonymous"
-         preview=".image-preview"
-         aspectRatio={1.5 / 1}
-         autoCropArea={1}
-         viewMode={2}
-         rotatable={false}
-         scalable={false}
-         zoomOnWheel={false}
-         dragMode="move"
-        /> */}
-       </div>
-       <div as={Row} className="hr">
-        <div column md={12}>
-         <hr></hr>
-        </div>
-       </div>
-       <div id="upload-directions">
-        <div>
-         {/* <input
-          className="file-upload"
-          //   onChange={this.onChange()}
-          type="file"
-         /> */}
-         <FaCube />
-        </div>
-        <div className="rotated">
-         <FaCube />
-        </div>
-        <div>
-         <FaArrowUp />
-        </div>
-        <div>
-         <FaArrowRight />
-        </div>
-        <div>
-         <FaArrowDown />
-        </div>
-        <div>
-         <FaArrowLeft />
-        </div>
-       </div>
-       <p className="option-tip">Upload at least one picture of this option</p>
-       <div as={Row} className="add-btn">
-        <div column md={12}>
-         <Button variant="danger">ADD</Button>
-        </div>
-       </div>
-      </Modal.Body>
-     </Modal>
-    </>
-    <>
-     {/* material modal */}
-
-     <Modal
-      id="price-request-modal"
-      className="arch-wide-modal product-modal material-modal"
-      size="lg"
-      show={this.state.material_modal}
-      onHide={() => this.material_close()}
-      aria-labelledby="example-modal-sizes-title-lg"
-     >
-      <Modal.Header closeButton />
-      <Modal.Body>
-       <div className="option-add-label">Material</div>
-       <div className="modal-upload">
-        <div className="upload-box">
-         <FaCloudUploadAlt />
-        </div>
-        <p>Upload Picture</p>
-       </div>
-       <Form.Row>
-        <Form.Group as={Col} md={12} controlId="formGridState">
-         <Form.Control placeholder="Material's Name" />
-        </Form.Group>
-       </Form.Row>
-       <div as={Row} className="add-btn">
-        <div column md={12}>
-         <Button variant="danger">ADD</Button>
-        </div>
-       </div>
-      </Modal.Body>
-     </Modal>
-    </>
-
-    <>
-     {/* size modal */}
-
-     <Modal
-      id="size_modal"
-      className="arch-wide-modal product-modal"
-      size="lg"
-      show={this.state.size_modal}
-      onHide={() => this.size_close()}
-      aria-labelledby="example-modal-sizes-title-lg"
-     >
-      <Modal.Header closeButton></Modal.Header>
-      <Modal.Body>
-       <div className="option-add-label">Add Size</div>
-       <Form.Row>
-        <Form.Group as={Col} controlId="formGridState">
-         <span md={2}>L: </span>
-         <Form.Control md={10} />
-        </Form.Group>
-        <Form.Group as={Col} controlId="formGridState">
-         <span>W: </span>
-         <Form.Control />
-        </Form.Group>
-        <Form.Group as={Col} controlId="formGridState">
-         <span>H: </span>
-         <Form.Control />
-        </Form.Group>
-       </Form.Row>
-       <div as={Row}>
-        <div column md={12}>
-         <div className="option-tip">Tips: add the size in mm</div>
-        </div>
-       </div>
-       <div as={Row} className="add-btn">
-        <div column md={12}>
-         <Button variant="danger">ADD</Button>
-        </div>
-       </div>
-      </Modal.Body>
-     </Modal>
-    </>
-
-    <>
-     {/* price modal */}
-
-     <Modal
-      id="price_modal"
-      className="arch-wide-modal product-modal"
-      size="lg"
-      show={this.state.price_modal}
-      onHide={() => this.price_close()}
-      aria-labelledby="example-modal-sizes-title-lg"
-     >
-      <Modal.Header closeButton></Modal.Header>
-      <Modal.Body>
-       <div className="option-add-label">Price</div>
-       <Form.Row>
-        <Form.Group as={Col} md={8} controlId="formGridState">
-         <Form.Control />
-         <span className="currency">¥</span>
-        </Form.Group>
-       </Form.Row>
-       <div as={Row}>
-        <div column md={12}>
-         <div className="option-tip">
-          Tips: Initial price must be higher than offer price
-         </div>
-        </div>
-       </div>
-       <div as={Row} className="add-btn">
-        <div column md={12}>
-         <Button variant="danger">ADD</Button>
-        </div>
-       </div>
-      </Modal.Body>
-     </Modal>
-    </>
-
-    <>
-     {/* offer modal */}
-
-     <Modal
-      id="offer_modal"
-      className="arch-wide-modal product-modal"
-      size="lg"
-      show={this.state.offer_modal}
-      onHide={() => this.offer_close()}
-      aria-labelledby="example-modal-sizes-title-lg"
-     >
-      <Modal.Header closeButton></Modal.Header>
-      <Modal.Body>
-       <div className="option-add-label">Offer Price</div>
-       <Form.Row>
-        <Form.Group as={Col} md={8} controlId="formGridState">
-         <Form.Control />
-         <span className="currency">¥</span>
-        </Form.Group>
-       </Form.Row>
-       <div as={Row}>
-        <div column md={12}>
-         <div className="option-tip">
-          Tips: Initial price must be higher than offer price
-         </div>
-        </div>
-       </div>
-       <div as={Row} className="add-btn">
-        <div column md={12}>
-         <Button variant="danger">ADD</Button>
-        </div>
-       </div>
-      </Modal.Body>
-     </Modal>
-    </>
+      </div>
+     </Modal.Body>
+    </Modal>
    </React.Fragment>
   );
  }
 }
-
-export default OptionsPrice;
+// const mapDispatchToProps = (dispatch) => ({
+//  dispatchNextTab: () => dispatch(nextTab()),
+// });
+const mapStateToProps = (state) => ({
+ OptionsPrice: state.optionsPrice,
+ loading_option: state.optionsPrice.loading_option,
+});
+export default connect(mapStateToProps)(OptionsPrice);
