@@ -32,7 +32,7 @@ export const AddProductReducer = (state= initialState, action)=>{
         case actions.ADD_PRODUCT_NEXT_TAB:
             return {
                 ...state,
-                tabIndex:state.tabIndex+1
+                tabIndex:state.tabIndex + 1
             }
         default:
             return state;

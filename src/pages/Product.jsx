@@ -83,7 +83,7 @@ class Product extends Component {
            renderPagination={({ pages, activePage, onClick }) => {
             return (
              <Flex direction="row">
-              {pages.map((page) => {
+              {pages.map((page, index) => {
                const isActivePage = activePage === page;
                return (
                 <Square
@@ -92,7 +92,7 @@ class Product extends Component {
                  active={isActivePage}
                  className="thumb"
                 >
-                 <img src={slide1} alt="" />
+                 <img src={this.state.activeOption.cover[index]} alt="" />
                 </Square>
                );
               })}
@@ -217,13 +217,15 @@ class Product extends Component {
           <div className="right-row product-info ">
            <div className="store-name">Grado</div>
            {/* <div className="product-name">I3 Office System & Work Station</div> */}
-           <div className="product-name">{this.state.product.kind}</div>
+           <div className="product-name">
+            {this.state.product.identity[0].name}
+           </div>
 
            <div className="design-by">
             Design By. <span>Muhamed Mahdy</span>
            </div>
            <div className="product-country">
-            Made in <span>China</span>
+            Made in <span>{this.state.product.identity[0].country}</span>
            </div>
           </div>
           <div className="right-row product-price">
@@ -245,7 +247,7 @@ class Product extends Component {
             {/* <button>1500 x 700 x 500</button>
            <button>1200 x 400 x 200</button> */}
             {this.state.options?.map((option, index) => {
-             if (option.material_name) {
+             if (option.material_name && option.size[0] != "n") {
               return (
                <button onClick={() => this.updateOption(index)}>
                 {option.size}
@@ -261,7 +263,10 @@ class Product extends Component {
             {this.state.options?.map((option, index) => {
              if (option.material_name) {
               return (
-               <button onClick={() => this.updateOption(index)}>
+               <button
+                onClick={() => this.updateOption(index)}
+                style={{ backgroundImage: option.material_pic }}
+               >
                 {option.material_name}
                </button>
               );
