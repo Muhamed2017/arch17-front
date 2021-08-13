@@ -11,7 +11,7 @@ import { ADD_PRODUCT_NEXT_TAB, ADD_ROW } from "../../redux/constants";
 import { nextTab } from "../../redux/actions/addProductActions";
 import axios from "axios";
 // const API = "https://arch17-apis.herokuapp.com/api/option-price/5";
-const API = "http://localhost:8000/api/option-price/1";
+const API = "http://localhost:8000/api/option-price/";
 
 class OptionsPrice extends Component {
  state = {
@@ -29,6 +29,7 @@ class OptionsPrice extends Component {
   validate_offerPrice: false,
   in_progress: false,
   is_saved: false,
+  product_id: null,
  };
 
  componentDidUpdate() {
@@ -210,7 +211,10 @@ class OptionsPrice extends Component {
     this.dataURLtoFile(row.product_pics[i], "file")
    );
   }
-  formData.append(`material_pic`, await this.convertImage(row.material.image));
+  formData.append(
+   `material_image`,
+   await this.convertImage(row.material.image)
+  );
   formData.append(`material_name`, row.material.name);
   if (row.size)
    formData.append(`size`, `${row.size.L}L ${row.size.W}W ${row.size.H}H`);
@@ -221,7 +225,7 @@ class OptionsPrice extends Component {
    console.log(pair[0] + ", " + pair[1]);
   }
   return await axios
-   .post(API, formData, {
+   .post(API + this.props.id, formData, {
     headers: { "Content-Type": "multipart/form-data" },
    })
    .then((data) => {

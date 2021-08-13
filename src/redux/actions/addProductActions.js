@@ -49,10 +49,10 @@ export const productIdentity = (name,
     places_tags,
     is_outdoor,
     is_for_kids,
-    product_file_kind)=>{
+    product_file_kind, id)=>{
     return (dispatch)=>{
         dispatch(addProductIdentity());
-        axios.post('http://127.0.0.1:8000/api/identity/1"', {
+        axios.post(`http://127.0.0.1:8000/api/identity/${id}`, {
             name,
             category,
             type,

@@ -11,8 +11,11 @@ import { ChakraProvider } from "@chakra-ui/react"
 import AddProductWrapper from './pages/addProduct/AddProductWrapper';
 import TestUpload from './pages/TestUpload';
 import TestCrop from './pages/TestCrop';
-import FileUpload from './components/FileUpload';
-
+import Dropzones from './components/Dropzone'
+import Kind from './pages/addProduct/Kind'
+import Product from './pages/Product'
+import CoverTab from './pages/addProduct/CoverTab';
+import Identity from './pages/addProduct/Identity';
 const  App=(props)=>{
   return (
     <ChakraProvider>
@@ -27,9 +30,9 @@ const  App=(props)=>{
               <Route path="/signin" exact>
                 {props.isLoggedIn ? <Redirect to="/" /> : <Login />}
               </Route>
-              <Route path="/identity">
+              {/* <Route path="/identity">
                 <AddProductWrapper />
-              </Route>
+              </Route> */}
               <Route path='/cropper' exact>
                 <TestUpload />
               </Route>
@@ -37,8 +40,17 @@ const  App=(props)=>{
                 <TestCrop />
               </Route>
               <Route path="/dropzone" exact>
-                <FileUpload/>
+                <Dropzones/>
               </Route>
+              <Route path='/product/:id' component={Product} exact/>
+              <Route path='/identity/:id' component={AddProductWrapper} exact />
+                {/* <Product/> */}
+              {/* </Route> */}
+              <Route path="/multi" exact>
+                <CoverTab/>
+              </Route>
+             <Route path="/add-product" exact><Kind />
+       </Route>
             </Switch>
           </Router>
         {/* <Router>

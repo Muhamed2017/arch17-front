@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Col, Row } from "react-bootstrap";
 import Select from "react-select";
 // import axios from "axios";
@@ -6,6 +6,7 @@ import ReactFlagsSelect from "react-flags-select";
 import PulseLoader from "react-spinners/PulseLoader";
 import { productIdentity } from "../../redux/actions/addProductActions";
 import { connect } from "react-redux";
+import AsyncSelect from "react-select/async";
 
 //select tags
 const colourStyles = {
@@ -64,6 +65,11 @@ const Identity = (props) => {
  const [is_for_kids, setForKids] = useState("");
  const [places_tags, setTags] = useState([]);
  const [places_tags_label, setTagsLabel] = useState([]);
+ const [product_id, setId] = useState(props.id);
+ useEffect(() => {
+  console.log(typeof props.id);
+  setId(props.id);
+ });
  const onChangeCategory = (selectedOption) => {
   setCategory(selectedOption);
   console.log(`Option selected:`, selectedOption);
@@ -115,6 +121,7 @@ const Identity = (props) => {
  };
 
  const handleIdentitySubmit = (e) => {
+  // let id = props.id;
   props.dispatchAddIdentity(
    name,
    category.value,
@@ -125,10 +132,11 @@ const Identity = (props) => {
    shape.value,
    kind.value,
    style.value,
-   //  productTags,
    places_tags,
    is_outdoor,
-   is_for_kids
+   is_for_kids,
+   product_file_kind,
+   product_id
   );
  };
 
@@ -382,6 +390,7 @@ const Identity = (props) => {
      <Col md={6}>
       <Form.Label>Designer</Form.Label>
       <Form.Control placeholder="Search Designers by name or email" />
+
       <p className="light">
        Search and tag the product’s designer, If you can’t in find the designer
        click here to invite.
@@ -466,7 +475,8 @@ const mapDispatchToProps = (dispatch) => ({
   // productTags,
   is_outdoor,
   is_for_kids,
-  product_file_kind
+  product_file_kind,
+  id
  ) =>
   dispatch(
    productIdentity(
@@ -482,7 +492,8 @@ const mapDispatchToProps = (dispatch) => ({
     places_tags,
     is_outdoor,
     is_for_kids,
-    product_file_kind
+    product_file_kind,
+    id
    )
   ),
 });

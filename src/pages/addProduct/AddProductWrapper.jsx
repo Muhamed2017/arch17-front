@@ -13,10 +13,10 @@ import {
  productIdentity,
 } from "../../redux/actions/addProductActions";
 import UploadFiles from "./UploadFiles";
-
+import { useParams } from "react-router-dom";
 const AddProductWrapper = (props) => {
  const [tabIndex, setTabIndex] = useState(props.tabIndex);
-
+ const params = useParams();
  const handleUpload = () => {
   console.log("uploaded");
   let node = document.getElementById("uploaded-files");
@@ -53,6 +53,7 @@ const AddProductWrapper = (props) => {
 
  useEffect(() => {
   setTabIndex(props.tabIndex);
+  console.log(typeof params.id);
  });
 
  Tabs.defaultProps = {
@@ -67,7 +68,7 @@ const AddProductWrapper = (props) => {
       <Tab>2. Options & Price</Tab>
       <Tab>3. Product Description</Tab>
       <Tab>4. Files Uploads</Tab>
-      <Tab>5. Product Preview</Tab>
+      {/* <Tab>5. Product Preview</Tab> */}
       {/* <button
        className="save-product-step-btn"
        onClick={tabIndex === 1 ? props.dispatchAddIdentity : ClickNo}
@@ -88,13 +89,13 @@ const AddProductWrapper = (props) => {
      </TabList>
     </div>
     <TabPanel>
-     <Identity />
+     <Identity id={params.id} />
     </TabPanel>
     <TabPanel>
-     <OptionsPrice />
+     <OptionsPrice id={params.id} />
     </TabPanel>
     <TabPanel>
-     <ProductFiles />
+     <ProductFiles id={params.id} />
     </TabPanel>
     <TabPanel>
      {/* <div className="step-form">
@@ -158,9 +159,9 @@ const AddProductWrapper = (props) => {
        </div>
       </div>
      </div> */}
-     <UploadFiles />
+     <UploadFiles id={params.id} />
     </TabPanel>
-    <TabPanel>SSSS</TabPanel>
+    {/* <TabPanel>SSSS</TabPanel> */}
    </Tabs>
   </div>
  );
@@ -178,7 +179,8 @@ const mapDispatchToProps = (dispatch) => ({
   style,
   places_tags,
   is_outdoor,
-  is_for_kids
+  is_for_kids,
+  id
  ) =>
   dispatch(
    productIdentity(
@@ -193,7 +195,8 @@ const mapDispatchToProps = (dispatch) => ({
     style,
     places_tags,
     is_outdoor,
-    is_for_kids
+    is_for_kids,
+    id
    )
   ),
  //  dispatchGotoStep: s() => dispatch(gotoTap(step)),

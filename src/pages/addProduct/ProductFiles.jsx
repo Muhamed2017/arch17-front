@@ -9,13 +9,14 @@ import { PulseLoader } from "react-spinners/PulseLoader";
 import { ADD_PRODUCT_NEXT_TAB } from "../../redux/constants";
 import { connect } from "react-redux";
 import axios from "axios";
-
 class ProductFiles extends Component {
- galleryObj = [];
- galleryArray = [];
+ galleriyFiles = [];
+ overviewsFiles = [];
+ descriptionFiles = [];
+ dimensionsFiles = [];
+ overs = [];
  constructor(props) {
   super(props);
-
   this.state = {
    modals: {
     overview_ex_modal: false,
@@ -26,22 +27,22 @@ class ProductFiles extends Component {
    over_view_image: null,
    description_mat_image: null,
    size_imgae: null,
-   gallery_video: null,
-
-   overView_url: "",
    description_url: "",
    size_image_url: "",
-   gallery_url: "",
    loaded: 0,
    gallery: null,
+   galleries: [],
+   overviews: [],
+   descriptions: [],
+   dimensions: [],
+   overviews_files: [],
+   //  o_image: null,
+   loading: false,
+   product_id: null,
   };
  }
- uplpoadGalleryFiles = (e) => {
-  this.galleryObj.push(e.target.files);
-  for (let i = 0; i < this.galleryObj[0].length; i++) {
-   this.galleryArray.push(URL.createObjectURL(this.gall[0][i]));
-  }
- };
+
+ fd = new FormData();
  overviewExample_open = () => {
   this.setState({ overview_ex_modal: true });
  };
@@ -53,27 +54,53 @@ class ProductFiles extends Component {
   Tabs.defaultProps = {
    selectedIndex: this.state.index,
   };
+  this.setState({ product_id: this.props.id });
   console.log(this.state.index);
  }
- onChangeOverview = (e) => {
-  if (e.target.files && e.target.files.length > 0) {
-   const reader = new FileReader();
-   reader.addEventListener(
-    "load",
-    () => this.setState({ overView_url: reader.result })
-    //    console.log(reader.result)
-   );
-   reader.readAsDataURL(e.target.files[0]);
-   this.setState({ over_view_image: e.target.files[0] });
+ fd = new FormData();
+
+ onChangeOverview = ({ target: { files } }) => {
+  const reader = new FileReader();
+
+  if (files && files.length > 0) {
+   this.fd.append("desc_overview_img[]", files[0]);
+   const overview_src = URL.createObjectURL(files[0]);
+   this.overviewsFiles.push(overview_src);
+   console.log(this.overviewsFiles);
+   this.setState({ overviews: this.overviewsFiles });
+
+   reader.addEventListener("load", () => {
+    //  this.overs.push(files[0]);
+    this.setState({ o_image: files[0] });
+   });
+  }
+ };
+
+ onChangeSizeImg = ({ target: { files } }) => {
+  const reader = new FileReader();
+
+  if (files && files.length > 0) {
+   this.fd.append("desc_dimension_img[]", files[0]);
+
+   const size_img_src = URL.createObjectURL(files[0]);
+   this.dimensionsFiles.push(size_img_src);
+   console.log(this.dimensionsFiles);
+   this.setState({ dimensions: this.dimensionsFiles });
+
+   reader.addEventListener("load", () => {
+    //  this.overs.push(files[0]);
+    // this.setState({ o_image: files[0] });
+   });
   }
  };
 
  onChangeGallery = ({ target: { files } }) => {
-  console.log(files[0]);
   if (files && files.length > 0) {
    const src = URL.createObjectURL(files[0]);
+   this.galleriyFiles.push(src);
    this.setState({ gallery_url: src });
-
+   this.setState({ galleries: this.galleriyFiles });
+   console.log(this.galleriyFiles);
    const reader = new FileReader();
    reader.addEventListener("load", () => {
     this.setState({ gallery_video: files[0] });
@@ -81,8 +108,9 @@ class ProductFiles extends Component {
    reader.readAsDataURL(files[0]);
    this.setState({ gallery_video: files[0] });
   }
+
   let formData = new FormData();
-  formData.append("img[]", files[0]);
+  formData.append("desc_gallery_files[]", files[0]);
 
   const options = {
    onUploadProgress: (progressEvent) => {
@@ -98,41 +126,39 @@ class ProductFiles extends Component {
    },
   };
   axios
-   .post("http://127.0.0.1:8000/api/upload", formData, options)
+   .post(
+    `http://127.0.0.1:8000/api/desc/${this.state.product_id}`,
+    formData,
+    options
+   )
    .then((response) => console.log(response))
    .catch((err) => console.log(err));
  };
 
- onChangeMatDescr = (e) => {
-  if (e.target.files && e.target.files.length > 0) {
-   const reader = new FileReader();
-   reader.addEventListener("load", () =>
-    this.setState({ description_url: reader.result })
-   );
-   reader.readAsDataURL(e.target.files[0]);
-   this.setState({ description_mat_image: e.target.files[0] });
+ onChangeMatDescr = ({ target: { files } }) => {
+  const reader = new FileReader();
+
+  if (files && files.length > 0) {
+   this.fd.append("desc_mat_desc_img[]", files[0]);
+   const desc_src = URL.createObjectURL(files[0]);
+   this.descriptionFiles.push(desc_src);
+   console.log(this.descriptionFiles);
+   this.setState({ descriptions: this.descriptionFiles });
+   reader.addEventListener("load", () => {});
   }
  };
 
- onChangeSizeImg = (e) => {
-  if (e.target.files && e.target.files.length > 0) {
-   const reader = new FileReader();
-   reader.addEventListener("load", () =>
-    this.setState({ size_image_url: reader.result })
-   );
-   reader.readAsDataURL(e.target.files[0]);
-   this.setState({ size_imgae: e.target.files[0] });
-  }
- };
  handlePostingImages = () => {
   const formData = new FormData();
-  formData.append("img[]", this.state.over_view_image);
-  formData.append("img[]", this.state.description_mat_image);
-  formData.append("img[]", this.state.size_imgae);
-  formData.append("gallery[]", this.state.gallery_video);
+  formData.append("img[]", this.state.o_image);
+  console.log(this.state.o_image);
+  // formData.append("img[]", this.state.over_view_image);
+  // formData.append("img[]", this.state.description_mat_image);
+  // formData.append("img[]", this.state.size_imgae);
+  // formData.append("gallery[]", this.state.gallery_video);
 
   axios
-   .post("http://127.0.0.1:8000/api/upload", formData)
+   .post("http://127.0.0.1:8000/api/desc/1", formData)
    .then((response) => {
     console.log(response);
    })
@@ -140,8 +166,12 @@ class ProductFiles extends Component {
  };
 
  handleNextStep = (e) => {
-  this.props.dispatch({ type: ADD_PRODUCT_NEXT_TAB });
-  console.log("updated");
+  console.log(this.state.loading);
+  axios
+   .post(`http://127.0.0.1:8000/api/desc/${this.state.product_id}`, this.fd)
+   .then((response) => {
+    this.props.dispatch({ type: ADD_PRODUCT_NEXT_TAB });
+   });
  };
 
  handleGotoStep = (step) => {
@@ -152,14 +182,18 @@ class ProductFiles extends Component {
    <div id="product-files-step">
     <button
      className="save-product-step-btn"
-     style={{ top: "-110px", height: "20px" }}
+     style={{
+      top: "-110px",
+      height: "20px",
+      background: this.state.loading ? "#B4B4B4" : "#E41E15",
+     }}
      onClick={this.handleNextStep}
     >
-     {this.props.loading ? (
+     {this.state.loading ? (
       <PulseLoader
        style={{ height: "20px" }}
        color="#ffffff"
-       loading={this.props.loading}
+       loading={this.state.loading}
        size={10}
       />
      ) : (
@@ -183,22 +217,14 @@ class ProductFiles extends Component {
 
      <TabPanel>
       <div className="tab-form-content" style={{ position: "relative" }}>
-       <div
-        style={{
-         position: "absolute",
-         top: "-80px",
-         left: 0,
-         width: "180px",
-        }}
-       >
-        <img
-         src={this.state.overView_url}
-         alt=""
-         style={{
-          display: "block",
-          width: "100%",
-         }}
-        />
+       <div className="files-previews">
+        {this.state.overviews?.map((file, index) => {
+         return (
+          <div key={index}>
+           <img src={file} alt="" key={file} />
+          </div>
+         );
+        })}
        </div>
        <div className="tab-head">
         <h2>Add Your Product Overview</h2>
@@ -293,22 +319,14 @@ class ProductFiles extends Component {
      </TabPanel>
      <TabPanel>
       <div className="tab-form-content">
-       <div
-        style={{
-         position: "absolute",
-         top: "-80px",
-         left: 0,
-         width: "180px",
-        }}
-       >
-        <img
-         src={this.state.description_url}
-         alt=""
-         style={{
-          display: "block",
-          width: "100%",
-         }}
-        />
+       <div className="files-previews">
+        {this.state.descriptions?.map((file, index) => {
+         return (
+          <div key={index}>
+           <img src={file} alt="" key={file} />
+          </div>
+         );
+        })}
        </div>
        <div className="tab-head">
         <h2>Add Material Description</h2>
@@ -350,7 +368,7 @@ class ProductFiles extends Component {
      </TabPanel>
      <TabPanel>
       <div className="tab-form-content" style={{ position: "relative" }}>
-       <div
+       {/* <div
         style={{
          position: "absolute",
          top: "-80px",
@@ -366,6 +384,15 @@ class ProductFiles extends Component {
           width: "100%",
          }}
         />
+       </div> */}
+       <div className="files-previews">
+        {this.state.dimensions?.map((file, index) => {
+         return (
+          <div key={index}>
+           <img src={file} alt="" key={file} />
+          </div>
+         );
+        })}
        </div>
        <div className="tab-head">
         <h2>Add Size Description</h2>
@@ -409,40 +436,36 @@ class ProductFiles extends Component {
        style={{ position: "relative" }}
        id="gallery"
       >
-       <div
-        style={{
-         position: "absolute",
-         top: "-80px",
-         left: 0,
-         width: "180px",
-        }}
-       >
-        <video
-         key={this.state.gallery_url}
-         type="video/mp4"
-         ref={this.state.video}
-         style={{
-          display: "block",
-          width: "100%",
-          position: "relative",
-         }}
-        >
-         <source src={this.state.gallery_url} type="video/mp4" />
-        </video>
-        <ProgressBar
-         now={this.state.loaded}
-         variant="danger"
-         style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-          height: "100%",
-          opacity: ".3",
-          //   left: "25%",
-         }}
-        />
+       <div className="files-previews">
+        {this.state.galleries?.map((file, index) => {
+         return (
+          <div style={{ position: "relative" }}>
+           <video
+            key={index}
+            type="video/mp4"
+            style={{
+             display: "block",
+             position: "relative",
+            }}
+           >
+            <source src={file} type="video/mp4" />
+           </video>
+           <ProgressBar
+            now={this.state.loaded}
+            variant="danger"
+            style={{
+             position: "absolute",
+             left: 0,
+             right: 0,
+             top: 0,
+             bottom: 0,
+             height: "100%",
+             opacity: ".3",
+            }}
+           />
+          </div>
+         );
+        })}
        </div>
        <div className="tab-head">
         <h2>Add products’s Gallery photos / videos</h2>

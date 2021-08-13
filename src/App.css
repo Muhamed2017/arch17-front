@@ -224,6 +224,7 @@ span.accordion-icon {
  margin: 5px 5px;
  font-size: 1.5rem;
  cursor: pointer;
+ display: inline-block;
 }
 .product-info > * {
  margin: 5px 0;
@@ -445,6 +446,9 @@ ul#shop-upps span {
  display: grid;
  grid-template-columns: repeat(3, auto);
  grid-gap: 15px;
+}
+.product-kinds svg {
+ display: inline-block;
 }
 
 .product-kinds button {
@@ -760,6 +764,15 @@ td svg {
  max-height: 46px !important;
 }
 
+.upload-btns {
+ align-items: center;
+}
+.uploaded-files {
+ display: inline-block;
+ display: grid;
+ grid-template-columns: 1fr 1fr 1fr;
+ grid-gap: 15px;
+}
 #upload-directions {
  padding-top: 10px;
  display: grid;
@@ -959,9 +972,10 @@ td svg {
 
 .upload-btns {
  display: grid;
- grid-template-columns: repeat(4, 105px);
+ grid-template-columns: repeat(2, 187px);
  grid-gap: 5px;
  position: relative;
+ justify-content: space-between;
 }
 
 .upload-btns .box {
@@ -1020,10 +1034,22 @@ td svg {
  background: #d9d9d9;
  font-size: 2rem;
  text-align: center;
- padding-top: 15px;
+ padding-top: 21px;
  font-family: "Roboto";
  font-weight: bold;
  cursor: pointer;
+}
+.upload-icon svg {
+ margin: auto;
+}
+.upload-action {
+ position: relative;
+}
+input.file-upload {
+ position: absolute;
+ top: 0;
+ bottom: 0;
+ opacity: 0;
 }
 .upload-block {
  margin-bottom: 65px;
@@ -1035,6 +1061,15 @@ td svg {
 
 /* priduct files overview */
 
+.files-previews {
+ display: grid;
+ grid-template-columns: repeat(6, 130px);
+ position: absolute;
+ top: -100px;
+ left: 0;
+ grid-gap: 25px;
+ align-items: center;
+}
 #product-files-step .react-tabs__tab-list {
  display: grid;
  position: absolute !important;

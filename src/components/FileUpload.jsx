@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "react-dropzone-uploader/dist/styles.css";
 import Dropzone from "react-dropzone-uploader";
 import { getDroppedOrSelectedFiles } from "html5-file-selector";
+import ReactDOMServer from "react-dom/server";
 import axios from "axios";
 const FileUpload = () => {
  //  const [SubmittedFiles, setSubmittedFiles] = useState([]);
@@ -60,22 +61,56 @@ const FileUpload = () => {
   );
  };
 
+ const djsConfig = () => {
+  return (
+   //  <>
+   <div className="dz-preview dz-file-preview">
+    <div className="dz-details">
+     <div className="dz-filename">
+      <span data-dz-name="true"></span>
+     </div>
+     <img data-dz-thumbnail="true" />
+    </div>
+    <div className="dz-progress">
+     <span className="dz-upload" data-dz-uploadprogress="true"></span>
+    </div>
+    <div className="dz-success-mark">
+     <span>✔</span>
+    </div>
+    <div className="dz-error-mark">
+     <span>✘</span>
+    </div>
+    <div className="dz-error-message">
+     <span data-dz-errormessage="true"></span>
+    </div>
+   </div>
+   //  </>
+  );
+ };
  return (
-  <Dropzone
-   onSubmit={onSubmit}
-   onChangeStatus={onFileChange}
-   InputComponent={selectFileInput}
-   getUploadParams={fileParams}
-   getFilesFromEvent={getFilesFromEvent}
-   accept="image/*,audio/*,video/*"
-   maxFiles={5}
-   inputContent="Drop A File"
-   styles={{
-    dropzone: { width: 600, height: 400 },
-    dropzoneActive: { borderColor: "green" },
-   }}
-  />
+  <>
+   <Dropzone
+    onSubmit={onSubmit}
+    onChangeStatus={onFileChange}
+    InputComponent={selectFileInput}
+    getUploadParams={fileParams}
+    getFilesFromEvent={getFilesFromEvent}
+    accept="image/*,audio/*,video/*"
+    maxFiles={5}
+    inputContent="Drop A File"
+    styles={{
+     dropzone: { width: 600, height: 400 },
+     dropzoneActive: { borderColor: "green" },
+    }}
+    PreviewComponent={djsConfig}
+   />
+  </>
  );
 };
 
 export default FileUpload;
+
+//  1 - upload files
+//  2 - finishing the cycle
+//  3 - testing it arefully..
+//  4 - product page ...

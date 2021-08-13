@@ -1,11 +1,10 @@
 import * as actions from '../../constants.js'
 
-
 const initialState = {
     loading:false,
     identity:{},
     options:{},
-    tabIndex:2
+    tabIndex:0
 }
 
 export const AddProductReducer = (state= initialState, action)=>{
