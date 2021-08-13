@@ -9,15 +9,18 @@ const Kind = () => {
  const [id, setId] = useState(null);
  const addProduct = (e) => {
   e.preventDefault();
+  setLoading(true);
   axios
    .post("https://arch17-apis.herokuapp.com/api/addproduct", {
     kind: "Furniture",
    })
    .then((response) => {
     console.log(response.data.product.id);
+    setLoading(false);
     setId(response.data.product.id);
     setAdded(true);
-   });
+   })
+   .catch((err) => setLoading(false));
  };
 
  if (added) {
@@ -30,7 +33,8 @@ const Kind = () => {
       <h3 className="light-head">What Kind of product you want to add ?</h3>
       <div className="product-kinds">
        <a href="/identity" onClick={addProduct}>
-        Furniture <BiChevronRight />
+        {loading ? "Adding..." : "Furniture"}
+        <BiChevronRight />
        </a>
        <a href="#" onClick={(e) => e.preventDefault}>
         Lighting

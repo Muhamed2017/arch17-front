@@ -10,6 +10,8 @@ import PulseLoader from "react-spinners/PulseLoader";
 import { ADD_PRODUCT_NEXT_TAB, ADD_ROW } from "../../redux/constants";
 import { nextTab } from "../../redux/actions/addProductActions";
 import axios from "axios";
+import imageCompression from "browser-image-compression";
+
 // const API = "https://arch17-apis.herokuapp.com/api/option-price/5";
 const API = "https://arch17-apis.herokuapp.com/api/option-price/";
 
@@ -30,6 +32,12 @@ class OptionsPrice extends Component {
   in_progress: false,
   is_saved: false,
   product_id: null,
+ };
+
+ options = {
+  maxSizeMB: 1,
+  maxWidthOrHeight: 1920,
+  useWebWorker: true,
  };
 
  componentDidUpdate() {
@@ -196,8 +204,7 @@ class OptionsPrice extends Component {
   while (n--) {
    u8arr[n] = bstr.charCodeAt(n);
   }
-
-  return new File([u8arr], filename, { type: mime });
+  return new File([u8arr], filename, { type: mime });;
  }
 
  saveRow = async (row) => {
@@ -248,7 +255,6 @@ class OptionsPrice extends Component {
  };
  handleNextStep = (e) => {
   this.props.dispatch({ type: ADD_PRODUCT_NEXT_TAB });
-  // this.setState({ material_modal: null });
  };
  render() {
   return (
@@ -261,7 +267,6 @@ class OptionsPrice extends Component {
        height: "20px",
        background: this.state.in_progress ? "#B4B4B4" : "#E41E15",
       }}
-      // onClick={this.handleNextStep}
       onClick={this.saveAndContinue.bind(this)}
      >
       {this.state.in_progress ? (
@@ -370,9 +375,7 @@ class OptionsPrice extends Component {
   );
  }
 }
-// const mapDispatchToProps = (dispatch) => ({
-//  dispatchNextTab: () => dispatch(nextTab()),
-// });
+
 const mapStateToProps = (state) => ({
  OptionsPrice: state.optionsPrice,
  loading_option: state.optionsPrice.loading_option,

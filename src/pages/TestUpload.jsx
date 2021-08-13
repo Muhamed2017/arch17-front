@@ -44,9 +44,6 @@ const TestUpload = () => {
    anchor.download = "cropPreview.png";
    anchor.href = URL.createObjectURL(blob);
 
-   //  let img = new File([blob], "Name");
-   //  setBlobs([...blobs, img]);
-   //  formData.append("img[]", img);
   }, "image/png");
  };
 

@@ -24,7 +24,17 @@ const addProductIOptionsSuccess = (options) => {
         payload:options
     }
 }
-
+const addProductDescription = () => {
+    return {
+        type: actions.ADD_PRODUCT_DESCRIPTION
+    }
+}
+const addProductDescriotionSuccess = (description)=>{
+    return {
+        type:actions.ADD_PRODUCT_DESCRIPTION_SUCCESS,
+        payload:description
+    }
+}
 const nextTabAction = () => {
     return {
         type: actions.ADD_PRODUCT_NEXT_TAB
@@ -78,6 +88,19 @@ export const productIdentity = (name,
 
 }
 
+export const productDescription = (data, id)=>{
+    return (dispatch)=>{
+        dispatch(addProductDescription());
+        axios.post(`https://arch17-apis.herokuapp.com/api/desc/${id}`, data)
+            .then(response => {
+                console.log(response)
+                dispatch(addProductDescriotionSuccess())
+            }).catch(error => {
+                console.log(error)
+            })
+    }
+    
+}
 export const productOptions = (options) => {
     return (dispatch) => {
         dispatch(addProductIOptions());

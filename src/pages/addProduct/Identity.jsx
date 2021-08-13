@@ -48,6 +48,17 @@ const SelectOptions = [
  { value: "vanilla", label: "Vanilla" },
 ];
 
+const TagsOptions = [
+ { value: "kitchen", label: "Kitchen" },
+ { value: "bedroom", label: "Bedroom" },
+ { value: "living room", label: "Living Room" },
+ { value: "office", label: "Office" },
+ { value: "general", label: "General" },
+ { value: "wc", label: "WC" },
+ { value: "park", label: "Park" },
+ { value: "villa", label: "Villa" },
+];
+
 const Identity = (props) => {
  const [name, setName] = useState(props.identity.name ?? "");
  const [category, setCategory] = useState("");
@@ -436,7 +447,7 @@ const Identity = (props) => {
         isMulti
         onChange={onChangeProductTags}
         value={places_tags_label}
-        options={SelectOptions}
+        options={TagsOptions}
         styles={colourStyles}
        />
       </Col>

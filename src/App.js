@@ -15,7 +15,6 @@ import Dropzones from './components/Dropzone'
 import Kind from './pages/addProduct/Kind'
 import Product from './pages/Product'
 import CoverTab from './pages/addProduct/CoverTab';
-import Identity from './pages/addProduct/Identity';
 const  App=(props)=>{
   return (
     <ChakraProvider>

@@ -103,7 +103,12 @@ class Product extends Component {
            {this.state.activeOption.cover?.map((item, index) => {
             return (
              <Item key={index}>
-              <img src={item} alt="option cover" />
+              <img
+               className="product-slider-img"
+               src={item}
+               alt="option cover"
+               draggable="false"
+              />
              </Item>
             );
            })}
@@ -112,48 +117,84 @@ class Product extends Component {
          <Accordion className="p-4 product-page-accordian">
           <Card>
            <Accordion.Toggle as={Card.Header} eventKey="0">
-            Description{" "}
+            Overview
             <span className="accordion-icon">
              <BsPlus />
             </span>
            </Accordion.Toggle>
            <Accordion.Collapse eventKey="0">
-            <Card.Body>Hello! I'm the body</Card.Body>
+            <Card.Body>
+             <div className="overview-text">
+              <p>
+               UFO series features a moulded shell upholstered with full foam
+               and cinched to give a comfortable cushion look and feel. The
+               refined timber casing frame that moulds to the shell showcases
+               the quality and elegance of the pieces. This series focuses on
+               comfort to create a soft, warm environment that users can relax
+               in.
+              </p>
+             </div>
+            </Card.Body>
            </Accordion.Collapse>
           </Card>
           <Card>
            <Accordion.Toggle as={Card.Header} eventKey="1">
-            Product Can be used at{" "}
+            Description
             <span className="accordion-icon">
              <BsPlus />
             </span>
            </Accordion.Toggle>
            <Accordion.Collapse eventKey="1">
-            <Card.Body>Hello! I'm another body</Card.Body>
+            <Card.Body>Hello! I'm the body</Card.Body>
            </Accordion.Collapse>
           </Card>
           <Card>
            <Accordion.Toggle as={Card.Header} eventKey="2">
-            Cad & 3D Files
+            Product Can be used at{" "}
             <span className="accordion-icon">
              <BsPlus />
             </span>
            </Accordion.Toggle>
            <Accordion.Collapse eventKey="2">
             <Card.Body>
-             <div
-              style={{
-               display: "inlile-grid",
-               gridTemplateColumns: "80px 80px 80px",
-               width: "120px",
-              }}
-             >
+             <div className="product-tags-boxs">
+              {this.state.product.identity[0].places_tags?.map((tag, index) => {
+               return <div key={index}>{tag}</div>;
+              })}
+             </div>
+            </Card.Body>
+           </Accordion.Collapse>
+          </Card>
+          <Card>
+           <Accordion.Toggle as={Card.Header} eventKey="3">
+            Cad & 3D Files
+            <span className="accordion-icon">
+             <BsPlus />
+            </span>
+           </Accordion.Toggle>
+           <Accordion.Collapse eventKey="3">
+            <Card.Body>
+             <div className="product-collabse-content">
               {this.state.product_files?.files_cad_2d?.map((file, index) => {
                return (
-                <div
-                 className="file-box"
-                 style={{ width: "80px", height: "80px", background: "red" }}
-                ></div>
+                <>
+                 <a href={file} className="product-boxs">
+                  <div className="file-box">
+                   <AiOutlineWhatsApp />
+                  </div>
+                  <p>Download File</p>
+                 </a>
+                </>
+               );
+              })}
+              {this.state.product_files?.files_3d?.map((file, index) => {
+               return (
+                <a href={file} className="product-boxs">
+                 <div className="file-box">
+                  <AiOutlineWhatsApp />
+                 </div>
+                 <p>Download File</p>
+                </a>
                );
               })}
              </div>
@@ -162,30 +203,34 @@ class Product extends Component {
           </Card>
 
           <Card>
-           <Accordion.Toggle as={Card.Header} eventKey="3">
+           <Accordion.Toggle as={Card.Header} eventKey="4">
             Catalogues{" "}
             <span className="accordion-icon">
              <BsPlus />
             </span>
            </Accordion.Toggle>
-           <Accordion.Collapse eventKey="3">
-            <Card.Body>Hello! I'm another body</Card.Body>
-           </Accordion.Collapse>
-          </Card>
-          <Card>
-           <Accordion.Toggle as={Card.Header} eventKey="4">
-            Similar Products by grado
-            <span className="accordion-icon">
-             <BsPlus />
-            </span>
-           </Accordion.Toggle>
            <Accordion.Collapse eventKey="4">
-            <Card.Body>Hello! I'm another body</Card.Body>
+            <Card.Body>
+             <div className="product-cats-boxs">
+              {this.state.product.files[0]?.files_pdf_cats?.map(
+               (pdf, index) => {
+                return (
+                 <a href={pdf} target="_plank">
+                  <div className="pdf-box">
+                   <AiOutlineWhatsApp />
+                  </div>
+                  <p>Download File</p>
+                 </a>
+                );
+               }
+              )}
+             </div>
+            </Card.Body>
            </Accordion.Collapse>
           </Card>
           <Card>
            <Accordion.Toggle as={Card.Header} eventKey="5">
-            Collection{" "}
+            Similar Products by grado
             <span className="accordion-icon">
              <BsPlus />
             </span>
@@ -196,12 +241,23 @@ class Product extends Component {
           </Card>
           <Card>
            <Accordion.Toggle as={Card.Header} eventKey="6">
-            Projects & inspirations by grado{" "}
+            Collection{" "}
             <span className="accordion-icon">
              <BsPlus />
             </span>
            </Accordion.Toggle>
            <Accordion.Collapse eventKey="6">
+            <Card.Body>Hello! I'm another body</Card.Body>
+           </Accordion.Collapse>
+          </Card>
+          <Card>
+           <Accordion.Toggle as={Card.Header} eventKey="7">
+            Projects & inspirations by grado{" "}
+            <span className="accordion-icon">
+             <BsPlus />
+            </span>
+           </Accordion.Toggle>
+           <Accordion.Collapse eventKey="7">
             <Card.Body>Hello! I'm another body</Card.Body>
            </Accordion.Collapse>
           </Card>
@@ -460,7 +516,17 @@ class Product extends Component {
     </React.Fragment>
    );
   } else {
-   return <></>;
+   return (
+    <>
+     <div className="page-loading-svg">
+      <svg className="" viewBox="0 0 1320 300">
+       <text x="50%" y="50%" dy=".35em" text-anchor="middle">
+        Arch17
+       </text>
+      </svg>
+     </div>
+    </>
+   );
   }
  }
 }

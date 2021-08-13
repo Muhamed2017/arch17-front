@@ -9,6 +9,7 @@ import { PulseLoader } from "react-spinners/PulseLoader";
 import { ADD_PRODUCT_NEXT_TAB } from "../../redux/constants";
 import { connect } from "react-redux";
 import axios from "axios";
+import { productDescription } from "../../redux/actions/addProductActions";
 class ProductFiles extends Component {
  galleriyFiles = [];
  overviewsFiles = [];
@@ -148,42 +149,17 @@ class ProductFiles extends Component {
   }
  };
 
- handlePostingImages = () => {
-  const formData = new FormData();
-  formData.append("img[]", this.state.o_image);
-  console.log(this.state.o_image);
-  // formData.append("img[]", this.state.over_view_image);
-  // formData.append("img[]", this.state.description_mat_image);
-  // formData.append("img[]", this.state.size_imgae);
-  // formData.append("gallery[]", this.state.gallery_video);
-
-  axios
-   .post("https://arch17-apis.herokuapp.com/api/desc/1", formData)
-   .then((response) => {
-    console.log(response);
-   })
-   .catch((error) => console.log(error));
- };
-
  handleNextStep = (e) => {
-  console.log(this.state.loading);
-  axios
-   .post(
-    `https://arch17-apis.herokuapp.com/api/desc/${this.state.product_id}`,
-    this.fd
-   )
-   .then((response) => {
-    this.props.dispatch({ type: ADD_PRODUCT_NEXT_TAB });
-   });
+  this.props.dispatchDescriptionStep(this.fd, this.state.product_id);
  };
 
  handleGotoStep = (step) => {
-  // this.props.dispatch({ type: GO_TO_TAB_STEP, payload: step });
+  console.log(this.props);
  };
  render() {
   return (
    <div id="product-files-step">
-    <button
+    {/* <button
      className="save-product-step-btn"
      style={{
       top: "-110px",
@@ -202,7 +178,20 @@ class ProductFiles extends Component {
      ) : (
       "Save & Continue"
      )}
+    </button> */}
+    <button
+     className="save-product-step-btn"
+     style={{
+      top: "-110px",
+      height: "20px",
+      color: "#fff",
+      background: this.props.loading ? "#B4B4B4" : "#E41E15",
+     }}
+     onClick={this.handleNextStep}
+    >
+     {this.props.loading ? "Saving ...." : "Save & Continue"}
     </button>
+
     {/* <Tabs> */}
     <Tabs
      onSelect={(index) => this.setState({ index })}
@@ -256,7 +245,7 @@ class ProductFiles extends Component {
            }}
           />
          </span>
-         <span className="gray-bg" onClick={this.handlePostingImages}>
+         <span className="gray-bg" onClick={this.handleGotoStep}>
           <MdTitle className="m-auto" />
          </span>
          <span className="gray-bg">
@@ -511,5 +500,11 @@ class ProductFiles extends Component {
   );
  }
 }
-const mapStateToProps = (state) => ({ OptionsPrice: state.optionsPrice });
-export default connect(mapStateToProps)(ProductFiles);
+const mapDispatchToProps = (dispatch) => ({
+ dispatchDescriptionStep: (data, id) => dispatch(productDescription(data, id)),
+});
+const mapStateToProps = (state) => ({
+ //  OptionsPrice: state.optionsPrice,
+ loading: state.addProduct.loading,
+});
+export default connect(mapStateToProps, mapDispatchToProps)(ProductFiles);
