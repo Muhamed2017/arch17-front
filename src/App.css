@@ -1975,9 +1975,10 @@ button.follow-btn {
  width: 80px;
  height: 90px;
  padding-top: 10px;
- background: red;
- color: #fff;
+ background: #f8f8f8;
+ /* color: #fff; */
  border-radius: 3px;
+ border-color: #707070;
 }
 .file-box svg,
 .pdf-box svg {

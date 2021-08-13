@@ -4,7 +4,7 @@ import Modal from "react-bootstrap/Modal";
 import Accordion from "react-bootstrap/Accordion";
 import Card from "react-bootstrap/Card";
 import { BsPlus, BsDownload, BsFillCaretDownFill } from "react-icons/bs";
-import { IoLayersSharp, IoPricetags, IoCube } from "react-icons/io5";
+import { IoLayersSharp, IoPricetags } from "react-icons/io5";
 import { RiWechat2Line, RiBook3Fill } from "react-icons/ri";
 import { BiShareAlt } from "react-icons/bi";
 import { AiOutlineShoppingCart, AiOutlineWhatsApp } from "react-icons/ai";
@@ -13,8 +13,9 @@ import Item from "../components/SliderComponents/slider";
 import { Flex, Square } from "../components/SliderComponents/slider";
 import slide1 from "../../src/slide1.jpg";
 import axios from "axios";
+import { FaFilePdf } from "react-icons/fa";
+import { GiFlatPlatform, GiCube } from "react-icons/gi";
 const breakPoints = [{ width: 1200, itemsToShow: 1 }];
-
 class Product extends Component {
  constructor(props) {
   super(props);
@@ -180,7 +181,7 @@ class Product extends Component {
                 <>
                  <a href={file} className="product-boxs">
                   <div className="file-box">
-                   <AiOutlineWhatsApp />
+                   <GiCube />
                   </div>
                   <p>Download File</p>
                  </a>
@@ -191,7 +192,7 @@ class Product extends Component {
                return (
                 <a href={file} className="product-boxs">
                  <div className="file-box">
-                  <AiOutlineWhatsApp />
+                  <GiCube />
                  </div>
                  <p>Download File</p>
                 </a>
@@ -217,7 +218,7 @@ class Product extends Component {
                 return (
                  <a href={pdf} target="_plank">
                   <div className="pdf-box">
-                   <AiOutlineWhatsApp />
+                   <FaFilePdf />
                   </div>
                   <p>Download File</p>
                  </a>
@@ -378,7 +379,7 @@ class Product extends Component {
             </button>
             <button className="action-btn">
              <span className="btn-icons">
-              <IoCube />
+              <GiCube />
              </span>
              Request Cad/ 3D Files
             </button>
