@@ -127,7 +127,7 @@ class ProductFiles extends Component {
   };
   axios
    .post(
-    `http://127.0.0.1:8000/api/desc/${this.state.product_id}`,
+    `https://arch17-apis.herokuapp.com/api/desc/${this.state.product_id}`,
     formData,
     options
    )
@@ -158,7 +158,7 @@ class ProductFiles extends Component {
   // formData.append("gallery[]", this.state.gallery_video);
 
   axios
-   .post("http://127.0.0.1:8000/api/desc/1", formData)
+   .post("https://arch17-apis.herokuapp.com/api/desc/1", formData)
    .then((response) => {
     console.log(response);
    })
@@ -168,7 +168,10 @@ class ProductFiles extends Component {
  handleNextStep = (e) => {
   console.log(this.state.loading);
   axios
-   .post(`http://127.0.0.1:8000/api/desc/${this.state.product_id}`, this.fd)
+   .post(
+    `https://arch17-apis.herokuapp.com/api/desc/${this.state.product_id}`,
+    this.fd
+   )
    .then((response) => {
     this.props.dispatch({ type: ADD_PRODUCT_NEXT_TAB });
    });

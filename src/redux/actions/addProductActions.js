@@ -52,7 +52,7 @@ export const productIdentity = (name,
     product_file_kind, id)=>{
     return (dispatch)=>{
         dispatch(addProductIdentity());
-        axios.post(`http://127.0.0.1:8000/api/identity/${id}`, {
+        axios.post(`https://arch17-apis.herokuapp.com/api/identity/${id}`, {
             name,
             category,
             type,

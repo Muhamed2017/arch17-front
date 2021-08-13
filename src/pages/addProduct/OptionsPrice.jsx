@@ -11,7 +11,7 @@ import { ADD_PRODUCT_NEXT_TAB, ADD_ROW } from "../../redux/constants";
 import { nextTab } from "../../redux/actions/addProductActions";
 import axios from "axios";
 // const API = "https://arch17-apis.herokuapp.com/api/option-price/5";
-const API = "http://localhost:8000/api/option-price/";
+const API = "https://arch17-apis.herokuapp.com/api/option-price/";
 
 class OptionsPrice extends Component {
  state = {

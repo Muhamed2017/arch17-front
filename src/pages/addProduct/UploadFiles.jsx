@@ -76,11 +76,15 @@ class UploadFiles extends Component {
  };
  onSubmitFiles = () => {
   axios
-   .post(`http://127.0.0.1:8000/api/files/${this.props.id}`, this.fd, {
-    headers: {
-     "Content-Type": "multipart/form-data",
-    },
-   })
+   .post(
+    `https://arch17-apis.herokuapp.com/api/files/${this.props.id}`,
+    this.fd,
+    {
+     headers: {
+      "Content-Type": "multipart/form-data",
+     },
+    }
+   )
    .then((response) => {
     this.props.dispatch({ type: ADD_PRODUCT_NEXT_TAB });
 

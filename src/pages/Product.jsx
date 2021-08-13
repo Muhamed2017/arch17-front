@@ -34,7 +34,9 @@ class Product extends Component {
 
  async componentDidMount() {
   await axios
-   .get(`http://127.0.0.1:8000/api/product/${this.state.product_id}`)
+   .get(
+    `https://arch17-apis.herokuapp.com/api/product/${this.state.product_id}`
+   )
    .then((products) => {
     this.setState({ product: products.data.product });
     this.setState({ options: products.data.product.options });
