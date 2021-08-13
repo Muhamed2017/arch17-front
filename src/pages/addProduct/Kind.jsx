@@ -10,7 +10,7 @@ const Kind = () => {
  const addProduct = (e) => {
   e.preventDefault();
   axios
-   .post("https://arch17-front.herokuapp.com/api/addproduct", {
+   .post("https://arch17-apis.herokuapp.com/api/addproduct", {
     kind: "Furniture",
    })
    .then((response) => {
