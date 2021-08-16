@@ -7,9 +7,17 @@ import { RiCodeSSlashFill } from "react-icons/ri";
 import ProgressBar from "react-bootstrap/ProgressBar";
 import { PulseLoader } from "react-spinners/PulseLoader";
 import { ADD_PRODUCT_NEXT_TAB } from "../../redux/constants";
+import { convertToRaw, EditorState } from "draft-js";
+import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+import { Editor } from "react-draft-wysiwyg";
 import { connect } from "react-redux";
 import axios from "axios";
+
 import { productDescription } from "../../redux/actions/addProductActions";
+import Overview from "./product-description/Overview";
+import MaterialDescription from "./product-description/MaterialDescription";
+
+import SizeDescription from "./product-description/SizeDescription";
 class ProductFiles extends Component {
  galleriyFiles = [];
  overviewsFiles = [];
@@ -24,6 +32,8 @@ class ProductFiles extends Component {
     dimension_ex_modal: false,
     material_ex_modal: false,
    },
+   editorState: EditorState.createEmpty(),
+
    index: 0,
    over_view_image: null,
    description_mat_image: null,
@@ -156,29 +166,16 @@ class ProductFiles extends Component {
  handleGotoStep = (step) => {
   console.log(this.props);
  };
+ onEditorStateChange = (editorState) => {
+  this.setState({
+   editorState,
+  });
+ };
  render() {
+  // const { editorState } = this.state;
+
   return (
    <div id="product-files-step">
-    {/* <button
-     className="save-product-step-btn"
-     style={{
-      top: "-110px",
-      height: "20px",
-      background: this.state.loading ? "#B4B4B4" : "#E41E15",
-     }}
-     onClick={this.handleNextStep}
-    >
-     {this.state.loading ? (
-      <PulseLoader
-       style={{ height: "20px" }}
-       color="#ffffff"
-       loading={this.state.loading}
-       size={10}
-      />
-     ) : (
-      "Save & Continue"
-     )}
-    </button> */}
     <button
      className="save-product-step-btn"
      style={{
@@ -194,10 +191,12 @@ class ProductFiles extends Component {
 
     {/* <Tabs> */}
     <Tabs
+     //  forceRenderTabPanel
+     forceRenderTabPanel={true}
      onSelect={(index) => this.setState({ index })}
      selectedIndex={this.state.index}
     >
-     <div id="tabs-wrapper">
+     <div id="tabs-desc-wrapper">
       <TabList>
        <Tab>Overview *</Tab>
        <Tab>Material Description</Tab>
@@ -207,9 +206,9 @@ class ProductFiles extends Component {
       </TabList>
      </div>
 
-     <TabPanel>
-      <div className="tab-form-content" style={{ position: "relative" }}>
-       <div className="files-previews">
+     <TabPanel forceRender>
+      {/* <div className="tab-form-content" style={{ position: "relative" }}> */}
+      {/* <div className="files-previews">
         {this.state.overviews?.map((file, index) => {
          return (
           <div key={index}>
@@ -217,8 +216,9 @@ class ProductFiles extends Component {
           </div>
          );
         })}
-       </div>
-       <div className="tab-head">
+       </div> */}
+      <Overview id={this.state.product_id} />
+      {/* <div className="tab-head">
         <h2>Add Your Product Overview</h2>
         <div className="tip">
          Tip. Add your products concept or general description{" "}
@@ -252,8 +252,8 @@ class ProductFiles extends Component {
           <RiCodeSSlashFill className="m-auto" />
          </span>
         </div>
-       </div>
-      </div>
+       </div> */}
+      {/* </div> */}
 
       {/* overview modal */}
 
@@ -309,8 +309,9 @@ class ProductFiles extends Component {
 
       {/* end of overview modal */}
      </TabPanel>
-     <TabPanel>
-      <div className="tab-form-content">
+     <TabPanel forceRender>
+      <MaterialDescription id={this.state.product_id} />
+      {/* <div className="tab-form-content">
        <div className="files-previews">
         {this.state.descriptions?.map((file, index) => {
          return (
@@ -320,6 +321,7 @@ class ProductFiles extends Component {
          );
         })}
        </div>
+
        <div className="tab-head">
         <h2>Add Material Description</h2>
         <div className="tip">
@@ -329,7 +331,6 @@ class ProductFiles extends Component {
         <div className="bold-tip">
          You can skip if informations not available
         </div>
-        {/* <div className='bolder-tip'></div> */}
         <div className="file-icons-tabs">
          <span className="red-bg" style={{ position: "relative" }}>
           <FaCloudUploadAlt className="m-auto" />
@@ -356,27 +357,11 @@ class ProductFiles extends Component {
          </span>
         </div>
        </div>
-      </div>
+      </div> */}
      </TabPanel>
-     <TabPanel>
-      <div className="tab-form-content" style={{ position: "relative" }}>
-       {/* <div
-        style={{
-         position: "absolute",
-         top: "-80px",
-         left: 0,
-         width: "180px",
-        }}
-       >
-        <img
-         src={this.state.size_image_url}
-         alt=""
-         style={{
-          display: "block",
-          width: "100%",
-         }}
-        />
-       </div> */}
+     <TabPanel forceRender>
+      <SizeDescription id={this.state.product_id} />
+      {/* <div className="tab-form-content" style={{ position: "relative" }}>
        <div className="files-previews">
         {this.state.dimensions?.map((file, index) => {
          return (
@@ -420,9 +405,9 @@ class ProductFiles extends Component {
          </span>
         </div>
        </div>
-      </div>
+      </div> */}
      </TabPanel>
-     <TabPanel>
+     <TabPanel forceRender>
       <div
        className="tab-form-content"
        style={{ position: "relative" }}
@@ -494,7 +479,7 @@ class ProductFiles extends Component {
        </div>
       </div>
      </TabPanel>
-     <TabPanel></TabPanel>
+     <TabPanel forceRender></TabPanel>
     </Tabs>
    </div>
   );
@@ -504,7 +489,6 @@ const mapDispatchToProps = (dispatch) => ({
  dispatchDescriptionStep: (data, id) => dispatch(productDescription(data, id)),
 });
 const mapStateToProps = (state) => ({
- //  OptionsPrice: state.optionsPrice,
  loading: state.addProduct.loading,
 });
 export default connect(mapStateToProps, mapDispatchToProps)(ProductFiles);

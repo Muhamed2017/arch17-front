@@ -4,7 +4,6 @@ const initialState = {
     loading:false,
     identity:{},
     options:{},
-    
     tabIndex:0
 }
 

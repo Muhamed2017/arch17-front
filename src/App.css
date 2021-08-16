@@ -2033,3 +2033,57 @@ button.follow-btn {
  font-weight: 500;
  text-align: left;
 }
+
+.text-editor {
+ text-align: center;
+ /* background-color: #2a2a2ab5; */
+ /* height: 100vh; */
+ min-height: 300px;
+}
+
+.text-editor .rich-editor {
+ /* padding: 10rem; */
+}
+
+.rich-editor .rdw-editor-main {
+ background-color: #fff;
+}
+
+.rich-editor .DraftEditor-editorContainer {
+ padding: 1rem;
+}
+
+.draft-editor-wrapper {
+ border: 1px solid #ccc;
+}
+#product-page .rdw-editor-toolbar {
+ display: none !important;
+}
+#product-page .rich-editor .DraftEditor-editorContainer {
+ padding: 0;
+}
+.rdw-editor-toolbar {
+}
+
+/* new product desc step tabs styling  */
+
+#product-files-step .react-tabs__tab-panel {
+ padding: 0 !important;
+ margin: 0px auto;
+}
+#product-files-step #react-tabs-9 {
+ width: 100% !important;
+}
+#tabs-desc-wrapper {
+ margin: auto;
+ background: #fff;
+}
+.public-DraftEditorPlaceholder-root {
+ color: #cfd0d2 !important;
+ position: absolute !important;
+ top: 32px !important;
+ left: 20px !important;
+ z-index: 0;
+ font-weight: 300;
+ /* font-family: "Roboto"; */
+}

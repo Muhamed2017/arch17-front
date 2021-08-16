@@ -15,6 +15,9 @@ import slide1 from "../../src/slide1.jpg";
 import axios from "axios";
 import { FaFilePdf } from "react-icons/fa";
 import { GiFlatPlatform, GiCube } from "react-icons/gi";
+import { convertFromRaw, EditorState } from "draft-js";
+import { Editor } from "react-draft-wysiwyg";
+
 const breakPoints = [{ width: 1200, itemsToShow: 1 }];
 class Product extends Component {
  constructor(props) {
@@ -27,9 +30,11 @@ class Product extends Component {
    options: null,
    activeOption: "",
    product_files: null,
+   product_desc_overview: null,
+   product_desc_mat: null,
+   product_desc_size_: null,
    loading: true,
    product_id: this.props.match.params.id,
-   // id: this.props.params.match.id,
   };
  }
 
@@ -49,6 +54,28 @@ class Product extends Component {
     }
 
     this.setState({ product_files: products.data.product.files[0] });
+    this.setState({
+     product_desc_overview: EditorState.createWithContent(
+      convertFromRaw(
+       JSON.parse(products.data.product.description[0].overview_content)
+      )
+     ),
+    });
+    this.setState({
+     product_desc_size: EditorState.createWithContent(
+      convertFromRaw(
+       JSON.parse(products.data.product.description[0].size_content)
+      )
+     ),
+    });
+
+    this.setState({
+     product_desc_mat: EditorState.createWithContent(
+      convertFromRaw(
+       JSON.parse(products.data.product.description[0]?.mat_desc_content)
+      )
+     ),
+    });
     console.log(products);
     this.setState({ loading: false });
    })
@@ -127,12 +154,15 @@ class Product extends Component {
             <Card.Body>
              <div className="overview-text">
               <p>
-               UFO series features a moulded shell upholstered with full foam
-               and cinched to give a comfortable cushion look and feel. The
-               refined timber casing frame that moulds to the shell showcases
-               the quality and elegance of the pieces. This series focuses on
-               comfort to create a soft, warm environment that users can relax
-               in.
+               <Editor
+                editorState={this.state.product_desc_overview}
+                wrapperClassName="rich-editor demo-wrapper"
+                editorClassName="demo-editor"
+                readOnly
+                toolbar={{
+                 options: [],
+                }}
+               />
               </p>
              </div>
             </Card.Body>
@@ -146,7 +176,19 @@ class Product extends Component {
             </span>
            </Accordion.Toggle>
            <Accordion.Collapse eventKey="1">
-            <Card.Body>Hello! I'm the body</Card.Body>
+            <Card.Body>
+             <p>
+              <Editor
+               editorState={this.state.product_desc_mat}
+               wrapperClassName="rich-editor demo-wrapper"
+               editorClassName="demo-editor"
+               readOnly
+               toolbar={{
+                options: [],
+               }}
+              />
+             </p>
+            </Card.Body>
            </Accordion.Collapse>
           </Card>
           <Card>
@@ -237,7 +279,19 @@ class Product extends Component {
             </span>
            </Accordion.Toggle>
            <Accordion.Collapse eventKey="5">
-            <Card.Body>Hello! I'm another body</Card.Body>
+            <Card.Body>
+             <p>
+              <Editor
+               editorState={this.state.product_desc_size}
+               wrapperClassName="rich-editor demo-wrapper"
+               editorClassName="demo-editor"
+               readOnly
+               toolbar={{
+                options: [],
+               }}
+              />
+             </p>
+            </Card.Body>
            </Accordion.Collapse>
           </Card>
           <Card>

@@ -15,6 +15,9 @@ import Dropzones from './components/Dropzone'
 import Kind from './pages/addProduct/Kind'
 import Product from './pages/Product'
 import CoverTab from './pages/addProduct/CoverTab';
+import Identity from './pages/addProduct/Identity';
+import TextEditor from './pages/TextEditor';
+
 const  App=(props)=>{
   return (
     <ChakraProvider>
@@ -50,6 +53,8 @@ const  App=(props)=>{
               </Route>
              <Route path="/add-product" exact><Kind />
        </Route>
+              <Route path="/editor" exact><TextEditor />
+              </Route>
             </Switch>
           </Router>
         {/* <Router>
