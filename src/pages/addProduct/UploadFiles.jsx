@@ -71,7 +71,6 @@ class UploadFiles extends Component {
    this.fd.append("files_pdf_cats[]", files[0]);
    const file_src = URL.createObjectURL(files[0]);
    this._pdfFiles.push(file_src);
-   console.log("SSSSS");
    console.log(this._pdfFiles);
    this.setState({ _pdfFiles: this._pdfFiles });
    reader.addEventListener("load", () => {
@@ -79,25 +78,7 @@ class UploadFiles extends Component {
    });
   }
  };
- onSubmitFiles = () => {
-  this.setState({ loading: true });
-  setTimeout(() => {
-   axios
-    .post(
-     `https://arch17-apis.herokuapp.com/api/files/${this.props.id}`,
-     this.fd,
-     {
-      headers: {
-       "Content-Type": "multipart/form-data",
-      },
-     }
-    )
-    .then((response) => {
-     this.setState({ published: true, loading: false });
-     console.log(response);
-    });
-  }, 2000);
- };
+
  handleNextStep = (e) => {
   this.setState({ loading: true });
 
@@ -114,8 +95,6 @@ class UploadFiles extends Component {
     )
     .then((response) => {
      this.setState({ published: true });
-     console.log(this.props);
-
      console.log(response);
     });
   }, 2000);

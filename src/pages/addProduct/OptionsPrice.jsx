@@ -147,11 +147,12 @@ class OptionsPrice extends Component {
    setTimeout(() => {
     this.props.dispatch({ type: ADD_PRODUCT_NEXT_TAB });
     this.setState({ loading: false });
-   }, 750);
+   }, 500);
    for (let row of this.props.OptionsPrice.rows) {
     if (!row) continue;
     await this.saveRow(row);
    }
+   this.props.dispatch({ type: OPTIONS_STORED });
   }
  }
 
@@ -181,7 +182,7 @@ class OptionsPrice extends Component {
 
  compressImage = async (imageFile) => {
   const options = {
-   maxSizeMB: 1,
+   maxSizeMB: 0.5,
    maxWidthOrHeight: 1920,
    useWebWorker: true,
   };
@@ -225,7 +226,7 @@ class OptionsPrice extends Component {
     headers: { "Content-Type": "multipart/form-data" },
    })
    .then((data) => {
-    this.props.dispatch({ type: OPTIONS_STORED });
+    // this.props.dispatch({ type: OPTIONS_STORED });
     console.log(data);
    });
  };
