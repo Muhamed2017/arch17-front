@@ -6,13 +6,24 @@ import {
   ADD_OFFER_PRICE,
   ADD_QUANTITY,
   DELETE_ROW,
-  ADD_PRODUCT_PICTURES,
-
+  ADD_PRODUCT_PICTURES
 } from "../constants";
 
 const defaultState = {
   rows: [],
-  loading_option:false
+  /*
+   Row=>
+   {
+    row_number:1,
+    material: {
+      image: null,
+      name: "",
+      thumbnail: null,
+      nameValidation: false,
+      imageValidation: false,
+    }
+   }
+   */
 };
 
 export default function userReducer(state = defaultState, action) {
@@ -37,12 +48,11 @@ export default function userReducer(state = defaultState, action) {
               nameValidation: false,
               imageValidation: false,
             },
-            offerPrice:null,
-            price:null,
-            quantity:0
+            offerPrice: null,
+            price: null,
+            quantity: 0
           },
         ],
-        loading_option:true
       };
 
     case ADD_MATERIAL:
@@ -71,21 +81,22 @@ export default function userReducer(state = defaultState, action) {
         rows: state.rows,
       };
     case ADD_QUANTITY:
-        state.rows[action.row_index]["quantity"] = action.data.quantity;
-        state.rows[action.row_index]["ver"] += 1;
-        return {
-            rows: state.rows,
-        };
-    case DELETE_ROW:
-        state.rows[action.row_index]=null // we cant remove the index because that would break the delete functionality
-        return {
-            rows: state.rows,
-        };
-    case ADD_PRODUCT_PICTURES:
-      state.rows[action.row_index]["product_pics"] = action.data;
+      state.rows[action.row_index]["quantity"] = action.data.quantity;
       state.rows[action.row_index]["ver"] += 1;
       return {
-          rows: state.rows,
+        rows: state.rows,
+      };
+    case DELETE_ROW:
+      state.rows[action.row_index] = null // we cant remove the index because that would break the delete functionality
+      return {
+        rows: state.rows,
+      };
+    case ADD_PRODUCT_PICTURES:
+      console.log(action.data)
+      state.rows[action.row_index]["productPictures"] = action.data;
+      state.rows[action.row_index]["ver"] += 1;
+      return {
+        rows: state.rows,
       };
     default:
       return state;

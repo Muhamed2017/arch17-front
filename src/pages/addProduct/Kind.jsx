@@ -2,7 +2,7 @@ import { useState } from "react";
 import { BiChevronRight } from "react-icons/bi";
 import axios from "axios";
 import { Redirect } from "react-router-dom";
-
+import ClipLoader from "react-spinners/ClipLoader";
 const Kind = () => {
  const [added, setAdded] = useState(false);
  const [loading, setLoading] = useState(false);
@@ -32,8 +32,31 @@ const Kind = () => {
      <div className="add-wrapper">
       <h3 className="light-head">What Kind of product you want to add ?</h3>
       <div className="product-kinds">
-       <a href="/identity" onClick={addProduct}>
-        {loading ? "Adding..." : "Furniture"}
+       <a
+        href="/identity"
+        onClick={addProduct}
+        style={{
+         backgroundColor: loading ? "#898989" : "",
+         position: "relative",
+        }}
+       >
+        {loading ? (
+         <>
+          Furniture
+          <span style={{ position: "absolute", right: "35px", top: "7px" }}>
+           <ClipLoader
+            color="#fff"
+            loading={loading}
+            size={22}
+            style={{
+             height: "1px",
+            }}
+           />
+          </span>
+         </>
+        ) : (
+         "Furniture"
+        )}
         <BiChevronRight />
        </a>
        <a href="#" onClick={(e) => e.preventDefault}>

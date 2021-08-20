@@ -61,7 +61,7 @@ const AddProductWrapper = (props) => {
  };
  return (
   <div id="add-product-wrapper">
-   <Tabs OnSelect={(index) => setTabIndex(index)}>
+   <Tabs OnSelect={(index) => setTabIndex(index)} forceRenderTabPanel={true}>
     <div id="tabs-wrapper">
      <TabList>
       <Tab>1. Product Idntity</Tab>
@@ -88,13 +88,13 @@ const AddProductWrapper = (props) => {
       </button> */}
      </TabList>
     </div>
-    <TabPanel>
+    <TabPanel forceRender>
      <Identity id={params.id} />
     </TabPanel>
-    <TabPanel>
+    <TabPanel forceRender>
      <OptionsPrice id={params.id} />
     </TabPanel>
-    <TabPanel>
+    <TabPanel forceRender>
      <ProductFiles id={params.id} />
     </TabPanel>
     <TabPanel>
@@ -159,7 +159,7 @@ const AddProductWrapper = (props) => {
        </div>
       </div>
      </div> */}
-     <UploadFiles id={params.id} />
+     <UploadFiles id={params.id} forceRender />
     </TabPanel>
     {/* <TabPanel>SSSS</TabPanel> */}
    </Tabs>

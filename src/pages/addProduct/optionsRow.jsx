@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useRef } from "react";
 import {
  FaCloudUploadAlt,
  FaPlus,
@@ -24,7 +24,7 @@ import {
  DELETE_ROW,
  ADD_PRODUCT_PICTURES,
 } from "../../redux/constants";
-// import memoize from "memoize-one";
+import imageCompression from "browser-image-compression";
 
 // const API = "https://arch17-apis.herokuapp.com/api/option-price/5";
 
@@ -41,22 +41,31 @@ class OptionRow extends Component {
   size_modal_edit: false,
   price_modal: false,
   offer_modal: false,
+  cropDelay: 3000,
  };
  constructor(props) {
   super(props);
   this.cropperRef = React.createRef();
  }
  _crop() {
-  const imageElement = this.cropperRef?.current;
-  const cropper = imageElement?.cropper;
-  const copyPicturesState = this.state.productPictures;
-  copyPicturesState[this.state.selected_product_pic.index][
-   "cropped"
-  ] = cropper.getCroppedCanvas().toDataURL();
-
-  this.setState({
-   productPictures: copyPicturesState,
-  });
+  setTimeout(() => {
+   const imageElement = this.cropperRef?.current;
+   const cropper = imageElement?.cropper;
+   const copyPicturesState = this.state.productPictures;
+   if (copyPicturesState[this.state.selected_product_pic.index]) {
+    copyPicturesState[this.state.selected_product_pic.index][
+     "cropped"
+    ] = cropper.getCroppedCanvas().toDataURL();
+   } else {
+    copyPicturesState[this.state.selected_product_pic.index] = {
+     url: this.state.selected_product_pic.url,
+     cropped: cropper.getCroppedCanvas().toDataURL(),
+    };
+   }
+   this.setState({
+    productPictures: copyPicturesState,
+   });
+  }, 750);
  }
  onCropperInit = (cropper) => {
   this.cropper = cropper;
@@ -174,17 +183,18 @@ class OptionRow extends Component {
   });
  };
 
- setProductPictures = (e, index) => {
+ setProductPictures = async (e, index) => {
   if (!e.target.files[0]) return;
   const copyPicturesState = this.state.productPictures;
+  const file = e.target.files[0];
   copyPicturesState[index] = {
-   url: URL.createObjectURL(e.target.files[0]),
+   url: URL.createObjectURL(file),
    cropped: null,
   };
   this.setState({
    productPictures: copyPicturesState,
    selected_product_pic: {
-    url: URL.createObjectURL(e.target.files[0]),
+    url: URL.createObjectURL(file),
     index,
    },
   });
@@ -246,7 +256,6 @@ class OptionRow extends Component {
   this.size_close();
   this.props.dispatch({
    type: ADD_SIZE,
-
    data: {
     H: Number(H.value),
     L: Number(L.value),
@@ -256,7 +265,7 @@ class OptionRow extends Component {
   });
  };
 
- onMaterialSubmit = (e) => {
+ onMaterialSubmit = async (e) => {
   e.preventDefault();
   const [fileInput, nameField] = e.target;
   const name = nameField?.value.trim();
@@ -291,9 +300,10 @@ class OptionRow extends Component {
  displayImage(name, image, fatPlusFunction) {
   if (image)
    return (
-    <div>
-     <img src={image} style={{ maxWidth: "52px" }} alt="" />
+    <div className="material-box">
+     <img src={image} style={{ maxWidth: "30px", margin: "auto" }} alt="" />
      <FaPencilAlt
+      className="edit-icon-pincel"
       onClick={() =>
        this.editForm("material_modal_edit", {
         temp_material: {
@@ -327,7 +337,7 @@ class OptionRow extends Component {
      {!thumbnail ? (
       <div className="upload-box">{icon}</div>
      ) : (
-      <img src={thumbnail} alt="" height={"70px"} />
+      <img src={thumbnail} height={"70px"} />
      )}
     </label>
     <input
@@ -355,11 +365,7 @@ class OptionRow extends Component {
       <span className="product-pic-icon">{icon}</span>
      ) : (
       <React.Fragment>
-       <img
-        src={this.state.productPictures[index].cropped}
-        height={"70px"}
-        alt=""
-       />
+       <img src={this.state.productPictures[index].cropped} height={"70px"} />
       </React.Fragment>
      )}
     </label>
@@ -507,20 +513,20 @@ class OptionRow extends Component {
 
  onSubmitProductPictures = (e) => {
   e.preventDefault();
-  const productsPicturesInputs = Array.from(
-   document.querySelectorAll(".productsPicturesInputs")
-  );
-  // const files = productsPicturesInputs.filter((e) => e.files[0]);
+  // const productsPicturesInputs = Array.from(
+  //   document.querySelectorAll(".productsPicturesInputs")
+  // );
+
   const files = [];
-  for (let i = 0; i < productsPicturesInputs.length; i++) {
-   if (!productsPicturesInputs[i]?.files[0]) continue;
-   files.push(this.state.productPictures[i].cropped);
+  for (let i = 0; i < this.state.productPictures.length; i++) {
+   if (!this.state.productPictures[i]) files[i] = null;
+   else files[i] = this.state.productPictures[i];
   }
+  console.log(files);
   if (files.length > 0) {
    this.pics_close();
    this.props.dispatch({
     type: ADD_PRODUCT_PICTURES,
-    // data: files.map((e) => URL.createObjectURL(e.files[0])),
     data: files,
     row_index: this.state.row_index,
    });
@@ -532,13 +538,11 @@ class OptionRow extends Component {
  displayProductImages = () => {
   if (this.state.productPictures.length) {
    return (
-    <div>
+    <div className="option-row-img-grid row-box">
      {this.state.productPictures.map((p) => (
-      // <img src={p.url} width={"70px"} alt="" />
-      <img src={p?.cropped || p?.url} width={"70px"} alt="" />
+      <img src={p?.cropped || p?.url} alt="" />
      ))}
-     {/* <FaPencilAlt style={{ width: "10px" }} /> */}
-     <FaPencilAlt style={{ width: "10px" }} />
+     <FaPencilAlt style={{ width: "10px" }} className="edit-icon-pincel" />
     </div>
    );
   } else {
@@ -554,7 +558,6 @@ class OptionRow extends Component {
   return (
    <React.Fragment>
     <tr>
-     {/* <td onClick={this.pics_open}>{this.displayProductImages()}</td> */}
      <td onClick={this.pics_open}>{this.displayProductImages()}</td>
      <td>
       {this.displayImage(
@@ -572,6 +575,7 @@ class OptionRow extends Component {
       <Form.Control
        placeholder=""
        onChange={this.setQuantity}
+       value={this.state?.quantity}
        style={{
         borderColor: this.displayInputValidation(this.state?.quantity > 0),
        }}
@@ -606,13 +610,15 @@ class OptionRow extends Component {
          ref={this.cropperRef}
          initialAspectRatio={16 / 9}
          guides={false}
-         crop={this._crop.bind(this)}
+         cropend={this._crop.bind(this)}
+         ready={this._crop.bind(this)}
          onInitialized={this.onCropperInit}
          crossOrigin="anonymous"
          preview=".image-preview"
          aspectRatio={1.5 / 1}
          autoCropArea={1}
          viewMode={2}
+         // onDragEndCapture={this._crop.bind(this)}
          rotatable={false}
          scalable={false}
          zoomOnWheel={true}

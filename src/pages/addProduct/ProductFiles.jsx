@@ -5,24 +5,28 @@ import { FaCloudUploadAlt } from "react-icons/fa";
 import { MdTitle } from "react-icons/md";
 import { RiCodeSSlashFill } from "react-icons/ri";
 import ProgressBar from "react-bootstrap/ProgressBar";
-import { PulseLoader } from "react-spinners/PulseLoader";
-import { ADD_PRODUCT_NEXT_TAB } from "../../redux/constants";
+// import { PulseLoader } from "react-spinners/PulseLoader";
+// import { ADD_PRODUCT_NEXT_TAB } from "../../redux/constants";
 import { convertToRaw, EditorState } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Editor } from "react-draft-wysiwyg";
 import { connect } from "react-redux";
 import axios from "axios";
 
-import { productDescription } from "../../redux/actions/addProductActions";
-import Overview from "./product-description/Overview";
-import MaterialDescription from "./product-description/MaterialDescription";
-
-import SizeDescription from "./product-description/SizeDescription";
+import {
+ nextTab,
+ productDescription,
+} from "../../redux/actions/addProductActions";
+// import Overview from "./product-description/Overview";
+// import MaterialDescription from "./product-description/MaterialDescription";
+// import SizeDescription from "./product-description/SizeDescription";
+import ClipLoader from "react-spinners/ClipLoader";
 class ProductFiles extends Component {
  galleriyFiles = [];
  overviewsFiles = [];
  descriptionFiles = [];
  dimensionsFiles = [];
+
  overs = [];
  constructor(props) {
   super(props);
@@ -32,8 +36,6 @@ class ProductFiles extends Component {
     dimension_ex_modal: false,
     material_ex_modal: false,
    },
-   editorState: EditorState.createEmpty(),
-
    index: 0,
    over_view_image: null,
    description_mat_image: null,
@@ -47,9 +49,11 @@ class ProductFiles extends Component {
    descriptions: [],
    dimensions: [],
    overviews_files: [],
-   //  o_image: null,
    loading: false,
    product_id: null,
+   overViewEditorState: EditorState.createEmpty(),
+   materialDesceditorState: EditorState.createEmpty(),
+   sizeDescEditorState: EditorState.createEmpty(),
   };
  }
 
@@ -67,43 +71,44 @@ class ProductFiles extends Component {
   };
   this.setState({ product_id: this.props.id });
   console.log(this.state.index);
+  console.log();
  }
- fd = new FormData();
+ //  fd = new FormData();
 
- onChangeOverview = ({ target: { files } }) => {
-  const reader = new FileReader();
+ //  onChangeOverview = ({ target: { files } }) => {
+ //   const reader = new FileReader();
 
-  if (files && files.length > 0) {
-   this.fd.append("desc_overview_img[]", files[0]);
-   const overview_src = URL.createObjectURL(files[0]);
-   this.overviewsFiles.push(overview_src);
-   console.log(this.overviewsFiles);
-   this.setState({ overviews: this.overviewsFiles });
+ //   if (files && files.length > 0) {
+ //    this.fd.append("desc_overview_img[]", files[0]);
+ //    const overview_src = URL.createObjectURL(files[0]);
+ //    this.overviewsFiles.push(overview_src);
+ //    console.log(this.overviewsFiles);
+ //    this.setState({ overviews: this.overviewsFiles });
 
-   reader.addEventListener("load", () => {
-    //  this.overs.push(files[0]);
-    this.setState({ o_image: files[0] });
-   });
-  }
- };
+ //    reader.addEventListener("load", () => {
+ //     //  this.overs.push(files[0]);
+ //     this.setState({ o_image: files[0] });
+ //    });
+ //   }
+ //  };
 
- onChangeSizeImg = ({ target: { files } }) => {
-  const reader = new FileReader();
+ //  onChangeSizeImg = ({ target: { files } }) => {
+ //   const reader = new FileReader();
 
-  if (files && files.length > 0) {
-   this.fd.append("desc_dimension_img[]", files[0]);
+ //   if (files && files.length > 0) {
+ //    this.fd.append("desc_dimension_img[]", files[0]);
 
-   const size_img_src = URL.createObjectURL(files[0]);
-   this.dimensionsFiles.push(size_img_src);
-   console.log(this.dimensionsFiles);
-   this.setState({ dimensions: this.dimensionsFiles });
+ //    const size_img_src = URL.createObjectURL(files[0]);
+ //    this.dimensionsFiles.push(size_img_src);
+ //    console.log(this.dimensionsFiles);
+ //    this.setState({ dimensions: this.dimensionsFiles });
 
-   reader.addEventListener("load", () => {
-    //  this.overs.push(files[0]);
-    // this.setState({ o_image: files[0] });
-   });
-  }
- };
+ //    reader.addEventListener("load", () => {
+ //     //  this.overs.push(files[0]);
+ //     // this.setState({ o_image: files[0] });
+ //    });
+ //   }
+ //  };
 
  onChangeGallery = ({ target: { files } }) => {
   if (files && files.length > 0) {
@@ -146,34 +151,109 @@ class ProductFiles extends Component {
    .catch((err) => console.log(err));
  };
 
- onChangeMatDescr = ({ target: { files } }) => {
-  const reader = new FileReader();
+ //  onChangeMatDescr = ({ target: { files } }) => {
+ // const reader = new FileReader();
 
-  if (files && files.length > 0) {
-   this.fd.append("desc_mat_desc_img[]", files[0]);
-   const desc_src = URL.createObjectURL(files[0]);
-   this.descriptionFiles.push(desc_src);
-   console.log(this.descriptionFiles);
-   this.setState({ descriptions: this.descriptionFiles });
-   reader.addEventListener("load", () => {});
-  }
+ //   if (files && files.length > 0) {
+ //    this.fd.append("desc_mat_desc_img[]", files[0]);
+ //    const desc_src = URL.createObjectURL(files[0]);
+ //    this.descriptionFiles.push(desc_src);
+ //    console.log(this.descriptionFiles);
+ //    this.setState({ descriptions: this.descriptionFiles });
+ //    reader.addEventListener("load", () => {});
+ //   }
+ //  };
+
+ uploadSizeCallback = (file) => {
+  return new Promise((resolve, reject) => {
+   const formData = new FormData();
+   formData.append("img[]", file);
+   axios
+    .post(
+     `https://arch17-apis.herokuapp.com/api/upload/${this.props.id}`,
+
+     formData
+    )
+    .then((response) => {
+     resolve({
+      data: { link: response.data.img[response.data.lastIndex].file_url },
+     });
+     console.log(response.data);
+    })
+    .catch((err) => {
+     console.log(err);
+     reject(err);
+    });
+  });
  };
-
  handleNextStep = (e) => {
-  this.props.dispatchDescriptionStep(this.fd, this.state.product_id);
+  // this.props.dispatchDescriptionStep(this.fd, this.state.product_id);
+  // console.log(this.state.overViewEditorState);
+  this.setState({ loading: true });
+  const formDataOverview = new FormData();
+  const formDataDesc = new FormData();
+  formDataOverview.append(
+   "overview_content",
+   JSON.stringify(
+    convertToRaw(this.state.overViewEditorState.getCurrentContent())
+   )
+  );
+  formDataDesc.append(
+   "size_content",
+   JSON.stringify(
+    convertToRaw(this.state.sizeDescEditorState.getCurrentContent())
+   )
+  );
+  formDataDesc.append(
+   "mat_desc_content",
+   JSON.stringify(
+    convertToRaw(this.state.materialDesceditorState.getCurrentContent())
+   )
+  );
+  axios
+   .post(
+    `https://arch17-apis.herokuapp.com/api/overviewContnet/${this.state.product_id}`,
+    formDataOverview
+   )
+   .then((response) => {
+    this.setState({ loading: false });
+    this.props.dispatchNextStep();
+    axios
+     .post(
+      `https://arch17-apis.herokuapp.com/api/descContent/${this.state.product_id}`,
+      formDataDesc
+     )
+     .then("Descriotion has been added ");
+   })
+   .catch((error) => console.log(error));
  };
 
  handleGotoStep = (step) => {
   console.log(this.props);
  };
- onEditorStateChange = (editorState) => {
+
+ onEditorStateOverviewChange = (overViewEditorState) => {
   this.setState({
-   editorState,
+   overViewEditorState,
+  });
+  console.log(convertToRaw(this.state.overViewEditorState.getCurrentContent()));
+ };
+
+ onEditorStateMaterialChange = (materialDesceditorState) => {
+  this.setState({
+   materialDesceditorState,
+  });
+  console.log(
+   convertToRaw(this.state.materialDesceditorState.getCurrentContent())
+  );
+ };
+
+ onEditorStateSizeChange = (sizeDescEditorState) => {
+  this.setState({
+   sizeDescEditorState,
   });
  };
  render() {
-  // const { editorState } = this.state;
-
   return (
    <div id="product-files-step">
     <button
@@ -182,16 +262,26 @@ class ProductFiles extends Component {
       top: "-110px",
       height: "20px",
       color: "#fff",
-      background: this.props.loading ? "#B4B4B4" : "#E41E15",
+      background: this.state.loading ? "#B4B4B4" : "#E41E15",
      }}
      onClick={this.handleNextStep}
     >
-     {this.props.loading ? "Saving ...." : "Save & Continue"}
+     {this.state.loading ? (
+      <>
+       {" "}
+       <ClipLoader
+        style={{ height: "20px" }}
+        color="#ffffff"
+        loading={this.state.loading}
+        size={20}
+       />
+      </>
+     ) : (
+      "Save & Continue"
+     )}
     </button>
 
-    {/* <Tabs> */}
     <Tabs
-     //  forceRenderTabPanel
      forceRenderTabPanel={true}
      onSelect={(index) => this.setState({ index })}
      selectedIndex={this.state.index}
@@ -207,56 +297,28 @@ class ProductFiles extends Component {
      </div>
 
      <TabPanel forceRender>
-      {/* <div className="tab-form-content" style={{ position: "relative" }}> */}
-      {/* <div className="files-previews">
-        {this.state.overviews?.map((file, index) => {
-         return (
-          <div key={index}>
-           <img src={file} alt="" key={file} />
-          </div>
-         );
-        })}
-       </div> */}
-      <Overview id={this.state.product_id} />
-      {/* <div className="tab-head">
-        <h2>Add Your Product Overview</h2>
-        <div className="tip">
-         Tip. Add your products concept or general description{" "}
-         <span onClick={this.overviewExample_open}>See example</span>
-        </div>
-        <div className="bold-tip">
-         You can add in English and Chinese or one language
-        </div>
-        <div className="file-icons-tabs">
-         <span className="red-bg" style={{ position: "relative" }}>
-          <FaCloudUploadAlt className="m-auto" />
-          <input
-           type="file"
-           accept="image/*"
-           onChange={this.onChangeOverview}
-           style={{
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            opacity: 0,
-            width: "50px",
-           }}
-          />
-         </span>
-         <span className="gray-bg" onClick={this.handleGotoStep}>
-          <MdTitle className="m-auto" />
-         </span>
-         <span className="gray-bg">
-          <RiCodeSSlashFill className="m-auto" />
-         </span>
-        </div>
-       </div> */}
-      {/* </div> */}
+      <>
+       <div className="text-editor">
+        <Editor
+         editorState={this.state.overViewEditorState}
+         wrapperClassName="rich-editor demo-wrapper"
+         editorClassName="demo-editor"
+         onEditorStateChange={this.onEditorStateOverviewChange}
+         placeholder="Add Your Product Description Overview "
+        />
+       </div>
+       <button
+        className="save-product-step-btn"
+        style={{ position: "relative", top: "10px" }}
+        onClick={this.submitOverviewContent}
+       >
+        Save
+       </button>
+      </>
+
+      {/* <Overview id={this.state.product_id} /> */}
 
       {/* overview modal */}
-
       <>
        <Modal
         show={this.state.overview_ex_modal}
@@ -310,102 +372,77 @@ class ProductFiles extends Component {
       {/* end of overview modal */}
      </TabPanel>
      <TabPanel forceRender>
-      <MaterialDescription id={this.state.product_id} />
-      {/* <div className="tab-form-content">
-       <div className="files-previews">
-        {this.state.descriptions?.map((file, index) => {
-         return (
-          <div key={index}>
-           <img src={file} alt="" key={file} />
-          </div>
-         );
-        })}
+      {/* <MaterialDescription id={this.state.product_id} /> */}
+      <>
+       <div className="text-editor">
+        <Editor
+         editorState={this.state.materialDesceditorState}
+         wrapperClassName="rich-editor demo-wrapper"
+         editorClassName="demo-editor"
+         onEditorStateChange={this.onEditorStateMaterialChange}
+         placeholder="Add Your Product Mateial Description "
+         toolbar={{
+          image: {
+           uploadEnabled: true,
+           urlEnabled: true,
+           uploadCallback: this.uploadSizeCallback,
+           previewImage: true,
+           alignmentEnabled: "LEFT",
+           inputAccept: "image/gif,image/jpeg,image/jpg,image/png,image/svg",
+           alt: { present: false, mandatory: false },
+           defaultSize: {
+            height: "auto",
+            width: "400",
+           },
+          },
+         }}
+        />
        </div>
-
-       <div className="tab-head">
-        <h2>Add Material Description</h2>
-        <div className="tip">
-         Add the product’s materials specifications, Wood, leather, fabrics,
-         etc,. <span>See Example</span>
-        </div>
-        <div className="bold-tip">
-         You can skip if informations not available
-        </div>
-        <div className="file-icons-tabs">
-         <span className="red-bg" style={{ position: "relative" }}>
-          <FaCloudUploadAlt className="m-auto" />
-          <input
-           type="file"
-           accept="image/*"
-           onChange={this.onChangeMatDescr}
-           style={{
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            opacity: 0,
-            width: "50px",
-           }}
-          />
-         </span>
-         <span className="gray-bg">
-          <MdTitle className="m-auto" />
-         </span>
-         <span className="gray-bg">
-          <RiCodeSSlashFill className="m-auto" />
-         </span>
-        </div>
-       </div>
-      </div> */}
+       {/* <button
+     className="save-product-step-btn"
+     style={{ position: "relative", top: "10px" }}
+     onClick={this.submitDescriptionContent}
+    >
+     Save
+    </button> */}
+      </>
      </TabPanel>
      <TabPanel forceRender>
-      <SizeDescription id={this.state.product_id} />
-      {/* <div className="tab-form-content" style={{ position: "relative" }}>
-       <div className="files-previews">
-        {this.state.dimensions?.map((file, index) => {
-         return (
-          <div key={index}>
-           <img src={file} alt="" key={file} />
-          </div>
-         );
-        })}
+      {/* <SizeDescription id={this.state.product_id} /> */}
+      <>
+       <div className="text-editor">
+        <Editor
+         editorState={this.state.sizeDescEditorState}
+         wrapperClassName="rich-editor demo-wrapper"
+         editorClassName="demo-editor"
+         onEditorStateChange={this.onEditorStateSizeChange}
+         placeholder="Add Your Product Size Description"
+         toolbar={{
+          //   options: ["image", "colorPicker"],
+          image: {
+           uploadEnabled: true,
+           urlEnabled: true,
+           uploadCallback: this.uploadSizeCallback,
+           previewImage: true,
+           alignmentEnabled: "LEFT",
+           inputAccept: "image/gif,image/jpeg,image/jpg,image/png,image/svg",
+           alt: { present: false, mandatory: false },
+           defaultSize: {
+            height: "auto",
+            width: "400",
+           },
+          },
+         }}
+        />
        </div>
-       <div className="tab-head">
-        <h2>Add Size Description</h2>
-        <div className="tip">
-         Add a picture of the size <span>See Example</span>
-        </div>
-        <div className="bold-tip">
-         You can skip if informations not available
-        </div>
-        <div className="file-icons-tabs">
-         <span className="red-bg" style={{ position: "relative" }}>
-          <FaCloudUploadAlt className="m-auto" />
-          <input
-           type="file"
-           accept="image/*"
-           onChange={this.onChangeSizeImg}
-           style={{
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            opacity: 0,
-            width: "50px",
-           }}
-          />
-         </span>
-         <span className="gray-bg">
-          <MdTitle className="m-auto" />
-         </span>
-         <span className="gray-bg">
-          <RiCodeSSlashFill className="m-auto" />
-         </span>
-        </div>
-       </div>
-      </div> */}
+       {/* <button
+     className="save-product-step-btn"
+     style={{ position: "relative", top: "10px" }}
+     onClick={this.submitSizeContent}
+    >
+     Save
+    </button> */}
+      </>
      </TabPanel>
      <TabPanel forceRender>
       <div
@@ -487,6 +524,7 @@ class ProductFiles extends Component {
 }
 const mapDispatchToProps = (dispatch) => ({
  dispatchDescriptionStep: (data, id) => dispatch(productDescription(data, id)),
+ dispatchNextStep: () => dispatch(nextTab()),
 });
 const mapStateToProps = (state) => ({
  loading: state.addProduct.loading,

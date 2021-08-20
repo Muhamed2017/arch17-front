@@ -9,6 +9,7 @@ class Overview extends Component {
   super(props);
   this.state = {
    editorState: EditorState.createEmpty(),
+   saveContentState: this.props.saveContentState,
   };
  }
  submitOverviewContent = () => {
@@ -28,11 +29,16 @@ class Overview extends Component {
    })
    .catch((error) => console.log(error));
  };
+
+ componentDidMount() {
+  if (this.state.saveContentState) {
+  }
+ }
+
  onEditorStateChange = (editorState) => {
   this.setState({
    editorState,
   });
-  //   console.log(convertToRaw(this.state.editorState.getCurrentContent()));
  };
 
  render() {
