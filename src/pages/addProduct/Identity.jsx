@@ -131,7 +131,7 @@ const promiseOptions = (inputValue) =>
  });
 const Identity = (props) => {
  const [name, setName] = useState(props.identity.name ?? "");
- const [category, setCategory] = useState("");
+ const [category, setCategory] = useState("Furniture");
  const [type, setType] = useState("");
  const [kind, setKind] = useState("");
  const [country, setCountry] = useState("");
@@ -151,13 +151,13 @@ const Identity = (props) => {
  const [rightBase, setRightBase] = useState([]);
  const [types, setTypes] = useState([]);
  const [types_label, setTypesLabel] = useState([]);
- const [materials, setMaterials] = useState([]);
+ const [materials, setMaterials] = useState(["Wood"]);
  const [materials_label, setMaterialsLabel] = useState([]);
- const [shapes, setShapes] = useState([]);
+ const [shapes, setShapes] = useState(["Round"]);
  const [shapes_label, setShapesLabel] = useState([]);
- const [bases, setBases] = useState([]);
+ const [bases, setBases] = useState(["4-base"]);
  const [bases_label, setBasesLabel] = useState([]);
- const [seats, setSeats] = useState([]);
+ const [seats, setSeats] = useState(["1-seater"]);
  const [seats_label, setSeatsLabel] = useState([]);
  useEffect(() => {
   console.log(types, shapes, styles, seats, bases, materials);
