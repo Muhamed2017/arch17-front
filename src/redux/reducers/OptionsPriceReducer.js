@@ -6,7 +6,8 @@ import {
   ADD_OFFER_PRICE,
   ADD_QUANTITY,
   DELETE_ROW,
-  ADD_PRODUCT_PICTURES
+  ADD_PRODUCT_PICTURES,
+  OPTIONS_STORED
 } from "../constants";
 
 const defaultState = {
@@ -24,6 +25,7 @@ const defaultState = {
     }
    }
    */
+  optionsStored:false
 };
 
 export default function userReducer(state = defaultState, action) {
@@ -98,6 +100,11 @@ export default function userReducer(state = defaultState, action) {
       return {
         rows: state.rows,
       };
+      case OPTIONS_STORED:
+        return {
+          ...state,
+          optionsStored:true
+        }
     default:
       return state;
   }

@@ -513,7 +513,7 @@ const Identity = (props) => {
     <div className="form-blc">
      <Form.Group as={Row}>
       <Col md={12}>
-       <Form.Label>Is this Video made for kids ? (Required)</Form.Label>
+       <Form.Label>Is this Product made for kids ? (Required)</Form.Label>
       </Col>
       <Col md={1}>
        <Form.Check

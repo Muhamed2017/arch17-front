@@ -9,6 +9,7 @@ import { FaFilePdf } from "react-icons/fa";
 import { Redirect } from "react-router-dom";
 
 import axios from "axios";
+import ClipLoader from "react-spinners/ClipLoader";
 class UploadFiles extends Component {
  _2dcadFiles = [];
  _3dFiles = [];
@@ -28,6 +29,7 @@ class UploadFiles extends Component {
    _pdf_files_submit: [],
    _3d_files_submit: [],
    published: false,
+   loading: false,
   };
  }
 
@@ -78,42 +80,48 @@ class UploadFiles extends Component {
   }
  };
  onSubmitFiles = () => {
-  axios
-   .post(
-    `https://arch17-apis.herokuapp.com/api/files/${this.props.id}`,
-    this.fd,
-    {
-     headers: {
-      "Content-Type": "multipart/form-data",
-     },
-    }
-   )
-   .then((response) => {
-    // this.props.dispatch({ type: ADD_PRODUCT_NEXT_TAB });
-    this.setState({ published: true });
-    console.log(response);
-   });
+  this.setState({ loading: true });
+  setTimeout(() => {
+   axios
+    .post(
+     `https://arch17-apis.herokuapp.com/api/files/${this.props.id}`,
+     this.fd,
+     {
+      headers: {
+       "Content-Type": "multipart/form-data",
+      },
+     }
+    )
+    .then((response) => {
+     this.setState({ published: true, loading: false });
+     console.log(response);
+    });
+  }, 2000);
  };
  handleNextStep = (e) => {
-  axios
-   .post(
-    `https://arch17-apis.herokuapp.com/api/files/${this.props.id}`,
-    this.fd,
-    {
-     headers: {
-      "Content-Type": "multipart/form-data",
-     },
-    }
-   )
-   .then((response) => {
-    // this.props.dispatch({ type: ADD_PRODUCT_NEXT_TAB });
-    this.setState({ published: true });
+  this.setState({ loading: true });
 
-    console.log(response);
-   });
+  setTimeout(() => {
+   axios
+    .post(
+     `https://arch17-apis.herokuapp.com/api/files/${this.props.id}`,
+     this.fd,
+     {
+      headers: {
+       "Content-Type": "multipart/form-data",
+      },
+     }
+    )
+    .then((response) => {
+     this.setState({ published: true });
+     console.log(this.props);
+
+     console.log(response);
+    });
+  }, 2000);
  };
  render() {
-  if (this.state.published) {
+  if (this.props.OptionsPrice.optionsStored && this.state.published) {
    return <Redirect to={{ pathname: `/product/${this.props.id}` }} />;
   } else {
    return (
@@ -121,15 +129,19 @@ class UploadFiles extends Component {
      <div className="step-form">
       <button
        className="save-product-step-btn"
-       style={{ top: "-110px", height: "20px" }}
+       style={{
+        top: "-110px",
+        height: "20px",
+        background: this.state.loading ? "#898989" : "",
+       }}
        onClick={this.handleNextStep}
       >
-       {this.props.loading ? (
-        <PulseLoader
+       {this.state.loading ? (
+        <ClipLoader
          style={{ height: "20px" }}
          color="#ffffff"
-         loading={this.props.loading}
-         size={10}
+         loading={this.state.loading}
+         size={20}
         />
        ) : (
         "Save & Continue"

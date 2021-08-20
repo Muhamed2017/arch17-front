@@ -16,7 +16,11 @@ import "cropperjs/dist/cropper.css";
 import slide4 from "../../../src/slide4.jpg";
 import { connect } from "react-redux";
 import OptionsRow from "./optionsRow";
-import { ADD_PRODUCT_NEXT_TAB, ADD_ROW } from "../../redux/constants";
+import {
+ ADD_PRODUCT_NEXT_TAB,
+ ADD_ROW,
+ OPTIONS_STORED,
+} from "../../redux/constants";
 import axios from "axios";
 import imageCompression from "browser-image-compression";
 import PulseLoader from "react-spinners/PulseLoader";
@@ -220,7 +224,10 @@ class OptionsPrice extends Component {
    .post(`${API}${this.props.id}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
    })
-   .then((data) => console.log(data));
+   .then((data) => {
+    this.props.dispatch({ type: OPTIONS_STORED });
+    console.log(data);
+   });
  };
 
  hideValidationMessage() {

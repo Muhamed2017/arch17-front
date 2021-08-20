@@ -4,7 +4,8 @@ const initialState = {
     loading:false,
     identity:{},
     options:{},
-    tabIndex:0
+    tabIndex:0,
+    optionsAdded:false
 }
 
 export const AddProductReducer = (state= initialState, action)=>{
