@@ -272,7 +272,9 @@ const Identity = (props) => {
  const handleIdentitySubmit = (e) => {
   props.dispatchAddIdentity(
    name,
-   category.value,
+   //  category.value,
+   category,
+
    types,
    materials,
    country,
