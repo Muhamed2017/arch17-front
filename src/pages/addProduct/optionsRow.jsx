@@ -354,7 +354,7 @@ class OptionRow extends Component {
     <label
      for={fieldName}
      style={{
-      maxHeight: "70px",
+      // maxHeight: "70px",
       maxWidth: "72px",
       overflow: "hidden",
      }}
