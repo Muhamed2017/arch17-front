@@ -30,7 +30,7 @@ const Kind = () => {
    <>
     <div id="add-product-one">
      <div className="add-wrapper">
-      <h3 className="light-head">What Kind of product you want to add ?</h3>
+      <h3 className="light-head">What Category of product you want to add ?</h3>
       <div className="product-kinds">
        <a
         href="/identity"

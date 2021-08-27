@@ -54,6 +54,24 @@ const colourStyles = {
   },
  }),
 };
+const material_styles = {
+ option: (provided, state) => ({
+  ...provided,
+  // fontWeight: state.bold == "Fuck" ? "bold" : "normal",
+  // color: state.label == "Fuck" ? "red" : "blue",
+  fontWeight: state.data.bold ?? "normal",
+  // color: "red",
+  // backgroundColor: state.data.color,
+  // fontSize: state.selectProps.myFontSize
+ }),
+ singleValue: (provided, state) => ({
+  ...provided,
+  color: "red",
+  // fontSize: state.selectProps.myFontSize
+  // fontWeight: state.bold ? "bold" : "normal",
+  fontWeight: state.color == "bold" ? "bold" : "normal",
+ }),
+};
 
 //end of select tags
 const SelectOptions = [
@@ -134,6 +152,7 @@ const Identity = (props) => {
  const [category, setCategory] = useState("Furniture");
  const [type, setType] = useState("");
  const [kind, setKind] = useState("");
+ const [style, setStyle] = useState("");
  const [country, setCountry] = useState("");
  const [is_outdoor, setOutdoor] = useState("yes");
  const [product_file_kind, setFileType] = useState("");
@@ -144,11 +163,7 @@ const Identity = (props) => {
  const [styles_label, setStylesLabel] = useState([]);
  const [product_id, setId] = useState(props.id);
  const [inputValue, setInputValue] = useState("");
- const [rightType, setRightType] = useState([]);
- const [rightShape, setRightShape] = useState([]);
- const [rightStyle, setRightStyle] = useState([]);
- const [rightSeats, setRightSeats] = useState([]);
- const [rightBase, setRightBase] = useState([]);
+
  const [types, setTypes] = useState([]);
  const [types_label, setTypesLabel] = useState([]);
  const [materials, setMaterials] = useState(["Wood"]);
@@ -159,36 +174,35 @@ const Identity = (props) => {
  const [bases_label, setBasesLabel] = useState([]);
  const [seats, setSeats] = useState(["1-seater"]);
  const [seats_label, setSeatsLabel] = useState([]);
+ const [furniture, setFurniture] = useState({});
  useEffect(() => {
   console.log(types, shapes, styles, seats, bases, materials);
   setId(props.id);
   if (kind.value === "Chairs") {
-   setRightType(productClass.chair_types);
-   setRightShape(productClass.chair_shapes);
-   setRightBase(productClass.chair_bases);
-  }
-  if (kind.value === "Beds") {
-   setRightType(productClass.beds_types);
-   setRightShape(productClass.beds_shapes);
-  }
-  if (kind.value === "Benches") {
-   setRightType(productClass.benches_types);
-   setRightShape(productClass.benches_shapes);
-  }
-  if (kind.value === "Cabinets") {
-   setRightType(productClass.cabinet_types);
-   setRightStyle(productClass.cabinets_styles);
-  }
-  if (kind.value === "Chests") {
-   setRightType(productClass.cehsts_types);
-   setRightBase(productClass.chests_bases);
-  }
-  if (kind.value === "Sofa") {
-   setRightType(productClass.sofa_types);
-   setRightBase(productClass.sofa_bases);
-   setRightSeats(productClass.sofa_seats);
+   setFurniture(productClass.chair);
+  } else if (kind.value === "Beds") {
+   setFurniture(productClass.beds);
+  } else if (kind.value === "Sofa") {
+   setFurniture(productClass.sofas);
+  } else if (kind.value === "Benches") {
+   setFurniture(productClass.benches);
+  } else if (kind.value === "Chests") {
+   setFurniture(productClass.chests);
+  } else if (kind.value === "Cabinets") {
+   setFurniture(productClass.cabinet);
+  } else if (kind.value === "Table") {
+   setFurniture(productClass.table);
+  } else if (kind.value === "Poufs") {
+   setFurniture(productClass.poufs);
+  } else if (kind.value === "Office") {
+   setFurniture(productClass.office);
+  } else if (kind.value === "Furniture components and hardware") {
+   setFurniture(productClass.components_hardware);
+  } else {
+   setFurniture(productClass.empty);
   }
  });
+
  const handleInputChange = (newValue = "") => {
   const inputValue = newValue.replace(/\W/g, "");
   setInputValue(inputValue);
@@ -201,6 +215,13 @@ const Identity = (props) => {
 
  const onChangeKind = (selectedOption) => {
   setKind(selectedOption);
+  // setFurniture({});
+  // setBases([]);
+  setShapesLabel([]);
+  setBasesLabel([]);
+  setSeatsLabel([]);
+  setTypesLabel([]);
+
   console.log(`Option selected:`, selectedOption);
   setType("");
  };
@@ -257,16 +278,12 @@ const Identity = (props) => {
   setTypes(
    Array.isArray(types_label) ? selectedOption.map((x) => x.value) : []
   );
-
   console.log(`Option selected:`, types);
  };
- const onChangeStyle = (selectedOption) => {
-  setStylesLabel(selectedOption);
-  setStyles(
-   Array.isArray(styles_label) ? selectedOption.map((x) => x.value) : []
-  );
 
-  console.log(`Option selected:`, styles);
+ const onChangeStyle = (selectedOption) => {
+  setStyle(selectedOption);
+  console.log(`Option selected:`, selectedOption);
  };
 
  const handleIdentitySubmit = (e) => {
@@ -274,7 +291,6 @@ const Identity = (props) => {
    name,
    //  category.value,
    category,
-
    types,
    materials,
    country,
@@ -376,33 +392,42 @@ const Identity = (props) => {
         })}
        />
       </Col>
-      <Form.Label
-       column
-       md={2}
-       className="sub-label"
-       onClick={() => console.log(product_file_kind, is_for_kids, places_tags)}
-      >
-       Type
-      </Form.Label>
-      <Col md={4}>
-       <Select
-        isMulti
-        options={rightType}
-        value={types_label}
-        // onChange={onChangeType}
-        onChange={onChangeProductTypes}
-        theme={(theme) => ({
-         ...theme,
-         colors: {
-          ...theme.colors,
-          primary25: "#f5f0f0",
-          primary: "#e41e15",
-          primary50: "#f5f0f0",
-         },
-        })}
-       />
-      </Col>
-      {rightShape.length > 0 ? (
+      {furniture.types?.length > 0 ? (
+       <>
+        <Form.Label
+         column
+         md={2}
+         className="sub-label"
+         onClick={() =>
+          console.log(product_file_kind, is_for_kids, places_tags)
+         }
+        >
+         Type
+        </Form.Label>
+        <Col md={4}>
+         <Select
+          isMulti
+          // options={rightType}
+          options={furniture.types}
+          value={types_label}
+          // onChange={onChangeType}
+          onChange={onChangeProductTypes}
+          theme={(theme) => ({
+           ...theme,
+           colors: {
+            ...theme.colors,
+            primary25: "#f5f0f0",
+            primary: "#e41e15",
+            primary50: "#f5f0f0",
+           },
+          })}
+         />
+        </Col>
+       </>
+      ) : (
+       <></>
+      )}
+      {furniture.shapes?.length > 0 ? (
        <>
         <Form.Label column md={2} className="sub-label">
          Shape
@@ -410,7 +435,8 @@ const Identity = (props) => {
         <Col md={4}>
          <Select
           isMulti
-          options={rightShape}
+          // options={rightShape}
+          options={furniture.shapes}
           value={shapes_label}
           onChange={onChangeShape}
           theme={(theme) => ({
@@ -434,8 +460,8 @@ const Identity = (props) => {
       <Col md={4}>
        <Select
         isMulti
-        options={rightStyle}
-        value={styles_label}
+        options={productClass.furniture_styles}
+        value={style ?? ""}
         onChange={onChangeStyle}
         theme={(theme) => ({
          ...theme,
@@ -454,9 +480,11 @@ const Identity = (props) => {
       <Col md={4}>
        <Select
         isMulti
-        options={SelectOptions}
+        // options={SelectOptions}
+        options={productClass.furniture_materials}
         value={materials_label}
         onChange={onChangeMaterial}
+        styles={material_styles}
         theme={(theme) => ({
          ...theme,
          colors: {
@@ -468,46 +496,58 @@ const Identity = (props) => {
         })}
        />
       </Col>
-      <Form.Label column md={2} className="sub-label">
-       Base
-      </Form.Label>
-      <Col md={4}>
-       <Select
-        isMulti
-        options={rightBase}
-        value={bases_label}
-        onChange={onChangeBase}
-        theme={(theme) => ({
-         ...theme,
-         colors: {
-          ...theme.colors,
-          primary25: "#f5f0f0",
-          primary: "#e41e15",
-          primary50: "#f5f0f0",
-         },
-        })}
-       />
-      </Col>
-      <Form.Label column md={2} className="sub-label">
-       Seats
-      </Form.Label>
-      <Col md={4}>
-       <Select
-        isMulti
-        options={rightSeats}
-        value={seats_label}
-        onChange={onChangeSeats}
-        theme={(theme) => ({
-         ...theme,
-         colors: {
-          ...theme.colors,
-          primary25: "#f5f0f0",
-          primary: "#e41e15",
-          primary50: "#f5f0f0",
-         },
-        })}
-       />
-      </Col>
+      {furniture.bases?.length > 0 ? (
+       <>
+        <Form.Label column md={2} className="sub-label">
+         Base
+        </Form.Label>
+        <Col md={4}>
+         <Select
+          isMulti
+          options={furniture.bases}
+          value={bases_label}
+          onChange={onChangeBase}
+          theme={(theme) => ({
+           ...theme,
+           colors: {
+            ...theme.colors,
+            primary25: "#f5f0f0",
+            primary: "#e41e15",
+            primary50: "#f5f0f0",
+           },
+          })}
+         />
+        </Col>
+       </>
+      ) : (
+       <></>
+      )}
+      {furniture.seats?.length > 0 ? (
+       <>
+        <Form.Label column md={2} className="sub-label">
+         Seats
+        </Form.Label>
+        <Col md={4}>
+         <Select
+          isMulti
+          options={furniture.seats}
+          value={seats_label}
+          onChange={onChangeSeats}
+          theme={(theme) => ({
+           ...theme,
+           colors: {
+            ...theme.colors,
+            primary25: "#f5f0f0",
+            primary: "#e41e15",
+            primary50: "#f5f0f0",
+           },
+          })}
+         />
+        </Col>
+       </>
+      ) : (
+       <></>
+      )}
      </Form.Group>
     </div>
     <div className="form-blc">
@@ -614,7 +654,7 @@ const Identity = (props) => {
      </Form.Row>
     </Form.Group>
     <Form.Group as={Row}>
-     <Col md={6}>
+     <Col md={6} style={{ marginBottom: "100px" }}>
       <Form.Label>Product Country or Origin</Form.Label>
       <ReactFlagsSelect
        selected={country}

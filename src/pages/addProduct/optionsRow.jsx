@@ -21,12 +21,10 @@ import {
  ADD_OFFER_PRICE,
  ADD_SIZE,
  ADD_QUANTITY,
+ ADD_CODE,
  DELETE_ROW,
  ADD_PRODUCT_PICTURES,
 } from "../../redux/constants";
-import imageCompression from "browser-image-compression";
-
-// const API = "https://arch17-apis.herokuapp.com/api/option-price/5";
 
 class OptionRow extends Component {
  state = {
@@ -337,7 +335,7 @@ class OptionRow extends Component {
      {!thumbnail ? (
       <div className="upload-box">{icon}</div>
      ) : (
-      <img src={thumbnail} height={"70px"} />
+      <img src={thumbnail} alt="" />
      )}
     </label>
     <input
@@ -352,7 +350,7 @@ class OptionRow extends Component {
 
  displayProductPicturesUploadField(fieldName, setThumbnail, index, icon) {
   return (
-   <div>
+   <div style={{ position: "relative" }}>
     <label
      for={fieldName}
      style={{
@@ -365,7 +363,11 @@ class OptionRow extends Component {
       <span className="product-pic-icon">{icon}</span>
      ) : (
       <React.Fragment>
-       <img src={this.state.productPictures[index].cropped} height={"70px"} />
+       <img
+        src={this.state.productPictures[index].cropped}
+        height={"70px"}
+        alt=""
+       />
       </React.Fragment>
      )}
     </label>
@@ -501,6 +503,16 @@ class OptionRow extends Component {
    row_index: this.state.row_index,
   });
  };
+ setCode = (e) => {
+  this.props.dispatch({
+   type: ADD_CODE,
+   data: {
+    // code: Number(e.target.value.trim()),
+    code: e.target.value,
+   },
+   row_index: this.state.row_index,
+  });
+ };
 
  removeRow = () => {
   const validRows = this.props.OptionsPrice.rows.filter((row) => !!row);
@@ -548,7 +560,7 @@ class OptionRow extends Component {
   } else {
    return (
     <>
-     <FaCloudUploadAlt />
+     <FaCloudUploadAlt style={{ fontSize: "22px" }} />
      <div className="under-link underline">Upload Images</div>
     </>
    );
@@ -557,7 +569,19 @@ class OptionRow extends Component {
  render() {
   return (
    <React.Fragment>
-    <tr>
+    <tr style={{ position: "relative" }}>
+     <td>
+      <Form.Control
+       placeholder="Code"
+       onChange={this.setCode}
+       value={this.state?.code}
+       style={
+        {
+         // borderColor: this.displayInputValidation(this.state?.code > 0),
+        }
+       }
+      />
+     </td>
      <td onClick={this.pics_open}>{this.displayProductImages()}</td>
      <td>
       {this.displayImage(
@@ -573,17 +597,22 @@ class OptionRow extends Component {
      <td>{this.displayOfferPrice()}</td>
      <td>
       <Form.Control
-       placeholder=""
+       placeholder="QY"
        onChange={this.setQuantity}
-       value={this.state?.quantity}
-       style={{
-        borderColor: this.displayInputValidation(this.state?.quantity > 0),
-       }}
+       value={this.state?.quantity > 0 ? this.state.quantity : ""}
+       style={
+        {
+         // borderColor: this.displayInputValidation(this.state?.quantity > 0),
+        }
+       }
       />
      </td>
-     <td className="trash-icon">
+     <div
+      className="trash-icon"
+      style={{ position: "absolute", right: "-20px", top: "76px" }}
+     >
       <FaTrashAlt onClick={this.removeRow} />
-     </td>
+     </div>
     </tr>
 
     <>
@@ -608,21 +637,24 @@ class OptionRow extends Component {
          style={{ height: "100%", width: "100%" }}
          // Cropper.js options
          ref={this.cropperRef}
-         initialAspectRatio={16 / 9}
+         initialAspectRatio="free"
          guides={false}
          cropend={this._crop.bind(this)}
          ready={this._crop.bind(this)}
-         onInitialized={this.onCropperInit}
+         //  onInitialized={this.onCropperInit}
          crossOrigin="anonymous"
          preview=".image-preview"
-         aspectRatio={1.5 / 1}
+         scalable={false}
+         aspectRatio={"free"}
          autoCropArea={1}
-         viewMode={2}
+         viewMode={1}
+         dragMode="move"
          // onDragEndCapture={this._crop.bind(this)}
          rotatable={false}
-         scalable={false}
          zoomOnWheel={true}
-         dragMode="move"
+         cropBoxMovable={false}
+         cropBoxResizable={true}
+         center={false}
         />
        </div>
        <div as={Row} className="hr">

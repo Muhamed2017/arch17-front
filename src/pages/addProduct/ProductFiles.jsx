@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { Modal } from "react-bootstrap";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import { MdTitle } from "react-icons/md";
 import { RiCodeSSlashFill } from "react-icons/ri";
 import ProgressBar from "react-bootstrap/ProgressBar";
 // import { PulseLoader } from "react-spinners/PulseLoader";
 // import { ADD_PRODUCT_NEXT_TAB } from "../../redux/constants";
+import { Form, Col, Row, Modal, Button } from "react-bootstrap";
 import { convertToRaw, EditorState } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Editor } from "react-draft-wysiwyg";
@@ -17,15 +17,12 @@ import {
  nextTab,
  productDescription,
 } from "../../redux/actions/addProductActions";
-// import Overview from "./product-description/Overview";
-// import MaterialDescription from "./product-description/MaterialDescription";
-// import SizeDescription from "./product-description/SizeDescription";
 import ClipLoader from "react-spinners/ClipLoader";
 class ProductFiles extends Component {
  galleriyFiles = [];
- overviewsFiles = [];
- descriptionFiles = [];
- dimensionsFiles = [];
+ //  overviewsFiles = [];
+ //  descriptionFiles = [];
+ //  dimensionsFiles = [];
 
  overs = [];
  constructor(props) {
@@ -35,6 +32,7 @@ class ProductFiles extends Component {
     overview_ex_modal: false,
     dimension_ex_modal: false,
     material_ex_modal: false,
+    embed_modal: false,
    },
    index: 0,
    over_view_image: null,
@@ -61,7 +59,12 @@ class ProductFiles extends Component {
  overviewExample_open = () => {
   this.setState({ overview_ex_modal: true });
  };
-
+ embedModal_open = () => {
+  this.setState({ embed_modal: true });
+ };
+ embedModal_close = () => {
+  this.setState({ embed_modal: false });
+ };
  overviewExample_close = () => {
   this.setState({ overview_ex_modal: false });
  };
@@ -307,13 +310,13 @@ class ProductFiles extends Component {
          placeholder="Add Your Product Description Overview "
         />
        </div>
-       <button
+       {/* <button
         className="save-product-step-btn"
         style={{ position: "relative", top: "10px" }}
         onClick={this.submitOverviewContent}
        >
         Save
-       </button>
+       </button> */}
       </>
 
       {/* <Overview id={this.state.product_id} /> */}
@@ -495,7 +498,7 @@ class ProductFiles extends Component {
           <FaCloudUploadAlt className="m-auto" />
           <input
            type="file"
-           accept="video/*"
+           accept="image/*"
            onChange={this.onChangeGallery}
            style={{
             position: "absolute",
@@ -510,7 +513,7 @@ class ProductFiles extends Component {
          </span>
          {/* <span className='gray-bg'><MdTitle/></span> */}
          <span className="gray-bg">
-          <RiCodeSSlashFill className="m-auto" />
+          <RiCodeSSlashFill className="m-auto" onClick={this.embedModal_open} />
          </span>
         </div>
        </div>
@@ -518,6 +521,47 @@ class ProductFiles extends Component {
      </TabPanel>
      <TabPanel forceRender></TabPanel>
     </Tabs>
+    <Modal
+     id="price-request-modal"
+     className="arch-wide-modal product-modal pics-modal"
+     size="md"
+     show={this.state.embed_modal}
+     onHide={this.embedModal_close}
+     aria-labelledby="example-modal-sizes-title-lg"
+    >
+     <Modal.Header closeButton></Modal.Header>
+     <Modal.Body>
+      <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
+       <h6>Media Embed</h6>
+       <Form.Row as={Row} style={{ margin: "20px 0" }}>
+        <Form.Label column md={2}>
+         URL
+        </Form.Label>
+        <Col md={10}>
+         <Form.Control
+          placeholder="Video URL"
+          value={""}
+          // onChange={this.setMaterialName}
+         />
+        </Col>
+       </Form.Row>
+       <Button
+        variant="danger"
+        type="submit"
+        style={{
+         textAlign: "right",
+         background: "#E41E15",
+         display: "block",
+         float: "right",
+         marginRight: "12px",
+        }}
+       >
+        {/* {this.displayButtonText(this.state.size_modal_edit)} */}
+        Embed
+       </Button>
+      </div>
+     </Modal.Body>
+    </Modal>
    </div>
   );
  }

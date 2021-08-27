@@ -76,7 +76,7 @@ class OptionsPrice extends Component {
 
   this.props.OptionsPrice.rows.map((row) => {
    if (!row) return;
-   const { quantity, price, offerPrice, productPictures } = row;
+   const { quantity, price, offerPrice, code, productPictures } = row;
    const { L, W, H } = row?.size;
    const { nameValidation, imageValidation } = row?.material;
    if (!nameValidation)
@@ -217,6 +217,9 @@ class OptionsPrice extends Component {
    formData.append(`size`, `${row.size.L}L ${row.size.W}W ${row.size.H}H`);
   if (row.price) formData.append(`price`, row.price);
   formData.append(`quantity`, row.quantity);
+
+  if (row.code) formData.append(`code`, row.code);
+
   if (row.offerPrice) formData.append(`offer_price`, row.offerPrice);
   for (var pair of formData.entries()) {
    console.log(pair[0] + ", " + pair[1]);
@@ -270,13 +273,14 @@ class OptionsPrice extends Component {
       <table>
        <thead>
         <tr>
+         <th>Code</th>
          <th>Picture</th>
          <th>Material</th>
          <th>
-          {" "}
           <span>
            <input
             type="checkbox"
+            style={{ visibility: "hidden" }}
             onClick={() => this.setValidation("validate_size")}
            />
           </span>
@@ -286,6 +290,7 @@ class OptionsPrice extends Component {
           <span>
            <input
             type="checkbox"
+            style={{ visibility: "hidden" }}
             onClick={() => this.setValidation("validate_price")}
            />
           </span>
@@ -294,6 +299,7 @@ class OptionsPrice extends Component {
          <th>
           <span>
            <input
+            style={{ visibility: "hidden" }}
             type="checkbox"
             onClick={() => this.setValidation("validate_offerPrice")}
            />
@@ -301,7 +307,7 @@ class OptionsPrice extends Component {
           Offer Price
          </th>
          <th>Quantity</th>
-         <th>Delete</th>
+         {/* <th>Delete</th> */}
         </tr>
        </thead>
        {this.props.OptionsPrice.rows.map((row) => {

@@ -8,120 +8,204 @@ export const kind_options = [
     { value: "Sofa", label: "Sofa" },
     { value: "Table", label: "Table" },
     { value: "Poufs", label: "Poufs" },
+    { value: "Office", label: "Office" },
+    { value: "wall decorations", label: "wall decorations" },
+    { value: "wall shelves", label:"wall shelves"},
+    { value: "window shades", label:"window shades"},
+    { value: "window treatment operating hardware", label:"window treatment operating hardware"},
+    { value: "Sitting Ball", label:"Sitting Ball"},
+    { value: "Furniture components and hardware", label: "Furniture components and hardware" },
+    {value:"Chaise lounges", label:"Chaise lounges"},
+    { value: "Walk-in wardrobes", label: "Walk-in wardrobes" },
+    {value:"Wardrobes", label:"Wardrobes"},
+    {value:"Food trolleys", label:"Food trolleys"},
+    { value: "religious art", label: "religious art" },
+    { value: "sculptures", label: "sculptures" },
+    { value: "Storage walls", label: "Storage walls" },
+    { value: "shelves", label: "shelves" },
+    { value: "specialty casework", label: "specialty casework" },
+    { value: "tatami", label:"tatami"}
 ]
 
-export const chair_types= [
-    { value: "Fauteuil & Lounge", label: "Fauteuil & Lounge" },
-    { value: "Armchair", label: "Armchair" },
-    { value: "Cinema Chair", label: "Cinema Chair" },
-    { value: "Rocking Chair", label: "Rocking Chair" },
-    { value: "Office Chair", label: "Office Chair" },
-    { value: "Beanbag", label: "Beanbag" },
-    { value: "Fauteuil", label: "Fauteuil" },
-    { value: "Dining Chair", label: "Dining Chair" },
-    { value: "Slipper Chair", label: "Slipper Chair" },
-    { value: "Stack Chair", label: "Stack Chair" },
-    { value: "Easy Chairs", label: "Easy Chairs" },
+
+export const furniture_styles=[
+    { value: "Contemporary", label: "Contemporary" },
+    { value: "Eclectic", label: "Eclectic" },
+    { value: "Modern", label: "Modern" },
+    { value: "Traditional", label: "Traditional" },
+    { value: "Asian", label: "Asian" },
+    { value:"Beach Style", label:"Beach Style" },
+    { value: "Craftsman", label: "Craftsman" },
+    { value: "Farmhouse", label: "Farmhouse" },
+    { value: "Industrial", label: "Industrial" },
+    { value: "Mediterranean", label: "Mediterranean" },
+    { value: "Rustic", label: "Rustic" },
+    { value: "Scandinavian", label: "Scandinavian" },
+    { value: "Southwestern", label: "Southwestern" },
+    { value: "Transitional", label: "Transitional" },
+    { value: "Tropical", label: "Tropical" },
+    { value: "Victorian", label: "Victorian" },
+    { value: "Chinese", label: "Chinese" },
 ]
-export const benches_types  = [];
-export const chair_styles=[];
-export const bed_styles = [];
-export const cabinets_styles=[];
-export const beds_shapes =[];
-export const poufs_types=[
-    { value: "Storage", label: "Storage" },
-    { value: "Pouf beds", label:"Pouf beds" },
-    { value: "Bean bag poufs", label: "Bean bag poufs" },
-];
-export const poufs_shapes= [
-    { value: "Square", label: "Square" },
-    { value: "Oval", label: "Oval" },
-    { value: "Rectangular", label: "Rectangular" },
-    { value: "Round", label: "Round" },
+export const furniture_materials =[
+    { value: "Fabric", label: "Fabric", bold:"bold"},
+    { value: "Velvet", label: "Velvet" },
+    { value: "Synthetic fiber", label: "Synthetic fiber" },
+    { value: "Polyester", label: "Polyester" },
+    { value: "Dacron®", label: "Dacron®" },
+    { value: "Microfiber", label: "Microfiber" },
+    { value: "Janus-fiber®", label: "Janus-fiber®" },
+    { value: "Sunbrella®", label: "Sunbrella®" },
+    { value: "Batyline®", label: "Batyline®" },
+    { value: "Textilene", label: "Textilene" },
+    { value: "Polypropylene", label: "Polypropylene" },
+    { value: "Trevira® CS", label: "Trevira® CS" },
+    { value: "Cotton", label: "Cotton" },
+    { value: "Wool", label: "Wool" },
+    { value: "Technical Fabric", label: "Technical Fabric" },
+    { value: "Linen", label: "Linen" },
+    { value: "Goose feather", label: "Goose feather" },
+    { value: "Velour Fabric", label: "Velour Fabric" },
+    { value: "Felt", label: "Felt" },
+    { value: "Jute", label: "Jute" },
+    { value: "Synthetic Fabric", label: "Synthetic Fabric" },
+    { value: "Satin", label: "Satin" },
+    { value: "Acrylic fabric", label: "Acrylic fabric" },
+    { value: "Viscose", label: "Viscose" },
+    { value: "Silk", label: "Silk" },
+    { value: "Alcantara®", label: "Alcantara®" },
+    { value: "Wool Felt", label: "Wool Felt" },
+    { value: "Woven vinyl", label: "Woven vinyl" },
+    { value: "Mesh fabric", label: "Mesh fabric" },
+    { value: "Recycled Fabric", label: "Recycled Fabric" },
+    { value: "Alpaca", label: "Alpaca" },
+    { value: "Synthetic fibre", label: "Synthetic fibre" },
+    { value: "Polyamide (PA)", label: "Polyamide (PA)" },
+    { value: "Nylon®", label: "Nylon®" },
+    { value: "Casentino wool", label: "Casentino wool" },
+    { value: "Canvas", label: "Canvas" },
+    { value: "Jersey fabric", label: "Jersey fabric" },
+    { value: "Nonwoven", label: "Nonwoven" },
+    { value: "WaProLace®", label: "WaProLace®" },
+    { value: "Vinytex", label: "Vinytex" },
+    { value: "Olefin fiber", label: "Olefin fiber" },
+    { value: "Nautical polyester", label: "Nautical polyester" },
+    { value: "Merino wool", label: "Merino wool" },
+    { value: "Casentino", label: "Casentino" },
+    { value: "Nautical", label: "Nautical" },
+    { value: "ECONYL®", label: "ECONYL®" },
+    { value: "Denim fabric", label: "Denim fabric" },
+    { value: "Hemp", label: "Hemp" },
+    { value: "Terry", label: "Terry" },
+    { value: "Merino", label: "Merino" },
+    { value: "Outlast®", label: "Outlast®" },
+    { value: "Rolloboules fibre", label: "Rolloboules fibre" },
+    { value: "Coolmax®", label: "Coolmax®" },
+    { value: "Modal®", label: "Modal®" },
+    { value: "Mohair", label: "Mohair" },
+    { value: "Organza", label: "Organza" },
+    { value: "Chinette", label: "Chinette" },
+    { value: "Taffeta", label: "Taffeta" },
+    { value: "Denim fabric", label: "Denim fabric" },
+    { value: "ECONYL®", label: "ECONYL®" },
+    { value: "Leather", label: "Leather", bold:"bold" },
+    { value: "nabuk", label: "nabuk" },
+    { value: "Eco-leather", label: "Eco-leather" },
+    { value: "Tanned Leather", label: "Tanned Leather" },
+    { value: "Deerskin", label: "Deerskin" },
+    { value: "Cowhide", label: "Cowhide" },
+    { value: "horse hide", label: "horse hide" },
+    { value: "Suede", label: "Suede" },
+    { value: "Calfskin", label: "Calfskin" },
+    { value: "Sheepskin", label: "Sheepskin" },
+    { value: "Bonded leather", label: "Bonded leather" },
+    { value: "Cuoietto leather", label: "Cuoietto leather" },
+    { value: "Fur", label: "Fur" },
+    { value: "Goatskin", label: "Goatskin" },
+    { value: "Natural sheepskin", label: "Natural sheepskin" },
+    { value: "Wood", label: "Wood", bold:"bold" },
+    { value: "Acacia", label: "Acacia" },
+    { value: "Acacia® Wood ", label: "Acacia® Wood " },
+    { value: "Alder", label: "Alder" },
+    { value: "Aluminium and Wood", label: "Aluminium and Wood" },
+    { value: "Ash", label: "Ash" },
+    { value: "Bamboo", label: "Bamboo" },
+    { value: "Beech", label: "Beech" },
+    { value: "Birch", label: "Birch" },
+    { value: "Briar", label: "Briar" },
+    { value: "Briccola wood", label: "Briccola wood" },
+    { value: "Cedarwood", label: "Cedarwood" },
+    { value: "Ceramic", label: "Ceramic" },
+    { value: "Ceramic materials", label: "Ceramic materials" },
+    { value: "Cherry Wood", label: "Cherry Wood" },
+    { value: "Chestnut", label: "Chestnut" },
+    { value: "Chipboard", label: "Chipboard" },
+    { value: "Chrome plated", label: "Chrome plated" },
+    { value: "Chrome plated steel", label: "Chrome plated steel" },
+    { value: "Cork", label: "Cork" },
+    { value: "DPL", label: "DPL" },
+    { value: "Ebony", label: "Ebony" },
+    { value: "Elm", label: "Elm" },
+    { value: "Engineered wood", label: "Engineered wood" },
+    { value: "English oak", label: "English oak" },
+    { value: "Eucalyptus", label: "Eucalyptus" },
+    { value: "Fir", label: "Fir" },
+    { value: "Formica©", label: "Formica©" },
+    { value: "HDF", label: "HDF" },
+    { value: "Honeycomb", label: "Honeycomb" },
+    { value: "HPL", label: "HPL" },
+    { value: "Imbuia wood", label: "Imbuia wood" },
+    { value: "Iroko", label: "Iroko" },
+    { value: "Iron", label: "Iron" },
+    { value: "Koto", label: "Koto" },
+    { value: "Laminate", label: "Laminate" },
+    { value: "Laminated Wood", label: "Laminated Wood" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Fabric", label: "Fabric" },
 
 ]
-export const benches_shapes=[
-    { value: "Modular", label: "Modular" },
-    { value: "Corner", label: "Corner" },
-    { value: "Round", label: "Round" },
-];
 
-export const sofa_shapes=[
-    { value: "Corner", label: "Corner" },
-    { value: "Curved", label: "Curved" },
-    { value: "High", label: "High" },
-    { value: "Low", label: "Low" },
-    { value: "Height-adjustable", label: "Height-adjustable" },
-    { value: "with gas lift", label: "with gas lift" },
-]
-export const sofa_types =[
-    { value: "loveseats", label: "loveseats" },
-    { value: "chaise longue", label: "chaise longue" },
-    { value: "cinema sofas ", label: "cinema sofas " },
-    { value: "Futons", label: "Futons" },
-    { value: "Day beds", label: "Day beds" },
-    { value: "Sofa Bed", label: "Sofa Bed" },
-    { value: "Modular", label: "Modular" },
-]
-export const chair_shapes =[
-    { value: "Bed Set", label: "Bed Set" },
-    { value: "Bed Headboard", label: "Bed Headboard" },
-    { value: "Bed Base", label: "Bed Base" },
+export const chair={
+    types:[
+        { value: "Fauteuil & Lounge", label: "Fauteuil & Lounge" },
+        { value: "Armchair", label: "Armchair" },
+        { value: "Cinema Chair", label: "Cinema Chair" },
+        { value: "Rocking Chair", label: "Rocking Chair" },
+        { value: "Office Chair", label: "Office Chair" },
+        { value: "Beanbag", label: "Beanbag" },
+        { value: "Fauteuil", label: "Fauteuil" },
+        { value: "Dining Chair", label: "Dining Chair" },
+        { value: "Slipper Chair", label: "Slipper Chair" },
+        { value: "Stack Chair", label: "Stack Chair" },
+        { value: "Easy Chairs", label: "Easy Chairs" },
+    ],
 
-];
-export const beds_types = [
-    { value: "Bed Set", label: "Bed Set" },
-    { value: "Bed Headboard", label: "Bed Headboard" },
-    { value: "Bed Base", label: "Bed Base" },
-    { value: "Bedding", label: "Bedding" },
-    { value: "Bedding Sets", label: "Bedding Sets" },
-    { value: "Pillow cases", label: "Pillow cases" },
-    { value: "Quilts", label: "Quilts" },
-    { value: "Duvets", label: "Duvets" },
-    { value: "Duvet Covers", label: "Duvet Covers" },
-    { value: "Beds Preads", label: "Beds Preads" },
-    { value: "Blankets", label: "Blankets" },
-    { value: "Lap robes", label: "Lap robes" },
-    { value: "Mattress covers", label: "Mattress covers" },
-    { value: "Bedframe covers", label: "Bedframe covers" },
-    { value: "Pillows", label: "Pillows" },
-    { value: "Mattresse", label:"Mattresse"}
-]
+    shapes:[
+        { value: "Bed Set", label: "Bed Set" },
+        { value: "Bed Headboard", label: "Bed Headboard" },
+        { value: "Bed Base", label: "Bed Base" },
+    ],
 
-export const cabinet_types = [
-    { value: "Wall Cabinets", label: "Wall Cabinets" },
-    { value: "Display Cabinets", label: "Display Cabinets" },
-    { value: "Shoes Cabinets", label: "Shoes Cabinets" },
-    { value: "High Leg Cabinets", label: "High Leg Cabinets" },
-    { value: "TV Units", label: "TV Units" },
-    { value: "Side boards", label: "Side boards" },
-    { value: "Dining area Cabinets", label: "Dining area Cabinets" },
-]
-export const cehsts_types = [
-    { value: "Storage", label: "Storage" },
-    { value: "Drawers", label: "Drawers" },
-    { value: "countertops", label: "countertops" },
-    { value: "curtains and drapes", label: "curtains and drapes" },
-    { value: "dividers &shoji", label: "dividers &shoji" },
-    { value: "dressers& drawers", label: "dressers& drawers" },
-    { value: "footstools & ottomans", label: "footstools & ottomans" },
-]
-
-export const table_types = [
-    { value: "Accent tables", label: "Accent tables" },
-    { value: "tea tables", label: "tea tables" },
-    { value: "dining tables", label: "dining tables" },
-    { value: "Dressing tables", label: "Dressing tables" },
-    { value: "coffee tables", label: "coffee tables" },
-    { value: "bar tables", label: "bar tables" },
-    { value: "bedside tables", label: "bedside tables" },
-    { value: "Office desk", label: "Office desk" },
-    { value: "Console Tables", label: "Console Tables" },
-    { value: "Game tables", label: "Game tables" },
-    { value: "Writing Desks", label: "Writing Desks" },
-]
-
-export const chair_bases =[
+    bases:[
     { value: "Cantilever", label: "Cantilever" },
     { value: "Rocking", label: "Rocking" },
     { value: "Sled base", label: "Sledbase" },
@@ -130,28 +214,225 @@ export const chair_bases =[
     { value: "with 4-spokebase", label: "with 4-spokebase" },
     { value: "with 5-spokebase", label: "with 5-spokebase" },
     { value: "with castors", label: "with castors" },
-]
-export const chests_bases = [
-    { value: "with 4-Spoke base", label: "with 4-Spoke base" },
-    { value: "Sled Base", label: "Sled Base" },
-    { value: "Swivel", label: "Swivel" },
-]
+    ]
+}
 
-export const sofa_bases = [
-    { value: "Cantilever", label: "Cantilever" },
-    { value: "Rocking", label: "Rocking" },
-    { value: "Sled base", label: "Sledbase" },
-    { value: "Swivel", label: "Swivel" },
-    { value: "trestle - based", label: "trestle - based" },
-    { value: "with 4-spokebase", label: "with 4-spokebase" },
-    { value: "with 5-spokebase", label: "with 5-spokebase" },
-]
+export const beds={
+    types:[
+        { value: "Bed Set", label: "Bed Set" },
+        { value: "Bed Headboard", label: "Bed Headboard" },
+        { value: "Bed Base", label: "Bed Base" },
+        { value: "Bedding", label: "Bedding" },
+        { value: "Bedding Sets", label: "Bedding Sets" },
+        { value: "Pillow cases", label: "Pillow cases" },
+        { value: "Quilts", label: "Quilts" },
+        { value: "Duvets", label: "Duvets" },
+        { value: "Duvet Covers", label: "Duvet Covers" },
+        { value: "Beds Preads", label: "Beds Preads" },
+        { value: "Blankets", label: "Blankets" },
+        { value: "Lap robes", label: "Lap robes" },
+        { value: "Mattress covers", label: "Mattress covers" },
+        { value: "Bedframe covers", label: "Bedframe covers" },
+        { value: "Pillows", label: "Pillows" },
+        { value: "Mattresse", label: "Mattresse" }
+    ],
+    shapes:[],
+    bases:[],
+    seats:[]
+}
 
-export const sofa_seats = [
-    { value: "2-Seater", label: "2-Seater" },
-    { value: "3-Seater", label: "3-Seater" },
-    { value: "4-Seater", label: "4-Seater" },
-    { value: "5-Seater", label: "5-Seater" },
-    { value: "6-Seater", label: "6-Seater" },
-    { value: "7-Seater", label: "7-Seater" },
-]
+export const sofas={
+    types:[
+        { value: "loveseats", label: "loveseats" },
+        { value: "chaise longue", label: "chaise longue" },
+        { value: "cinema sofas ", label: "cinema sofas " },
+        { value: "Futons", label: "Futons" },
+        { value: "Day beds", label: "Day beds" },
+        { value: "Sofa Bed", label: "Sofa Bed" },
+        { value: "Modular", label: "Modular" },
+    ],
+    shapes:[
+        { value: "Corner", label: "Corner" },
+        { value: "Curved", label: "Curved" },
+        { value: "High", label: "High" },
+        { value: "Low", label: "Low" },
+        { value: "Height-adjustable", label: "Height-adjustable" },
+        { value: "with gas lift", label: "with gas lift" },
+    ],
+    seats:[
+        { value: "2-Seater", label: "2-Seater" },
+        { value: "3-Seater", label: "3-Seater" },
+        { value: "4-Seater", label: "4-Seater" },
+        { value: "5-Seater", label: "5-Seater" },
+        { value: "6-Seater", label: "6-Seater" },
+        { value: "7-Seater", label: "7-Seater" },
+    ],
+    bases:[
+        { value: "Rocking", label: "Rocking" },
+        { value: "Sled base", label: "Sledbase" },
+        { value: "Swivel", label: "Swivel" },
+        { value: "trestle - based", label: "trestle - based" },
+        { value: "with 4-spokebase", label: "with 4-spokebase" },
+        { value: "with 5-spokebase", label: "with 5-spokebase" },
+    ]
+}
+
+export const benches = {
+    types : [],
+    shapes:[
+        { value: "Modular", label: "Modular" },
+        { value: "Corner", label: "Corner" },
+        { value: "Round", label: "Round" },
+    ],
+    seats:[],
+    bases:[]
+}
+export const office={
+    types:[
+        { value: "Workstation desks", label: "Workstation desks" },
+        { value: "Multiple", label: "Multiple" },
+        { value: "Executive desks", label: "Executive desks" },
+        { value: "for Disabled", label: "for Disabled" },
+        { value: "Office workstations", label: "Office workstations" },
+        { value: "Office Desk", label: "Office Desk" },
+    ],
+    shapes:[
+        { value: "Square", label: "Square" },
+        { value: "Oval", label: "Oval" },
+        { value: "Rectangular", label: "Rectangular" },
+        { value: "Round", label: "Round" },
+        { value: "L-shaped", label: "L-shaped" }
+    ],
+    seats: [],
+    bases: []
+}
+export const chests = {
+    types :[
+        { value: "Storage", label: "Storage" },
+        { value: "Drawers", label: "Drawers" },
+    ],
+    shapes:[
+        { value: "with 4-Spoke base", label: "with 4-Spoke base" },
+        { value: "Sled Base", label: "Sled Base" },
+        { value: "Swivel", label: "Swivel" },
+    ],
+    seats:[],
+    bases:[]
+
+}
+export const poufs = {
+    types: [
+        { value: "Storage", label: "Storage" },
+        { value: "Pouf beds", label: "Pouf beds" },
+        { value: "Bean bag poufs", label: "Bean bag poufs" },
+    ],
+    shapes:[
+        { value: "Square", label: "Square" },
+        { value: "Oval", label: "Oval" },
+        { value: "Rectangular", label: "Rectangular" },
+        { value: "Round", label: "Round" },
+    ],
+    bases:[],
+    seats:[]
+
+}
+
+export const cabinet ={
+    types :[
+        { value: "Wall Cabinets", label: "Wall Cabinets" },
+        { value: "Display Cabinets", label: "Display Cabinets" },
+        { value: "Shoes Cabinets", label: "Shoes Cabinets" },
+        { value: "High Leg Cabinets", label: "High Leg Cabinets" },
+        { value: "TV Units", label: "TV Units" },
+        { value: "Side boards", label: "Side boards" },
+        { value: "Dining area Cabinets", label: "Dining area Cabinets" },
+    ],
+    shapes:[],
+    seats:[],
+    bases:[]
+}
+
+export const table = {
+    types:[
+        { value: "Accent tables", label: "Accent tables" },
+        { value: "tea tables", label: "tea tables" },
+        { value: "dining tables", label: "dining tables" },
+        { value: "Dressing tables", label: "Dressing tables" },
+        { value: "coffee tables", label: "coffee tables" },
+        { value: "bar tables", label: "bar tables" },
+        { value: "bedside tables", label: "bedside tables" },
+        { value: "Office desk", label: "Office desk" },
+        { value: "Console Tables", label: "Console Tables" },
+        { value: "Game tables", label: "Game tables" },
+        { value: "Writing Desks", label: "Writing Desks" },
+    ],
+    shapes:[
+        { value: "Triangular", label: "Triangular" },
+        { value: "Hexagonal", label: "Hexagonal" },
+        { value: "Octagonal", label: "Octagonal" },
+        { value: "Square", label: "Square" },
+        { value: "Oval", label: "Oval" },
+        { value: "Rectangular", label: "Rectangular" },
+        { value: "Round", label: "Round" },
+        { value: "Corner", label: "Corner" },
+    ],
+    bases:[],
+    seats:[]
+}
+export const blinds ={
+    types:[],
+    shapes:[],
+    bases:[],
+    seats:[]
+}
+export const footstools_ottomans= {
+    types: [],
+    shapes: [],
+    bases: [
+        { value: "with 4-Spoke base", label: "with 4-Spoke base" },
+        { value: "Sled Base", label: "Sled Base" },
+        { value: "Swivel", label: "Swivel" },
+        { value: "Square", label: "Square" },
+    ],
+    seats: []
+}
+export const components_hardware={
+    types:[
+        { value: "Chair bases", label: "Chair bases" },
+        { value: "Cabinet doors opening systems", label: "Cabinet doors opening systems" },
+        { value: "Hinge Bases", label: "Hinge Bases" },
+        { value: "Door dampers for hinge", label: "Door dampers for hinge" },
+        { value: "Ironmongery", label: "Ironmongery" },
+        { value: "Cabinet Hinges", label: "Cabinet Hinges" },
+        { value: "Wheels", label: "Wheels" },
+        { value: "Wardrobe Accessories", label: "Wardrobe Accessories" },
+        { value: "Wardrobe Accessories", label: "Wardrobe Accessories" },
+        { value: "Guides", label: "Guides" },
+        { value: "Edges", label: "Edges" },
+        { value: "Furniture locks", label: "Furniture locks" },
+        { value: "Furniture feet", label: "Furniture feet" }, 
+        { value: "Guides", label: "Guides" },
+        { value: "Plinths", label: "Plinths" },
+        { value: "Rises", label: "Rises" },
+        { value: "Cable gland systems", label: "Cable gland systems" }, 
+        { value: "Furniture lighting", label: "Furniture lighting" },
+        { value: "Drawers dividers", label: "Drawers dividers" }, 
+        { value: "Furniture knobs", label: "Furniture knobs" },
+        { value: "Furniture Handles", label: "Furniture Handles" },
+        { value: "Furniture foils", label: "Furniture foils" },
+        { value: "Trestles", label: "Trestles" },
+        { value: "Table legs & bases", label: "Table legs & bases" },
+        { value: "Tabletops", label: "Tabletops" },
+        { value: "Cabinet doors", label: "Cabinet doors" },
+        { value: "Drawers", label: "Drawers" },
+    ],
+    shapes:[],
+    bases:[],
+    seats:[]
+}
+export const empty ={
+types:[],
+shapes:[],
+bases:[],
+seats:[]
+}

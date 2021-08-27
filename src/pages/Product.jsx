@@ -13,10 +13,12 @@ import Item from "../components/SliderComponents/slider";
 import { Flex, Square } from "../components/SliderComponents/slider";
 import slide1 from "../../src/slide1.jpg";
 import axios from "axios";
-import { FaFilePdf } from "react-icons/fa";
 import { GiCube } from "react-icons/gi";
 import { convertFromRaw, EditorState } from "draft-js";
 import { Editor } from "react-draft-wysiwyg";
+// import { Document, Page, pdfjs } from "react-pdf";
+import { Image, Transformation } from "cloudinary-react";
+// pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const breakPoints = [{ width: 1200, itemsToShow: 1 }];
 class Product extends Component {
@@ -35,6 +37,8 @@ class Product extends Component {
    product_desc_size_: null,
    loading: true,
    product_id: this.props.match.params.id,
+   //  numPages: 5,
+   //  pageNumber: 1,
   };
  }
 
@@ -53,7 +57,12 @@ class Product extends Component {
      this.setState({ activeOption: products.data.product.options[0] });
     }
 
-    this.setState({ product_files: products.data.product.files[0] });
+    if (products.data.product.files[0].files_cad_2d == null) {
+     this.setState({ product_files: products.data.product.files[1] });
+    } else {
+     this.setState({ product_files: products.data.product.files[0] });
+    }
+
     if (products.data.product.description[0].overview_content) {
      this.setState({
       product_desc_overview: EditorState.createWithContent(
@@ -235,7 +244,7 @@ class Product extends Component {
               {this.state.product_files?.files_cad_2d?.map((file, index) => {
                return (
                 <>
-                 <a href={file} className="product-boxs">
+                 <a href={file} download="arch17.dwg" className="product-boxs">
                   <div className="file-box">
                    <GiCube />
                   </div>
@@ -272,10 +281,18 @@ class Product extends Component {
               {this.state.product.files[0]?.files_pdf_cats?.map(
                (pdf, index) => {
                 return (
-                 <a href={pdf} target="_plank">
-                  <div className="pdf-box">
-                   <FaFilePdf />
-                  </div>
+                 <a
+                  key={index}
+                  href={pdf}
+                  target="_plank"
+                  className="cataloge-box"
+                 >
+                  <Image
+                   cloudName="azharuniversity"
+                   publicId={pdf.slice(0, -3) + "png"}
+                  >
+                   <Transformation page="1" />
+                  </Image>
                   <p>Download File</p>
                  </a>
                 );
@@ -370,8 +387,23 @@ class Product extends Component {
             Requirements, Quantity and Material or Size customization.
            </div>
           </div>
+          <div className="right-row">
+           <span>Code</span>
+           <div className="options" id="codes">
+            {this.state.options?.map((option, index) => {
+             if (option.material_name && option.code[0] != "n") {
+              return (
+               <button onClick={() => this.updateOption(index)}>
+                {option.code}
+               </button>
+              );
+             }
+            })}
+           </div>
+          </div>
           <div className="right-row ">
            <span>Size</span>
+
            <div id="sizes" className="options">
             {/* <button>1500 x 700 x 500</button>
            <button>1200 x 400 x 200</button> */}
@@ -386,6 +418,7 @@ class Product extends Component {
             })}
            </div>
           </div>
+
           <div className="right-row ">
            <span>Material</span>
            <div id="materials" className="options">

@@ -5,6 +5,7 @@ import {
   ADD_INIT_PRICE,
   ADD_OFFER_PRICE,
   ADD_QUANTITY,
+  ADD_CODE,
   DELETE_ROW,
   ADD_PRODUCT_PICTURES,
   OPTIONS_STORED
@@ -84,6 +85,12 @@ export default function userReducer(state = defaultState, action) {
       };
     case ADD_QUANTITY:
       state.rows[action.row_index]["quantity"] = action.data.quantity;
+      state.rows[action.row_index]["ver"] += 1;
+      return {
+        rows: state.rows,
+      };
+    case ADD_CODE:
+      state.rows[action.row_index]["code"] = action.data.code;
       state.rows[action.row_index]["ver"] += 1;
       return {
         rows: state.rows,
