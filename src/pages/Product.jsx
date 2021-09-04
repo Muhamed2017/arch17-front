@@ -157,7 +157,7 @@ class Product extends Component {
               direction="row"
               className="swiper-squares"
               style={{
-               gridTemplateColumns: "repeat(6, 90px)",
+               gridTemplateColumns: "repeat(auto-fit, 90px)",
                justifyContent: "center",
                margin: 0,
                width: "90%",
