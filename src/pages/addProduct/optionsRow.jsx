@@ -1,4 +1,4 @@
-import React, { Component, useRef } from "react";
+import React, { Component } from "react";
 import {
  FaCloudUploadAlt,
  FaPlus,
@@ -10,11 +10,20 @@ import {
  FaArrowUp,
  FaPencilAlt,
 } from "react-icons/fa";
+import ClipLoader from "react-spinners/ClipLoader";
+// import ReactNotification,
+import { store } from "react-notifications-component";
+// import "animate.css/animate.min.css";
+import { MdError } from "react-icons/md";
+import "react-notifications-component/dist/theme.css";
+
 import { Form, Col, Row, Modal, Button } from "react-bootstrap";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
 import slide4 from "../../../src/slide4.jpg";
 import { connect } from "react-redux";
+import axios from "axios";
+import { compressImage } from "./OptionsPrice";
 import {
  ADD_INIT_PRICE,
  ADD_MATERIAL,
@@ -22,6 +31,7 @@ import {
  ADD_SIZE,
  ADD_QUANTITY,
  ADD_CODE,
+ ADD_OPTION_ID,
  DELETE_ROW,
  ADD_PRODUCT_PICTURES,
 } from "../../redux/constants";
@@ -40,11 +50,28 @@ class OptionRow extends Component {
   price_modal: false,
   offer_modal: false,
   cropDelay: 3000,
+  loadCovers: false,
+  option_id: null,
  };
  constructor(props) {
   super(props);
   this.cropperRef = React.createRef();
  }
+
+ //  onCrop = () => {};
+ dataURLtoFile = (dataurl, filename) => {
+  var arr = dataurl.split(","),
+   mime = arr[0].match(/:(.*?);/)[1],
+   bstr = atob(arr[1]),
+   n = bstr.length,
+   u8arr = new Uint8Array(n);
+
+  while (n--) {
+   u8arr[n] = bstr.charCodeAt(n);
+  }
+
+  return new File([u8arr], filename, { type: mime });
+ };
  _crop() {
   setTimeout(() => {
    const imageElement = this.cropperRef?.current;
@@ -60,10 +87,11 @@ class OptionRow extends Component {
      cropped: cropper.getCroppedCanvas().toDataURL(),
     };
    }
+
    this.setState({
     productPictures: copyPicturesState,
    });
-  }, 750);
+  }, 500);
  }
  onCropperInit = (cropper) => {
   this.cropper = cropper;
@@ -170,7 +198,11 @@ class OptionRow extends Component {
    });
   }
  };
-
+ options = {
+  maxSizeMB: 1,
+  maxWidthOrHeight: 800,
+  useWebWorker: true,
+ };
  setMaterialThumbnail = (e) => {
   this.setState({
    temp_material: {
@@ -180,22 +212,50 @@ class OptionRow extends Component {
    },
   });
  };
-
- setProductPictures = async (e, index) => {
-  if (!e.target.files[0]) return;
-  const copyPicturesState = this.state.productPictures;
-  const file = e.target.files[0];
-  copyPicturesState[index] = {
-   url: URL.createObjectURL(file),
-   cropped: null,
-  };
-  this.setState({
-   productPictures: copyPicturesState,
-   selected_product_pic: {
-    url: URL.createObjectURL(file),
-    index,
+ addNotification = () => {
+  store.addNotification({
+   message: (
+    <>
+     <div className="file-error-notification">
+      <MdError />
+      <span>Maximum size is 1MB for each image</span>
+     </div>
+    </>
+   ),
+   type: "danger",
+   backgroundColor: "blue",
+   insert: "bottom",
+   container: "center",
+   animationIn: ["animate__animated", "animate__fadeIn"],
+   animationOut: ["animate__animated", "animate__fadeOut"],
+   showIcon: true,
+   dismiss: {
+    duration: 3000,
    },
   });
+ };
+ setProductPictures = async (e, index) => {
+  if (!e.target.files[0]) {
+   return;
+  }
+  if (e.target.files[0].size > 1048576 * 1.5) {
+   this.addNotification();
+   return;
+  } else {
+   const copyPicturesState = this.state.productPictures;
+   let file = e.target.files[0];
+   copyPicturesState[index] = {
+    url: URL.createObjectURL(file),
+    cropped: null,
+   };
+   this.setState({
+    productPictures: copyPicturesState,
+    selected_product_pic: {
+     url: URL.createObjectURL(file),
+     index,
+    },
+   });
+  }
  };
 
  material_close = () => {
@@ -240,7 +300,8 @@ class OptionRow extends Component {
   this.setState({
    temp_material: {
     ...this.state.temp_material,
-    name: e.target.value.trim(),
+    // name: e.target.value.trim(),
+    name: e.target.value,
     nameValidation: true,
    },
   });
@@ -312,7 +373,16 @@ class OptionRow extends Component {
        })
       }
      />
-     <p style={{ marginBottom: 0 }}>{name}</p>
+     <p
+      style={{
+       marginBottom: 0,
+       padding: "3px 0",
+       fontSize: "0.73rem",
+       fontWeight: "400",
+      }}
+     >
+      {name}
+     </p>
     </div>
    );
   else return <FaPlus onClick={fatPlusFunction} />;
@@ -329,6 +399,7 @@ class OptionRow extends Component {
  }
 
  displayUploadField(fieldName, setThumbnail, thumbnail, icon) {
+  // console.log("Micro");
   return (
    <React.Fragment>
     <label for={fieldName}>
@@ -354,7 +425,7 @@ class OptionRow extends Component {
     <label
      for={fieldName}
      style={{
-      // maxHeight: "70px",
+      maxHeight: "70px",
       maxWidth: "72px",
       overflow: "hidden",
      }}
@@ -365,7 +436,7 @@ class OptionRow extends Component {
       <React.Fragment>
        <img
         src={this.state.productPictures[index].cropped}
-        height={"70px"}
+        style={{ height: "70px", width: "70px" }}
         alt=""
        />
       </React.Fragment>
@@ -441,9 +512,10 @@ class OptionRow extends Component {
    return (
     <div>
      <FaPencilAlt
+      style={{ fontSize: ".8rem", position: "relative", top: "-18px" }}
       onClick={() => this.editForm("price_modal_edit", { temp_price: value })}
      />
-     <p>¥ {value}</p>
+     <p style={{ fontSize: ".85rem" }}>¥ {value}</p>
     </div>
    );
   } else {
@@ -457,11 +529,12 @@ class OptionRow extends Component {
    return (
     <div>
      <FaPencilAlt
+      style={{ fontSize: ".8rem", position: "relative", top: "-18px" }}
       onClick={() =>
        this.editForm("size_modal_edit", { temp_size: this.state?.size })
       }
      />
-     <p>{`L ${L} W ${W} H ${H}`}</p>
+     <p style={{ fontSize: ".85rem" }}>{`L ${L} W ${W} H ${H}`}</p>
     </div>
    );
   } else {
@@ -475,13 +548,14 @@ class OptionRow extends Component {
    return (
     <div>
      <FaPencilAlt
+      style={{ fontSize: ".8rem", position: "relative", top: "-18px" }}
       onClick={() =>
        this.editForm("offer_modal_edit", {
         temp_offerPrice: this.state?.offerPrice,
        })
       }
      />
-     <p>¥ {offerPrice}</p>
+     <p style={{ fontSize: ".85rem" }}>¥ {offerPrice}</p>
     </div>
    );
   } else {
@@ -503,12 +577,21 @@ class OptionRow extends Component {
    row_index: this.state.row_index,
   });
  };
+
  setCode = (e) => {
   this.props.dispatch({
    type: ADD_CODE,
    data: {
-    // code: Number(e.target.value.trim()),
     code: e.target.value,
+   },
+   row_index: this.state.row_index,
+  });
+ };
+ setOptionId = (id) => {
+  this.props.dispatch({
+   type: ADD_OPTION_ID,
+   data: {
+    option_id: id,
    },
    row_index: this.state.row_index,
   });
@@ -523,20 +606,42 @@ class OptionRow extends Component {
   });
  };
 
- onSubmitProductPictures = (e) => {
+ onSubmitProductPictures = async (e) => {
   e.preventDefault();
-  // const productsPicturesInputs = Array.from(
-  //   document.querySelectorAll(".productsPicturesInputs")
-  // );
+  this.setState({ loadCovers: true });
 
+  const fd = new FormData();
   const files = [];
   for (let i = 0; i < this.state.productPictures.length; i++) {
    if (!this.state.productPictures[i]) files[i] = null;
-   else files[i] = this.state.productPictures[i];
+   else {
+    files[i] = this.state.productPictures[i];
+    fd.append(
+     "cover[]",
+     await compressImage(this.dataURLtoFile(files[i]?.cropped, "file"))
+    );
+   }
   }
+  this.pics_close();
+
   console.log(files);
   if (files.length > 0) {
-   this.pics_close();
+   axios
+    .post(
+     `https://arch17-apis.herokuapp.com/api/option-covers/${this.props.id}`,
+     fd,
+     {
+      headers: { "Content-Type": "multipart/form-data" },
+     }
+    )
+    .then((response) => {
+     this.setState({ loadCovers: false });
+     //  this.setState({ option_id: response.data.option_id });
+     this.setOptionId(response.data.option_id);
+     console.log(response);
+    })
+    .catch((err) => console.log(err));
+   //  this.pics_close();
    this.props.dispatch({
     type: ADD_PRODUCT_PICTURES,
     data: files,
@@ -546,13 +651,16 @@ class OptionRow extends Component {
    return;
   }
  };
-
  displayProductImages = () => {
   if (this.state.productPictures.length) {
    return (
     <div className="option-row-img-grid row-box">
      {this.state.productPictures.map((p) => (
-      <img src={p?.cropped || p?.url} alt="" />
+      <img
+       src={p?.cropped || p?.url}
+       alt=""
+       style={{ width: "28px", height: "28px" }}
+      />
      ))}
      <FaPencilAlt style={{ width: "10px" }} className="edit-icon-pincel" />
     </div>
@@ -600,11 +708,9 @@ class OptionRow extends Component {
        placeholder="QY"
        onChange={this.setQuantity}
        value={this.state?.quantity > 0 ? this.state.quantity : ""}
-       style={
-        {
-         // borderColor: this.displayInputValidation(this.state?.quantity > 0),
-        }
-       }
+       style={{
+        width: "54px",
+       }}
       />
      </td>
      <div
@@ -626,6 +732,7 @@ class OptionRow extends Component {
      >
       <Modal.Header closeButton></Modal.Header>
       <Modal.Body>
+       {/* <ReactNotification /> */}
        <div className="option-add-label">Product Picuters</div>
        <div className="sub-head">
         Choose the corresponding view of the photo you want to upload
@@ -655,6 +762,7 @@ class OptionRow extends Component {
          cropBoxMovable={false}
          cropBoxResizable={true}
          center={false}
+         //  crop={this.onCrop}
         />
        </div>
        <div as={Row} className="hr">
@@ -704,8 +812,26 @@ class OptionRow extends Component {
         <p className="option-tip">Upload at least one picture of this option</p>
         <div as={Row} className="add-btn">
          <div column md={12}>
-          <Button variant="danger" type="submit">
-           ADD
+          <Button
+           variant="transparen"
+           type="submit"
+           style={{
+            backgroundColor: this.state.loadCovers ? "#898989" : "#e41e15",
+            color: "#fff",
+           }}
+          >
+           {!this.state.loadCovers ? (
+            "ADD"
+           ) : (
+            <>
+             <ClipLoader
+              style={{ height: "20px" }}
+              color="#ffffff"
+              loading={this.state.loadCovers}
+              size={20}
+             />
+            </>
+           )}
           </Button>
          </div>
         </div>

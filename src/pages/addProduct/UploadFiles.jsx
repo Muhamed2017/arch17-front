@@ -1,12 +1,11 @@
 import React, { Component } from "react";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import { connect } from "react-redux";
-import { PulseLoader } from "react-spinners/PulseLoader";
-import { ADD_PRODUCT_NEXT_TAB } from "../../redux/constants";
 import { RiFilePdfFill } from "react-icons/ri";
 import { IoIosCube } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa";
 import { Redirect } from "react-router-dom";
+import { Modal, Button } from "react-bootstrap";
 
 import axios from "axios";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -30,8 +29,12 @@ class UploadFiles extends Component {
    _3d_files_submit: [],
    published: false,
    loading: false,
+   skip_modal: false,
   };
  }
+ skip = () => {
+  this.setState({ published: true });
+ };
 
  fd = new FormData();
  onChange2dcadFiles = ({ target: { files } }) => {
@@ -78,34 +81,45 @@ class UploadFiles extends Component {
    });
   }
  };
-
+ skip_modal_close = () => {
+  this.setState({ skip_modal: false });
+ };
  handleNextStep = (e) => {
-  this.setState({ loading: true });
+  if (this.state._pdfFiles.length < 1) {
+   this.setState({ skip_modal: true });
+   return;
+  } else {
+   this.setState({ loading: true });
 
-  setTimeout(() => {
-   axios
-    .post(
-     `https://arch17-apis.herokuapp.com/api/files/${this.props.id}`,
-     this.fd,
-     {
-      headers: {
-       "Content-Type": "multipart/form-data",
-      },
-     }
-    )
-    .then((response) => {
-     this.setState({ published: true });
-     console.log(response);
-    });
-  }, 2000);
+   setTimeout(() => {
+    axios
+     .post(
+      `https://arch17-apis.herokuapp.com/api/files/${this.props.id}`,
+      this.fd,
+      {
+       headers: {
+        "Content-Type": "multipart/form-data",
+       },
+      }
+     )
+     .then((response) => {
+      this.setState({ published: true });
+      console.log(response);
+     });
+   }, 2000);
+  }
  };
  render() {
-  if (this.props.OptionsPrice.optionsStored && this.state.published) {
+  // if (this.props.OptionsPrice.optionsStored && this.state.published) {
+  if (this.state.published) {
    return <Redirect to={{ pathname: `/product/${this.props.id}` }} />;
   } else {
    return (
     <>
      <div className="step-form">
+      <button className="product-skip-btn" onClick={this.skip}>
+       Skip
+      </button>
       <button
        className="save-product-step-btn"
        style={{
@@ -213,6 +227,38 @@ class UploadFiles extends Component {
         </div>
        </div>
       </div>
+      <Modal
+       id="price-request-modal"
+       className="arch-wide-modal product-modal pics-modal"
+       size="md"
+       show={this.state.skip_modal}
+       onHide={this.skip_modal_close}
+       aria-labelledby="example-modal-sizes-title-lg"
+      >
+       <Modal.Header closeButton></Modal.Header>
+       <Modal.Body>
+        <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
+         <h6>Skip Modal</h6>
+         <Button
+          variant="danger"
+          type="submit"
+          onClick={() => {
+           this.setState({ skip_modal: false });
+           this.setState({ published: true });
+          }}
+          style={{
+           textAlign: "right",
+           background: "#E41E15",
+           display: "block",
+           float: "right",
+           marginRight: "12px",
+          }}
+         >
+          Skip
+         </Button>
+        </div>
+       </Modal.Body>
+      </Modal>
      </div>
     </>
    );

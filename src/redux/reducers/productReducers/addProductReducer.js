@@ -28,8 +28,7 @@ export const AddProductReducer = (state= initialState, action)=>{
                 addingProduct: true,
                 currentStep: "description",
                 nextStep: "fileUploads",
-                loading: true
-                
+                loading: true                
             }
         case actions.ADD_PRODUCT_DESCRIPTION_SUCCESS:
             return {

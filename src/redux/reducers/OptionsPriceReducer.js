@@ -8,24 +8,12 @@ import {
   ADD_CODE,
   DELETE_ROW,
   ADD_PRODUCT_PICTURES,
-  OPTIONS_STORED
+  OPTIONS_STORED,
+  ADD_OPTION_ID
 } from "../constants";
 
 const defaultState = {
   rows: [],
-  /*
-   Row=>
-   {
-    row_number:1,
-    material: {
-      image: null,
-      name: "",
-      thumbnail: null,
-      nameValidation: false,
-      imageValidation: false,
-    }
-   }
-   */
   optionsStored:false
 };
 
@@ -112,6 +100,12 @@ export default function userReducer(state = defaultState, action) {
           ...state,
           optionsStored:true
         }
+    case ADD_OPTION_ID:
+      state.rows[action.row_index]["option_id"] = action.data.option_id;
+      state.rows[action.row_index]["ver"] += 1;
+      return {
+        rows: state.rows,
+      };
     default:
       return state;
   }

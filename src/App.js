@@ -15,8 +15,10 @@ import Dropzones from './components/Dropzone'
 import Kind from './pages/addProduct/Kind'
 import Product from './pages/Product'
 import CoverTab from './pages/addProduct/CoverTab';
-import Identity from './pages/addProduct/Identity';
+// import Identity from './pages/addProduct/Identity';
 import TextEditor from './pages/TextEditor';
+import "react-notifications-component/dist/theme.css";
+
 
 const  App=(props)=>{
   return (

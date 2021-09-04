@@ -270,6 +270,9 @@ span.accordion-icon {
 #codes {
  grid-template-columns: repeat(2, auto);
 }
+#codes {
+ max-width: 78%;
+}
 #sizes button,
 #codes button {
  background: #fff;
@@ -279,12 +282,13 @@ span.accordion-icon {
  font-size: 0.85rem;
 }
 #materials {
- grid-template-columns: repeat(4, 1fr);
+ grid-template-columns: repeat(4, 67px);
 }
 #materials button {
- height: 80px;
+ height: 67px;
  background: #acada8;
  border-radius: 7px;
+ font-size: 0.7rem;
 }
 #materials button:nth-child(1) {
  background: #3b3a3a;
@@ -296,7 +300,6 @@ span.accordion-icon {
 #materials button:nth-child(3) {
  background: #dbdbdb;
 }
-
 .action-btn {
  width: 100%;
  border: none;
@@ -310,9 +313,27 @@ span.accordion-icon {
 }
 .btn-icons {
  position: absolute;
- left: 20px;
+ left: 11px;
  font-size: 1.6rem;
- top: 3px;
+ top: 10px;
+}
+.igwUEm {
+ background-color: #fff !important;
+ margin: 5px !important;
+ /* align-self: baseline !important; */
+}
+.item-background {
+ background-origin: inherit;
+ background-repeat: no-repeat;
+ background-size: contain;
+ background-position: center;
+ display: block;
+ max-width: 100%;
+ min-height: 510px;
+ width: 579px;
+}
+.product-price svg {
+ display: inline;
 }
 button#shop-now {
  width: 100%;
@@ -371,15 +392,43 @@ ul#shop-upps span {
  border: none !important;
  font-weight: 600;
  font-size: 1.2rem;
-
  border-top: 1px solid #dedede !important;
-
  min-height: 60px;
  background: #fff !important;
 }
 
 /* for the carousel */
-
+.similar-products .inner-body {
+ display: grid;
+ grid-template-columns: repeat(4, 1fr);
+ grid-gap: 10px;
+}
+.similar-products .product-img {
+ height: 150px;
+}
+.similar-products .product-store {
+ font-size: 0.7rem;
+ font-weight: 600;
+}
+.similar-products .product-store {
+ margin-top: 8px;
+}
+.similar-products h6 {
+ margin-top: 10px;
+}
+.similar-products .product-name {
+ font-size: 10px;
+ margin-bottom: 18px;
+ font-weight: 400;
+}
+.similar-products .product-price {
+ font-size: 0.8rem;
+}
+.similar-products .inner-body img {
+ display: block;
+ width: 100%;
+ height: 100%;
+}
 .rec.rec-arrow {
  border-radius: 0;
  position: absolute;
@@ -397,11 +446,23 @@ ul#shop-upps span {
  font-size: 1.4rem !important;
  line-height: unset;
 }
+.rec-item-wrapper > div {
+ background-color: transparent !important;
+}
 .rec.rec-arrow-right {
- right: 35px;
+ /* right: 35px; */
+ right: 0px;
 }
 .rec.rec-arrow-left {
- left: 35px;
+ /* left: 35px; */
+ left: 0px;
+}
+.rec.rec-arrow-left:hover:enabled,
+.rec.rec-arrow-right:hover:enabled {
+ background-color: transparent !important;
+ outline: unset !important;
+ opacity: 1 !important;
+ outline: transparent !important;
 }
 
 /* round buttons on hover */
@@ -409,12 +470,11 @@ ul#shop-upps span {
  background-color: #fff;
 }
 .rec.rec-arrow:focus {
- background-color: #fff !important;
+ background-color: transparent !important;
  outline: unset !important;
 }
 .lgksPe:hover:enabled,
 .lgksPe:focus:enabled {
- background-color: #fff !important;
  box-shadow: none !important;
  color: #000 !important;
 }
@@ -1009,6 +1069,12 @@ td svg {
 }
 .material-modal .modal-upload label {
  max-width: 81px;
+ height: 80px;
+ width: 80px;
+}
+.material-modal .modal-upload img {
+ width: 100%;
+ height: 100%;
 }
 @media (min-width: 576px) {
  .example-modals .modal-dialog {
@@ -1113,11 +1179,14 @@ input.file-upload {
 .files-previews {
  display: grid;
  grid-template-columns: repeat(6, 130px);
- position: absolute;
- top: -100px;
- left: 0;
+ position: relative;
+ top: -96px;
+ left: -127px;
  grid-gap: 25px;
  align-items: center;
+}
+.progress-bar {
+ background-color: #626262 !important;
 }
 #product-files-step .react-tabs__tab-list {
  display: grid;
@@ -1125,6 +1194,21 @@ input.file-upload {
  left: -172px;
  top: -12px;
  background: transparent !important;
+}
+.product-skip-btn {
+ top: -110px;
+ right: 180px;
+ height: 25px;
+ color: rgb(255, 255, 255);
+ position: absolute;
+ background: rgb(180, 180, 180);
+ border: none;
+ padding: 4px 0;
+ bottom: 12px;
+ border-radius: 3px;
+ font-weight: 500;
+ min-width: 170px;
+ min-height: 30px;
 }
 #product-files-step .react-tabs__tab-list li {
  width: 160px;
@@ -1401,7 +1485,7 @@ span.learn-more {
 }
 .rect-0 {
  left: 0;
- width: 65.5%;
+ width: 66%;
  top: 0;
  bottom: 0;
  border-top-left-radius: 7px;
@@ -1409,14 +1493,14 @@ span.learn-more {
 }
 .rect-1,
 .rect-2 {
- right: 0;
- width: 32.5%;
+ right: -4.5px;
+ width: 33%;
 }
 .rect-1 {
  top: 0;
  bottom: 50%;
  border-top-right-radius: 7px;
- margin-bottom: 2px;
+ margin-bottom: 1px;
 }
 .rect-2 {
  border-bottom-right-radius: 7px;
@@ -1770,9 +1854,13 @@ button.follow-btn {
  font-weight: 300;
  margin-bottom: 20px;
 }
-.product-price {
+.inner-body .product-price {
  color: #ff0000;
  font-size: 14px;
+}
+#product-page .get-icons {
+ margin: 0;
+ padding: 0;
 }
 
 /* end of store product page */
@@ -1941,6 +2029,21 @@ button.follow-btn {
 /* end of all categories styles */
 
 /* media queries  */
+@media screen and (max-width: 992px) {
+ .swiper-squares {
+  grid-template-columns: repeat(6, 16%) !important;
+  width: 80% !important;
+  justify-content: center !important;
+ }
+}
+/* .swiper-squares { */
+/* grid-template-columns: repeat(6, 16%) !important; */
+/* } */
+@media screen and(min-width:992px) {
+ .swiper-squares {
+  grid-template-columns: repeat(6, 100px) !important;
+ }
+}
 @media screen and (min-width: 768px) {
 }
 @media screen and (max-width: 768px) {
@@ -2036,7 +2139,6 @@ button.follow-btn {
  height: 90px;
  padding-top: 10px;
  background: #f8f8f8;
- /* color: #fff; */
  border-radius: 3px;
  border-color: #707070;
 }
@@ -2076,7 +2178,11 @@ button.follow-btn {
  color: #747474;
  font-weight: 500;
 }
+.galleries-box {
+ grid-template-columns: repeat(3, auto) !important;
 
+ min-height: 180px;
+}
 .product-cats-boxs {
  display: grid;
  grid-template-columns: repeat(4, 150px);
@@ -2093,26 +2199,13 @@ button.follow-btn {
  font-weight: 500;
  text-align: left;
 }
-option[value="Fuck"] {
- color: red !important;
- font-weight: bold !important;
-}
 
-.option {
- /* font-weight: 900 !important; */
-}
 .ReactFlagsSelect-module_fullWidthOptions__1XeR6 {
  min-height: 320px;
 }
 .text-editor {
  text-align: center;
- /* background-color: #2a2a2ab5; */
- /* height: 100vh; */
  min-height: 300px;
-}
-
-.text-editor .rich-editor {
- /* padding: 10rem; */
 }
 
 .rich-editor .rdw-editor-main {
@@ -2132,9 +2225,16 @@ option[value="Fuck"] {
 #product-page .rich-editor .DraftEditor-editorContainer {
  padding: 0;
 }
-.rdw-editor-toolbar {
+.product-tabs .collection-text {
+ padding-top: 5px;
 }
-
+.product-tabs .collection-text h5 {
+ font-size: 13px;
+}
+.product-tabs .collection-text p {
+ font-size: 9.5px;
+ padding: 4px 0px 0 0;
+}
 /* new product desc step tabs styling  */
 
 #product-files-step .react-tabs__tab-panel {
@@ -2184,7 +2284,7 @@ p.designer-name-select {
 
 .option-row-img-grid {
  display: grid;
- grid-template-columns: repeat(3, 35px);
+ grid-template-columns: repeat(3, 28px);
  grid-gap: 2px;
  position: relative;
 }
@@ -2211,5 +2311,24 @@ p.designer-name-select {
  font-size: 22px;
 }
 .material-box:hover > .edit-icon-pincel {
+ display: inline-block;
+}
+/* notifications comoponents */
+
+.file-error-notification svg {
+ font-size: 2rem;
+ display: inline-block;
+ padding: 0 2 px;
+ vertical-align: middle;
+}
+.notification__item--danger {
+ background-color: #e41e15 !important;
+}
+.file-error-notification {
+ padding: 8px 0;
+}
+.file-error-notification span {
+ font-weight: 600;
+ padding-left: 5px;
  display: inline-block;
 }

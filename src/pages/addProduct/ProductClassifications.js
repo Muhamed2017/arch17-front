@@ -199,11 +199,7 @@ export const chair={
         { value: "Easy Chairs", label: "Easy Chairs" },
     ],
 
-    shapes:[
-        { value: "Bed Set", label: "Bed Set" },
-        { value: "Bed Headboard", label: "Bed Headboard" },
-        { value: "Bed Base", label: "Bed Base" },
-    ],
+    shapes:[],
 
     bases:[
     { value: "Cantilever", label: "Cantilever" },
@@ -214,7 +210,8 @@ export const chair={
     { value: "with 4-spokebase", label: "with 4-spokebase" },
     { value: "with 5-spokebase", label: "with 5-spokebase" },
     { value: "with castors", label: "with castors" },
-    ]
+    ],
+    seats:[]
 }
 
 export const beds={

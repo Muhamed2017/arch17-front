@@ -20,11 +20,8 @@ import {
 import ClipLoader from "react-spinners/ClipLoader";
 class ProductFiles extends Component {
  galleriyFiles = [];
- //  overviewsFiles = [];
- //  descriptionFiles = [];
- //  dimensionsFiles = [];
-
- overs = [];
+ embed_urls = [];
+ //  loaded = [];
  constructor(props) {
   super(props);
   this.state = {
@@ -52,6 +49,12 @@ class ProductFiles extends Component {
    overViewEditorState: EditorState.createEmpty(),
    materialDesceditorState: EditorState.createEmpty(),
    sizeDescEditorState: EditorState.createEmpty(),
+   overviewLength: 0,
+   sizeLength: 0,
+   materialLength: 0,
+   skip_modal: false,
+   desc_id: "",
+   embed_url: "",
   };
  }
 
@@ -61,6 +64,9 @@ class ProductFiles extends Component {
  };
  embedModal_open = () => {
   this.setState({ embed_modal: true });
+ };
+ skip_modal_close = () => {
+  this.setState({ skip_modal: false });
  };
  embedModal_close = () => {
   this.setState({ embed_modal: false });
@@ -74,44 +80,14 @@ class ProductFiles extends Component {
   };
   this.setState({ product_id: this.props.id });
   console.log(this.state.index);
-  console.log();
  }
- //  fd = new FormData();
 
- //  onChangeOverview = ({ target: { files } }) => {
- //   const reader = new FileReader();
-
- //   if (files && files.length > 0) {
- //    this.fd.append("desc_overview_img[]", files[0]);
- //    const overview_src = URL.createObjectURL(files[0]);
- //    this.overviewsFiles.push(overview_src);
- //    console.log(this.overviewsFiles);
- //    this.setState({ overviews: this.overviewsFiles });
-
- //    reader.addEventListener("load", () => {
- //     //  this.overs.push(files[0]);
- //     this.setState({ o_image: files[0] });
- //    });
- //   }
- //  };
-
- //  onChangeSizeImg = ({ target: { files } }) => {
- //   const reader = new FileReader();
-
- //   if (files && files.length > 0) {
- //    this.fd.append("desc_dimension_img[]", files[0]);
-
- //    const size_img_src = URL.createObjectURL(files[0]);
- //    this.dimensionsFiles.push(size_img_src);
- //    console.log(this.dimensionsFiles);
- //    this.setState({ dimensions: this.dimensionsFiles });
-
- //    reader.addEventListener("load", () => {
- //     //  this.overs.push(files[0]);
- //     // this.setState({ o_image: files[0] });
- //    });
- //   }
- //  };
+ onChangeEmbedUrl = (e) => {
+  this.setState({ embed_url: e.target.value });
+ };
+ addEmbedBox = () => {
+  this.embed_urls.push(this.state.embed_url);
+ };
 
  onChangeGallery = ({ target: { files } }) => {
   if (files && files.length > 0) {
@@ -133,12 +109,10 @@ class ProductFiles extends Component {
 
   const options = {
    onUploadProgress: (progressEvent) => {
-    this.setState({ loaded: 0 });
     const { loaded, total } = progressEvent;
     let percent = Math.floor((loaded * 100) / total);
     this.setState({ loaded: percent });
     console.log(`${loaded} kb of ${total} | ${percent}%`);
-
     if (percent < 100) {
      this.setState({ loading_gallery_pecent: percent });
     }
@@ -150,31 +124,24 @@ class ProductFiles extends Component {
     formData,
     options
    )
-   .then((response) => console.log(response))
+   .then((response) => {
+    console.log(response);
+   })
    .catch((err) => console.log(err));
  };
 
- //  onChangeMatDescr = ({ target: { files } }) => {
- // const reader = new FileReader();
-
- //   if (files && files.length > 0) {
- //    this.fd.append("desc_mat_desc_img[]", files[0]);
- //    const desc_src = URL.createObjectURL(files[0]);
- //    this.descriptionFiles.push(desc_src);
- //    console.log(this.descriptionFiles);
- //    this.setState({ descriptions: this.descriptionFiles });
- //    reader.addEventListener("load", () => {});
- //   }
- //  };
+ skip = () => {
+  this.props.dispatchNextStep();
+ };
 
  uploadSizeCallback = (file) => {
   return new Promise((resolve, reject) => {
    const formData = new FormData();
    formData.append("img[]", file);
+   formData.append("desc_id", this.state.desc_id);
    axios
     .post(
      `https://arch17-apis.herokuapp.com/api/upload/${this.props.id}`,
-
      formData
     )
     .then((response) => {
@@ -182,6 +149,7 @@ class ProductFiles extends Component {
       data: { link: response.data.img[response.data.lastIndex].file_url },
      });
      console.log(response.data);
+     this.setState({ desc_id: response.data.product_desc.description[0].id });
     })
     .catch((err) => {
      console.log(err);
@@ -190,45 +158,47 @@ class ProductFiles extends Component {
   });
  };
  handleNextStep = (e) => {
-  // this.props.dispatchDescriptionStep(this.fd, this.state.product_id);
-  // console.log(this.state.overViewEditorState);
-  this.setState({ loading: true });
-  const formDataOverview = new FormData();
-  const formDataDesc = new FormData();
-  formDataOverview.append(
-   "overview_content",
-   JSON.stringify(
-    convertToRaw(this.state.overViewEditorState.getCurrentContent())
-   )
-  );
-  formDataDesc.append(
-   "size_content",
-   JSON.stringify(
-    convertToRaw(this.state.sizeDescEditorState.getCurrentContent())
-   )
-  );
-  formDataDesc.append(
-   "mat_desc_content",
-   JSON.stringify(
-    convertToRaw(this.state.materialDesceditorState.getCurrentContent())
-   )
-  );
-  axios
-   .post(
-    `https://arch17-apis.herokuapp.com/api/overviewContnet/${this.state.product_id}`,
-    formDataOverview
-   )
-   .then((response) => {
-    this.setState({ loading: false });
-    this.props.dispatchNextStep();
-    axios
-     .post(
-      `https://arch17-apis.herokuapp.com/api/descContent/${this.state.product_id}`,
-      formDataDesc
-     )
-     .then("Descriotion has been added ");
-   })
-   .catch((error) => console.log(error));
+  if (
+   this.state.sizeLength +
+    this.state.materialLength +
+    this.state.overviewLength <
+   1
+  ) {
+   this.setState({ skip_modal: true });
+   return;
+  } else {
+   this.setState({ loading: true });
+   const formDataOverview = new FormData();
+   formDataOverview.append(
+    "overview_content",
+    JSON.stringify(
+     convertToRaw(this.state.overViewEditorState.getCurrentContent())
+    )
+   );
+   formDataOverview.append(
+    "size_content",
+    JSON.stringify(
+     convertToRaw(this.state.sizeDescEditorState.getCurrentContent())
+    )
+   );
+   formDataOverview.append(
+    "mat_desc_content",
+    JSON.stringify(
+     convertToRaw(this.state.materialDesceditorState.getCurrentContent())
+    )
+   );
+   formDataOverview.append("desc_id", this.state.desc_id);
+   axios
+    .post(
+     `https://arch17-apis.herokuapp.com/api/overviewContnet/${this.state.product_id}`,
+     formDataOverview
+    )
+    .then((response) => {
+     this.setState({ loading: false });
+     this.props.dispatchNextStep();
+    })
+    .catch((error) => console.log(error));
+  }
  };
 
  handleGotoStep = (step) => {
@@ -238,27 +208,35 @@ class ProductFiles extends Component {
  onEditorStateOverviewChange = (overViewEditorState) => {
   this.setState({
    overViewEditorState,
+   overviewLength: convertToRaw(
+    this.state.overViewEditorState.getCurrentContent()
+   ).blocks[0].text.length,
   });
-  console.log(convertToRaw(this.state.overViewEditorState.getCurrentContent()));
  };
 
  onEditorStateMaterialChange = (materialDesceditorState) => {
   this.setState({
    materialDesceditorState,
+   materialLength: convertToRaw(
+    this.state.materialDesceditorState.getCurrentContent()
+   ).blocks[0].text.length,
   });
-  console.log(
-   convertToRaw(this.state.materialDesceditorState.getCurrentContent())
-  );
+  // console.log( convertToRaw(this.state.materialDesceditorState.getCurrentContent()));
  };
 
  onEditorStateSizeChange = (sizeDescEditorState) => {
   this.setState({
    sizeDescEditorState,
+   sizeLength: convertToRaw(this.state.sizeDescEditorState.getCurrentContent())
+    .blocks[0].text.length,
   });
  };
  render() {
   return (
    <div id="product-files-step">
+    <button className="product-skip-btn" onClick={this.skip}>
+     Skip
+    </button>
     <button
      className="save-product-step-btn"
      style={{
@@ -308,6 +286,21 @@ class ProductFiles extends Component {
          editorClassName="demo-editor"
          onEditorStateChange={this.onEditorStateOverviewChange}
          placeholder="Add Your Product Description Overview "
+         toolbar={{
+          image: {
+           uploadEnabled: true,
+           urlEnabled: true,
+           uploadCallback: this.uploadSizeCallback,
+           previewImage: true,
+           alignmentEnabled: "LEFT",
+           inputAccept: "image/gif,image/jpeg,image/jpg,image/png,image/svg",
+           alt: { present: false, mandatory: false },
+           defaultSize: {
+            height: "auto",
+            width: "400",
+           },
+          },
+         }}
         />
        </div>
        {/* <button
@@ -438,13 +431,6 @@ class ProductFiles extends Component {
          }}
         />
        </div>
-       {/* <button
-     className="save-product-step-btn"
-     style={{ position: "relative", top: "10px" }}
-     onClick={this.submitSizeContent}
-    >
-     Save
-    </button> */}
       </>
      </TabPanel>
      <TabPanel forceRender>
@@ -456,30 +442,39 @@ class ProductFiles extends Component {
        <div className="files-previews">
         {this.state.galleries?.map((file, index) => {
          return (
-          <div style={{ position: "relative" }}>
-           <video
-            key={index}
-            type="video/mp4"
-            style={{
-             display: "block",
-             position: "relative",
-            }}
-           >
-            <source src={file} type="video/mp4" />
-           </video>
-           <ProgressBar
-            now={this.state.loaded}
-            variant="danger"
-            style={{
-             position: "absolute",
-             left: 0,
-             right: 0,
-             top: 0,
-             bottom: 0,
-             height: "100%",
-             opacity: ".3",
-            }}
-           />
+          <div style={{ position: "relative" }} key={index}>
+           <img src={file} alt="" />
+          </div>
+         );
+        })}
+        <ProgressBar
+         now={this.state.loaded}
+         style={{
+          background: "#000",
+          position: "absolute",
+          right: 0,
+          top: 0,
+          bottom: 0,
+          maxWidth: "130px",
+          height: "100%",
+          opacity: this.state.loaded < 100 ? ".3" : "0",
+          left: `${155 * this.state.galleries.length - 155}px`,
+          display: this.state.loaded >= 100 ? "none" : "",
+         }}
+        />
+        {this.embed_urls?.map((url, index) => {
+         return (
+          <div style={{ position: "relative" }} key={index}>
+           {/* <iframe src={url} alt="" title="embeded" /> */}
+           <iframe
+            width="130"
+            // height="315"
+            src={url}
+            title="YouTube video player"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+           ></iframe>
           </div>
          );
         })}
@@ -525,6 +520,39 @@ class ProductFiles extends Component {
      id="price-request-modal"
      className="arch-wide-modal product-modal pics-modal"
      size="md"
+     show={this.state.skip_modal}
+     onHide={this.skip_modal_close}
+     aria-labelledby="example-modal-sizes-title-lg"
+    >
+     <Modal.Header closeButton></Modal.Header>
+     <Modal.Body>
+      <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
+       <h6>Skip Modal</h6>
+
+       <Button
+        variant="danger"
+        type="submit"
+        onClick={() => {
+         this.props.dispatchNextStep();
+         this.setState({ skip_modal: false });
+        }}
+        style={{
+         textAlign: "right",
+         background: "#E41E15",
+         display: "block",
+         float: "right",
+         marginRight: "12px",
+        }}
+       >
+        Skip
+       </Button>
+      </div>
+     </Modal.Body>
+    </Modal>
+    <Modal
+     id="price-request-modal"
+     className="arch-wide-modal product-modal pics-modal"
+     size="md"
      show={this.state.embed_modal}
      onHide={this.embedModal_close}
      aria-labelledby="example-modal-sizes-title-lg"
@@ -540,13 +568,17 @@ class ProductFiles extends Component {
         <Col md={10}>
          <Form.Control
           placeholder="Video URL"
-          value={""}
-          // onChange={this.setMaterialName}
+          // value={""}
+          onChange={this.onChangeEmbedUrl}
          />
         </Col>
        </Form.Row>
        <Button
         variant="danger"
+        onClick={() => {
+         this.addEmbedBox();
+         this.setState({ embed_modal: false });
+        }}
         type="submit"
         style={{
          textAlign: "right",

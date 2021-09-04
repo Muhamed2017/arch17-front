@@ -1,19 +1,11 @@
-import React, { Component, useRef } from "react";
-import {
- FaCloudUploadAlt,
- FaPlus,
- FaTrashAlt,
- FaCube,
- FaArrowRight,
- FaArrowLeft,
- FaArrowDown,
- FaArrowUp,
- FaPencilAlt,
-} from "react-icons/fa";
-import { Form, Col, Row, Modal, Button } from "react-bootstrap";
-import Cropper from "react-cropper";
+import React, { Component } from "react";
+import "react-notifications-component/dist/theme.css";
+import { FaPlus } from "react-icons/fa";
+import { Row, Modal, Button } from "react-bootstrap";
+// import ReactNotification,
+// import { store } from "react-notifications-component";
+
 import "cropperjs/dist/cropper.css";
-import slide4 from "../../../src/slide4.jpg";
 import { connect } from "react-redux";
 import OptionsRow from "./optionsRow";
 import {
@@ -23,11 +15,24 @@ import {
 } from "../../redux/constants";
 import axios from "axios";
 import imageCompression from "browser-image-compression";
-import PulseLoader from "react-spinners/PulseLoader";
 import ClipLoader from "react-spinners/ClipLoader";
 
-const API = "https://arch17-apis.herokuapp.com/api/option-price/";
-
+export const API = "https://arch17-apis.herokuapp.com/api/option-price/";
+export const compressImage = async (imageFile) => {
+ const options = {
+  maxSizeMB: 1,
+  maxWidthOrHeight: 850,
+  useWebWorker: true,
+ };
+ try {
+  const compressedFile = await imageCompression(imageFile, options);
+  console.log("compressedFile instanceof Blob", compressedFile instanceof Blob); // true
+  console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
+  return compressedFile;
+ } catch (error) {
+  throw new Error(error);
+ }
+};
 class OptionsPrice extends Component {
  state = {
   src: "",
@@ -44,7 +49,21 @@ class OptionsPrice extends Component {
   validate_offerPrice: false,
   loading: false,
  };
-
+ //  addNotification = () => {
+ //   store.addNotification({
+ //    title: "Option and price Notification",
+ //    message: "Hello from Option and price step",
+ //    type: "danger",
+ //    insert: "bottom",
+ //    container: "top-left",
+ //    animationIn: ["animate__animated", "animate__fadeIn"],
+ //    //  animationOut: ["animate__animated", "animate__fadeOut"],
+ //    dismiss: {
+ //     duration: 1500,
+ //     // onScreen: false,
+ //    },
+ //   });
+ //  };
  componentDidUpdate() {
   console.log(this.props);
  }
@@ -116,6 +135,7 @@ class OptionsPrice extends Component {
    if (!row) return;
    const { quantity, price, offerPrice, productPictures } = row;
    const { L, W, H } = row?.size;
+   const { option_id } = row;
    const { nameValidation, imageValidation } = row?.material;
    if (!nameValidation)
     validation_messages.push("material name at row#" + row.row_number);
@@ -147,7 +167,7 @@ class OptionsPrice extends Component {
    setTimeout(() => {
     this.props.dispatch({ type: ADD_PRODUCT_NEXT_TAB });
     this.setState({ loading: false });
-   }, 500);
+   }, 3000);
    for (let row of this.props.OptionsPrice.rows) {
     if (!row) continue;
     await this.saveRow(row);
@@ -180,37 +200,19 @@ class OptionsPrice extends Component {
   return new File([u8arr], filename, { type: mime });
  }
 
- compressImage = async (imageFile) => {
-  const options = {
-   maxSizeMB: 0.5,
-   maxWidthOrHeight: 1920,
-   useWebWorker: true,
-  };
-  try {
-   const compressedFile = await imageCompression(imageFile, options);
-   console.log(
-    "compressedFile instanceof Blob",
-    compressedFile instanceof Blob
-   ); // true
-   console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
-   return compressedFile;
-  } catch (error) {
-   throw new Error(error);
-  }
- };
  saveRow = async (row) => {
   const formData = new FormData();
-  for (let i = 0; i < row.productPictures.length; i++) {
-   formData.append(
-    `cover[${i}]`,
-    await this.compressImage(
-     this.dataURLtoFile(row.productPictures[i]?.cropped, "file")
-    )
-   );
-  }
+  // for (let i = 0; i < row.productPictures.length; i++) {
+  //  formData.append(
+  //   `cover[${i}]`,
+  //   await compressImage(
+  //    this.dataURLtoFile(row.productPictures[i]?.cropped, "file")
+  //   )
+  //  );
+  // }
   formData.append(
    `material_image`,
-   await this.compressImage(await this.convertImage(row.material.image))
+   await compressImage(await this.convertImage(row.material.image))
   );
   formData.append(`material_name`, row.material.name);
   if (row.size)
@@ -225,11 +227,10 @@ class OptionsPrice extends Component {
    console.log(pair[0] + ", " + pair[1]);
   }
   return await axios
-   .post(`${API}${this.props.id}`, formData, {
+   .post(`${API}${this.props.id}/${row.option_id}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
    })
    .then((data) => {
-    // this.props.dispatch({ type: OPTIONS_STORED });
     console.log(data);
    });
  };
@@ -245,6 +246,7 @@ class OptionsPrice extends Component {
  render() {
   return (
    <React.Fragment>
+    {/* <ReactNotification /> */}
     <div className="step-form">
      <button
       className="save-product-step-btn"
@@ -314,7 +316,7 @@ class OptionsPrice extends Component {
         if (!row) return;
         return (
          <tbody>
-          <OptionsRow row_data={row} />
+          <OptionsRow row_data={row} id={this.props.id} />
          </tbody>
         );
        })}
