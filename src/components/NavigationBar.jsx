@@ -1,13 +1,7 @@
 import React from "react";
 import logo from "../../src/logo-gray.png";
-import {
- BrowserRouter as Router,
- Route,
- Switch,
- Redirect,
- NavLink,
- Link,
-} from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
+import { toast, Flip, Bounce } from "react-toastify";
 
 import {
  Container,
@@ -21,22 +15,26 @@ import { connect } from "react-redux";
 import { logginOut } from "../redux/actions/authActions";
 import { BsChatFill } from "react-icons/bs";
 import { IoNotifications } from "react-icons/io5";
-import Register from "../pages/Register";
-import Login from "../pages/Login";
 const NavigationBar = (props) => {
  const handleLogout = () => {
   props.dispatchLogOut();
  };
-
+ const handleNotify = () => {
+  toast.success("Success Notification !", {
+   position: toast.POSITION.BOTTOM_LEFT,
+   theme: "colored",
+   transition: Flip,
+  });
+ };
  return (
   <div className="w-100 bg-white navbar-border-bottom sticky-top">
    <Container>
     <Navbar bg="white" expand="md" sticky="top">
      <Navbar.Brand>
       <Router>
-       <Link to="/">
+       <a href="/">
         <img id="nav-logo" src={logo} alt="Logo" />
-       </Link>
+       </a>
       </Router>
      </Navbar.Brand>
      <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -51,7 +49,7 @@ const NavigationBar = (props) => {
         id="basic-nav-dropdown"
         style={{ padding: "10px" }}
        >
-        <NavDropdown.Item href="#action/3.1">Products</NavDropdown.Item>
+        <NavDropdown.Item href="action/3.1">Products</NavDropdown.Item>
         <NavDropdown.Item href="#action/3.2">Magazine</NavDropdown.Item>
        </NavDropdown>
        <FormControl
@@ -74,7 +72,6 @@ const NavigationBar = (props) => {
         </React.Fragment>
        ) : (
         <>
-         {/* <span id="test-name">{props.userInfo.user.displayName}</span> */}
          <div
           style={{ fontSize: "1.7rem", paddingTop: "1px", color: "#797979" }}
          >
@@ -131,11 +128,12 @@ const NavigationBar = (props) => {
           }}
           id="basic-nav-dropdown"
          >
-          <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
+          <NavDropdown.Item href="/product/5">Action</NavDropdown.Item>
           <NavDropdown.Item href="#action/3.2">Another action</NavDropdown.Item>
           <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
           <NavDropdown.Divider />
           <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
+          <NavDropdown.Item onClick={handleNotify}>Notify</NavDropdown.Item>
          </NavDropdown>
         </>
        )}

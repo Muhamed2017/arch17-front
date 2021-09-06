@@ -1,6 +1,8 @@
 
 import * as actions from '../constants'
 import { auth, googleProvider, facebookProvider} from './../../firebase';
+import axios from 'axios'
+import {toast, Flip, Bounce } from 'react-toastify';
 
 export const emailPasswordSignup = ()=>({
     type:actions.SIGNUP_EMAIL_PASSWORD_REQUEST
@@ -8,10 +10,12 @@ export const emailPasswordSignup = ()=>({
 export const emailPasswordSignin = () => ({
     type: actions.SIGNIN_EMAIL_PASSWORD_REQUEST
 })
-// export const emailPasswordSigninSuccess = (user) => ({
-//     type: actions.SIGNIN_EMAIL_PASSWORD_SUCCESS,
-//     payload:user
-// })
+export const normalSignup = ()=>({
+    type : actions.NORMAL_SIGNUP_REQUEST
+})
+export const normalSignin = () => ({
+    type: actions.NORMAL_SIGNIN_REQUEST
+})
 export const emailPasswordSignupSuccess = user => ({
     type: actions.SIGNUP_EMAIL_PASSWORD_SUCCESS,
     payload: user
@@ -45,7 +49,14 @@ export const googleSignuoSuccess = user => ({
     type: actions.GOOGLE_SIGNUP_SUCCESS,
     payload: user
 })
-
+export const normalSignupSuccess = user => ({
+    type: actions.NORMAL_SIGNUP_SUCEESS,
+    payload: user
+})
+export const normalSigninSuccess = user => ({
+    type: actions.NORMAL_SIGNIN_SUCEESS,
+    payload: user
+})
 export const logout = ()=>{
     return {
         type: actions.LOGOUT
@@ -65,30 +76,45 @@ export const signupEmailPassword= (fullName, email, password)=>{
             })
             console.log(userCredential);
         })
+       
     }
 }
-
+export const normalSignupRequest= (fname, lname, email, password)=>{
+const fd = new FormData();
+return (dispatch)=>{
+    fd.append('fname', fname)
+    fd.append('lname', lname)
+    fd.append('email', email)
+    fd.append('password', password)
+    fd.append('password_confirmation', password)
+    dispatch(normalSignup())
+    axios.post(`${actions.ENDPOINT}user/registration/signup`, fd)
+    .then((response)=>{
+        dispatch(normalSignupSuccess(response.data))
+        setNormalUserInfo(response.data)
+        toast.success("Welcome Muhamed Gomaa, Update Your profile Now", {
+            position: toast.POSITION.BOTTOM_CENTER,
+            theme: "colored",
+            transition: Flip,
+        });
+        console.log(response)
+    }
+   )
+}
+}
 
 export const signinEmailPassword = (email, password) => {
     return (dispatch) => {
-        dispatch(emailPasswordSignin());
+        dispatch(emailPasswordSignin())
         auth.signInWithEmailAndPassword(email, password).then((userCredential) => {
                 setUserInfo(userCredential.user)
                 dispatch(emailPasswordSigninSuccess(userCredential.user))
             console.log(userCredential);
         })
+
     }
 }
 const setUserInfo = (userData)=>{
-    // const user ={
-    //     userId: userData.uid,
-    //     userFullName:userData.displayName,
-    //     userEmail:userData.email,
-    //     userPhotoUrl:userData.photoURL,
-    //     userPhoneNum:userData.phoneNumber,
-    //     userEmailVerified:userData.emailVerified,
-    //     userProviderId:userData.providerData.providerId,
-    // }
     const state = {
         user : userData,
         isLoggedIn:true,
@@ -97,6 +123,15 @@ const setUserInfo = (userData)=>{
     localStorage.setItem('user',JSON.stringify(state))
 }
 
+const setNormalUserInfo = (userData) => {
+ 
+    const state = {
+        normal_user: userData,
+        isLoggedIn: true,
+        loading: false
+    }
+    localStorage.setItem('normal', JSON.stringify(state))
+}
 export const signupGoogle = () => {
     return (dispatch) => {
         dispatch(googleSignup());
@@ -116,26 +151,16 @@ export const signupFacebook= ()=>{
           console.log(userCredential.user)
           dispatch(facebookSignupSuccess(userCredential.user))
           setUserInfo(userCredential.user)
+        
       }).catch(error=>{
           console.log(error.message)
       })
   }  
 }
-// export const signupLinkedin = () => {
-//     return (dispatch) => {
-//         dispatch(linkedinSignupRequest());
-//         auth.signInWithPopup(linkedinProvider).then((userCredential) => {
-//             console.log(userCredential.user)
-//             dispatch(linkedinSignupSuccess(userCredential.user))
-//             setUserInfo(userCredential.user)
-//         }).catch((error) => {
-//             console.log(error.message)
-//         })
-//     }
-// }
 export const logginOut = () => {
     localStorage.removeItem('user');
-    return (dispatch)=>{
+    return (dispatch) => {
         dispatch(logout())
     }
 }
+

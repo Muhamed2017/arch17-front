@@ -1,20 +1,14 @@
 import React, { useState } from "react";
 import Form from "react-bootstrap/Form";
 import { Container, Col, Row } from "react-bootstrap";
-import {
- FaLinkedinIn,
- FaFacebookF,
- FaGoogle,
- FaAppleAlt,
-} from "react-icons/fa";
-// import { AiFillWechat } from "react-icons/ai";
+import { FaLinkedinIn, FaFacebookF, FaGoogle } from "react-icons/fa";
 import { connect } from "react-redux";
 import { isNotEmptyString } from "@formiz/validations";
 import {
  signupEmailPassword,
  signupFacebook,
  signupGoogle,
- //  signupLinkedin,
+ normalSignupRequest,
 } from "../redux/actions/authActions";
 import HashLoader from "react-spinners/HashLoader";
 const Register = (props) => {
@@ -93,6 +87,7 @@ const Register = (props) => {
          onClick={(e) => {
           e.preventDefault();
           handleRegularSignup();
+          props.dispatchNormalSignup(fname, lname, email, password);
          }}
         >
          {props.loading ? (
@@ -131,30 +126,7 @@ const Register = (props) => {
          </span>{" "}
          Continue With Linkedin
         </button>
-        {/* <button
-         className="coninue-btn wechat-auth"
-         onClick={(e) => {
-          e.preventDefault();
-          props.dispatchGoogleSignup();
-         }}
-        >
-         <span>
-          <AiFillWechat />
-         </span>
-         Continue With WeChat
-        </button> */}
-        <button
-         className="coninue-btn apple-auth"
-         onClick={(e) => {
-          //   e.preventDefault();
-          //   props.dispatchGoogleSignup();
-         }}
-        >
-         <span>
-          <FaAppleAlt />
-         </span>
-         Continue With Apple
-        </button>
+
         <button
          className="coninue-btn google-auth"
          onClick={(e) => {
@@ -197,6 +169,9 @@ const mapDispatchToProps = (dispatch) => ({
  //  dispatchLogOut: () => dispatch(logginOut()),
  dispatchFacebookSignup: () => dispatch(signupFacebook()),
  dispatchGoogleSignup: () => dispatch(signupGoogle()),
+ dispatchNormalSignup: (fname, lname, email, password) =>
+  dispatch(normalSignupRequest(fname, lname, email, password)),
+ //  dispatchGoogleSignup: () => dispatch(signupGoogle()),
  //  dispatchLinkedinSignup: () => dispatch(signupLinkedin()),
 });
 const mapStateToProps = (state) => {

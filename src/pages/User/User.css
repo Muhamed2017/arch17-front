@@ -1,0 +1,50 @@
+/* reset password component */
+.box-container{
+    background-color: #FFF;
+}
+.box-header h1{
+    font-family: Arial;
+    font-weight: bolder;
+    font-size: 40px;
+}
+.box-body p{
+    font-family: 'Roboto', sans-serif;
+    font-size: 20px;
+    font-weight: 300 ;
+    color: #000000;
+}
+.box-footer p{
+    font-family: Arial;
+    font-size: 15px;
+    color: #666666;
+    font-weight: normal;
+}
+.box-footer p .box-strong{
+    font-weight: bold;
+    
+}
+.box-footer p .box-red{
+    color: #A6292E;
+}
+
+
+@media(max-width : 1200px ){
+    .box-header h1{
+        font-size: 34px;
+    }
+    .box-body p{
+        font-size: 21px;
+    }
+}
+@media(max-width : 576px ){
+    .box-header h1{
+        font-size: 24px;
+    }
+    .box-body p{
+        font-size: 14px;
+    }
+    .box-footer p{
+        font-size: 12px;
+    }
+
+}

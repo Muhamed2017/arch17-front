@@ -1,3 +1,11 @@
+:root {
+ --toastify-color-light: #fff;
+ --toastify-color-dark: #121212;
+ --toastify-color-info: #e41e15 !important;
+ --toastify-color-success: #07bc0c;
+ --toastify-color-warning: #f1c40f;
+ --toastify-color-error: #e74c3c;
+}
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
 * {
  box-sizing: border-box;
@@ -10,6 +18,9 @@ body {
 }
 .m-t-global {
  margin-top: 15%;
+}
+#user-profile svg {
+ display: inline-block !important;
 }
 /* forms normalization */
 .form-control:focus {
@@ -1397,7 +1408,7 @@ span.learn-more {
  border-bottom: 1px solid #d8d8d8 !important;
  font-size: 20px;
  font-family: "Roboto";
- height: 52px;
+ height: 57px;
  font-weight: 400 !important;
 }
 .profile-tabs .react-tabs__tab--selected {

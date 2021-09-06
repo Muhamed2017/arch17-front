@@ -79,7 +79,6 @@ const Login = (props) => {
           <>Continue</>
          )}
         </button>
-
         <div className="form-separator"></div>
         <button
          className="coninue-btn facebook-auth"
@@ -105,12 +104,7 @@ const Login = (props) => {
          </span>
          Continue With WeChat
         </button> */}
-        <button className="coninue-btn apple-auth">
-         <span>
-          <FaAppleAlt />
-         </span>
-         Continue With Apple
-        </button>
+
         <button
          className="coninue-btn google-auth"
          onClick={(e) => {
@@ -151,5 +145,7 @@ const mapDispatchToProps = (dispatch) => ({
   dispatch(signinEmailPassword(email, password)),
  dispatchFacebookSignup: () => dispatch(signupFacebook()),
  dispatchGoogleSignup: () => dispatch(signupGoogle()),
+ dispatchNormalSignup: () => dispatch(signupGoogle()),
+ dispatchNormalSignin: () => dispatch(signupGoogle()),
 });
 export default connect(null, mapDispatchToProps)(Login);

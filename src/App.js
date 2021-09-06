@@ -18,7 +18,9 @@ import CoverTab from './pages/addProduct/CoverTab';
 // import Identity from './pages/addProduct/Identity';
 import TextEditor from './pages/TextEditor';
 import "react-notifications-component/dist/theme.css";
-
+import UserProfile from './pages/UserProfile';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer} from 'react-toastify'
 
 const  App=(props)=>{
   return (
@@ -52,6 +54,9 @@ const  App=(props)=>{
               {/* </Route> */}
               <Route path="/multi" exact>
                 <CoverTab/>
+              </Route>
+               <Route path="/user" exact>
+                <UserProfile/>
               </Route>
              <Route path="/add-product" exact><Kind />
        </Route>
@@ -89,6 +94,8 @@ const  App=(props)=>{
                 </Route> */}
           {/* </Switch> */}
         {/* </Router> */} 
+          <ToastContainer  />
+
     </React.Fragment>
     </AuthProvider>
     </ChakraProvider>
