@@ -10,7 +10,8 @@ import {
 // import { AiFillWechat } from "react-icons/ai";
 import { connect } from "react-redux";
 import {
- signinEmailPassword,
+ //  signinEmailPassword,
+ vanillaSigninEmailPassword,
  signupFacebook,
  signupGoogle,
 } from "../redux/actions/authActions";
@@ -142,10 +143,10 @@ const Login = (props) => {
 // export default Signin;
 const mapDispatchToProps = (dispatch) => ({
  dispatchRegularSignup: (email, password) =>
-  dispatch(signinEmailPassword(email, password)),
+  dispatch(vanillaSigninEmailPassword(email, password)),
  dispatchFacebookSignup: () => dispatch(signupFacebook()),
  dispatchGoogleSignup: () => dispatch(signupGoogle()),
- dispatchNormalSignup: () => dispatch(signupGoogle()),
- dispatchNormalSignin: () => dispatch(signupGoogle()),
+ //  dispatchNormalSignup: () => dispatch(signupGoogle()),
+ //  dispatchNormalSignin: () => dispatch(signupGoogle()),
 });
 export default connect(null, mapDispatchToProps)(Login);

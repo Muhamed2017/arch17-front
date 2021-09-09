@@ -3,7 +3,7 @@ import * as actions from '../constants'
 import { auth, googleProvider, facebookProvider} from './../../firebase';
 import axios from 'axios'
 import {toast, Flip, Bounce } from 'react-toastify';
-
+import firebase from 'firebase';
 export const emailPasswordSignup = ()=>({
     type:actions.SIGNUP_EMAIL_PASSWORD_REQUEST
 })
@@ -21,7 +21,7 @@ export const emailPasswordSignupSuccess = user => ({
     payload: user
 })
 export const emailPasswordSigninSuccess = user => ({
-    type: actions.SIGNUP_EMAIL_PASSWORD_SUCCESS,
+    type: actions.SIGNIN_EMAIL_PASSWORD_SUCCESS,
     payload: user
 })
 export const googleSignup = user => ({
@@ -57,27 +57,48 @@ export const normalSigninSuccess = user => ({
     type: actions.NORMAL_SIGNIN_SUCEESS,
     payload: user
 })
+export const setNavActionCreator = info =>({
+    type :actions.SET_NAV_INFO,
+    payload:info
+})
+export const restNavinfo = info =>({
+    type: actions.SET_NAV_INFO,
+    payload: info
+})
 export const logout = ()=>{
     return {
         type: actions.LOGOUT
     }
 }
 
+
 export const signupEmailPassword= (fullName, email, password)=>{
     return (dispatch)=>{
         dispatch(emailPasswordSignup());
+        
         auth.createUserWithEmailAndPassword(email, password).then((userCredential) => {
             userCredential.user.updateProfile({
                 displayName: fullName,
                 // photoURL: 'ksmksmksmskmskmskmsksmksmskm'
+        
             }).then(()=>{
                 setUserInfo(userCredential.user)
                 dispatch(emailPasswordSignupSuccess(userCredential.user))
             })
+        //    console.log(userCredential.user.getIdTokenResult())
+            userCredential.user.getIdTokenResult().then((token)=>{
+                console.log(token)
+            })
+
+        
             console.log(userCredential);
         })
        
     }
+}
+export const updateUserProfile=()=>{
+
+    
 }
 export const normalSignupRequest= (fname, lname, email, password)=>{
 const fd = new FormData();
@@ -92,7 +113,7 @@ return (dispatch)=>{
     .then((response)=>{
         dispatch(normalSignupSuccess(response.data))
         setNormalUserInfo(response.data)
-        toast.success("Welcome Muhamed Gomaa, Update Your profile Now", {
+        toast.success(`Welcome ${response.data.user.fname} ${response.data.user.lname} You Can Update Your Profile Now`, {
             position: toast.POSITION.BOTTOM_CENTER,
             theme: "colored",
             transition: Flip,
@@ -103,18 +124,61 @@ return (dispatch)=>{
 }
 }
 
-export const signinEmailPassword = (email, password) => {
+
+
+export const vanillaSigninEmailPassword = (email, password)=>{
+return (dispatch)=>{
+    dispatch(emailPasswordSignin())
+    auth.signInWithEmailAndPassword(email, password).then((userCredential)=>{
+        dispatch(emailPasswordSigninSuccess(userCredential.user))
+        setUserInfo(userCredential.user)
+        setUserInfoAction(userCredential.user)
+        console.log(userCredential);
+    })
+}
+}
+export const signinEmailPassword = (email, password, newName, newEmail, phone) => {
     return (dispatch) => {
         dispatch(emailPasswordSignin())
         auth.signInWithEmailAndPassword(email, password).then((userCredential) => {
-                setUserInfo(userCredential.user)
-                dispatch(emailPasswordSigninSuccess(userCredential.user))
+            if(newName!=="" ){
+                userCredential.user.updateProfile({
+                    displayName: newName,
+                }).then(()=>{
+                    console.log("Name updated")
+                    setUserInfo(userCredential.user)
+                    dispatch(setNavActionCreator(userCredential.user))
+                })
+            } if (newEmail != "") {
+                userCredential.user.updateEmail(newEmail).then(() => {
+                    setUserInfo(userCredential.user)
+                    // setUserInfoAction(userCredential.user)
+                    console.log("email updated")
+                    console.log(newEmail, auth.currentUser)
+                })
+            }
+            if (phone != "") {
+                userCredential.user.updatePhoneNumber(phone).then(() => {
+                    console.log("phone updated")
+                    setUserInfoAction(userCredential.user)
+                })
+            }
+            dispatch(emailPasswordSigninSuccess(userCredential.user))
+            setUserInfo(userCredential.user)
+            setUserInfoAction(userCredential.user)
             console.log(userCredential);
         })
 
     }
 }
-const setUserInfo = (userData)=>{
+
+export const setUserInfoAction = (userData)=>{
+    return (dispatch)=>{
+        dispatch(setNavActionCreator(userData))
+    }
+    
+}
+export const setUserInfo = (userData)=>{
     const state = {
         user : userData,
         isLoggedIn:true,
@@ -122,6 +186,8 @@ const setUserInfo = (userData)=>{
     }
     localStorage.setItem('user',JSON.stringify(state))
 }
+
+export const setNavInfo=(info)=>{}
 
 const setNormalUserInfo = (userData) => {
  
@@ -139,6 +205,7 @@ export const signupGoogle = () => {
             console.log(userCredential.user)
             dispatch(googleSignuoSuccess(userCredential.user))
             setUserInfo(userCredential.user)
+            dispatch(setNavActionCreator(auth.currentUser))
         }).catch((error) => {
             console.log(error.message)
         })
@@ -150,8 +217,7 @@ export const signupFacebook= ()=>{
       auth.signInWithPopup(facebookProvider).then((userCredential)=>{
           console.log(userCredential.user)
           dispatch(facebookSignupSuccess(userCredential.user))
-          setUserInfo(userCredential.user)
-        
+          setUserInfo(userCredential.user)        
       }).catch(error=>{
           console.log(error.message)
       })

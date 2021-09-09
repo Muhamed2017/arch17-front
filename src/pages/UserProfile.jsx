@@ -6,10 +6,20 @@ import profile from "../../src/profiles.jpg";
 import CollectionsTab from "./user_profile_tabs/CollectionsTab";
 import FollwingTab from "./user_profile_tabs/FollwingTab";
 import BocList from "./user_profile_tabs/BoqList";
+import Settings from "./user_profile_tabs/Settings";
+import { connect } from "react-redux";
+import { Redirect } from "react-router";
+import { auth } from "./../firebase";
+import { setUserInfoAction } from "../redux/actions/authActions";
 
 class UserProfile extends Component {
- state = {};
+ constructor(props) {
+  super(props);
+  this.state = {};
+ }
+ componentDidMount() {}
  render() {
+  if (!this.props.isLoggedIn) return <Redirect to="/" />;
   return (
    <React.Fragment>
     <div id="user-profile" className="bg-white">
@@ -21,7 +31,8 @@ class UserProfile extends Component {
           <img src={profile} alt="profile" />
          </div>
          <div className="profile-heading">
-          <h2 className="name">Muhamed Mahdy</h2>
+          {/* <h2 className="name">Muhamed Mahdy</h2> */}
+          <h2 className="name">{this.props.name}</h2>
           <p className="join-design">Join 17Designclub</p>
          </div>
          <button className="profile-settings-btn">
@@ -36,6 +47,7 @@ class UserProfile extends Component {
            <Tab>Collection</Tab>
            <Tab>Follwing</Tab>
            <Tab>BOQ Lists</Tab>
+           <Tab>Setting</Tab>
           </TabList>
           <TabPanel>
            <CollectionsTab />
@@ -45,6 +57,9 @@ class UserProfile extends Component {
           </TabPanel>
           <TabPanel>
            <BocList />
+          </TabPanel>
+          <TabPanel>
+           <Settings />
           </TabPanel>
          </Tabs>
         </div>
@@ -56,5 +71,14 @@ class UserProfile extends Component {
   );
  }
 }
+const mapDispatchToProps = (dispatch) => ({
+ setNav: (info) => dispatch(setUserInfoAction(info)),
+});
 
-export default UserProfile;
+const mapStateToProps = (state) => {
+ return {
+  isLoggedIn: state.regularUser.isLoggedIn,
+  name: state.regularUser.info?.displayName,
+ };
+};
+export default connect(mapStateToProps, mapDispatchToProps)(UserProfile);

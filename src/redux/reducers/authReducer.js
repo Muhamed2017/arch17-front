@@ -4,6 +4,7 @@ const userDefaultState ={
     user:null,
     isLoggedIn:false,
     loading:false,
+    info:null
 }
 
 const userInfo = JSON.parse(localStorage.getItem("user")) ?? userDefaultState;
@@ -21,7 +22,13 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 ...state,
                 loading: false,
                 user:action.payload,
-                isLoggedIn:true
+                isLoggedIn:true,
+                info:action.payload
+            }
+        case actions.SET_NAV_INFO:
+            return {
+                ...state,
+                info: action.payload,
             }
         case actions.SIGNUP_EMAIL_PASSWORD_FAIL:
             return {
@@ -38,8 +45,19 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
             return {
                 ...state,
                 loading: false,
-                isLoggedIn: true
+                user:action.payload,
+                isLoggedIn: true,
+                info: action.payload
             }
+             case actions.VANILLA_SIGNIN_EMAIL_PASSWORD_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                user:action.payload,
+                isLoggedIn: true,
+                info: action.payload
+            }
+           
         case actions.SIGNIN_EMAIL_PASSWORD_FAIL:
             return {
                 ...state,
@@ -50,7 +68,9 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 ...state,
                 loading: false,
                 user: action.payload,
-                isLoggedIn: true
+                isLoggedIn: true,
+                info: action.payload
+
             }
         case actions.FACEBOOK_SIGNUP_REQUEST:
             return {
@@ -63,27 +83,17 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 ...state,
                 loading: false,
                 user: action.payload,
-                isLoggedIn: true
+                isLoggedIn: true,
+                info: action.payload
+
             }
             case actions.LOGOUT:
                 return {
                     ...state,
                     user:null,
-                    isLoggedIn:false
+                    isLoggedIn:false,
+                    info:null
                 }
-        // case actions.NORMAL_SIGNUP_REQUEST:
-        //     return {
-        //         ...state,
-        //         loading: true,
-        //         // isLoggedIn: false
-        //     }
-        // case actions.NORMAL_SIGNUP_SUCEESS:
-        //     return {
-        //         ...state,
-        //         loading: false,
-        //         isLoggedIn: true,
-        //         normal_user:action.payload
-        //     }
         default:
             return state;
     }
