@@ -169,23 +169,24 @@ class Settings extends Component {
     this.setState({ prfl_loading: false });
    }, 500);
   }
-  if (this.state.provider === "google.com") {
+  if (
+   this.state.provider === "google.com" ||
+   this.state.provider === "facebook.com"
+  ) {
    auth.currentUser
     .updateProfile({
      displayName: `${this.state.fname} ${this.state.lname}`,
     })
     .then(() => {
-     console.log("profile google updated");
+     console.log("profile face or google updated updated");
      console.log(auth.currentUser);
      this.props.setNav(auth.currentUser);
      this.setState({ prfl_loading: false });
     });
    console.log(auth.currentUser);
    this.props.setNav(auth.currentUser);
-   //    this.setState({ prfl_loading: false });
   } else {
    console.log("not signed in, please sign in and try again");
-   //    this.setState({ prfl_loading: false });
   }
  };
  dataURLtoFile = (dataurl, filename) => {
