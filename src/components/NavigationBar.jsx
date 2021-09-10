@@ -38,10 +38,11 @@ class NavigationBar extends Component {
  componentDidMount() {
   auth.onAuthStateChanged((user) => {
    if (user) {
+    console.log(user);
     this.setState({ user });
     this.props.setNav(user);
    } else {
-    this.props.setNav(null);
+    // this.props.setNav(null);
    }
   });
  }
@@ -140,7 +141,10 @@ class NavigationBar extends Component {
           <NavDropdown
            className="test-name"
            //    title={this.props.userInfo.user?.displayName}
-           title={this.props.userInfo?.info?.displayName}
+           title={
+            this.props.userInfo?.info?.displayName
+            // this.props.userInfo.info.phoneNumber
+           }
            style={{
             paddingTop: "5px",
             fontWeight: "500",

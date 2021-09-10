@@ -1,22 +1,91 @@
 import React, { useState } from "react";
-import Form from "react-bootstrap/Form";
-import { Container, Col, Row } from "react-bootstrap";
-import { FaLinkedinIn, FaFacebookF, FaGoogle } from "react-icons/fa";
+// import Form from "react-bootstrap/Form";
+import { Container, Col, Row, Form, Modal, Button } from "react-bootstrap";
+import { FaLinkedinIn, FaFacebookF } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 import { connect } from "react-redux";
 import { isNotEmptyString } from "@formiz/validations";
+import firebase from "firebase/app";
+// import {auth} from ''
+import { auth } from "./../firebase";
 import {
  signupEmailPassword,
  signupFacebook,
  signupGoogle,
  normalSignupRequest,
+ setUserInfoAction,
 } from "../redux/actions/authActions";
 import HashLoader from "react-spinners/HashLoader";
+import {
+ phoneSigninRequest,
+ phoneSignupSuccess,
+} from "./../redux/actions/authActions";
 const Register = (props) => {
  const [fname, setFname] = useState("");
  const [lname, setLname] = useState("");
  const [email, setEmail] = useState("");
  const [password, setPassword] = useState("");
+ const [phone, setPhone] = useState("");
+ const [vCode, setVCode] = useState("");
+ const [confResult, setConfResult] = useState("");
+ const [phoneLoading, setPhoneLoading] = useState(false);
+ const [phoneCodeMoadl, setPhoneCodeModal] = useState(false);
 
+ const phoneModal_close = () => {
+  setPhoneCodeModal(false);
+ };
+ const setUpRecaptch = () => {
+  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(
+   "recaptch-container",
+   {
+    size: "invisible",
+    callback: (response) => {
+     onSignInSubmit();
+     console.log(response);
+    },
+   }
+  );
+ };
+ const onSignInSubmit = () => {
+  //   if (auth.currentUser) {
+  //    props.setNav(auth.currentUser);
+  //    console.log(auth.currentUser);
+  //    auth.currentUser.reload().then(() => {
+  //     console.log("logged out");
+  //    });
+  //    return;
+  //   }
+  setUpRecaptch();
+
+  props.dispatchPhoneSigninRequest();
+  setPhoneLoading(true);
+  const phoneNumber = phone;
+  const appVerifier = window.recaptchaVerifier;
+  firebase
+   .auth()
+   .signInWithPhoneNumber(phoneNumber, appVerifier)
+   .then((confirmationResult) => {
+    setConfResult(confirmationResult);
+    setPhoneCodeModal(true);
+    console.log(confirmationResult);
+    window.confirmationResult = confirmationResult;
+   })
+   .catch((error) => {
+    console.log(`SMS not sent, try again ${error}`);
+   });
+ };
+ const validateCode = () => {
+  confResult
+   .confirm(vCode)
+   .then((userCredentials) => {
+    props.dispatchPhoneSigninSuccess(userCredentials.user);
+    props.setNav(userCredentials.user);
+    console.log(userCredentials.user);
+   })
+   .catch((err) => {
+    console.log(err);
+   });
+ };
  const handleRegularSignup = () => {
   props.dispatchRegularSignup(`${fname} ${lname}`, email, password);
   console.log(props.isLoggedIn);
@@ -38,6 +107,16 @@ const Register = (props) => {
         <h6>The world platform for architecture & design</h6>
        </div>
        <Form noValidate>
+        <Form.Group>
+         <Form.Control
+          id="phone"
+          name="phone"
+          type="phone"
+          placeholder="Enter Phone"
+          onChange={(e) => setPhone(e.target.value)}
+         />
+        </Form.Group>
+
         <Form.Group>
          <Row>
           <Col>
@@ -99,6 +178,24 @@ const Register = (props) => {
           <>Continue</>
          )}
         </button>
+        <button
+         style={{ background: "rgb(25 22 22)" }}
+         className="coninue-btn regular-auth my-3"
+         onClick={(e) => {
+          e.preventDefault();
+          onSignInSubmit();
+         }}
+        >
+         {props.loading ? (
+          <>
+           Sending SMS Confirmation Code
+           <HashLoader color="#ffffff" loading={true} css={{}} size={35} />
+          </>
+         ) : (
+          <>Signup With Phone</>
+         )}
+        </button>
+        <div id="recaptch-container"></div>
 
         <div className="form-separator"></div>
         <button
@@ -135,7 +232,7 @@ const Register = (props) => {
          }}
         >
          <span>
-          <FaGoogle />
+          <FcGoogle />
          </span>
          Continue With Google {props.cout}
         </button>
@@ -160,19 +257,60 @@ const Register = (props) => {
      </Row>
     </Container>
    </div>
+   <Modal
+    id="price-request-modal"
+    className="arch-wide-modal product-modal pics-modal"
+    size="md"
+    show={phoneCodeMoadl}
+    onHide={phoneModal_close}
+    aria-labelledby="example-modal-sizes-title-lg"
+   >
+    <Modal.Header closeButton></Modal.Header>
+    <Modal.Body>
+     <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
+      <h6>Enter Code</h6>
+      <Form.Row as={Row} style={{ margin: "20px 0" }}>
+       <Form.Label column md={2}>
+        Code
+       </Form.Label>
+       <Col md={10}>
+        <Form.Control
+         placeholder="SMS CODE"
+         onChange={(e) => setVCode(e.target.value)}
+        />
+       </Col>
+      </Form.Row>
+      <Button
+       variant="danger"
+       onClick={() => validateCode()}
+       type="submit"
+       style={{
+        textAlign: "right",
+        background: "#E41E15",
+        display: "block",
+        float: "right",
+        marginRight: "12px",
+       }}
+      >
+       Continue
+      </Button>
+     </div>
+    </Modal.Body>
+   </Modal>
   </React.Fragment>
  );
 };
 const mapDispatchToProps = (dispatch) => ({
  dispatchRegularSignup: (fullName, email, password) =>
   dispatch(signupEmailPassword(fullName, email, password)),
- //  dispatchLogOut: () => dispatch(logginOut()),
  dispatchFacebookSignup: () => dispatch(signupFacebook()),
  dispatchGoogleSignup: () => dispatch(signupGoogle()),
  dispatchNormalSignup: (fname, lname, email, password) =>
   dispatch(normalSignupRequest(fname, lname, email, password)),
- //  dispatchGoogleSignup: () => dispatch(signupGoogle()),
- //  dispatchLinkedinSignup: () => dispatch(signupLinkedin()),
+ setNav: (info) => dispatch(setUserInfoAction(info)),
+ dispatchPhoneSigninRequest: () => dispatch(phoneSigninRequest()),
+ dispatchPhoneSigninSuccess: (info) => dispatch(phoneSignupSuccess(info)),
+ //  dispatchLogOut: () => dispatch(logginOut()),
 });
 const mapStateToProps = (state) => {
  return {

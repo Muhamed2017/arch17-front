@@ -13,6 +13,8 @@ const configs = {
 }
 const app = firebase.initializeApp(configs);
 export const auth = app.auth();
+auth.languageCode = 'it';
+
 auth.setPersistence('local').then(()=>{
     console.log("forever")
 })

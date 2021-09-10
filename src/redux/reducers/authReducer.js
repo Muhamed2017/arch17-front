@@ -87,6 +87,21 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 info: action.payload
 
             }
+            case actions.PHONE_SIGNUP_REQUEST:
+            return {
+                ...state,
+                loading: true,
+                isLoggedIn: false,
+
+            }
+        case actions.PHONE_SIGNUP_SUCCESS:
+            return {
+                ...state,
+                user:action.payload,
+                info:action.payload,
+                loading: false,
+                isLoggedIn: true,
+            }
             case actions.LOGOUT:
                 return {
                     ...state,

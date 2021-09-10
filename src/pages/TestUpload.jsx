@@ -43,7 +43,6 @@ const TestUpload = () => {
    const anchor = document.createElement("a");
    anchor.download = "cropPreview.png";
    anchor.href = URL.createObjectURL(blob);
-
   }, "image/png");
  };
 

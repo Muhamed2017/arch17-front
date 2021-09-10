@@ -1,12 +1,16 @@
-import { Component } from "react";
+import React, { Component } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import grado from "../../../src/grado.jpg";
-import app, { auth, fire } from "./../../firebase";
+import { auth } from "./../../firebase";
 import firebase from "firebase/app";
 import { connect } from "react-redux";
 import { Modal } from "react-bootstrap";
 import { toast, Flip } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
+import Cropper from "react-cropper";
+import "cropperjs/dist/cropper.css";
+import { compressImage } from "../addProduct/OptionsPrice";
+import axios from "axios";
 
 import {
  signinEmailPassword,
@@ -15,6 +19,7 @@ import {
 class Settings extends Component {
  constructor(props) {
   super(props);
+  this.cropperRef = React.createRef();
   this.state = {
    fname: "",
    lname: "",
@@ -27,16 +32,31 @@ class Settings extends Component {
    pswrd_loading: false,
    prfl_loading: false,
    change_password_modal: false,
+   profile_modal: false,
+   profile_src: "",
+   //  profile_img: null,
+   cropped_profile: null,
+   addProfileLoad: false,
   };
  }
-
+ profile_close = () => {
+  this.setState({ profile_modal: false });
+ };
  password_modal_close = () => {
   this.setState({ change_password_modal: false });
+ };
+ onChangeProfile = (e) => {
+  const file = e.target.files[0];
+  const src = URL.createObjectURL(file);
+  // this.setState({ profile_img: file });
+  this.setState({ profile_src: src });
+  console.log(file);
+  console.log(src);
  };
  componentDidMount() {
   auth.onAuthStateChanged((user) => {
    if (user) {
-    console.log(this.props);
+    console.log(this.props.info);
     console.log(user);
     this.setState({
      signgedin: true,
@@ -54,7 +74,8 @@ class Settings extends Component {
    fname: this.props.userInfo?.info?.displayName?.split(" ")[0],
    lname: this.props.userInfo?.info?.displayName?.split(" ")[1],
    email: this.props.userInfo?.info?.email ?? "",
-   phone: this.props.userInfo?.user?.phoneNumber ?? "",
+   phone: this.props.userInfo?.info?.phoneNumber ?? "",
+   photoURL: this.props.userInfo?.info?.photoURL ?? "",
   });
  }
 
@@ -79,7 +100,8 @@ class Settings extends Component {
   this.setUpRecaptch();
   const phoneNumber = "+201015862559";
   const appVerifier = window.recaptchaVerifier;
-  auth
+  firebase
+   .auth()
    .signInWithPhoneNumber(phoneNumber, appVerifier)
    .then((confirmationResult) => {
     // SMS sent. Prompt user to type the code from the message, then sign the
@@ -166,7 +188,58 @@ class Settings extends Component {
    //    this.setState({ prfl_loading: false });
   }
  };
+ dataURLtoFile = (dataurl, filename) => {
+  var arr = dataurl.split(","),
+   mime = arr[0].match(/:(.*?);/)[1],
+   bstr = atob(arr[1]),
+   n = bstr.length,
+   u8arr = new Uint8Array(n);
 
+  while (n--) {
+   u8arr[n] = bstr.charCodeAt(n);
+  }
+
+  return new File([u8arr], filename, { type: mime });
+ };
+ _crop() {
+  setTimeout(() => {
+   const imageElement = this.cropperRef?.current;
+   const cropper = imageElement?.cropper;
+   let cropped = cropper.getCroppedCanvas().toDataURL();
+   this.setState({ cropped_profile: cropped });
+   console.log(this.state.cropped_profile);
+  });
+ }
+ onProfilePicSubmit = async (e) => {
+  e.preventDefault();
+  this.setState({ addProfileLoad: true });
+
+  const fd = new FormData();
+  if (this.state.cropped_profile) {
+   fd.append(
+    "img[]",
+    await compressImage(this.dataURLtoFile(this.state.cropped_profile, "file"))
+   );
+   axios
+    .post("https://arch17-apis.herokuapp.com/api/upload/5", fd)
+    .then((response) => {
+     console.log(response.data.img[response.data.lastIndex].file_url);
+     auth.currentUser
+      .updateProfile({
+       photoURL: response.data.img[response.data.lastIndex].file_url,
+      })
+      .then(() => {
+       this.props.setNav(auth.currentUser);
+       console.log("updated");
+       this.setState({ addProfileLoad: false });
+       this.setState({ profile_modal: false });
+      });
+    })
+    .catch((error) => console.log(error));
+   // };
+  }
+  console.log(fd);
+ };
  handleFnameChange = (e) => {
   this.setState({ fname: e.target.value });
  };
@@ -191,14 +264,35 @@ class Settings extends Component {
    <>
     <Container fluid>
      <Row md={{ span: 12 }}>
-      <Col sm={12}>
-       <h2>Edit Profile</h2>
-      </Col>
+      <Col sm={12}></Col>
       <Col sm={3}>
        <h6>Profile Picture</h6>
        <div className="profile-container">
-        <img src={grado} alt="" />
+        {this.props.info?.photoURL ? (
+         <>
+          <img
+           src={this.props.info.photoURL}
+           alt={this.props.info.displayName}
+          />
+         </>
+        ) : (
+         <>
+          <img src={grado} alt={this.props.info.displayName} />
+         </>
+        )}
        </div>
+       <h2
+        onClick={() => {
+         this.setState({ profile_modal: true });
+        }}
+        style={{
+         textDecoration: "underline",
+         cursor: "pointer",
+         padding: "5px 0",
+        }}
+       >
+        Edit Profile
+       </h2>
       </Col>
       <Col sm={3}>
        <div className="profile-form">
@@ -290,10 +384,7 @@ class Settings extends Component {
        className="example-modals"
        keyboard={false}
       >
-       <Modal.Header closeButton>
-        {/* <Modal.Title>
-        </Modal.Title> */}
-       </Modal.Header>
+       <Modal.Header closeButton></Modal.Header>
        <Modal.Body>
         <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
          <Form.Row as={Row} style={{ margin: "20px 0" }}>
@@ -348,6 +439,54 @@ class Settings extends Component {
            <>Change</>
           )}
          </Button>
+        </div>
+       </Modal.Body>
+      </Modal>
+      <Modal
+       id="price-request-modal"
+       className="arch-wide-modal product-modal material-modal"
+       size="lg"
+       show={this.state.profile_modal}
+       onHide={() => this.profile_close()}
+       aria-labelledby="example-modal-sizes-title-lg"
+      >
+       <Modal.Header closeButton />
+       <Modal.Body>
+        <div className="option-add-label">Profile</div>
+        <Cropper
+         src={this.state.profile_src}
+         style={{ height: "100%", width: "100%" }}
+         ref={this.cropperRef}
+         initialAspectRatio="free"
+         guides={true}
+         cropend={this._crop.bind(this)}
+         ready={this._crop.bind(this)}
+         crossOrigin="anonymous"
+         preview=".image-preview"
+         scalable={false}
+         aspectRatio={1}
+         autoCropArea={1}
+         viewMode={1}
+         dragMode="move"
+         rotatable={false}
+         zoomOnWheel={true}
+         cropBoxMovable={true}
+         cropBoxResizable={true}
+         center={false}
+        />
+        <input type="file" onChange={this.onChangeProfile} />
+        <div as={Row} className="add-btn">
+         <div column md={12}>
+          <Button variant="danger" onClick={this.onProfilePicSubmit}>
+           {this.state.addProfileLoad ? (
+            <>
+             <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
+            </>
+           ) : (
+            <>Change</>
+           )}
+          </Button>
+         </div>
         </div>
        </Modal.Body>
       </Modal>

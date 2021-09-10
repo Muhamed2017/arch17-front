@@ -49,6 +49,13 @@ export const googleSignuoSuccess = user => ({
     type: actions.GOOGLE_SIGNUP_SUCCESS,
     payload: user
 })
+export const phoneSignupRequestCreator = () => ({
+    type: actions.PHONE_SIGNUP_REQUEST,
+})
+export const phoneSignupSuccessCreator = user => ({
+    type: actions.PHONE_SIGNUP_SUCCESS,
+    payload: user
+})
 export const normalSignupSuccess = user => ({
     type: actions.NORMAL_SIGNUP_SUCEESS,
     payload: user
@@ -209,6 +216,16 @@ export const signupGoogle = () => {
         }).catch((error) => {
             console.log(error.message)
         })
+    }
+}
+export const phoneSigninRequest = ()=>{
+return (dispatch)=>{
+    dispatch(phoneSignupRequestCreator())
+}
+}
+export const phoneSignupSuccess = (user)=>{
+    return (dispatch)=>{
+        dispatch(phoneSignupSuccessCreator(user))        
     }
 }
 export const signupFacebook= ()=>{

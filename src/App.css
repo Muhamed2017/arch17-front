@@ -118,7 +118,7 @@ input {
 .coninue-btn span {
  position: absolute;
  left: 24px;
- bottom: 5px;
+ bottom: 8px;
  font-size: 1.5rem;
 }
 
@@ -135,7 +135,9 @@ button.wechat-auth {
  background-color: #51c332;
 }
 button.google-auth {
- background-color: #e75238;
+ font-weight: 600;
+ color: #333232;
+ border: 0.4px solid #bbbbbb;
 }
 button.apple-auth {
  background-color: #313131;
