@@ -12,7 +12,11 @@ import {
  NavDropdown,
 } from "react-bootstrap";
 import { connect } from "react-redux";
-import { logginOut, setUserInfoAction } from "../redux/actions/authActions";
+import {
+ logginOut,
+ phoneSignupSuccess,
+ setUserInfoAction,
+} from "../redux/actions/authActions";
 import { BsChatFill } from "react-icons/bs";
 import { IoNotifications } from "react-icons/io5";
 class NavigationBar extends Component {
@@ -38,13 +42,16 @@ class NavigationBar extends Component {
  componentDidMount() {
   auth.onAuthStateChanged((user) => {
    if (user) {
+    this.props.loggingin(user);
     console.log(user);
     this.setState({ user });
+
     this.props.setNav(user);
    } else {
-    // this.props.setNav(null);
+    this.props.setNav(null);
    }
   });
+  this.props.setNav(auth.currentUser);
  }
  render() {
   return (
@@ -177,6 +184,7 @@ class NavigationBar extends Component {
 const mapDispatchToProps = (dispatch) => ({
  dispatchLogOut: () => dispatch(logginOut()),
  setNav: (info) => dispatch(setUserInfoAction(info)),
+ loggingin: (user) => dispatch(phoneSignupSuccess(user)),
 });
 const mapStateToProps = (state) => {
  return {

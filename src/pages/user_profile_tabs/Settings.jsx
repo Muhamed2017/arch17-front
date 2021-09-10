@@ -54,21 +54,22 @@ class Settings extends Component {
   console.log(src);
  };
  componentDidMount() {
-  auth.onAuthStateChanged((user) => {
-   if (user) {
-    console.log(this.props.info);
-    console.log(user);
-    this.setState({
-     signgedin: true,
-     provider: user.providerData[0].providerId,
-    });
-   } else {
-    this.setState({
-     signgedin: false,
-     provider: null,
-    });
-   }
-  });
+  // auth.onAuthStateChanged((user) => {
+  //  if (user) {
+  //   console.log(this.props.info);
+  //   this.props.setNav(user);
+  //   console.log(user);
+  //   this.setState({
+  //    signgedin: true,
+  //    provider: user.providerData[0].providerId,
+  //   });
+  //  } else {
+  //   this.setState({
+  //    signgedin: false,
+  //    provider: null,
+  //   });
+  //  }
+  // });
 
   this.setState({
    fname: this.props.userInfo?.info?.displayName?.split(" ")[0],

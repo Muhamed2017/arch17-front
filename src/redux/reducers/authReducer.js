@@ -28,6 +28,9 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
         case actions.SET_NAV_INFO:
             return {
                 ...state,
+                loading:false,
+                user:action.payload,
+                isLoggedIn:true,
                 info: action.payload,
             }
         case actions.SIGNUP_EMAIL_PASSWORD_FAIL:
