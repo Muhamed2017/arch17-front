@@ -151,14 +151,36 @@ class Settings extends Component {
  handleUpdateProfile = () => {
   this.setState({ prfl_loading: true });
 
-  if (this.state.signgedin && this.state.provider === "password") {
-   this.props.signin(
-    auth.currentUser.email,
-    "Muhamed10",
-    `${this.state.fname} ${this.state.lname}`,
-    this.state.email,
-    this.state.phone
-   );
+  if (
+   this.state.signgedin
+   //  && this.state.provider === "password"
+  ) {
+   //  this.props.signin(
+   //   auth.currentUser.email,
+   //   "Muhamed10",
+   //   `${this.state.fname} ${this.state.lname}`,
+   //   this.state.email,
+   //   this.state.phone
+   //  );
+   auth.currentUser
+    .updateProfile({
+     displayName: `${this.state.fname} ${this.state.lname}`,
+    })
+    .then(() => {
+     console.log("profile updated");
+     this.props.setNav(auth.currentUser);
+    });
+   //  if (this.state.email != auth.currentUser.email) {
+   //   auth
+   //    .signInWithEmailAndPassword(auth.currentUser.email, "Muhamed10")
+   //    .then((userCredntials) => {
+   //     userCredntials.user.updateEmail(this.state.email).then(() => {
+   //      console.log("re logged");
+
+   //     });
+   //    });
+   //  }
+
    setTimeout(() => {
     this.setState({ prfl_loading: false });
    }, 500);

@@ -59,6 +59,7 @@ class NavigationBar extends Component {
      signgedin: false,
      provider: null,
     });
+    this.props.setNav(auth.currentUser);
    }
   });
  }

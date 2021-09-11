@@ -21,10 +21,16 @@ import HashLoader from "react-spinners/HashLoader";
 const Login = (props) => {
  const [email, setEmail] = useState("");
  const [password, setPassword] = useState("");
+ const [phone, setPhone] = useState("");
 
  const handleRegularSignup = () => {
-  props.dispatchRegularSignup(email, password);
+  if (!email.includes("@")) {
+   props.dispatchRegularSignup(`${email}@arch17.com`, password);
+  } else {
+   props.dispatchRegularSignup(email, password);
+  }
   console.log(props.isLoggedIn);
+  console.log(phone);
  };
  return (
   <React.Fragment>
@@ -44,11 +50,11 @@ const Login = (props) => {
        <Form noValidate>
         <Form.Group>
          <Form.Control
-          type="email"
+          type="text"
           name="email"
           id="email"
           noValidate
-          placeholder="Email"
+          placeholder="Email Or Phone"
           onChange={(e) => setEmail(e.target.value)}
          />
         </Form.Group>

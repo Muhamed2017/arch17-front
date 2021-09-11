@@ -6,6 +6,8 @@ import { FcGoogle } from "react-icons/fc";
 import { connect } from "react-redux";
 import { isNotEmptyString } from "@formiz/validations";
 import firebase from "firebase/app";
+import { VerificationPin, StatusType } from "react-verification-pin";
+
 // import {auth} from ''
 import { auth } from "./../firebase";
 import {
@@ -30,10 +32,37 @@ const Register = (props) => {
  const [confResult, setConfResult] = useState("");
  const [phoneLoading, setPhoneLoading] = useState(false);
  const [phoneCodeMoadl, setPhoneCodeModal] = useState(false);
+ const [status, setStatus] = useState("process");
 
+ const handleOnFinish = (code) => {
+  // if (code === "111111") {
+  //  setTimeout(() => {
+  //   setStatus("error");
+  //  }, 3000);
+  // } else {
+  //  setTimeout(() => {
+  //   setStatus("success");
+  //  }, 3000);
+  // }
+  confResult
+   .confirm(code)
+   .then((userCredentials) => {
+    setStatus("success");
+
+    props.dispatchPhoneSigninSuccess(userCredentials.user);
+    props.setNav(userCredentials.user);
+    console.log(userCredentials.user);
+    setPhoneCodeModal(false);
+   })
+   .catch((err) => {
+    console.log(err);
+    setStatus("error");
+   });
+ };
  const phoneModal_close = () => {
   setPhoneCodeModal(false);
  };
+
  const setUpRecaptch = () => {
   window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(
    "recaptch-container",
@@ -47,16 +76,7 @@ const Register = (props) => {
   );
  };
  const onSignInSubmit = () => {
-  //   if (auth.currentUser) {
-  //    props.setNav(auth.currentUser);
-  //    console.log(auth.currentUser);
-  //    auth.currentUser.reload().then(() => {
-  //     console.log("logged out");
-  //    });
-  //    return;
-  //   }
   setUpRecaptch();
-
   props.dispatchPhoneSigninRequest();
   setPhoneLoading(true);
   const phoneNumber = phone;
@@ -74,22 +94,41 @@ const Register = (props) => {
     console.log(`SMS not sent, try again ${error}`);
    });
  };
- const validateCode = () => {
-  confResult
-   .confirm(vCode)
+
+ const handleSignupPhoneHack = () => {
+  setUpRecaptch();
+
+  const appVerifier = window.recaptchaVerifier;
+  const phoneNumber = phone;
+  const tail = "@arch17.com";
+  auth
+   .createUserWithEmailAndPassword(`${phone}${tail}`, password)
    .then((userCredentials) => {
-    props.dispatchPhoneSigninSuccess(userCredentials.user);
-    props.setNav(userCredentials.user);
-    console.log(userCredentials.user);
+    console.log("user.created");
+    userCredentials.user
+     .updateProfile({
+      displayName: `${fname} ${lname}`,
+     })
+     .then(() => {
+      userCredentials.user
+       .linkWithPhoneNumber(phoneNumber, appVerifier)
+       .then((confirmationResult) => {
+        setConfResult(confirmationResult);
+        window.confirmationResult = confirmationResult;
+        setPhoneCodeModal(true);
+        console.log("sms Sent");
+       });
+     });
    })
-   .catch((err) => {
-    console.log(err);
+   .catch((error) => {
+    console.log(error);
    });
  };
  const handleRegularSignup = () => {
   props.dispatchRegularSignup(`${fname} ${lname}`, email, password);
   console.log(props.isLoggedIn);
  };
+
  return (
   <React.Fragment>
    <div id="wrapper" className="auth-form">
@@ -107,16 +146,6 @@ const Register = (props) => {
         <h6>The world platform for architecture & design</h6>
        </div>
        <Form noValidate>
-        <Form.Group>
-         <Form.Control
-          id="phone"
-          name="phone"
-          type="phone"
-          placeholder="Enter Phone"
-          onChange={(e) => setPhone(e.target.value)}
-         />
-        </Form.Group>
-
         <Form.Group>
          <Row>
           <Col>
@@ -145,15 +174,79 @@ const Register = (props) => {
           </Col>
          </Row>
         </Form.Group>
-        <Form.Group>
-         <Form.Control
-          id="email"
-          name="email"
-          type="email"
-          placeholder="Enter email"
-          onChange={(e) => setEmail(e.target.value)}
-         />
-        </Form.Group>
+        <nav>
+         <div
+          class="nav nav-tabs"
+          id="nav-tab"
+          role="tablist"
+          style={{
+           alignItems: "center",
+           fontFamily: "Roboto",
+           marginBottom: "5px",
+          }}
+         >
+          <span style={{ padding: "0px 10px 0px 0" }}>Signup By:</span>
+          <button
+           class="nav-link active"
+           id="nav-home-tab"
+           data-bs-toggle="tab"
+           data-bs-target="#nav-home"
+           type="button"
+           role="tab"
+           aria-controls="nav-home"
+           aria-selected="true"
+          >
+           E-mail
+          </button>
+          <button
+           class="nav-link"
+           id="nav-profile-tab"
+           data-bs-toggle="tab"
+           data-bs-target="#nav-profile"
+           type="button"
+           role="tab"
+           aria-controls="nav-profile"
+           aria-selected="false"
+          >
+           Phone Number
+          </button>
+         </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+         <div
+          class="tab-pane fade show active"
+          id="nav-home"
+          role="tabpanel"
+          aria-labelledby="nav-home-tab"
+         >
+          <Form.Group>
+           <Form.Control
+            id="email"
+            name="email"
+            type="email"
+            placeholder="Enter email"
+            onChange={(e) => setEmail(e.target.value)}
+           />
+          </Form.Group>
+         </div>
+         <div
+          class="tab-pane fade"
+          id="nav-profile"
+          role="tabpanel"
+          aria-labelledby="nav-profile-tab"
+         >
+          <Form.Group>
+           <Form.Control
+            id="phone"
+            name="phone"
+            type="phone"
+            placeholder="Enter Phone"
+            onChange={(e) => setPhone(e.target.value)}
+           />
+          </Form.Group>
+         </div>
+        </div>
+
         <Form.Group controlId="formBasicPassword">
          <Form.Control
           type="password"
@@ -183,7 +276,8 @@ const Register = (props) => {
          className="coninue-btn regular-auth my-3"
          onClick={(e) => {
           e.preventDefault();
-          onSignInSubmit();
+          // onSignInSubmit();
+          handleSignupPhoneHack();
          }}
         >
          {props.loading ? (
@@ -212,7 +306,7 @@ const Register = (props) => {
         </button>
         <button
          className="coninue-btn linkedin-auth"
-         disabled={true}
+         disabled={{ disabled: true }}
          onClick={(e) => {
           //   e.preventDefault();
           //   props.dispatchLinkedinSignup();
@@ -260,7 +354,7 @@ const Register = (props) => {
    <Modal
     id="price-request-modal"
     className="arch-wide-modal product-modal pics-modal"
-    size="md"
+    size="xl"
     show={phoneCodeMoadl}
     onHide={phoneModal_close}
     aria-labelledby="example-modal-sizes-title-lg"
@@ -269,7 +363,7 @@ const Register = (props) => {
     <Modal.Body>
      <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
       <h6>Enter Code</h6>
-      <Form.Row as={Row} style={{ margin: "20px 0" }}>
+      {/* <Form.Row as={Row} style={{ margin: "20px 0" }}>
        <Form.Label column md={2}>
         Code
        </Form.Label>
@@ -279,10 +373,18 @@ const Register = (props) => {
          onChange={(e) => setVCode(e.target.value)}
         />
        </Col>
-      </Form.Row>
-      <Button
+      </Form.Row> */}
+      <VerificationPin
+       type="number"
+       inputsNumber={6}
+       status={status}
+       title="Your title here"
+       subTitle="Your subtitle here"
+       onFinish={handleOnFinish}
+      />
+      {/* <Button
        variant="danger"
-       onClick={() => validateCode()}
+       //  onClick={() => validateCode()}
        type="submit"
        style={{
         textAlign: "right",
@@ -293,7 +395,7 @@ const Register = (props) => {
        }}
       >
        Continue
-      </Button>
+      </Button> */}
      </div>
     </Modal.Body>
    </Modal>

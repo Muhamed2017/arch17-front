@@ -6,6 +6,7 @@ import profile from "../../src/profiles.jpg";
 import CollectionsTab from "./user_profile_tabs/CollectionsTab";
 import FollwingTab from "./user_profile_tabs/FollwingTab";
 import BocList from "./user_profile_tabs/BoqList";
+import firebase from "firebase/app";
 import Settings from "./user_profile_tabs/Settings";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
@@ -17,9 +18,21 @@ class UserProfile extends Component {
   super(props);
   this.state = {};
  }
- componentDidMount() {}
+ componentDidMount() {
+  //     this.props.setNav(auth.currentUser);
+  //     console.log()
+  //     const creds = firebase.auth.PhoneAuthProvider.PHONE_SIGN_IN_METHOD;
+  //     console.log(creds);
+  //     auth.currentUser.linkWithCredential({});
+  //   var credential = firebase.auth.PhoneAuthProvider.credential(confirmationResult.verificationId, code);
+  //     if (auth.currentUser) {
+  //      auth.currentUser.linkWithPhoneNumber(auth.currentUser.providerId).then(() => {
+  //       console.log("linked");
+  //      });
+  //     }
+ }
  render() {
-  if (!this.props.isLoggedIn && !auth.currentUser) return <Redirect to="/" />;
+  //   if (!this.props.isLoggedIn && !auth.currentUser) return <Redirect to="/" />;
   return (
    <React.Fragment>
     <div id="user-profile" className="bg-white">

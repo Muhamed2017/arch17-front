@@ -63,11 +63,29 @@ input {
 /* end of navigation */
 
 /* signin and signup form styles */
+
+.auth-form .nav-tabs {
+ border-bottom: none;
+}
+.auth-form .nav-tabs .nav-link {
+ border: none;
+ color: #000;
+ padding: 0.5rem 0.7em;
+}
+.auth-form .fade {
+ transition-duration: 0.078s;
+}
+.auth-form .nav-tabs .nav-link.active {
+ font-weight: 700;
+ color: #000;
+}
+
 .auth-form {
  height: 100%;
  max-width: 1200px;
  margin: 65px auto;
 }
+
 #wrapper .heading {
  text-align: center;
  margin: 0 auto 30px;
