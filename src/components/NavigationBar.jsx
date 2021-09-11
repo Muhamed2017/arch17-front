@@ -24,6 +24,7 @@ class NavigationBar extends Component {
   super(props);
   this.state = {
    photoURL: auth.currentUser?.photoURL,
+   user: auth.currentUser ?? null,
   };
  }
  handleLogout = () => {
@@ -44,13 +45,14 @@ class NavigationBar extends Component {
   this.setState({ photoURL: auth.currentUser?.photoURL });
   auth.onAuthStateChanged((user) => {
    if (user) {
-    console.log(this.props.info);
+    // console.log(this.props.info);
     this.props.setNav(user);
     console.log(user);
 
     this.setState({
      signgedin: true,
      provider: user.providerData[0].providerId,
+     user,
     });
    } else {
     this.setState({
@@ -61,6 +63,7 @@ class NavigationBar extends Component {
   });
  }
  render() {
+  const user = this.state.user;
   return (
    <div className="w-100 bg-white navbar-border-bottom sticky-top">
     <Container>
@@ -130,11 +133,13 @@ class NavigationBar extends Component {
             alignItems: "flex-end",
            }}
           >
-           {this.props.userInfo.user?.photoURL ? (
+           {/* {this.props.userInfo.user?.photoURL ? ( */}
+           {this.state.user?.photoURL ? (
             <>
              <img
               style={{ display: "block", borderRadius: "50%" }}
-              src={this.props.userInfo.user?.photoURL}
+              //   src={this.props.userInfo.user?.photoURL}
+              src={this.state.user.photoURL}
               alt=""
              />
             </>
@@ -156,7 +161,8 @@ class NavigationBar extends Component {
            className="test-name"
            //    title={this.props.userInfo.user?.displayName}
            title={
-            this.props.userInfo?.user?.displayName
+            this.props.userInfo?.user?.displayName ??
+            this.props.userInfo?.user?.phoneNumber
             // this.props.userInfo.info.phoneNumber
            }
            style={{
