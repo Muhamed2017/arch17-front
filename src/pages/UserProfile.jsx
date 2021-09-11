@@ -78,7 +78,9 @@ const mapDispatchToProps = (dispatch) => ({
 const mapStateToProps = (state) => {
  return {
   isLoggedIn: state.regularUser.isLoggedIn,
-  name: state.regularUser.info?.displayName,
+  name: state.regularUser.user?.displayName,
+  user: state.regularUser.user,
+  info: state.regularUser.info,
  };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(UserProfile);

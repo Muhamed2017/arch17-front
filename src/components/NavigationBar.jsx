@@ -22,15 +22,16 @@ import { IoNotifications } from "react-icons/io5";
 class NavigationBar extends Component {
  constructor(props) {
   super(props);
-
   this.state = {
-   //    displayName: this.props.userInfo.user.displayName,
-   user: null,
+   photoURL: auth.currentUser?.photoURL,
   };
  }
  handleLogout = () => {
-  this.props.dispatchLogOut();
-  window.location.reload();
+  auth.signOut().then(() => {
+   this.props.dispatchLogOut();
+   //    this.props.setNav(null);
+   //    window.location.reload();
+  });
  };
  handleNotify = () => {
   toast.success("Success Notification !", {
@@ -40,18 +41,24 @@ class NavigationBar extends Component {
   });
  };
  componentDidMount() {
+  this.setState({ photoURL: auth.currentUser?.photoURL });
   auth.onAuthStateChanged((user) => {
    if (user) {
-    this.props.loggingin(user);
-    console.log(user);
-    this.setState({ user });
-
+    console.log(this.props.info);
     this.props.setNav(user);
+    console.log(user);
+
+    this.setState({
+     signgedin: true,
+     provider: user.providerData[0].providerId,
+    });
    } else {
-    this.props.setNav(null);
+    this.setState({
+     signgedin: false,
+     provider: null,
+    });
    }
   });
-  this.props.setNav(auth.currentUser);
  }
  render() {
   return (
@@ -123,11 +130,11 @@ class NavigationBar extends Component {
             alignItems: "flex-end",
            }}
           >
-           {this.props.userInfo.user.photoURL ? (
+           {this.props.userInfo.user?.photoURL ? (
             <>
              <img
               style={{ display: "block", borderRadius: "50%" }}
-              src={this.props.userInfo.user.photoURL}
+              src={this.props.userInfo.user?.photoURL}
               alt=""
              />
             </>
@@ -149,7 +156,7 @@ class NavigationBar extends Component {
            className="test-name"
            //    title={this.props.userInfo.user?.displayName}
            title={
-            this.props.userInfo?.info?.displayName
+            this.props.userInfo?.user?.displayName
             // this.props.userInfo.info.phoneNumber
            }
            style={{
@@ -192,6 +199,7 @@ const mapStateToProps = (state) => {
   loading: state.regularUser.loading,
   userInfo: state.regularUser,
   info: state.regularUser.info,
+  user: state.regularUser.user,
  };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(NavigationBar);

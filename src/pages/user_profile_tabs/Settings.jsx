@@ -19,6 +19,7 @@ import {
 class Settings extends Component {
  constructor(props) {
   super(props);
+
   this.cropperRef = React.createRef();
   this.state = {
    fname: "",
@@ -54,35 +55,34 @@ class Settings extends Component {
   console.log(src);
  };
  componentDidMount() {
-  // auth.onAuthStateChanged((user) => {
-  //  if (user) {
-  //   console.log(this.props.info);
-  //   this.props.setNav(user);
-  //   console.log(user);
-  //   this.setState({
-  //    signgedin: true,
-  //    provider: user.providerData[0].providerId,
-  //   });
-  //  } else {
-  //   this.setState({
-  //    signgedin: false,
-  //    provider: null,
-  //   });
-  //  }
-  // });
+  // console.log(auth.currentUser.photoURL);
+  auth.onAuthStateChanged((user) => {
+   if (user) {
+    console.log(this.props.info);
+    this.props.setNav(user);
+    console.log(user);
+
+    this.setState({
+     signgedin: true,
+     provider: user.providerData[0].providerId,
+    });
+   } else {
+    this.setState({
+     signgedin: false,
+     provider: null,
+    });
+   }
+  });
 
   this.setState({
-   fname: this.props.userInfo?.info?.displayName?.split(" ")[0],
-   lname: this.props.userInfo?.info?.displayName?.split(" ")[1],
-   email: this.props.userInfo?.info?.email ?? "",
-   phone: this.props.userInfo?.info?.phoneNumber ?? "",
-   photoURL: this.props.userInfo?.info?.photoURL ?? "",
+   fname: this.props.userInfo?.user?.displayName?.split(" ")[0],
+   lname: this.props.userInfo?.user?.displayName?.split(" ")[1],
+   email: this.props.userInfo?.user?.email ?? "",
+   phone: this.props.userInfo?.user?.phoneNumber ?? "",
+   photoURL: this.props.userInfo?.user?.photoURL ?? "",
   });
  }
 
- handleCancel = () => {
-  //   this.setState({ change_password_modal: true });
- };
  setUpRecaptch = () => {
   window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(
    "recaptch-container",
@@ -121,12 +121,6 @@ class Settings extends Component {
   auth.currentUser.sendEmailVerification().then(() => {
    console.log("email sent");
   });
-  //   auth
-  //    .applyActionCode(`eD-dgxUCBypUD1Otsz0ldw45ag37ZgdVQn5trfse12oAAAF7yuyWDQ`)
-  //    .then(() => {
-  //     console.log("valid");
-  //    });
-  //   auth.currentUser.updatePassword()
  };
  changePassword = () => {
   this.setState({ pswrd_loading: true });
@@ -165,7 +159,6 @@ class Settings extends Component {
     this.state.email,
     this.state.phone
    );
-   this.props.setNav(auth.currentUser);
    setTimeout(() => {
     this.setState({ prfl_loading: false });
    }, 500);
@@ -185,7 +178,7 @@ class Settings extends Component {
      this.setState({ prfl_loading: false });
     });
    console.log(auth.currentUser);
-   this.props.setNav(auth.currentUser);
+   //  this.props.setNav(auth.currentUser);
   } else {
    console.log("not signed in, please sign in and try again");
   }
@@ -273,13 +266,13 @@ class Settings extends Component {
         {this.props.info?.photoURL ? (
          <>
           <img
-           src={this.props.info.photoURL}
-           alt={this.props.info.displayName}
+           src={this.props.info?.photoURL}
+           alt={this.props.info?.displayName}
           />
          </>
         ) : (
          <>
-          <img src={grado} alt={this.props.info.displayName} />
+          <img src={grado} alt={this.props.info?.displayName} />
          </>
         )}
        </div>
@@ -510,7 +503,7 @@ const mapStateToProps = (state) => {
   isLoggedIn: state.regularUser.isLoggedIn,
   loading: state.regularUser.loading,
   userInfo: state.regularUser,
-  info: state.regularUser.info,
+  info: state.regularUser.user,
  };
 };
 // export default Settings;

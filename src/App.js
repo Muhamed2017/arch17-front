@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Component} from 'react';
 import './App.css';
 import './Demo.css'
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
@@ -21,8 +21,18 @@ import "react-notifications-component/dist/theme.css";
 import UserProfile from './pages/UserProfile';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer} from 'react-toastify'
+import {auth} from './firebase'
+ class App extends Component {
+   constructor(props){
+     super(props)
+     this.state={
+     }
+   }
+   componentDidMount(){
+    //  console.log(auth.currentUser.photoURL)
 
-const  App=(props)=>{
+   }
+  render(){
   return (
     <ChakraProvider>
     <AuthProvider>
@@ -31,10 +41,10 @@ const  App=(props)=>{
           <Router>
             <Switch>
               <Route path="/signup" exact>
-                {props.isLoggedIn ? <Redirect to="/" /> : <Register />}
+                {this.props.isLoggedIn ? <Redirect to="/" /> : <Register />}
               </Route>
               <Route path="/signin" exact>
-                {props.isLoggedIn ? <Redirect to="/" /> : <Login />}
+                {this.props.isLoggedIn ? <Redirect to="/" /> : <Login />}
               </Route>
               {/* <Route path="/identity">
                 <AddProductWrapper />
@@ -100,12 +110,14 @@ const  App=(props)=>{
     </AuthProvider>
     </ChakraProvider>
   );
+              }
 }
 
 const mapStateToProps = (state) => {
   return {
     isLoggedIn: state.regularUser.isLoggedIn,
-    user:state.regularUser.user
+    user:state.regularUser.user,
+    info:state.regularUser.info
   }
 }
 export default connect(mapStateToProps)(App);
