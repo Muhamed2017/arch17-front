@@ -54,13 +54,13 @@ class NavigationBar extends Component {
     closeOnClick: false,
     style: {
      fontFamily: "Roboto",
-     //  fontSize: "1.2rem",
      color: "#fff",
-     //  width: "350px",
      backgroundColor: "#EAEAEA",
+     padding: "25px 0",
      margin: "auto",
     },
     autoClose: 20000,
+    className: "welcome-notify",
    }
   );
  };

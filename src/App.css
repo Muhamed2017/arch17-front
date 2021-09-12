@@ -1480,6 +1480,9 @@ span.learn-more {
  width: 100%;
  border-radius: 50%;
 }
+.welcome-notify .Toastify__close-button--white {
+ color: "#000" !important;
+}
 .profile-tabs .react-tabs__tab-panel {
  max-width: 1250px;
  margin: 30px auto !important;

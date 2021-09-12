@@ -114,11 +114,38 @@ return (dispatch)=>{
     .then((response)=>{
         dispatch(normalSignupSuccess(response.data))
         setNormalUserInfo(response.data)
-        toast.success(`Welcome ${response.data.user.fname} ${response.data.user.lname} You Can Update Your Profile Now`, {
-            position: toast.POSITION.BOTTOM_CENTER,
-            theme: "dark",
+        // toast.success(`Welcome ${response.data.user.fname} ${response.data.user.lname}` + `You Can` + <a href=`user/settings/">Update it now</a>+ `Now`, {
+        toast.success(<h2>Welcome {response.data.user.fname} You Can Update Your profile from <a href="/user" style={{textDecoration:"underline", color:"#fff"}}>here</a></h2>, {
+            position: toast.POSITION.BOTTOM_LEFT,
+            theme: "colored",
             transition: Flip,
+            closeOnClick: false,
+            fontFamily: "Roboto",
+            pauseOnHover: true,
+            autoClose: 10000,
+            style: {
+            fontFamily: "Roboto",
+            },
         });
+        // toast.success(   <h style={{ color: "#000" }}>
+        // `Welcome ${response.data.user.fname} ${response.data.user.lname}`,<a
+        // style={{ color: "#000", textDecoration: "underline" }}
+        // href="/user/settings">Update Your profile Now</a></h>,{
+        //     position: toast.POSITION.BOTTOM_CENTER,
+        //     theme: "white",
+        //     transition: Flip,
+        //     pauseOnHover: true,
+        //     closeOnClick: false,
+        //     style: {
+        //     fontFamily: "Roboto",
+        //     color: "#fff",
+        //     backgroundColor: "#EAEAEA",
+        //     padding: "25px 0",
+        //     margin: "auto",
+        //     },
+        //     autoClose: 20000,
+        //     className: "welcome-notify",
+        // })
         console.log(response)
     }
    )

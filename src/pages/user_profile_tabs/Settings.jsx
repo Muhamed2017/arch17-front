@@ -9,6 +9,7 @@ import { toast, Flip } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
 import Cropper from "react-cropper";
 import { IoWarning } from "react-icons/io5";
+import { IoMdCloudUpload } from "react-icons/io";
 import "cropperjs/dist/cropper.css";
 import { compressImage } from "../addProduct/OptionsPrice";
 import axios from "axios";
@@ -414,36 +415,48 @@ class Settings extends Component {
            />
           </Col>
          </Form.Group>
-         <Form.Group as={Row}>
-          <Col>
-           <Form.Label>Email</Form.Label>
-           <Form.Control
-            placeholder="Email"
-            onChange={this.handleEmailChange}
-            value={this.state.email}
-           />
-          </Col>
-         </Form.Group>
+         {this.props.userInfo.info?.email?.includes("+") ? (
+          <>
+           <Form.Group as={Row}>
+            <Col>
+             <Form.Label>Email</Form.Label>
+             <Form.Control
+              placeholder="Email"
+              onChange={this.handleEmailChange}
+              value={this.state.email}
+             />
+            </Col>
+           </Form.Group>
+          </>
+         ) : (
+          <></>
+         )}
 
          <Row md={{ span: 12 }}>
-          <Col md={6}>
-           <button
-            href="#"
-            style={{
-             textAlign: "right",
-             textDecoration: "underline",
-             fontWeight: "600",
-             color: "#000",
-             background: "transparent",
-             outline: "none",
-             border: "none",
-            }}
-            // onClick={this.changePasswordOpen}
-            onClick={this.changePasswordOpen}
-           >
-            Change Password
-           </button>
-          </Col>
+          {this.props.userInfo.info?.email?.includes("+") ? (
+           <>
+            <Col md={6}>
+             <button
+              href="#"
+              style={{
+               textAlign: "right",
+               textDecoration: "underline",
+               fontWeight: "600",
+               color: "#000",
+               background: "transparent",
+               outline: "none",
+               border: "none",
+              }}
+              // onClick={this.changePasswordOpen}
+              onClick={this.changePasswordOpen}
+             >
+              Change Password
+             </button>
+            </Col>
+           </>
+          ) : (
+           <></>
+          )}
           <Col md={6} style={{ textAlign: "right" }}>
            <button
             style={{
@@ -685,28 +698,61 @@ class Settings extends Component {
         <Modal.Header closeButton />
         <Modal.Body>
          <div className="option-add-label">Profile</div>
-         <Cropper
-          src={this.state.profile_src}
-          style={{ height: "100%", width: "100%" }}
-          ref={this.cropperRef}
-          initialAspectRatio="free"
-          guides={true}
-          cropend={this._crop.bind(this)}
-          ready={this._crop.bind(this)}
-          crossOrigin="anonymous"
-          preview=".image-preview"
-          scalable={false}
-          aspectRatio={1}
-          autoCropArea={1}
-          viewMode={1}
-          dragMode="move"
-          rotatable={false}
-          zoomOnWheel={true}
-          cropBoxMovable={true}
-          cropBoxResizable={true}
-          center={false}
-         />
-         <input type="file" onChange={this.onChangeProfile} />
+         <div className="cropper-box">
+          <Cropper
+           src={this.state.profile_src}
+           style={{ height: "100%", width: "100%" }}
+           ref={this.cropperRef}
+           initialAspectRatio="free"
+           guides={true}
+           cropend={this._crop.bind(this)}
+           ready={this._crop.bind(this)}
+           crossOrigin="anonymous"
+           preview=".image-preview"
+           scalable={false}
+           aspectRatio={1}
+           autoCropArea={1}
+           viewMode={1}
+           dragMode="move"
+           rotatable={false}
+           zoomOnWheel={true}
+           cropBoxMovable={true}
+           cropBoxResizable={true}
+           center={false}
+          />
+         </div>
+         <div style={{ position: "relative", width: "80px", height: "80px" }}>
+          <IoMdCloudUpload
+           style={{
+            position: "absolute",
+            top: "0",
+            left: "0",
+            right: "0",
+            bottom: "0",
+            fontSize: "5rem",
+            zIndex: 1,
+            background: "#e8e8e84a",
+            textAlign: "left",
+           }}
+          />
+          <input
+           type="file"
+           onChange={this.onChangeProfile}
+           style={{
+            position: "absolute",
+            background: "red",
+            opacity: 0,
+            top: "0",
+            left: "0",
+            right: "0",
+            bottom: "0",
+            width: "100%",
+            fontSize: "5rem",
+            zIndex: "2",
+           }}
+          />
+         </div>
+
          <div as={Row} className="add-btn">
           <div column md={12}>
            <Button variant="danger" onClick={this.onProfilePicSubmit}>

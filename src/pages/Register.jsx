@@ -56,7 +56,7 @@ const Register = (props) => {
      setStatus("success");
      props.updateInfo(userCredentials.user);
      presistInfo(userCredentials.user, true);
-    }, 3000);
+    }, 1000);
     props.dispatchPhoneSigninSuccess(userCredentials.user);
     setPhoneCodeModal(false);
    })
@@ -293,7 +293,11 @@ const Register = (props) => {
         >
          {props.loading ? (
           <>
-           Logging
+           {phoneSelected ? (
+            <>Sending SMS with Verification code </>
+           ) : (
+            <>Creating New Account</>
+           )}
            <HashLoader color="#ffffff" loading={true} css={{}} size={35} />
           </>
          ) : (
