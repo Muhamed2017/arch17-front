@@ -1,13 +1,8 @@
 import React, { useState } from "react";
 import Form from "react-bootstrap/Form";
 import { Container, Col, Row } from "react-bootstrap";
-import {
- FaLinkedinIn,
- FaFacebookF,
- FaAppleAlt,
- FaGoogle,
-} from "react-icons/fa";
-// import { AiFillWechat } from "react-icons/ai";
+import { FaLinkedinIn, FaFacebookF } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 import { connect } from "react-redux";
 import {
  //  signinEmailPassword,
@@ -120,7 +115,8 @@ const Login = (props) => {
          }}
         >
          <span>
-          <FaGoogle />
+          {/* <FaGoogle /> */}
+          <FcGoogle />
          </span>
          Continue With Google
         </button>
