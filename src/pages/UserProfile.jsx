@@ -8,6 +8,8 @@ import FollwingTab from "./user_profile_tabs/FollwingTab";
 import BocList from "./user_profile_tabs/BoqList";
 import firebase from "firebase/app";
 import Settings from "./user_profile_tabs/Settings";
+import blank from "../../src/blank.jpg";
+
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
 import { auth } from "./../firebase";
@@ -43,7 +45,7 @@ class UserProfile extends Component {
        <Col md={{ span: 12 }}>
         <div className="profile-section">
          <div className="profile-img">
-          <img src={this.props.photoURL ?? ""} alt="profile" />
+          <img src={this.props.photoURL ?? blank} alt="profile" />
          </div>
          <div className="profile-heading">
           <h2 className="name">{this.props.displayName}</h2>

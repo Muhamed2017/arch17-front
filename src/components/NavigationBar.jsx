@@ -36,12 +36,33 @@ class NavigationBar extends Component {
   });
  };
  handleNotify = () => {
-  toast.success("Success Notification !", {
-   position: toast.POSITION.BOTTOM_LEFT,
-   theme: "colored",
-   transition: Flip,
-   autoClose: 20000,
-  });
+  toast.success(
+   <h style={{ color: "#000" }}>
+    Welcome Muhamed ,
+    <a
+     style={{ color: "#000", textDecoration: "underline" }}
+     href="/user/settings"
+    >
+     Update Your profile Now
+    </a>
+   </h>,
+   {
+    position: toast.POSITION.BOTTOM_CENTER,
+    theme: "white",
+    transition: Flip,
+    pauseOnHover: true,
+    closeOnClick: false,
+    style: {
+     fontFamily: "Roboto",
+     //  fontSize: "1.2rem",
+     color: "#fff",
+     //  width: "350px",
+     backgroundColor: "#EAEAEA",
+     margin: "auto",
+    },
+    autoClose: 20000,
+   }
+  );
  };
  componentDidMount() {
   this.setState({ photoURL: auth.currentUser?.photoURL });

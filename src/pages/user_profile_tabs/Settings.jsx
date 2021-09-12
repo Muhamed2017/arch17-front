@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import grado from "../../../src/grado.jpg";
+import blank from "../../../src/blank.jpg";
 import { auth } from "./../../firebase";
 import firebase from "firebase/app";
 import { connect } from "react-redux";
@@ -13,7 +13,8 @@ import "cropperjs/dist/cropper.css";
 import { compressImage } from "../addProduct/OptionsPrice";
 import axios from "axios";
 import { Link } from "react-router-dom";
-
+import { Redirect } from "react-router";
+import { logginOut } from "./../../redux/actions/authActions";
 import {
  signinEmailPassword,
  setUserInfoAction,
@@ -32,6 +33,7 @@ class Settings extends Component {
    phone: "",
    password: "",
    new_password: "",
+   deletePassword: "",
    provider: null,
    signgedin: false,
    pswrd_loading: false,
@@ -139,14 +141,17 @@ class Settings extends Component {
  };
  handleDeleteSubmit = () => {
   this.setState({ deletingAcc: true });
-  // if (auth.currentUser) {
-  auth.currentUser?.delete().then(() => {
-   this.setState({ deletingAcc: true });
-   this.props.updateInfo(null);
-   presistInfo(null, false);
-   //  window.history.pushState("/");
-  });
-  // }
+  auth
+   .signInWithEmailAndPassword(
+    auth.currentUser.email,
+    this.state.deletePassword
+   )
+   .then((userCreds) => {
+    console.log(userCreds.user);
+    auth.currentUser.delete().then(() => {
+     this.props.dispatchLogOut();
+    });
+   });
  };
  changePassword = () => {
   this.setState({ pswrd_loading: true });
@@ -247,6 +252,9 @@ class Settings extends Component {
    console.log(this.state.cropped_profile);
   });
  }
+ updateEmail = () => {
+  // auth.currentUser.verify);
+ };
  onProfilePicSubmit = async (e) => {
   e.preventDefault();
   this.setState({ addProfileLoad: true });
@@ -300,10 +308,16 @@ class Settings extends Component {
  handlePasswordChange = (e) => {
   this.setState({ password: e.target.value });
  };
+
+ handleDeletePasswordChange = (e) => {
+  this.setState({ deletePassword: e.target.value });
+ };
+
  handleNewPasswordChange = (e) => {
   this.setState({ new_password: e.target.value });
  };
  render() {
+  if (!this.props.isLoggedIn || !auth.currentUser) return <Redirect to="/" />;
   return (
    <>
     <div id="user-settings">
@@ -349,7 +363,7 @@ class Settings extends Component {
           </>
          ) : (
           <>
-           <img src={grado} alt={this.props.info?.displayName} />
+           <img src={blank} alt={this.props.info?.displayName} />
           </>
          )}
         </div>
@@ -626,6 +640,17 @@ class Settings extends Component {
             </div>
            </Col>
           </Row>
+          <Form.Group as={Row} className="mb-2 px-3">
+           <Col>
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+             placeholder="Type your password"
+             onChange={this.handleDeletePasswordChange}
+             type="password"
+             value={this.state.deletePassword}
+            />
+           </Col>
+          </Form.Group>
           <Button
            variant="danger"
            onClick={this.handleDeleteSubmit}
@@ -714,6 +739,7 @@ const mapDispatchToProps = (dispatch) => ({
   dispatch(signinEmailPassword(email, password, newName, newEmail, phone)),
  setNav: (info) => dispatch(setUserInfoAction(info)),
  updateInfo: (information) => dispatch(updateInfo(information)),
+ dispatchLogOut: () => dispatch(logginOut()),
 });
 
 const mapStateToProps = (state) => {

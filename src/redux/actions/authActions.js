@@ -116,7 +116,7 @@ return (dispatch)=>{
         setNormalUserInfo(response.data)
         toast.success(`Welcome ${response.data.user.fname} ${response.data.user.lname} You Can Update Your Profile Now`, {
             position: toast.POSITION.BOTTOM_CENTER,
-            theme: "colored",
+            theme: "dark",
             transition: Flip,
         });
         console.log(response)
