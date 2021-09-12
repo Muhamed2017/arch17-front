@@ -415,7 +415,7 @@ class Settings extends Component {
            />
           </Col>
          </Form.Group>
-         {this.props.userInfo.info?.email?.includes("+") ? (
+         {!this.props.userInfo.info?.email?.includes("+") ? (
           <>
            <Form.Group as={Row}>
             <Col>
@@ -433,7 +433,7 @@ class Settings extends Component {
          )}
 
          <Row md={{ span: 12 }}>
-          {this.props.userInfo.info?.email?.includes("+") ? (
+          {!this.props.userInfo.info?.email?.includes("+") ? (
            <>
             <Col md={6}>
              <button
