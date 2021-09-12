@@ -22,6 +22,8 @@ import UserProfile from './pages/UserProfile';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer} from 'react-toastify'
 import {auth} from './firebase'
+import Settings from './pages/user_profile_tabs/Settings';
+import { Home } from './pages/Home';
  class App extends Component {
    constructor(props){
      super(props)
@@ -38,6 +40,7 @@ import {auth} from './firebase'
     <AuthProvider>
     <React.Fragment>
           <NavigationBar />
+          {/* <Home/> */}
           <Router>
             <Switch>
               <Route path="/signup" exact>
@@ -68,9 +71,15 @@ import {auth} from './firebase'
                <Route path="/user" exact>
                 <UserProfile/>
               </Route>
+              <Route path='/user/settings' exact>
+                <Settings/>
+              </Route>
              <Route path="/add-product" exact><Kind />
        </Route>
               <Route path="/editor" exact><TextEditor />
+              </Route>
+              <Route path='/'>
+                <Home/>
               </Route>
             </Switch>
           </Router>
@@ -103,6 +112,7 @@ import {auth} from './firebase'
                   <TestUpload />
                 </Route> */}
           {/* </Switch> */}
+
         {/* </Router> */} 
           <ToastContainer  />
 

@@ -12,6 +12,8 @@ import { connect } from "react-redux";
 import { Redirect } from "react-router";
 import { auth } from "./../firebase";
 import { setUserInfoAction } from "../redux/actions/authActions";
+import { Link } from "react-router-dom";
+// import { useHistory } from "react-router";
 
 class UserProfile extends Component {
  constructor(props) {
@@ -19,7 +21,7 @@ class UserProfile extends Component {
   this.state = {};
  }
  componentDidMount() {
-  //     this.props.setNav(auth.currentUser);
+  //   this.props.setNav(auth.currentUser);
   //     console.log()
   //     const creds = firebase.auth.PhoneAuthProvider.PHONE_SIGN_IN_METHOD;
   //     console.log(creds);
@@ -32,7 +34,7 @@ class UserProfile extends Component {
   //     }
  }
  render() {
-  //   if (!this.props.isLoggedIn && !auth.currentUser) return <Redirect to="/" />;
+  if (!this.props.isLoggedIn && !auth.currentUser) return <Redirect to="/" />;
   return (
    <React.Fragment>
     <div id="user-profile" className="bg-white">
@@ -41,16 +43,17 @@ class UserProfile extends Component {
        <Col md={{ span: 12 }}>
         <div className="profile-section">
          <div className="profile-img">
-          <img src={profile} alt="profile" />
+          <img src={this.props.photoURL ?? ""} alt="profile" />
          </div>
          <div className="profile-heading">
-          {/* <h2 className="name">Muhamed Mahdy</h2> */}
-          <h2 className="name">{this.props.name}</h2>
+          <h2 className="name">{this.props.displayName}</h2>
           <p className="join-design">Join 17Designclub</p>
          </div>
-         <button className="profile-settings-btn">
-          <IoMdSettings /> Settings
-         </button>
+         <Link to="/user/settings">
+          <button className="profile-settings-btn">
+           <IoMdSettings /> Settings
+          </button>
+         </Link>
         </div>
        </Col>
        <Col md={{ span: 12 }}>
@@ -60,7 +63,7 @@ class UserProfile extends Component {
            <Tab>Collection</Tab>
            <Tab>Follwing</Tab>
            <Tab>BOQ Lists</Tab>
-           <Tab>Setting</Tab>
+           {/* <Tab>Setting</Tab> */}
           </TabList>
           <TabPanel>
            <CollectionsTab />
@@ -71,9 +74,9 @@ class UserProfile extends Component {
           <TabPanel>
            <BocList />
           </TabPanel>
-          <TabPanel>
-           <Settings />
-          </TabPanel>
+          {/* <TabPanel> */}
+          {/* <Settings /> */}
+          {/* </TabPanel> */}
          </Tabs>
         </div>
        </Col>
@@ -94,6 +97,8 @@ const mapStateToProps = (state) => {
   name: state.regularUser.user?.displayName,
   user: state.regularUser.user,
   info: state.regularUser.info,
+  displayName: state.regularUser.displayName,
+  photoURL: state.regularUser.photoURL,
  };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(UserProfile);

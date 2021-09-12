@@ -1442,9 +1442,43 @@ span.learn-more {
  box-shadow: none !important;
  padding: 0;
 }
+#user-settings {
+ /* max-width: 80%; */
+ margin: 0 auto;
+ min-height: 100vh;
+ background-color: #fff;
+ padding: 100px;
+}
+#user-settings .form-group {
+ margin-bottom: 25px;
+ /* margin: auto; */
+}
+#user-settings .profile-form {
+ max-width: 550px;
+ margin: auto;
+}
+#user-settings .form-control {
+ min-height: 45px;
+ /* border-radius: 3px; */
+ border-color: #15141469 !important;
+}
+#user-settings label {
+ font-weight: 600;
+ font-size: 0.8rem;
+}
 #user-profile,
 #designer-profile {
  min-height: 100vh;
+}
+.profile-container {
+ width: 80%;
+ margin: auto;
+ max-width: 190px;
+}
+.profile-container img {
+ display: block;
+ width: 100%;
+ border-radius: 50%;
 }
 .profile-tabs .react-tabs__tab-panel {
  max-width: 1250px;

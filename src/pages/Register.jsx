@@ -6,7 +6,7 @@ import { FcGoogle } from "react-icons/fc";
 import { connect } from "react-redux";
 import { isNotEmptyString } from "@formiz/validations";
 import firebase from "firebase/app";
-import { VerificationPin, StatusType } from "react-verification-pin";
+import { VerificationPin } from "react-verification-pin";
 
 // import {auth} from ''
 import { auth } from "./../firebase";
@@ -16,6 +16,9 @@ import {
  signupGoogle,
  normalSignupRequest,
  setUserInfoAction,
+ logginOut,
+ presistInfo,
+ updateInfo,
 } from "../redux/actions/authActions";
 import HashLoader from "react-spinners/HashLoader";
 import {
@@ -33,6 +36,8 @@ const Register = (props) => {
  const [phoneLoading, setPhoneLoading] = useState(false);
  const [phoneCodeMoadl, setPhoneCodeModal] = useState(false);
  const [status, setStatus] = useState("process");
+ const [phoneSelected, setPhoneSelected] = useState(false);
+ const [emailSelected, setEmailSelected] = useState(true);
 
  const handleOnFinish = (code) => {
   // if (code === "111111") {
@@ -47,16 +52,20 @@ const Register = (props) => {
   confResult
    .confirm(code)
    .then((userCredentials) => {
-    setStatus("success");
-
+    setTimeout(() => {
+     setStatus("success");
+     props.updateInfo(userCredentials.user);
+     presistInfo(userCredentials.user, true);
+    }, 3000);
     props.dispatchPhoneSigninSuccess(userCredentials.user);
-    props.setNav(userCredentials.user);
-    console.log(userCredentials.user);
     setPhoneCodeModal(false);
    })
    .catch((err) => {
     console.log(err);
     setStatus("error");
+    auth.signOut().then(() => {
+     props.dispatchLogOut();
+    });
    });
  };
  const phoneModal_close = () => {
@@ -70,6 +79,7 @@ const Register = (props) => {
     size: "invisible",
     callback: (response) => {
      onSignInSubmit();
+     //  handleSignupPhoneHack();
      console.log(response);
     },
    }
@@ -95,8 +105,18 @@ const Register = (props) => {
    });
  };
 
+ const hadleEmailPhoneContinueButton = () => {
+  if (phoneSelected) {
+   handleSignupPhoneHack();
+  }
+  if (emailSelected) {
+   handleRegularSignup();
+   props.dispatchNormalSignup(fname, lname, email, password);
+  }
+ };
  const handleSignupPhoneHack = () => {
   setUpRecaptch();
+  props.dispatchPhoneSigninRequest();
 
   const appVerifier = window.recaptchaVerifier;
   const phoneNumber = phone;
@@ -176,7 +196,7 @@ const Register = (props) => {
         </Form.Group>
         <nav>
          <div
-          class="nav nav-tabs"
+          className="nav nav-tabs"
           id="nav-tab"
           role="tablist"
           style={{
@@ -187,7 +207,7 @@ const Register = (props) => {
          >
           <span style={{ padding: "0px 10px 0px 0" }}>Signup By:</span>
           <button
-           class="nav-link active"
+           className="nav-link active"
            id="nav-home-tab"
            data-bs-toggle="tab"
            data-bs-target="#nav-home"
@@ -195,11 +215,15 @@ const Register = (props) => {
            role="tab"
            aria-controls="nav-home"
            aria-selected="true"
+           onClick={() => {
+            console.log("email selected");
+            setPhoneSelected(true);
+           }}
           >
            E-mail
           </button>
           <button
-           class="nav-link"
+           className="nav-link"
            id="nav-profile-tab"
            data-bs-toggle="tab"
            data-bs-target="#nav-profile"
@@ -207,14 +231,18 @@ const Register = (props) => {
            role="tab"
            aria-controls="nav-profile"
            aria-selected="false"
+           onClick={() => {
+            console.log("phone selected");
+            setPhoneSelected(true);
+           }}
           >
            Phone Number
           </button>
          </div>
         </nav>
-        <div class="tab-content" id="nav-tabContent">
+        <div className="tab-content" id="nav-tabContent">
          <div
-          class="tab-pane fade show active"
+          className="tab-pane fade show active"
           id="nav-home"
           role="tabpanel"
           aria-labelledby="nav-home-tab"
@@ -230,7 +258,7 @@ const Register = (props) => {
           </Form.Group>
          </div>
          <div
-          class="tab-pane fade"
+          className="tab-pane fade"
           id="nav-profile"
           role="tabpanel"
           aria-labelledby="nav-profile-tab"
@@ -258,8 +286,9 @@ const Register = (props) => {
          className="coninue-btn regular-auth"
          onClick={(e) => {
           e.preventDefault();
-          handleRegularSignup();
-          props.dispatchNormalSignup(fname, lname, email, password);
+          hadleEmailPhoneContinueButton();
+          // handleRegularSignup();
+          // props.dispatchNormalSignup(fname, lname, email, password);
          }}
         >
          {props.loading ? (
@@ -271,7 +300,7 @@ const Register = (props) => {
           <>Continue</>
          )}
         </button>
-        <button
+        {/* <button
          style={{ background: "rgb(25 22 22)" }}
          className="coninue-btn regular-auth my-3"
          onClick={(e) => {
@@ -280,15 +309,20 @@ const Register = (props) => {
           handleSignupPhoneHack();
          }}
         >
-         {props.loading ? (
+         {phoneLoading ? (
           <>
            Sending SMS Confirmation Code
-           <HashLoader color="#ffffff" loading={true} css={{}} size={35} />
+           <HashLoader
+            color="#ffffff"
+            loading={phoneLoading}
+            css={{}}
+            size={35}
+           />
           </>
          ) : (
           <>Signup With Phone</>
          )}
-        </button>
+        </button> */}
         <div id="recaptch-container"></div>
 
         <div className="form-separator"></div>
@@ -354,7 +388,7 @@ const Register = (props) => {
    <Modal
     id="price-request-modal"
     className="arch-wide-modal product-modal pics-modal"
-    size="xl"
+    size="lg"
     show={phoneCodeMoadl}
     onHide={phoneModal_close}
     aria-labelledby="example-modal-sizes-title-lg"
@@ -412,7 +446,8 @@ const mapDispatchToProps = (dispatch) => ({
  setNav: (info) => dispatch(setUserInfoAction(info)),
  dispatchPhoneSigninRequest: () => dispatch(phoneSigninRequest()),
  dispatchPhoneSigninSuccess: (info) => dispatch(phoneSignupSuccess(info)),
- //  dispatchLogOut: () => dispatch(logginOut()),
+ dispatchLogOut: () => dispatch(logginOut()),
+ updateInfo: (info) => dispatch(updateInfo(info)),
 });
 const mapStateToProps = (state) => {
  return {

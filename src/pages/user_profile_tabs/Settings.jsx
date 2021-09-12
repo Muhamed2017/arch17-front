@@ -8,13 +8,17 @@ import { Modal } from "react-bootstrap";
 import { toast, Flip } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
 import Cropper from "react-cropper";
+import { IoWarning } from "react-icons/io5";
 import "cropperjs/dist/cropper.css";
 import { compressImage } from "../addProduct/OptionsPrice";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 import {
  signinEmailPassword,
  setUserInfoAction,
+ updateInfo,
+ presistInfo,
 } from "../../redux/actions/authActions";
 class Settings extends Component {
  constructor(props) {
@@ -33,8 +37,10 @@ class Settings extends Component {
    pswrd_loading: false,
    prfl_loading: false,
    change_password_modal: false,
+   delete_acc_modal: false,
    profile_modal: false,
    profile_src: "",
+   deletingAcc: false,
    //  profile_img: null,
    cropped_profile: null,
    addProfileLoad: false,
@@ -56,30 +62,39 @@ class Settings extends Component {
  };
  componentDidMount() {
   // console.log(auth.currentUser.photoURL);
-  auth.onAuthStateChanged((user) => {
-   if (user) {
-    console.log(this.props.info);
-    this.props.setNav(user);
-    console.log(user);
+  // auth.onAuthStateChanged((user) => {
+  //  if (user) {
+  //   console.log(this.props.info);
+  //   this.props.setNav(user);
+  //   console.log(user);
 
-    this.setState({
-     signgedin: true,
-     provider: user.providerData[0].providerId,
-    });
-   } else {
-    this.setState({
-     signgedin: false,
-     provider: null,
-    });
-   }
-  });
+  //   this.setState({
+  //    signgedin: true,
+  //    provider: user.providerData[0].providerId,
+  //   });
+  //  } else {
+  //   this.setState({
+  //    signgedin: false,
+  //    provider: null,
+  //   });
+  //  }
+  // });
 
   this.setState({
-   fname: this.props.userInfo?.user?.displayName?.split(" ")[0],
-   lname: this.props.userInfo?.user?.displayName?.split(" ")[1],
-   email: this.props.userInfo?.user?.email ?? "",
-   phone: this.props.userInfo?.user?.phoneNumber ?? "",
-   photoURL: this.props.userInfo?.user?.photoURL ?? "",
+   //  fname: this.props.userInfo?.user?.displayName?.split(" ")[0],
+   //  lname: this.props.userInfo?.user?.displayName?.split(" ")[1],
+   // email: this.props.userInfo?.user?.email ?? "",
+   //  phone: this.props.userInfo?.user?.phoneNumber ?? "",
+   //  photoURL: this.props.userInfo?.user?.photoURL ?? "",
+   //  email: this.props.email,
+   fname: this.props.displayName?.split(" ")[0],
+   lname: this.props.displayName?.split(" ")[1],
+   photoURL: this.props.photoURL,
+   phone: this.props.userInfo?.info?.phoneNumber ?? "",
+   //  email: this.props.userInfo?.info?.email ?? "",
+   email: this.props.userInfo.info?.email?.includes("+")
+    ? "No Email"
+    : this.props.userInfo?.info?.email,
   });
  }
 
@@ -90,7 +105,7 @@ class Settings extends Component {
     size: "invisible",
     callback: (response) => {
      // reCAPTCHA solved, allow signInWithPhoneNumber.
-     this.onSignInSubmit();
+     //  this.onSignInSubmit();
      console.log(response);
     },
    }
@@ -122,6 +137,17 @@ class Settings extends Component {
    console.log("email sent");
   });
  };
+ handleDeleteSubmit = () => {
+  this.setState({ deletingAcc: true });
+  // if (auth.currentUser) {
+  auth.currentUser?.delete().then(() => {
+   this.setState({ deletingAcc: true });
+   this.props.updateInfo(null);
+   presistInfo(null, false);
+   //  window.history.pushState("/");
+  });
+  // }
+ };
  changePassword = () => {
   this.setState({ pswrd_loading: true });
   auth
@@ -148,38 +174,27 @@ class Settings extends Component {
  changePasswordOpen = () => {
   this.setState({ change_password_modal: true });
  };
+ deleteAccountOpen = () => {
+  this.setState({ delete_acc_modal: true });
+ };
+ deleteAccClose = () => {
+  this.setState({ delete_acc_modal: false });
+ };
  handleUpdateProfile = () => {
   this.setState({ prfl_loading: true });
 
-  if (
-   this.state.signgedin
-   //  && this.state.provider === "password"
-  ) {
-   //  this.props.signin(
-   //   auth.currentUser.email,
-   //   "Muhamed10",
-   //   `${this.state.fname} ${this.state.lname}`,
-   //   this.state.email,
-   //   this.state.phone
-   //  );
+  if (this.props.isLoggedIn) {
    auth.currentUser
     .updateProfile({
      displayName: `${this.state.fname} ${this.state.lname}`,
     })
     .then(() => {
      console.log("profile updated");
-     this.props.setNav(auth.currentUser);
+     auth.currentUser.reload().then(() => {
+      this.props.updateInfo(auth.currentUser);
+      presistInfo(auth.currentUser, true);
+     });
     });
-   //  if (this.state.email != auth.currentUser.email) {
-   //   auth
-   //    .signInWithEmailAndPassword(auth.currentUser.email, "Muhamed10")
-   //    .then((userCredntials) => {
-   //     userCredntials.user.updateEmail(this.state.email).then(() => {
-   //      console.log("re logged");
-
-   //     });
-   //    });
-   //  }
 
    setTimeout(() => {
     this.setState({ prfl_loading: false });
@@ -196,7 +211,8 @@ class Settings extends Component {
     .then(() => {
      console.log("profile face or google updated updated");
      console.log(auth.currentUser);
-     this.props.setNav(auth.currentUser);
+     this.props.updateInfo(auth.currentUser);
+     presistInfo(auth.currentUser, true);
      this.setState({ prfl_loading: false });
     });
    console.log(auth.currentUser);
@@ -246,7 +262,9 @@ class Settings extends Component {
        photoURL: response.data.img[response.data.lastIndex].file_url,
       })
       .then(() => {
-       this.props.setNav(auth.currentUser);
+       //  this.props.setNav(auth.currentUser);
+       this.props.updateInfo(auth.currentUser);
+       presistInfo(auth.currentUser, true);
        console.log("updated");
        this.setState({ addProfileLoad: false });
        this.setState({ profile_modal: false });
@@ -279,80 +297,251 @@ class Settings extends Component {
  render() {
   return (
    <>
-    <Container fluid>
-     <Row md={{ span: 12 }}>
-      <Col sm={12}></Col>
-      <Col sm={3}>
-       <h6>Profile Picture</h6>
-       <div className="profile-container">
-        {this.props.info?.photoURL ? (
-         <>
-          <img
-           src={this.props.info?.photoURL}
-           alt={this.props.info?.displayName}
-          />
-         </>
-        ) : (
-         <>
-          <img src={grado} alt={this.props.info?.displayName} />
-         </>
-        )}
-       </div>
-       <h2
-        onClick={() => {
-         this.setState({ profile_modal: true });
-        }}
-        style={{
-         textDecoration: "underline",
-         cursor: "pointer",
-         padding: "5px 0",
-        }}
+    <div id="user-settings">
+     <Container fluid>
+      <Row md={{ span: 12 }} style={{ marginBottom: "70px" }}>
+       <Col sm={4}>
+        <h2
+         style={{
+          fontSize: "2rem",
+          fontWeight: "600",
+          color: "#000",
+          fontFamily: "Roboto",
+          textDecoration: "underline",
+          textAlign: "center",
+         }}
+        >
+         Settings
+        </h2>
+       </Col>
+      </Row>
+      <Row md={{ span: 12 }}>
+       <Col sm={4}>
+        <h6
+         style={{
+          textAlign: "center",
+          padding: "5px 0 12px 0",
+          fontSize: "1.2rem",
+          fontWeight: 400,
+          color: "#000",
+         }}
+        >
+         Profile Picture
+        </h6>
+        <div className="profile-container">
+         {/* {this.props.info?.photoURL ? ( */}
+         {this.props.photoURL ? (
+          <>
+           <img
+            // src={this.props.info?.photoURL}
+            src={this.props.photoURL}
+            alt={this.props.displayName}
+           />
+          </>
+         ) : (
+          <>
+           <img src={grado} alt={this.props.info?.displayName} />
+          </>
+         )}
+        </div>
+        <h2
+         onClick={() => {
+          this.setState({ profile_modal: true });
+         }}
+         style={{
+          textDecoration: "underline",
+          cursor: "pointer",
+          padding: "10px 0",
+          textAlign: "center",
+          fontSize: "1.2rem",
+          fontWeight: 400,
+         }}
+        >
+         Change Picture
+        </h2>
+       </Col>
+       <Col sm={8}>
+        <div className="profile-form">
+         <Form.Group as={Row} md={{ span: 12 }}>
+          <Col md={6}>
+           <Form.Label>First Name</Form.Label>
+           <Form.Control
+            placeholder="First Name"
+            onChange={this.handleFnameChange}
+            value={this.state.fname}
+           />
+          </Col>
+          <Col md={6}>
+           <Form.Label>Last Name</Form.Label>
+           <Form.Control
+            placeholder="Last Name"
+            onChange={this.handleLnameChange}
+            value={this.state.lname}
+           />
+          </Col>
+         </Form.Group>
+         {/* <Form.Group as={Row} className=""></Form.Group> */}
+         <Form.Group as={Row} className="">
+          <Col>
+           <Form.Label>Phone</Form.Label>
+           <Form.Control
+            placeholder="Phone"
+            onChange={this.handlePhoneChange}
+            value={this.state.phone}
+           />
+          </Col>
+         </Form.Group>
+         <Form.Group as={Row}>
+          <Col>
+           <Form.Label>Email</Form.Label>
+           <Form.Control
+            placeholder="Email"
+            onChange={this.handleEmailChange}
+            value={this.state.email}
+           />
+          </Col>
+         </Form.Group>
+
+         <Row md={{ span: 12 }}>
+          <Col md={6}>
+           <button
+            href="#"
+            style={{
+             textAlign: "right",
+             textDecoration: "underline",
+             fontWeight: "600",
+             color: "#000",
+             background: "transparent",
+             outline: "none",
+             border: "none",
+            }}
+            // onClick={this.changePasswordOpen}
+            onClick={this.changePasswordOpen}
+           >
+            Change Password
+           </button>
+          </Col>
+          <Col md={6} style={{ textAlign: "right" }}>
+           <button
+            style={{
+             textAlign: "right",
+             textDecoration: "underline",
+             fontWeight: "600",
+             color: "#000",
+             background: "transparent",
+             outline: "none",
+             border: "none",
+            }}
+            onClick={this.deleteAccountOpen}
+           >
+            Delete Account
+           </button>
+          </Col>
+         </Row>
+         <Row span={{ span: 12 }} className="py-3">
+          <Col md={3}></Col>
+          <Col md={3}></Col>
+          <Col md={3} style={{ padding: "0" }}>
+           <Link to="/user">
+            <Button
+             style={{
+              display: "block",
+              float: "right",
+              marginRight: "12px",
+              padding: "7px 0",
+              width: "120px",
+              background: "#797979",
+              textAlign: "center",
+              border: "none",
+              //  outline:"none"
+             }}
+            >
+             Cancel
+            </Button>
+           </Link>
+           <div id="recaptch-container"></div>
+          </Col>
+
+          <Col md={3}>
+           <Button
+            variant="danger"
+            onClick={this.handleUpdateProfile}
+            type="submit"
+            style={{
+             //  textAlign: "right",
+             background: "#E41E15",
+             display: "block",
+             float: "right",
+             //  marginRight: "12px",
+             width: "120px",
+             textAlign: "center",
+             // padding: "6px 35px",
+             //  width: "120px",
+            }}
+           >
+            {this.state.prfl_loading ? (
+             <>
+              <ClipLoader
+               style={{ height: "20px" }}
+               color="#ffffff"
+               size={20}
+              />
+             </>
+            ) : (
+             <>Save</>
+            )}
+           </Button>
+          </Col>
+
+          {/* <Col md={6}>
+           <Button onClick={this.handleVerify}>Test Verify</Button>
+          </Col> */}
+         </Row>
+        </div>
+       </Col>
+      </Row>
+      <>
+       <Modal
+        show={this.state.change_password_modal}
+        onHide={this.password_modal_close}
+        className="example-modals"
+        keyboard={false}
        >
-        Edit Profile
-       </h2>
-      </Col>
-      <Col sm={3}>
-       <div className="profile-form">
-        <Form.Group as={Row} md={{ span: 12 }}>
-         <Col md={6}>
-          <Form.Label>First Name</Form.Label>
-          <Form.Control
-           placeholder="First Name"
-           onChange={this.handleFnameChange}
-           value={this.state.fname}
-          />
-         </Col>
-         <Col md={6}>
-          <Form.Label>Last Name</Form.Label>
-          <Form.Control
-           placeholder="Last Name"
-           onChange={this.handleLnameChange}
-           value={this.state.lname}
-          />
-         </Col>
-        </Form.Group>
-        <Form.Group as={Row} className=""></Form.Group>
-        <Form.Group as={Row} className="">
-         <Form.Label>Phone</Form.Label>
-         <Form.Control
-          placeholder="Phone"
-          onChange={this.handlePhoneChange}
-          value={this.state.phone}
-         />
-        </Form.Group>
-        <Form.Group as={Row}>
-         <Form.Label>Email</Form.Label>
-         <Form.Control
-          placeholder="Email"
-          onChange={this.handleEmailChange}
-          value={this.state.email}
-         />
-        </Form.Group>
-        <Row span={{ span: 12 }} className="py-3">
-         <Col md={3}>
+        <Modal.Header closeButton></Modal.Header>
+        <Modal.Body>
+         <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
+          <Form.Row as={Row} style={{ margin: "20px 0" }}>
+           <Form.Label column md={4}>
+            Old Password
+           </Form.Label>
+           <Col md={8}>
+            <Form.Control
+             type="password"
+             value={this.state.password}
+             placeholder="Old Password"
+             onChange={this.handlePasswordChange}
+            />
+           </Col>
+          </Form.Row>
+          <Form.Row as={Row} style={{ margin: "20px 0" }}>
+           <Form.Label column md={4}>
+            New Password
+           </Form.Label>
+           <Col md={8}>
+            <Form.Control
+             type="password"
+             placeholder="New Password"
+             onChange={this.handleNewPasswordChange}
+             value={this.state.new_password}
+            />
+           </Col>
+          </Form.Row>
           <Button
            variant="danger"
-           onClick={this.handleUpdateProfile}
+           onClick={() => {
+            this.changePassword();
+            this.setState({ embed_modal: false });
+           }}
            type="submit"
            style={{
             textAlign: "right",
@@ -362,153 +551,150 @@ class Settings extends Component {
             marginRight: "12px",
            }}
           >
-           {this.state.prfl_loading ? (
+           {this.state.pswrd_loading ? (
             <>
-             <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
-            </>
-           ) : (
-            <>Update</>
-           )}
-          </Button>
-         </Col>
-         <Col md={3}>
-          <Button
-           //   onClick={this.handleCancel  }
-           onClick={this.onSignInSubmit}
-          >
-           Cancel
-          </Button>
-          <div id="recaptch-container"></div>
-         </Col>
-         <Col md={6}>
-          <Button onClick={this.handleVerify}>Test Verify</Button>
-         </Col>
-        </Row>
-        <Row md={{ span: 12 }}>
-         <Col md={12}>
-          <a href="#" onClick={this.changePasswordOpen}>
-           Change Password
-          </a>
-         </Col>
-        </Row>
-       </div>
-      </Col>
-     </Row>
-     <>
-      <Modal
-       show={this.state.change_password_modal}
-       onHide={this.password_modal_close}
-       className="example-modals"
-       keyboard={false}
-      >
-       <Modal.Header closeButton></Modal.Header>
-       <Modal.Body>
-        <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
-         <Form.Row as={Row} style={{ margin: "20px 0" }}>
-          <Form.Label column md={4}>
-           Old Password
-          </Form.Label>
-          <Col md={8}>
-           <Form.Control
-            value={this.state.password}
-            placeholder="Enter Your Old Password"
-            onChange={this.handlePasswordChange}
-           />
-          </Col>
-         </Form.Row>
-         <Form.Row as={Row} style={{ margin: "20px 0" }}>
-          <Form.Label column md={4}>
-           New Password
-          </Form.Label>
-          <Col md={8}>
-           <Form.Control
-            placeholder="Enter Your New Password"
-            onChange={this.handleNewPasswordChange}
-            value={this.state.new_password}
-           />
-          </Col>
-         </Form.Row>
-         <Button
-          variant="danger"
-          onClick={() => {
-           this.changePassword();
-           this.setState({ embed_modal: false });
-          }}
-          type="submit"
-          style={{
-           textAlign: "right",
-           background: "#E41E15",
-           display: "block",
-           float: "right",
-           marginRight: "12px",
-          }}
-         >
-          {this.state.pswrd_loading ? (
-           <>
-            <ClipLoader
-             style={{ height: "20px" }}
-             color="#ffffff"
-             loading={this.state.loadCovers}
-             size={20}
-            />
-           </>
-          ) : (
-           <>Change</>
-          )}
-         </Button>
-        </div>
-       </Modal.Body>
-      </Modal>
-      <Modal
-       id="price-request-modal"
-       className="arch-wide-modal product-modal material-modal"
-       size="lg"
-       show={this.state.profile_modal}
-       onHide={() => this.profile_close()}
-       aria-labelledby="example-modal-sizes-title-lg"
-      >
-       <Modal.Header closeButton />
-       <Modal.Body>
-        <div className="option-add-label">Profile</div>
-        <Cropper
-         src={this.state.profile_src}
-         style={{ height: "100%", width: "100%" }}
-         ref={this.cropperRef}
-         initialAspectRatio="free"
-         guides={true}
-         cropend={this._crop.bind(this)}
-         ready={this._crop.bind(this)}
-         crossOrigin="anonymous"
-         preview=".image-preview"
-         scalable={false}
-         aspectRatio={1}
-         autoCropArea={1}
-         viewMode={1}
-         dragMode="move"
-         rotatable={false}
-         zoomOnWheel={true}
-         cropBoxMovable={true}
-         cropBoxResizable={true}
-         center={false}
-        />
-        <input type="file" onChange={this.onChangeProfile} />
-        <div as={Row} className="add-btn">
-         <div column md={12}>
-          <Button variant="danger" onClick={this.onProfilePicSubmit}>
-           {this.state.addProfileLoad ? (
-            <>
-             <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
+             <ClipLoader
+              style={{ height: "20px" }}
+              color="#ffffff"
+              loading={this.state.loadCovers}
+              size={20}
+             />
             </>
            ) : (
             <>Change</>
            )}
           </Button>
          </div>
-        </div>
-       </Modal.Body>
-      </Modal>
-     </>
-    </Container>
+        </Modal.Body>
+       </Modal>
+       <Modal
+        show={this.state.delete_acc_modal}
+        onHide={this.deleteAccClose}
+        closeButton
+        keyboard={false}
+        size="md"
+       >
+        {/* <Modal.Header closeButton></Modal.Header> */}
+        <Modal.Body>
+         <div className="modal-wrapper" style={{ padding: "15px", margin: "" }}>
+          <Row as={Row} style={{ margin: "0px 0" }}>
+           <p style={{ fontSize: "1.4rem", fontWeight: "600" }}>
+            Delete Account
+           </p>
+           <Col md={8}></Col>
+          </Row>
+          <Row as={Row} style={{ margin: "30px 0" }}>
+           <Col md={12}>
+            <div
+             className="warning-danger"
+             style={{
+              background: "#fbe9e7",
+              padding: "15px",
+              color: "#E41E15",
+             }}
+            >
+             <span
+              style={{
+               display: "inline-block",
+               fontSize: "2.5rem",
+               verticalAlign: "center",
+               padding: "0 10px",
+              }}
+             >
+              <IoWarning />
+             </span>
+             <p
+              style={{
+               color: "#c62828",
+               fontWeight: "600",
+               width: "80%",
+               fontSize: ".9rem",
+               display: "inline-block",
+              }}
+             >
+              After you deleting your account, it's permanently deleted.
+             </p>
+            </div>
+           </Col>
+          </Row>
+          <Button
+           variant="danger"
+           onClick={this.handleDeleteSubmit}
+           type="submit"
+           style={{
+            textAlign: "right",
+            background: "#E41E15",
+            display: "block",
+            float: "right",
+            marginRight: "12px",
+           }}
+          >
+           {this.state.deletingAcc ? (
+            <>
+             <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
+            </>
+           ) : (
+            <>Delete</>
+           )}
+          </Button>
+         </div>
+        </Modal.Body>
+       </Modal>
+       <Modal
+        id="price-request-modal"
+        className="arch-wide-modal product-modal material-modal"
+        size="lg"
+        show={this.state.profile_modal}
+        onHide={() => this.profile_close()}
+        aria-labelledby="example-modal-sizes-title-lg"
+       >
+        <Modal.Header closeButton />
+        <Modal.Body>
+         <div className="option-add-label">Profile</div>
+         <Cropper
+          src={this.state.profile_src}
+          style={{ height: "100%", width: "100%" }}
+          ref={this.cropperRef}
+          initialAspectRatio="free"
+          guides={true}
+          cropend={this._crop.bind(this)}
+          ready={this._crop.bind(this)}
+          crossOrigin="anonymous"
+          preview=".image-preview"
+          scalable={false}
+          aspectRatio={1}
+          autoCropArea={1}
+          viewMode={1}
+          dragMode="move"
+          rotatable={false}
+          zoomOnWheel={true}
+          cropBoxMovable={true}
+          cropBoxResizable={true}
+          center={false}
+         />
+         <input type="file" onChange={this.onChangeProfile} />
+         <div as={Row} className="add-btn">
+          <div column md={12}>
+           <Button variant="danger" onClick={this.onProfilePicSubmit}>
+            {this.state.addProfileLoad ? (
+             <>
+              <ClipLoader
+               style={{ height: "20px" }}
+               color="#ffffff"
+               size={20}
+              />
+             </>
+            ) : (
+             <>Change</>
+            )}
+           </Button>
+          </div>
+         </div>
+        </Modal.Body>
+       </Modal>
+      </>
+     </Container>
+    </div>
    </>
   );
  }
@@ -518,6 +704,7 @@ const mapDispatchToProps = (dispatch) => ({
  signin: (email, password, newName, newEmail, phone) =>
   dispatch(signinEmailPassword(email, password, newName, newEmail, phone)),
  setNav: (info) => dispatch(setUserInfoAction(info)),
+ updateInfo: (information) => dispatch(updateInfo(information)),
 });
 
 const mapStateToProps = (state) => {
@@ -526,6 +713,8 @@ const mapStateToProps = (state) => {
   loading: state.regularUser.loading,
   userInfo: state.regularUser,
   info: state.regularUser.user,
+  displayName: state.regularUser.displayName,
+  photoURL: state.regularUser.photoURL,
  };
 };
 // export default Settings;

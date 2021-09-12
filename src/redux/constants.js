@@ -28,7 +28,7 @@ export const PHONE_SIGNUP_SUCCESS = 'PHONE_SIGNUP_SUCCESS'
 export const NORMAL_SIGNUP_SUCEESS = 'NORMAL_SIGNUP_SUCEESS'
 export const NORMAL_SIGNIN_SUCEESS = 'NORMAL_SIGNIN_SUCEESS'
 export const LOGOUT = 'LOGOUT'
-
+export const UPDATE_INFO = 'UPDATE_INFO'
 
 // add products constants..
 

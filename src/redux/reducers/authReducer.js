@@ -1,14 +1,15 @@
 import * as actions from '../constants'
-
+// import { auth, googleProvider, facebookProvider } from './../../firebase';
 const userDefaultState ={
     user:null,
     isLoggedIn:false,
     loading:false,
-    info:null
+    info:null,
+    displayName:null,
+    photoURL:null
 }
 
 const userInfo = JSON.parse(localStorage.getItem("user")) ?? userDefaultState;
-
 // firebase email/password authentication reducer ...
 export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
     switch (action.type) {
@@ -23,7 +24,10 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 loading: false,
                 user:action.payload,
                 isLoggedIn:true,
-                info:action.payload
+                info:action.payload,
+                photoURL: action.payload.photoURL,
+                displayName: action.payload.displayName,
+                email: action.payload.email,
             }
         case actions.SET_NAV_INFO:
             return {
@@ -32,6 +36,8 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 user:action.payload,
                 isLoggedIn:true,
                 info: action.payload,
+                photoURL: action.payload.photoURL,
+                displayName: action.payload.displayName,
             }
         case actions.SIGNUP_EMAIL_PASSWORD_FAIL:
             return {
@@ -50,7 +56,9 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 loading: false,
                 user:action.payload,
                 isLoggedIn: true,
-                info: action.payload
+                info: action.payload,
+                photoURL: action.payload.photoURL,
+                displayName: action.payload.displayName,
             }
              case actions.VANILLA_SIGNIN_EMAIL_PASSWORD_SUCCESS:
             return {
@@ -58,7 +66,9 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 loading: false,
                 user:action.payload,
                 isLoggedIn: true,
-                info: action.payload
+                info: action.payload,
+                photoURL: action.payload.photoURL,
+                displayName: action.payload.displayName,
             }
            
         case actions.SIGNIN_EMAIL_PASSWORD_FAIL:
@@ -72,7 +82,9 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 loading: false,
                 user: action.payload,
                 isLoggedIn: true,
-                info: action.payload
+                info: action.payload,
+                photoURL: action.payload.photoURL,
+                displayName: action.payload.displayName,
 
             }
         case actions.FACEBOOK_SIGNUP_REQUEST:
@@ -87,8 +99,9 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 loading: false,
                 user: action.payload,
                 isLoggedIn: true,
-                info: action.payload
-
+                info: action.payload,
+                 photoURL: action.payload.photoURL,
+                displayName: action.payload.displayName,
             }
             case actions.PHONE_SIGNUP_REQUEST:
             return {
@@ -104,6 +117,9 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 info:action.payload,
                 loading: false,
                 isLoggedIn: true,
+                photoURL: action.payload.photoURL,
+                displayName: action.payload.displayName,
+
             }
             case actions.LOGOUT:
                 return {
@@ -111,6 +127,16 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                     user:null,
                     isLoggedIn:false,
                     info:null
+                }
+                case actions.UPDATE_INFO:
+                return {
+                    ...state,
+                    displayName:action.payload.displayName,
+                    photoURL:action.payload.photoURL,
+                email: action.payload.email,
+
+
+
                 }
         default:
             return state;

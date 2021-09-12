@@ -126,7 +126,7 @@ export default class CoverTab extends Component {
     <Modal
      id="price-request-modal"
      className="arch-wide-modal product-modal pics-modal"
-     size="xl"
+     size="lg"
      show={this.state.codeModal}
      onHide={this.codeModal_close}
      aria-labelledby="example-modal-sizes-title-lg"

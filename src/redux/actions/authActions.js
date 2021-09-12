@@ -77,36 +77,30 @@ export const logout = ()=>{
         type: actions.LOGOUT
     }
 }
-
+export const updateInfo = (information)=>{
+    return {
+        type:actions.UPDATE_INFO,
+        payload:information
+    }
+}
 
 export const signupEmailPassword= (fullName, email, password)=>{
     return (dispatch)=>{
         dispatch(emailPasswordSignup());
-        
         auth.createUserWithEmailAndPassword(email, password).then((userCredential) => {
             userCredential.user.updateProfile({
                 displayName: fullName,
-                // photoURL: 'ksmksmksmskmskmskmsksmksmskm'
-        
             }).then(()=>{
-                setUserInfo(userCredential.user)
+                // setUserInfo(userCredential.user)
                 dispatch(emailPasswordSignupSuccess(userCredential.user))
+                // dispatch(updateInfo(userCredential.user))
+                presistInfo(userCredential.user, true)
             })
-        //    console.log(userCredential.user.getIdTokenResult())
-            userCredential.user.getIdTokenResult().then((token)=>{
-                console.log(token)
-            })
-
-        
-            console.log(userCredential);
         })
        
     }
 }
-export const updateUserProfile=()=>{
 
-    
-}
 export const normalSignupRequest= (fname, lname, email, password)=>{
 const fd = new FormData();
 return (dispatch)=>{
@@ -131,15 +125,16 @@ return (dispatch)=>{
 }
 }
 
-
-
 export const vanillaSigninEmailPassword = (email, password)=>{
 return (dispatch)=>{
     dispatch(emailPasswordSignin())
     auth.signInWithEmailAndPassword(email, password).then((userCredential)=>{
         dispatch(emailPasswordSigninSuccess(userCredential.user))
-        setUserInfo(userCredential.user)
-        setUserInfoAction(userCredential.user)
+        // setUserInfo(userCredential.user)
+        // setUserInfoAction(userCredential.user)
+        dispatch(emailPasswordSignupSuccess(userCredential.user))
+        // dispatch(updateInfo(userCredential.user))
+        presistInfo(userCredential.user, true)
         console.log(userCredential);
     })
 }
@@ -153,12 +148,12 @@ export const signinEmailPassword = (email, password, newName, newEmail, phone) =
                     displayName: newName,
                 }).then(()=>{
                     console.log("Name updated")
-                    setUserInfo(userCredential.user)
+                    // setUserInfo(userCredential.user)
                     dispatch(setNavActionCreator(userCredential.user))
                 })
             } if (newEmail != "") {
                 userCredential.user.updateEmail(newEmail).then(() => {
-                    setUserInfo(userCredential.user)
+                    // setUserInfo(userCredential.user)
                     // setUserInfoAction(userCredential.user)
                     console.log("email updated")
                     console.log(newEmail, auth.currentUser)
@@ -171,7 +166,7 @@ export const signinEmailPassword = (email, password, newName, newEmail, phone) =
                 })
             }
             dispatch(emailPasswordSigninSuccess(userCredential.user))
-            setUserInfo(userCredential.user)
+            // setUserInfo(userCredential.user)
             setUserInfoAction(userCredential.user)
             console.log(userCredential);
         })
@@ -185,15 +180,24 @@ export const setUserInfoAction = (userData)=>{
     }
     
 }
-export const setUserInfo = (userData)=>{
+// export const setUserInfo = (userData)=>{
+//     const state = {
+//         user : userData,
+//         isLoggedIn:true,
+//         loading:false
+//     }
+//     localStorage.setItem('user',JSON.stringify(state))
+// }
+export const presistInfo = (info, loggingState)=>{
     const state = {
-        user : userData,
-        isLoggedIn:true,
-        loading:false
+        info: info,
+        isLoggedIn: loggingState,
+        displayName:info.displayName,
+        photoURL:info.photoURL,
+        email:info.email
     }
-    localStorage.setItem('user',JSON.stringify(state))
+    localStorage.setItem('user' ,JSON.stringify(state))
 }
-
 export const setNavInfo=(info)=>{}
 
 const setNormalUserInfo = (userData) => {
@@ -211,8 +215,10 @@ export const signupGoogle = () => {
         auth.signInWithPopup(googleProvider).then((userCredential) => {
             console.log(userCredential.user)
             dispatch(googleSignuoSuccess(userCredential.user))
-            setUserInfo(userCredential.user)
-            dispatch(setNavActionCreator(auth.currentUser))
+            dispatch(updateInfo(userCredential.user))
+            presistInfo(userCredential.user, true)
+            // setUserInfo(userCredential.user)
+            // dispatch(setNavActionCreator(auth.currentUser))
         }).catch((error) => {
             console.log(error.message)
         })
@@ -234,7 +240,8 @@ export const signupFacebook= ()=>{
       auth.signInWithPopup(facebookProvider).then((userCredential)=>{
           console.log(userCredential.user)
           dispatch(facebookSignupSuccess(userCredential.user))
-          setUserInfo(userCredential.user)        
+          dispatch(updateInfo(userCredential.user))
+          presistInfo(userCredential.user, true)
       }).catch(error=>{
           console.log(error.message)
       })

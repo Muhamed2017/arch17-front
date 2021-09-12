@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import logo from "../../src/logo-gray.png";
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router, Link } from "react-router-dom";
 import { toast, Flip, Bounce } from "react-toastify";
 import { auth } from "../firebase";
 import {
@@ -16,22 +16,23 @@ import {
  logginOut,
  phoneSignupSuccess,
  setUserInfoAction,
+ updateInfo,
 } from "../redux/actions/authActions";
 import { BsChatFill } from "react-icons/bs";
 import { IoNotifications } from "react-icons/io5";
+import UserProfile from "./../pages/UserProfile";
 class NavigationBar extends Component {
  constructor(props) {
   super(props);
   this.state = {
    photoURL: auth.currentUser?.photoURL,
    user: auth.currentUser ?? null,
+   displayName: this.props.displayName ?? "",
   };
  }
  handleLogout = () => {
   auth.signOut().then(() => {
    this.props.dispatchLogOut();
-   //    this.props.setNav(null);
-   //    window.location.reload();
   });
  };
  handleNotify = () => {
@@ -39,32 +40,33 @@ class NavigationBar extends Component {
    position: toast.POSITION.BOTTOM_LEFT,
    theme: "colored",
    transition: Flip,
+   autoClose: 20000,
   });
  };
  componentDidMount() {
   this.setState({ photoURL: auth.currentUser?.photoURL });
-  auth.onAuthStateChanged((user) => {
-   if (user) {
-    // console.log(this.props.info);
-    this.props.setNav(user);
-    console.log(user);
+  // comment or no
+  //   this.props.setNav(this.props.userInfo?.user);
 
-    this.setState({
-     signgedin: true,
-     provider: user.providerData[0].providerId,
-     user,
-    });
-   } else {
-    this.setState({
-     signgedin: false,
-     provider: null,
-    });
-    // this.props.setNav(auth.currentUser)
-   }
-  });
+  //   auth.onAuthStateChanged((user) => {
+  //    if (user && this.props.isLoggedIn) {
+  //     this.props.setNav(user);
+  //     console.log(user);
+
+  //     this.setState({
+  //      signgedin: true,
+  //      provider: user.providerData[0].providerId,
+  //      user,
+  //     });
+  //    } else {
+  //     this.setState({
+  //      signgedin: false,
+  //      provider: null,
+  //     });
+  //    }
+  //   });
  }
  render() {
-  const user = this.state.user;
   return (
    <div className="w-100 bg-white navbar-border-bottom sticky-top">
     <Container>
@@ -72,8 +74,10 @@ class NavigationBar extends Component {
       <Navbar.Brand>
        <Router>
         <a href="/">
+         {/* <Link to="/" href="/"> */}
          <img id="nav-logo" src={logo} alt="Logo" />
         </a>
+        {/* </Lin/k> */}
        </Router>
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -134,13 +138,12 @@ class NavigationBar extends Component {
             alignItems: "flex-end",
            }}
           >
-           {/* {this.props.userInfo.user?.photoURL ? ( */}
-           {this.state.user?.photoURL ? (
+           {/* {this.state.user?.photoURL ? ( */}
+           {this.props.photoURL ? (
             <>
              <img
               style={{ display: "block", borderRadius: "50%" }}
-              //   src={this.props.userInfo.user?.photoURL}
-              src={this.state.user.photoURL}
+              src={this.props.photoURL}
               alt=""
              />
             </>
@@ -162,9 +165,10 @@ class NavigationBar extends Component {
            className="test-name"
            //    title={this.props.userInfo.user?.displayName}
            title={
-            this.props.userInfo?.user?.displayName ??
-            this.props.userInfo?.user?.phoneNumber
+            // this.props.userInfo?.user?.displayName ??
+            // this.props.displayName ?? this.props.userInfo?.user?.phoneNumber
             // this.props.userInfo.info.phoneNumber
+            this.props.displayName ?? this.props.userInfo.user?.displayName
            }
            style={{
             paddingTop: "5px",
@@ -175,7 +179,7 @@ class NavigationBar extends Component {
            id="basic-nav-dropdown"
           >
            <NavDropdown.Item href="/product/5">Action</NavDropdown.Item>
-           <NavDropdown.Item href="/user">Another action</NavDropdown.Item>
+           <NavDropdown.Item href="/user">Profile</NavDropdown.Item>
            <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
            <NavDropdown.Divider />
            <NavDropdown.Item onClick={this.handleLogout}>
@@ -199,6 +203,7 @@ const mapDispatchToProps = (dispatch) => ({
  dispatchLogOut: () => dispatch(logginOut()),
  setNav: (info) => dispatch(setUserInfoAction(info)),
  loggingin: (user) => dispatch(phoneSignupSuccess(user)),
+ updateInfo: (information) => dispatch(updateInfo(information)),
 });
 const mapStateToProps = (state) => {
  return {
@@ -207,6 +212,8 @@ const mapStateToProps = (state) => {
   userInfo: state.regularUser,
   info: state.regularUser.info,
   user: state.regularUser.user,
+  displayName: state.regularUser.displayName,
+  photoURL: state.regularUser.photoURL,
  };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(NavigationBar);
