@@ -190,9 +190,13 @@ class Settings extends Component {
     })
     .then(() => {
      console.log("profile updated");
-     auth.currentUser.reload().then(() => {
-      this.props.updateInfo(auth.currentUser);
-      presistInfo(auth.currentUser, true);
+     this.props.updateInfo(auth.currentUser);
+     presistInfo(auth.currentUser, true);
+     toast.success("Pofile Updated Successfully", {
+      position: toast.POSITION.BOTTOM_LEFT,
+      theme: "colored",
+      transition: Flip,
+      hideProgressBar: true,
      });
     });
 
@@ -268,6 +272,11 @@ class Settings extends Component {
        console.log("updated");
        this.setState({ addProfileLoad: false });
        this.setState({ profile_modal: false });
+       toast.success("Your Picture Updated Successfully", {
+        position: toast.POSITION.BOTTOM_LEFT,
+        theme: "colored",
+        transition: Flip,
+       });
       });
     })
     .catch((error) => console.log(error));
