@@ -434,6 +434,10 @@ class Settings extends Component {
 
          <Row md={{ span: 12 }}>
           {!this.props.userInfo.info?.email?.includes("+") ? (
+           // this.props.userInfo.info?.providerData[0].providerId !=
+           //  "google.com" ||
+           // this.props.userInfo.info?.providerData[0].providerId !=
+           //  "facebook.com" ?
            <>
             <Col md={6}>
              <button

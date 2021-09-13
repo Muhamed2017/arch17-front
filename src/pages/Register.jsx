@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-// import Form from "react-bootstrap/Form";
 import { Container, Col, Row, Form, Modal, Button } from "react-bootstrap";
 import { FaLinkedinIn, FaFacebookF } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
@@ -7,8 +6,7 @@ import { connect } from "react-redux";
 import { isNotEmptyString } from "@formiz/validations";
 import firebase from "firebase/app";
 import { VerificationPin } from "react-verification-pin";
-
-// import {auth} from ''
+import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
 import { auth } from "./../firebase";
 import {
  signupEmailPassword,
@@ -25,6 +23,8 @@ import {
  phoneSigninRequest,
  phoneSignupSuccess,
 } from "./../redux/actions/authActions";
+import en from "world_countries_lists/data/en/world.json";
+
 const Register = (props) => {
  const [fname, setFname] = useState("");
  const [lname, setLname] = useState("");
@@ -264,13 +264,19 @@ const Register = (props) => {
           aria-labelledby="nav-profile-tab"
          >
           <Form.Group>
-           <Form.Control
+           {/* <Form.Control
             id="phone"
             name="phone"
             type="phone"
             placeholder="Enter Phone"
             onChange={(e) => setPhone(e.target.value)}
-           />
+           /> */}
+           <ConfigProvider locale={en}>
+            <CountryPhoneInput
+             onChange={(e) => setPhone(`+${e.code}${e.phone}`)}
+            />
+           </ConfigProvider>
+           {/* <CountryPhoneInput /> */}
           </Form.Group>
          </div>
         </div>
@@ -344,10 +350,11 @@ const Register = (props) => {
         </button>
         <button
          className="coninue-btn linkedin-auth"
-         disabled={{ disabled: true }}
+         //  disabled={{ disabled: true }}
          onClick={(e) => {
-          //   e.preventDefault();
+          e.preventDefault();
           //   props.dispatchLinkedinSignup();
+          console.log(phone);
          }}
         >
          <span>

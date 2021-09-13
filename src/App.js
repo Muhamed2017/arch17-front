@@ -15,24 +15,24 @@ import Dropzones from './components/Dropzone'
 import Kind from './pages/addProduct/Kind'
 import Product from './pages/Product'
 import CoverTab from './pages/addProduct/CoverTab';
-// import Identity from './pages/addProduct/Identity';
 import TextEditor from './pages/TextEditor';
 import "react-notifications-component/dist/theme.css";
 import UserProfile from './pages/UserProfile';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer} from 'react-toastify'
-import {auth} from './firebase'
 import Settings from './pages/user_profile_tabs/Settings';
 import { Home } from './pages/Home';
- class App extends Component {
+import CountryPhoneInput, { ConfigProvider } from 'antd-country-phone-input';
+import en from 'world_countries_lists/data/en/world.json';
+
+import 'antd/dist/antd.css';
+import 'antd-country-phone-input/dist/index.css'
+
+class App extends Component {
    constructor(props){
      super(props)
      this.state={
      }
-   }
-   componentDidMount(){
-    //  console.log(auth.currentUser.photoURL)
-
    }
   render(){
   return (
@@ -40,7 +40,9 @@ import { Home } from './pages/Home';
     <AuthProvider>
     <React.Fragment>
           <NavigationBar />
-          {/* <Home/> */}
+          <ConfigProvider locale={en}>
+            {/* <CountryPhoneInput /> */}
+          </ConfigProvider>
           <Router>
             <Switch>
               <Route path="/signup" exact>
@@ -63,8 +65,6 @@ import { Home } from './pages/Home';
               </Route>
               <Route path='/product/:id' component={Product} exact/>
               <Route path='/identity/:id' component={AddProductWrapper} exact />
-                {/* <Product/> */}
-              {/* </Route> */}
               <Route path="/multi" exact>
                 <CoverTab/>
               </Route>
