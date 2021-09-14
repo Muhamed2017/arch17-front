@@ -154,15 +154,15 @@ const Register = (props) => {
   props.dispatchRegularSignup(`${fname} ${lname}`, email, password);
   console.log(props.isLoggedIn);
  };
-
+ // https%3A%2F%2Farch17-front.herokuapp.com%2Fcallback
  const handleSuccess = (data) => {
   console.log(data.code);
   axios
-   .get(
-    "https://arch17-front.herokuapp.com/callback?state=foobar&code=AQTC4pifzAGOBhNU3rDrDMnFyDp4pz8I1boIrmLMBvfDIi8mQkNe73Y4RgtiJHLTpBoBjz8ry9Bl1987SJMqxmC4W_SSpR6t9bY3u0ujgKtbZpoUOIV05tVGPGDYBSSUaaCtSlORZ3-BiWZsPpfcCuIVT4wkosskTPRjBzRnuO2y7viUe7UxFPimSW6aUjFsxm6FQL2odRZnMEidAhw"
+   .post(
+    `https://www.linkedin.com/oauth/v2/accessToken?grant_type=authorization_code&client_id=78elnnx8q5k0w5&client_secret=8FpLEqAE16bS8Buh&code=${data.code}&redirect_uri=https://arch17-front.herokuapp.com/callback`
    )
-   .then((resp) => {
-    console.log(resp);
+   .then((response) => {
+    console.log(response);
    });
  };
 
