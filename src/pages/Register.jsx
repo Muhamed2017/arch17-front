@@ -8,6 +8,7 @@ import firebase from "firebase/app";
 import { VerificationPin } from "react-verification-pin";
 import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
 import { auth } from "./../firebase";
+import { Form as FormAnt, Input } from "antd";
 import {
  signupEmailPassword,
  signupFacebook,
@@ -24,6 +25,16 @@ import {
  phoneSignupSuccess,
 } from "./../redux/actions/authActions";
 import en from "world_countries_lists/data/en/world.json";
+const strongRegex = new RegExp(
+ "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})"
+);
+const mediumRegex = new RegExp(
+ "^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})"
+);
+const hasCapital = new RegExp("^(?=.*[a-z])");
+const hasLower = new RegExp("^(?=.*[A-Z])");
+const hasNumeric = new RegExp("^(?=.*[0-9])");
+const hasSpecial = new RegExp("^(?=.[!@#$%^&])|(?=.*[!@#$%^&*])");
 
 const Register = (props) => {
  const [fname, setFname] = useState("");
@@ -167,32 +178,61 @@ const Register = (props) => {
        </div>
        <Form noValidate>
         <Form.Group>
-         <Row>
-          <Col>
-           <Form.Control
-            placeholder="First name"
-            id="fname"
-            name="fname"
-            type="text"
-            onChange={(e) => setFname(e.target.value)}
-           />
-          </Col>
-          <Col>
-           <Form.Control
-            id="lname"
-            type="text"
-            name="lname"
-            validation={[
-             {
-              rule: isNotEmptyString(),
-              message: "This field is required",
-             },
-            ]}
-            placeholder="Last name"
-            onChange={(e) => setLname(e.target.value)}
-           />
-          </Col>
-         </Row>
+         <FormAnt>
+          <Row>
+           <Col>
+            <FormAnt.Item
+             name="fname"
+             rules={[
+              {
+               required: true,
+               message: "firs name is required",
+              },
+              () => ({
+               validator(_, value) {
+                if (value.length < 2) {
+                 return Promise.reject(new Error("Too short"));
+                }
+                return Promise.resolve();
+               },
+              }),
+             ]}
+            >
+             <Input
+              onChange={(e) => setFname(e.target.value)}
+              placeholder="First Name"
+              size="large"
+             />
+            </FormAnt.Item>
+           </Col>
+           <Col>
+            <FormAnt.Item
+             name="lname"
+             //  hasFeedback
+             rules={[
+              {
+               required: true,
+               message: "last name is required",
+              },
+              () => ({
+               validator(_, value) {
+                if (value.length < 2) {
+                 return Promise.reject(new Error("Too short"));
+                }
+                return Promise.resolve();
+               },
+              }),
+             ]}
+            >
+             <Input
+              onChange={(e) => setLname(e.target.value)}
+              placeholder="Last Name"
+              size="large"
+             />
+            </FormAnt.Item>
+           </Col>
+          </Row>
+         </FormAnt>
         </Form.Group>
         <nav>
          <div
@@ -248,13 +288,57 @@ const Register = (props) => {
           aria-labelledby="nav-home-tab"
          >
           <Form.Group>
-           <Form.Control
-            id="email"
-            name="email"
-            type="email"
-            placeholder="Enter email"
-            onChange={(e) => setEmail(e.target.value)}
-           />
+           <FormAnt>
+            <FormAnt.Item
+             name="email"
+             rules={[
+              {
+               type: "email",
+               message: "The input is not valid E-mail!",
+              },
+              {
+               required: true,
+               message: "Please input your E-mail!",
+              },
+             ]}
+            >
+             <Input size="large" onChange={(e) => setEmail(e.target.value)} />
+            </FormAnt.Item>
+            <FormAnt.Item
+             name="password"
+             //  dependencies={["password"]}
+             hasFeedback
+             rules={[
+              {
+               required: true,
+               message: "Please Type a strong password!",
+              },
+              () => ({
+               validator(_, value) {
+                if (value.length < 8) {
+                 return Promise.reject(
+                  new Error("Should be at least 8 charcters")
+                 );
+                } else if (!hasCapital.test(value)) {
+                 return Promise.reject(new Error("Should have Lower Letter"));
+                } else if (!hasLower.test(value)) {
+                 return Promise.reject(new Error("Should have Capital Letter"));
+                } else if (!hasNumeric.test(value)) {
+                 return Promise.reject(new Error("Should have Numeric Letter"));
+                } else if (!hasSpecial.test(value)) {
+                 return Promise.reject(new Error("Should have Special Letter"));
+                }
+                return Promise.resolve();
+               },
+              }),
+             ]}
+            >
+             <Input.Password
+              size="large"
+              onChange={(e) => setPassword(e.target.value)}
+             />
+            </FormAnt.Item>
+           </FormAnt>
           </Form.Group>
          </div>
          <div
@@ -264,13 +348,6 @@ const Register = (props) => {
           aria-labelledby="nav-profile-tab"
          >
           <Form.Group>
-           {/* <Form.Control
-            id="phone"
-            name="phone"
-            type="phone"
-            placeholder="Enter Phone"
-            onChange={(e) => setPhone(e.target.value)}
-           /> */}
            <ConfigProvider locale={en}>
             <CountryPhoneInput
              onChange={(e) => setPhone(`+${e.code}${e.phone}`)}
@@ -280,21 +357,11 @@ const Register = (props) => {
           </Form.Group>
          </div>
         </div>
-
-        <Form.Group controlId="formBasicPassword">
-         <Form.Control
-          type="password"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-         />
-        </Form.Group>
         <button
          className="coninue-btn regular-auth"
          onClick={(e) => {
           e.preventDefault();
           hadleEmailPhoneContinueButton();
-          // handleRegularSignup();
-          // props.dispatchNormalSignup(fname, lname, email, password);
          }}
         >
          {props.loading ? (
