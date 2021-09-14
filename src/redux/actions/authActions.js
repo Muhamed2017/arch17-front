@@ -115,7 +115,7 @@ return (dispatch)=>{
         dispatch(normalSignupSuccess(response.data))
         setNormalUserInfo(response.data)
         // toast.success(`Welcome ${response.data.user.fname} ${response.data.user.lname}` + `You Can` + <a href=`user/settings/">Update it now</a>+ `Now`, {
-        toast.success(<h2>Welcome {response.data.user.fname} You Can Update Your profile from <a href="/user" style={{textDecoration:"underline", color:"#fff"}}>here</a></h2>, {
+        toast.success(<h2 style={{color:"#fff"}}>Welcome {response.data.user.fname} You Can Update Your profile from <a href="/user" style={{textDecoration:"underline", color:"#fff"}}>here</a></h2>, {
             position: toast.POSITION.BOTTOM_LEFT,
             theme: "colored",
             transition: Flip,
@@ -125,6 +125,7 @@ return (dispatch)=>{
             autoClose: 10000,
             style: {
             fontFamily: "Roboto",
+            color:"#fff"
             },
         });
         // toast.success(   <h style={{ color: "#000" }}>

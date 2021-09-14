@@ -41,7 +41,6 @@ class App extends Component {
     <React.Fragment>
           <NavigationBar />
           <ConfigProvider locale={en}>
-            {/* <CountryPhoneInput /> */}
           </ConfigProvider>
           <Router>
             <Switch>
