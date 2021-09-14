@@ -164,7 +164,7 @@ const Register = (props) => {
      grant_type: "authorization_code",
      client_id: "78elnnx8q5k0w5",
      client_secret: "8FpLEqAE16bS8Buh",
-     cod: data.code,
+     code: data.code,
      redirect_uri: "https://arch17-front.herokuapp.com/callback",
     },
     {
