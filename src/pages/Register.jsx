@@ -455,6 +455,7 @@ const Register = (props) => {
         </button> */}
         <LinkedIn
          clientId="78elnnx8q5k0w5"
+         clientSecret="8FpLEqAE16bS8Buh"
          onFailure={handleFailure}
          onSuccess={handleSuccess}
          redirectUri="https://arch17-front.herokuapp.com/callback"
