@@ -177,7 +177,7 @@ const Register = (props) => {
         <h6>The world platform for architecture & design</h6>
        </div>
        <Form noValidate>
-        <Form.Group>
+        <Form.Group style={{ marginBottom: "0" }}>
          <FormAnt>
           <Row>
            <Col>
@@ -186,7 +186,7 @@ const Register = (props) => {
              rules={[
               {
                required: true,
-               message: "firs name is required",
+               message: "first name is required",
               },
               () => ({
                validator(_, value) {
@@ -208,7 +208,6 @@ const Register = (props) => {
            <Col>
             <FormAnt.Item
              name="lname"
-             //  hasFeedback
              rules={[
               {
                required: true,
