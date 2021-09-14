@@ -165,7 +165,7 @@ const Register = (props) => {
      client_id: "78elnnx8q5k0w5",
      client_secret: "8FpLEqAE16bS8Buh",
      code: data.code,
-     redirect_url: "https://arch17-front.herokuapp.com/callback",
+     redirect_uri: "https://arch17-front.herokuapp.com/callback",
     },
     {
      headers: {
