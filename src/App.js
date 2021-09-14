@@ -12,6 +12,8 @@ import AddProductWrapper from './pages/addProduct/AddProductWrapper';
 import TestUpload from './pages/TestUpload';
 import TestCrop from './pages/TestCrop';
 import Dropzones from './components/Dropzone'
+import { LinkedInPopUp } from 'react-linkedin-login-oauth2';
+
 import Kind from './pages/addProduct/Kind'
 import Product from './pages/Product'
 import CoverTab from './pages/addProduct/CoverTab';
@@ -50,9 +52,7 @@ class App extends Component {
               <Route path="/signin" exact>
                 {this.props.isLoggedIn ? <Redirect to="/" /> : <Login />}
               </Route>
-              {/* <Route path="/identity">
-                <AddProductWrapper />
-              </Route> */}
+              <Route exact path="/callback" component={LinkedInPopUp} />
               <Route path='/cropper' exact>
                 <TestUpload />
               </Route>

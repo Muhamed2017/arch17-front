@@ -3,12 +3,15 @@ import { Container, Col, Row, Form, Modal, Button } from "react-bootstrap";
 import { FaLinkedinIn, FaFacebookF } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { connect } from "react-redux";
-import { isNotEmptyString } from "@formiz/validations";
+import axios from "axios";
 import firebase from "firebase/app";
 import { VerificationPin } from "react-verification-pin";
 import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
 import { auth } from "./../firebase";
 import { Form as FormAnt, Input } from "antd";
+import { LinkedIn } from "react-linkedin-login-oauth2";
+import linkedin from "react-linkedin-login-oauth2/assets/linkedin.png";
+
 import {
  signupEmailPassword,
  signupFacebook,
@@ -40,6 +43,7 @@ const Register = (props) => {
  const [fname, setFname] = useState("");
  const [lname, setLname] = useState("");
  const [email, setEmail] = useState("");
+ const [phonePassword, setPhonePassword] = useState("");
  const [password, setPassword] = useState("");
  const [phone, setPhone] = useState("");
  const [vCode, setVCode] = useState("");
@@ -51,15 +55,6 @@ const Register = (props) => {
  const [emailSelected, setEmailSelected] = useState(true);
 
  const handleOnFinish = (code) => {
-  // if (code === "111111") {
-  //  setTimeout(() => {
-  //   setStatus("error");
-  //  }, 3000);
-  // } else {
-  //  setTimeout(() => {
-  //   setStatus("success");
-  //  }, 3000);
-  // }
   confResult
    .confirm(code)
    .then((userCredentials) => {
@@ -133,7 +128,7 @@ const Register = (props) => {
   const phoneNumber = phone;
   const tail = "@arch17.com";
   auth
-   .createUserWithEmailAndPassword(`${phone}${tail}`, password)
+   .createUserWithEmailAndPassword(`${phone}${tail}`, phonePassword)
    .then((userCredentials) => {
     console.log("user.created");
     userCredentials.user
@@ -160,6 +155,20 @@ const Register = (props) => {
   console.log(props.isLoggedIn);
  };
 
+ const handleSuccess = (data) => {
+  console.log(data.code);
+  axios
+   .get(
+    "http://localhost:3000/callback?state=foobar&code=AQTC4pifzAGOBhNU3rDrDMnFyDp4pz8I1boIrmLMBvfDIi8mQkNe73Y4RgtiJHLTpBoBjz8ry9Bl1987SJMqxmC4W_SSpR6t9bY3u0ujgKtbZpoUOIV05tVGPGDYBSSUaaCtSlORZ3-BiWZsPpfcCuIVT4wkosskTPRjBzRnuO2y7viUe7UxFPimSW6aUjFsxm6FQL2odRZnMEidAhw"
+   )
+   .then((resp) => {
+    console.log(resp);
+   });
+ };
+
+ const handleFailure = (error) => {
+  console.log(error);
+ };
  return (
   <React.Fragment>
    <div id="wrapper" className="auth-form">
@@ -286,10 +295,11 @@ const Register = (props) => {
           role="tabpanel"
           aria-labelledby="nav-home-tab"
          >
-          <Form.Group>
+          <Form.Group style={{ marginBottom: "0" }}>
            <FormAnt>
             <FormAnt.Item
              name="email"
+             style={{ marginBottom: "18px" }}
              rules={[
               {
                type: "email",
@@ -301,11 +311,14 @@ const Register = (props) => {
               },
              ]}
             >
-             <Input size="large" onChange={(e) => setEmail(e.target.value)} />
+             <Input
+              size="large"
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+             />
             </FormAnt.Item>
             <FormAnt.Item
              name="password"
-             //  dependencies={["password"]}
              hasFeedback
              rules={[
               {
@@ -335,6 +348,7 @@ const Register = (props) => {
              <Input.Password
               size="large"
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter Password"
              />
             </FormAnt.Item>
            </FormAnt>
@@ -352,7 +366,42 @@ const Register = (props) => {
              onChange={(e) => setPhone(`+${e.code}${e.phone}`)}
             />
            </ConfigProvider>
-           {/* <CountryPhoneInput /> */}
+          </Form.Group>
+          <Form.Group>
+           <FormAnt.Item
+            name="phonePassword"
+            hasFeedback
+            rules={[
+             {
+              required: true,
+              message: "Please Type a strong password!",
+             },
+             () => ({
+              validator(_, value) {
+               if (value.length < 8) {
+                return Promise.reject(
+                 new Error("Should be at least 8 charcters")
+                );
+               } else if (!hasCapital.test(value)) {
+                return Promise.reject(new Error("Should have Lower Letter"));
+               } else if (!hasLower.test(value)) {
+                return Promise.reject(new Error("Should have Capital Letter"));
+               } else if (!hasNumeric.test(value)) {
+                return Promise.reject(new Error("Should have Numeric Letter"));
+               } else if (!hasSpecial.test(value)) {
+                return Promise.reject(new Error("Should have Special Letter"));
+               }
+               return Promise.resolve();
+              },
+             }),
+            ]}
+           >
+            <Input.Password
+             size="large"
+             onChange={(e) => setPhonePassword(e.target.value)}
+             placeholder="Enter Password"
+            />
+           </FormAnt.Item>
           </Form.Group>
          </div>
         </div>
@@ -376,31 +425,7 @@ const Register = (props) => {
           <>Continue</>
          )}
         </button>
-        {/* <button
-         style={{ background: "rgb(25 22 22)" }}
-         className="coninue-btn regular-auth my-3"
-         onClick={(e) => {
-          e.preventDefault();
-          // onSignInSubmit();
-          handleSignupPhoneHack();
-         }}
-        >
-         {phoneLoading ? (
-          <>
-           Sending SMS Confirmation Code
-           <HashLoader
-            color="#ffffff"
-            loading={phoneLoading}
-            css={{}}
-            size={35}
-           />
-          </>
-         ) : (
-          <>Signup With Phone</>
-         )}
-        </button> */}
         <div id="recaptch-container"></div>
-
         <div className="form-separator"></div>
         <button
          className="coninue-btn facebook-auth"
@@ -414,7 +439,7 @@ const Register = (props) => {
          </span>
          Continue With Facebook
         </button>
-        <button
+        {/* <button
          className="coninue-btn linkedin-auth"
          //  disabled={{ disabled: true }}
          onClick={(e) => {
@@ -427,8 +452,21 @@ const Register = (props) => {
           <FaLinkedinIn />
          </span>{" "}
          Continue With Linkedin
-        </button>
-
+        </button> */}
+        <LinkedIn
+         clientId="78elnnx8q5k0w5"
+         onFailure={handleFailure}
+         onSuccess={handleSuccess}
+         redirectUri="https://arch17-front.herokuapp.com/callback"
+         className="coninue-btn linkedin-auth"
+        >
+         <button className="coninue-btn linkedin-auth">
+          <span>
+           <FaLinkedinIn />
+          </span>
+          Continue With Linkedin
+         </button>
+        </LinkedIn>
         <button
          className="coninue-btn google-auth"
          onClick={(e) => {
