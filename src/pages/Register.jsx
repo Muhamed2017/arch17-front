@@ -158,9 +158,8 @@ const Register = (props) => {
  const handleSuccess = (data) => {
   console.log(data.code);
   axios
-   .post(
-    "https://www.linkedin.com/oauth/v2/accessToken",
-    {
+   .post("https://www.linkedin.com/oauth/v2/accessToken", {
+    data: {
      grant_type: "authorization_code",
      client_id: "78elnnx8q5k0w5",
      client_secret: "8FpLEqAE16bS8Buh",
@@ -168,12 +167,10 @@ const Register = (props) => {
      redirect_uri:
       "https://cors-anywhere.herokuapp.com/https://arch17-front.herokuapp.com/callback",
     },
-    {
-     headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-     },
-    }
-   )
+    headers: {
+     "Content-Type": "application/x-www-form-urlencoded",
+    },
+   })
    .then((response) => {
     console.log(response);
    });
