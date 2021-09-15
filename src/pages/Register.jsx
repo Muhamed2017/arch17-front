@@ -160,13 +160,14 @@ const Register = (props) => {
   axios
    .post(
     "https://www.linkedin.com/oauth/v2/accessToken",
-    JSON.stringify({
+    {
      grant_type: "authorization_code",
      client_id: "78elnnx8q5k0w5",
      client_secret: "8FpLEqAE16bS8Buh",
      code: data.code,
-     redirect_uri: "https://arch17-front.herokuapp.com/callback",
-    }),
+     redirect_uri:
+      "https://cors-anywhere.herokuapp.com/https://arch17-front.herokuapp.com/callback",
+    },
     {
      headers: {
       "Content-Type": "application/x-www-form-urlencoded",
