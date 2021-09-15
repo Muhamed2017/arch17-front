@@ -160,13 +160,15 @@ const Register = (props) => {
   axios
    .post(
     "https://www.linkedin.com/oauth/v2/accessToken",
-    {
-     grant_type: "authorization_code",
-     client_id: "78elnnx8q5k0w5",
-     client_secret: "8FpLEqAE16bS8Buh",
-     code: data.code,
-     redirect_uri: "https://arch17-front.herokuapp.com/callback",
-    },
+    JSON.stringify({
+     data: {
+      grant_type: "authorization_code",
+      client_id: "78elnnx8q5k0w5",
+      client_secret: "8FpLEqAE16bS8Buh",
+      code: data.code,
+      redirect_uri: "https://arch17-front.herokuapp.com/callback",
+     },
+    }),
     {
      headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -471,6 +473,7 @@ const Register = (props) => {
          onFailure={handleFailure}
          onSuccess={handleSuccess}
          redirectUri="https://arch17-front.herokuapp.com/callback"
+         scop
          className="coninue-btn linkedin-auth"
         >
          <button className="coninue-btn linkedin-auth">
