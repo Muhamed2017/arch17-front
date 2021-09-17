@@ -12,6 +12,8 @@ import { IoWarning } from "react-icons/io5";
 import { IoMdCloudUpload } from "react-icons/io";
 import "cropperjs/dist/cropper.css";
 import { compressImage } from "../addProduct/OptionsPrice";
+import { VerificationPin } from "react-verification-pin";
+
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { Redirect } from "react-router";
@@ -44,9 +46,11 @@ class Settings extends Component {
    profile_modal: false,
    profile_src: "",
    deletingAcc: false,
-   //  profile_img: null,
    cropped_profile: null,
    addProfileLoad: false,
+   confResult: "",
+   phoneModal: false,
+   status: "process",
   };
  }
  profile_close = () => {
@@ -64,82 +68,55 @@ class Settings extends Component {
   console.log(src);
  };
  componentDidMount() {
-  // console.log(auth.currentUser.photoURL);
-  // auth.onAuthStateChanged((user) => {
-  //  if (user) {
-  //   console.log(this.props.info);
-  //   this.props.setNav(user);
-  //   console.log(user);
-
-  //   this.setState({
-  //    signgedin: true,
-  //    provider: user.providerData[0].providerId,
-  //   });
-  //  } else {
-  //   this.setState({
-  //    signgedin: false,
-  //    provider: null,
-  //   });
-  //  }
-  // });
-
   this.setState({
-   //  fname: this.props.userInfo?.user?.displayName?.split(" ")[0],
-   //  lname: this.props.userInfo?.user?.displayName?.split(" ")[1],
-   // email: this.props.userInfo?.user?.email ?? "",
-   //  phone: this.props.userInfo?.user?.phoneNumber ?? "",
-   //  photoURL: this.props.userInfo?.user?.photoURL ?? "",
-   //  email: this.props.email,
    fname: this.props.displayName?.split(" ")[0],
    lname: this.props.displayName?.split(" ")[1],
    photoURL: this.props.photoURL,
    phone: this.props.userInfo?.info?.phoneNumber ?? "",
-   //  email: this.props.userInfo?.info?.email ?? "",
    email: this.props.userInfo.info?.email?.includes("+")
     ? "No Email"
     : this.props.userInfo?.info?.email,
   });
  }
 
+ handlePhoneFinish = (code) => {
+  const fd = new FormData();
+  this.state.confResult
+   .confirm(code)
+   .then((userCredentials) => {
+    fd.append("uid", userCredentials.user.uid);
+    fd.append("phone", this.state.phone);
+    axios
+     .post("https://arch17-apis.herokuapp.com/api/update-phone", fd)
+     .then((response) => {
+      console.log(response.data);
+     });
+    this.setState({ phoneModal: false });
+   })
+   .catch((err) => {
+    console.log(err);
+    this.setState({ status: "error" });
+    auth.signOut().then(() => {
+     this.props.dispatchLogOut();
+    });
+   });
+ };
  setUpRecaptch = () => {
   window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(
-   "recaptch-container",
+   "recaptch-setting-container",
    {
     size: "invisible",
     callback: (response) => {
-     // reCAPTCHA solved, allow signInWithPhoneNumber.
-     //  this.onSignInSubmit();
      console.log(response);
     },
    }
   );
  };
- onSignInSubmit = (e) => {
-  e.preventDefault();
-  this.setUpRecaptch();
-  const phoneNumber = "+201015862559";
-  const appVerifier = window.recaptchaVerifier;
-  firebase
-   .auth()
-   .signInWithPhoneNumber(phoneNumber, appVerifier)
-   .then((confirmationResult) => {
-    // SMS sent. Prompt user to type the code from the message, then sign the
-    // user in with confirmationResult.confirm(code).
-    console.log(confirmationResult);
-    window.confirmationResult = confirmationResult;
-    // ...
-   })
-   .catch((error) => {
-    // Error; SMS not sent
-    // ...
-   });
+
+ phoneModal_close = () => {
+  this.setState({ phoneModal: false });
  };
 
- handleVerify = () => {
-  auth.currentUser.sendEmailVerification().then(() => {
-   console.log("email sent");
-  });
- };
  handleDeleteSubmit = () => {
   this.setState({ deletingAcc: true });
   auth
@@ -317,6 +294,18 @@ class Settings extends Component {
  handleNewPasswordChange = (e) => {
   this.setState({ new_password: e.target.value });
  };
+ changePhoneNumber = () => {
+  this.setUpRecaptch();
+  const appVerifier = window.recaptchaVerifier;
+  auth
+   .signInWithPhoneNumber(auth.currentUser.phoneNumber, appVerifier)
+   .then((confirmationResult) => {
+    window.confirmationResult = confirmationResult;
+    this.setState({ confResult: confirmationResult, phoneModal: true });
+    console.log(confirmationResult);
+   })
+   .catch((err) => console.log(err));
+ };
  render() {
   if (!this.props.isLoggedIn || !auth.currentUser) return <Redirect to="/" />;
   return (
@@ -406,7 +395,7 @@ class Settings extends Component {
          </Form.Group>
          {/* <Form.Group as={Row} className=""></Form.Group> */}
          <Form.Group as={Row} className="">
-          <Col>
+          <Col md={12}>
            <Form.Label>Phone</Form.Label>
            <Form.Control
             placeholder="Phone"
@@ -414,6 +403,23 @@ class Settings extends Component {
             value={this.state.phone}
            />
           </Col>
+          {/* <p>Change</p> */}
+          {!this.props.userInfo.info?.phoneNumber ? (
+           <>
+            <p className="change-label">Add Phone</p>
+           </>
+          ) : (
+           <>
+            {this.state.phone != this.props.userInfo.info?.phoneNumber && (
+             <>
+              <p className="change-label" onClick={this.changePhoneNumber}>
+               Change
+              </p>
+              <div id="recaptch-setting-container"></div>
+             </>
+            )}
+           </>
+          )}
          </Form.Group>
          {!this.props.userInfo.info?.email?.includes("+") ? (
           <>
@@ -490,52 +496,62 @@ class Settings extends Component {
               marginRight: "12px",
               padding: "7px 0",
               width: "120px",
-              background: "#797979",
+              background: "rgb(167 167 167)",
               textAlign: "center",
               border: "none",
-              //  outline:"none"
              }}
             >
              Cancel
             </Button>
            </Link>
-           <div id="recaptch-container"></div>
           </Col>
-
           <Col md={3}>
-           <Button
-            variant="danger"
-            onClick={this.handleUpdateProfile}
-            type="submit"
-            style={{
-             //  textAlign: "right",
-             background: "#E41E15",
-             display: "block",
-             float: "right",
-             //  marginRight: "12px",
-             width: "120px",
-             textAlign: "center",
-             // padding: "6px 35px",
-             //  width: "120px",
-            }}
-           >
-            {this.state.prfl_loading ? (
-             <>
-              <ClipLoader
-               style={{ height: "20px" }}
-               color="#ffffff"
-               size={20}
-              />
-             </>
-            ) : (
-             <>Save</>
-            )}
-           </Button>
+           {this.state.fname == this.props.displayName?.split(" ")[0] &&
+           this.state.lname == this.props.displayName?.split(" ")[1] ? (
+            <>
+             <Button
+              disabled
+              style={{
+               background: "#797979",
+               display: "block",
+               float: "right",
+               width: "120px",
+               textAlign: "center",
+               border: "none",
+              }}
+             >
+              Save
+             </Button>
+            </>
+           ) : (
+            <>
+             <Button
+              variant="danger"
+              onClick={this.handleUpdateProfile}
+              type="submit"
+              style={{
+               background: "#E41E15",
+               display: "block",
+               float: "right",
+               width: "120px",
+               textAlign: "center",
+              }}
+             >
+              {this.state.prfl_loading ? (
+               <>
+                <ClipLoader
+                 style={{ height: "20px" }}
+                 color="#ffffff"
+                 size={20}
+                />
+               </>
+              ) : (
+               <>Save</>
+              )}
+             </Button>
+            </>
+           )}
           </Col>
-
-          {/* <Col md={6}>
-           <Button onClick={this.handleVerify}>Test Verify</Button>
-          </Col> */}
          </Row>
         </div>
        </Col>
@@ -778,6 +794,29 @@ class Settings extends Component {
        </Modal>
       </>
      </Container>
+     <Modal
+      id="price-request-modal"
+      className="arch-wide-modal product-modal pics-modal"
+      size="lg"
+      show={this.state.phoneModal}
+      onHide={this.phoneModal_close}
+      aria-labelledby="example-modal-sizes-title-lg"
+     >
+      <Modal.Header closeButton></Modal.Header>
+      <Modal.Body>
+       <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
+        <h6>Enter Code</h6>
+        <VerificationPin
+         type="number"
+         inputsNumber={6}
+         status={this.state.status}
+         title="Your title here"
+         subTitle="Your subtitle here"
+         onFinish={this.handlePhoneFinish}
+        />
+       </div>
+      </Modal.Body>
+     </Modal>
     </div>
    </>
   );

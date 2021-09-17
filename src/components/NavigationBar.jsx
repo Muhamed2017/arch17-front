@@ -124,7 +124,6 @@ class NavigationBar extends Component {
       position: toast.POSITION.TOP_CENTER,
       theme: "colored",
       transition: Flip,
-      //   progress: false,
       autoClose: 3000,
       toastId: "nav-msg",
      });

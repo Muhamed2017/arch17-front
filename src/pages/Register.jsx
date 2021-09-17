@@ -11,9 +11,6 @@ import { auth } from "./../firebase";
 import { Form as FormAnt, Input } from "antd";
 import { LinkedIn } from "react-linkedin-login-oauth2";
 import queryString from "query-string";
-// import linkedin from "react-linkedin-login-oauth2/assets/linkedin.png";
-// "https://arch17-front.herokuapp.com/callback",
-// "http://localhost:3000
 import {
  signupEmailPassword,
  signupFacebook,
@@ -156,19 +153,20 @@ const Register = (props) => {
   props.dispatchRegularSignup(`${fname} ${lname}`, email, password);
   console.log(props.isLoggedIn);
  };
- // https%3A%2F%2Farch17-front.herokuapp.com%2Fcallback
  const handleSuccess = (data) => {
   console.log(data);
-  const fd = new FormData();
-
-  fd.append("grant_type", "authorization_code");
-  fd.append("client_id", "78elnnx8q5k0w5");
-  fd.append("client_secret", "8FpLEqAE16bS8Buh");
-  fd.append("code", data.code);
-  fd.append("redirect_uri", "https://arch17-front.herokuapp.com/callback");
 
   axios
-   .post("https://www.linkedin.com/oauth/v2/accessToken?", fd, {
+   .get("https://www.linkedin.com/oauth/v2/authorization", {
+    params: {
+     grand_type: "authorization_code",
+     client_id: "78elnnx8q5k0w5",
+     code: data.code,
+     redirect_uri: "http://localhost:3000/callback",
+     scope: "r_liteprofile",
+     response_type: "code",
+     state: "DCEeFWf45A53525e1125e",
+    },
     headers: {
      "Content-Type": "application/x-www-form-urlencoded",
     },
@@ -470,8 +468,9 @@ const Register = (props) => {
          onFailure={handleFailure}
          onSuccess={handleSuccess}
          redirectUri="http://localhost:3000/callback"
-         scop
+         scope="r_emailaddress"
          className="coninue-btn linkedin-auth"
+         redirectPath="http://localhost:3000/callback"
         >
          <button className="coninue-btn linkedin-auth">
           <span>
