@@ -51,6 +51,7 @@ class Settings extends Component {
    confResult: "",
    phoneModal: false,
    status: "process",
+   changing: false,
   };
  }
  profile_close = () => {
@@ -296,16 +297,19 @@ class Settings extends Component {
   this.setState({ new_password: e.target.value });
  };
  changePhoneNumber = () => {
+  this.setState({ changing: true });
   this.setUpRecaptch();
   const appVerifier = window.recaptchaVerifier;
   auth
-   .signInWithPhoneNumber(auth.currentUser.phoneNumber, appVerifier)
+   .signInWithPhoneNumber(this.props.userInfo.info?.phoneNumber, appVerifier)
    .then((confirmationResult) => {
     window.confirmationResult = confirmationResult;
     this.setState({ confResult: confirmationResult, phoneModal: true });
     console.log(confirmationResult);
+    this.setState({ changing: false });
    })
    .catch((err) => console.log(err));
+  this.setState({ changing: false });
  };
  render() {
   if (!this.props.isLoggedIn || !auth.currentUser) return <Redirect to="/" />;
@@ -414,7 +418,18 @@ class Settings extends Component {
             {this.state.phone != this.props.userInfo.info?.phoneNumber && (
              <>
               <p className="change-label" onClick={this.changePhoneNumber}>
-               Change
+               Change{" "}
+               {this.state.changing ? (
+                <>
+                 <ClipLoader
+                  style={{ height: "20px" }}
+                  color="#ffffff"
+                  size={15}
+                 />
+                </>
+               ) : (
+                ""
+               )}
               </p>
               <div id="recaptch-setting-container"></div>
              </>

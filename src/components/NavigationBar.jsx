@@ -260,6 +260,7 @@ class NavigationBar extends Component {
     </Container>
     {this.props.isLoggedIn &&
     !this.props.userInfo.info?.emailVerified &&
+    !this.props.userInfo.info?.phoneNumber &&
     !this.state.verified ? (
      <>
       <button
