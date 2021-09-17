@@ -16,6 +16,25 @@ body {
  min-height: 100vh;
  background: #f8f8f8 !important;
 }
+.Toastify__toast-container--top-center {
+ transform: none !important;
+ position: relative !important;
+ top: -8px !important;
+ left: 0px !important;
+ right: -1px !important;
+ width: 100.1vw !important;
+ padding: 0px !important;
+ min-height: auto;
+}
+.Toastify__toast-container--top-center .Toastify__toast-body {
+ justify-content: center;
+}
+#nav-msg {
+ padding: 2px 8px !important;
+ border-radius: 0;
+ margin-bottom: 0;
+ min-height: 35px;
+}
 .m-t-global {
  margin-top: 15%;
 }

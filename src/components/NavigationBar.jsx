@@ -117,15 +117,29 @@ class NavigationBar extends Component {
      console.log(response);
 
      this.props.updateInfo(response.data.user);
+
      presistInfo(response.data.user, true);
      this.setState({ verifying: false, validate_modal: false, verified: true });
+     toast.success("Your email has been verified", {
+      position: toast.POSITION.TOP_CENTER,
+      theme: "colored",
+      transition: Flip,
+      //   progress: false,
+      autoClose: 3000,
+      toastId: "nav-msg",
+     });
     })
     .catch((error) => console.log(error));
   }
  };
+ verifyNotification = () => {};
+
  render() {
   return (
-   <div className="w-100 bg-white navbar-border-bottom sticky-top">
+   <div
+    id="navigation-component"
+    className="w-100 bg-white navbar-border-bottom sticky-top"
+   >
     <Container>
      <Navbar bg="white" expand="md" sticky="top">
       <Navbar.Brand>
@@ -259,7 +273,6 @@ class NavigationBar extends Component {
         fontSize: ".8rem",
        }}
        onClick={this.sendVerificationCode}
-       //    onClick={() => console.log(this.state.verified)}
       >
        Your account is not activated.
        <span
