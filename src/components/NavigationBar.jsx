@@ -3,6 +3,8 @@ import logo from "../../src/logo-gray.png";
 import { BrowserRouter as Router, Link } from "react-router-dom";
 import { toast, Flip, Bounce } from "react-toastify";
 import { auth } from "../firebase";
+import ClipLoader from "react-spinners/ClipLoader";
+
 import {
  Container,
  Navbar,
@@ -10,6 +12,10 @@ import {
  Form,
  FormControl,
  NavDropdown,
+ Modal,
+ Col,
+ Row,
+ Button,
 } from "react-bootstrap";
 import { connect } from "react-redux";
 import {
@@ -20,7 +26,8 @@ import {
 } from "../redux/actions/authActions";
 import { BsChatFill } from "react-icons/bs";
 import { IoNotifications } from "react-icons/io5";
-import UserProfile from "./../pages/UserProfile";
+import axios from "axios";
+import { presistInfo } from "./../redux/actions/authActions";
 class NavigationBar extends Component {
  constructor(props) {
   super(props);
@@ -28,6 +35,11 @@ class NavigationBar extends Component {
    photoURL: auth.currentUser?.photoURL,
    user: auth.currentUser ?? null,
    displayName: this.props.displayName ?? "",
+   vCode: "",
+   verifying: false,
+   validate_modal: false,
+   sendingVcode: false,
+   verified: this.props.userInfo?.info?.emailVerified,
   };
  }
  handleLogout = () => {
@@ -66,27 +78,51 @@ class NavigationBar extends Component {
  };
  componentDidMount() {
   this.setState({ photoURL: auth.currentUser?.photoURL });
-  // comment or no
-  //   this.props.setNav(this.props.userInfo?.user);
-
-  //   auth.onAuthStateChanged((user) => {
-  //    if (user && this.props.isLoggedIn) {
-  //     this.props.setNav(user);
-  //     console.log(user);
-
-  //     this.setState({
-  //      signgedin: true,
-  //      provider: user.providerData[0].providerId,
-  //      user,
-  //     });
-  //    } else {
-  //     this.setState({
-  //      signgedin: false,
-  //      provider: null,
-  //     });
-  //    }
-  //   });
  }
+ onChangeVcode = (e) => {
+  this.setState({ vCode: e.target.value });
+ };
+
+ validate_modal_close = () => {
+  this.setState({ validate_modal: false });
+ };
+ sendVerificationCode = () => {
+  if (auth.currentUser) {
+   this.setState({ sendingVcode: true });
+   this.setState({ verifying: true });
+   const fd = new FormData();
+   fd.append("uid", auth.currentUser.uid);
+   axios
+    .post("https://arch17-apis.herokuapp.com/api/user", fd)
+    .then((response) => {
+     console.log(response);
+     this.setState({
+      validate_modal: true,
+      verifying: false,
+      sendingVcode: false,
+     });
+    });
+  }
+ };
+ verify = () => {
+  if (auth.currentUser) {
+   let code = this.state.vCode;
+   this.setState({ verifying: true });
+   const fd = new FormData();
+   fd.append("uid", auth.currentUser.uid);
+   fd.append("code", code);
+   axios
+    .post("https://arch17-apis.herokuapp.com/api/validate-code", fd)
+    .then((response) => {
+     console.log(response);
+
+     this.props.updateInfo(response.data.user);
+     presistInfo(response.data.user, true);
+     this.setState({ verifying: false, validate_modal: false, verified: true });
+    })
+    .catch((error) => console.log(error));
+  }
+ };
  render() {
   return (
    <div className="w-100 bg-white navbar-border-bottom sticky-top">
@@ -95,10 +131,8 @@ class NavigationBar extends Component {
       <Navbar.Brand>
        <Router>
         <a href="/">
-         {/* <Link to="/" href="/"> */}
          <img id="nav-logo" src={logo} alt="Logo" />
         </a>
-        {/* </Lin/k> */}
        </Router>
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -159,7 +193,6 @@ class NavigationBar extends Component {
             alignItems: "flex-end",
            }}
           >
-           {/* {this.state.user?.photoURL ? ( */}
            {this.props.photoURL ? (
             <>
              <img
@@ -184,11 +217,7 @@ class NavigationBar extends Component {
 
           <NavDropdown
            className="test-name"
-           //    title={this.props.userInfo.user?.displayName}
            title={
-            // this.props.userInfo?.user?.displayName ??
-            // this.props.displayName ?? this.props.userInfo?.user?.phoneNumber
-            // this.props.userInfo.info.phoneNumber
             this.props.displayName ?? this.props.userInfo.user?.displayName
            }
            style={{
@@ -216,6 +245,89 @@ class NavigationBar extends Component {
       </Navbar.Collapse>
      </Navbar>
     </Container>
+    {this.props.isLoggedIn &&
+    !this.props.userInfo.info?.emailVerified &&
+    !this.state.verified ? (
+     <>
+      <button
+       style={{
+        width: "100%",
+        background: "#E41E15",
+        color: "#fff",
+        padding: "5px 0",
+        fontFamily: "Roboto",
+        fontSize: ".8rem",
+       }}
+       onClick={this.sendVerificationCode}
+       //    onClick={() => console.log(this.state.verified)}
+      >
+       Your account is not activated.
+       <span
+        style={{
+         textDecoration: "underline",
+         textAlign: "center",
+         padding: "0 3px",
+        }}
+       >
+        Click here
+       </span>
+       to activate it
+       {this.state.sendingVcode ? (
+        <>
+         <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
+        </>
+       ) : (
+        ""
+       )}
+      </button>
+      <Modal
+       show={this.state.validate_modal}
+       onHide={this.validate_modal_close}
+       className="example-modals"
+       keyboard={false}
+      >
+       <Modal.Body>
+        <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
+         <Form.Row as={Row} style={{ margin: "20px 0" }}>
+          <Form.Label column md={4}>
+           6-digit code
+          </Form.Label>
+          <Col md={8}>
+           <Form.Control
+            value={this.state.vCode}
+            placeholder="Six digit code"
+            onChange={this.onChangeVcode}
+           />
+          </Col>
+         </Form.Row>
+
+         <Button
+          variant="danger"
+          onClick={this.verify}
+          type="submit"
+          style={{
+           textAlign: "right",
+           background: "#E41E15",
+           display: "block",
+           float: "right",
+           marginRight: "12px",
+          }}
+         >
+          {this.state.verifying ? (
+           <>
+            <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
+           </>
+          ) : (
+           <>Verify</>
+          )}
+         </Button>
+        </div>
+       </Modal.Body>
+      </Modal>
+     </>
+    ) : (
+     ""
+    )}
    </div>
   );
  }

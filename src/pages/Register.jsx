@@ -10,8 +10,10 @@ import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
 import { auth } from "./../firebase";
 import { Form as FormAnt, Input } from "antd";
 import { LinkedIn } from "react-linkedin-login-oauth2";
-import linkedin from "react-linkedin-login-oauth2/assets/linkedin.png";
-
+import queryString from "query-string";
+// import linkedin from "react-linkedin-login-oauth2/assets/linkedin.png";
+// "https://arch17-front.herokuapp.com/callback",
+// "http://localhost:3000
 import {
  signupEmailPassword,
  signupFacebook,
@@ -156,17 +158,17 @@ const Register = (props) => {
  };
  // https%3A%2F%2Farch17-front.herokuapp.com%2Fcallback
  const handleSuccess = (data) => {
-  console.log(data.code);
+  console.log(data);
+  const fd = new FormData();
+
+  fd.append("grant_type", "authorization_code");
+  fd.append("client_id", "78elnnx8q5k0w5");
+  fd.append("client_secret", "8FpLEqAE16bS8Buh");
+  fd.append("code", data.code);
+  fd.append("redirect_uri", "https://arch17-front.herokuapp.com/callback");
+
   axios
-   .post("https://www.linkedin.com/oauth/v2/accessToken", {
-    data: {
-     grant_type: "authorization_code",
-     client_id: "78elnnx8q5k0w5",
-     client_secret: "8FpLEqAE16bS8Buh",
-     code: data.code,
-     redirect_uri:
-      "https://cors-anywhere.herokuapp.com/https://arch17-front.herokuapp.com/callback",
-    },
+   .post("https://www.linkedin.com/oauth/v2/accessToken?", fd, {
     headers: {
      "Content-Type": "application/x-www-form-urlencoded",
     },
@@ -465,10 +467,9 @@ const Register = (props) => {
         </button> */}
         <LinkedIn
          clientId="78elnnx8q5k0w5"
-         clientSecret="8FpLEqAE16bS8Buh"
          onFailure={handleFailure}
          onSuccess={handleSuccess}
-         redirectUri="https://arch17-front.herokuapp.com/callback"
+         redirectUri="http://localhost:3000/callback"
          scop
          className="coninue-btn linkedin-auth"
         >

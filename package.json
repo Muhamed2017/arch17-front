@@ -27,6 +27,7 @@
     "jwt-decode": "^3.1.2",
     "material-ui-dropzone": "^3.5.0",
     "popper.js": "^1.16.1",
+    "query-string": "^7.0.1",
     "react": "^17.0.2",
     "react-bootstrap": "^1.6.1",
     "react-cropper": "^2.1.8",
