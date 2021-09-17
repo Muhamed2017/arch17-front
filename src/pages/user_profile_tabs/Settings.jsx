@@ -90,6 +90,8 @@ class Settings extends Component {
      .post("https://arch17-apis.herokuapp.com/api/update-phone", fd)
      .then((response) => {
       console.log(response.data);
+      this.props.updateInfo(response.data.user);
+      presistInfo(response.data.user, true);
      });
     this.setState({ phoneModal: false });
    })
@@ -165,7 +167,6 @@ class Settings extends Component {
  };
  handleUpdateProfile = () => {
   this.setState({ prfl_loading: true });
-
   if (this.props.isLoggedIn) {
    auth.currentUser
     .updateProfile({
