@@ -2427,3 +2427,14 @@ p.designer-name-select {
  padding-left: 5px;
  display: inline-block;
 }
+
+/* create brand styles */
+
+#create-brand {
+ max-width: 600px;
+ margin: 100px auto 0;
+}
+.collection-option {
+ /* background-color: red; */
+}
+/* end of create brand page  */

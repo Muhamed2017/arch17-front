@@ -3,6 +3,7 @@ import { convertToRaw, EditorState } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Editor } from "react-draft-wysiwyg";
 import axios from "axios";
+import { API } from "./../../../utitlties";
 
 class Overview extends Component {
  constructor(props) {
@@ -20,10 +21,7 @@ class Overview extends Component {
    JSON.stringify(convertToRaw(this.state.editorState.getCurrentContent()))
   );
   axios
-   .post(
-    `https://arch17-apis.herokuapp.com/api/overviewContnet/${this.props.id}`,
-    formData
-   )
+   .post(`${API}overviewContnet/${this.props.id}`, formData)
    .then((response) => {
     console.log(response);
    })

@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { auth } from "./../firebase";
+import { API } from "./../utitlties";
 import { Modal, Form, Col, Row, Button } from "react-bootstrap";
 import axios from "axios";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -27,14 +28,12 @@ export class Home extends Component {
    this.setState({ verifying: true });
    const fd = new FormData();
    fd.append("uid", auth.currentUser.uid);
-   axios
-    .post("https://arch17-apis.herokuapp.com/api/user", fd)
-    .then((response) => {
-     console.log(response);
-     this.setState({ validate_modal: true });
-     this.setState({ verifying: false });
-     this.setState({ sendingVcode: false });
-    });
+   axios.post(`${API}user`, fd).then((response) => {
+    console.log(response);
+    this.setState({ validate_modal: true });
+    this.setState({ verifying: false });
+    this.setState({ sendingVcode: false });
+   });
   }
  };
  verify = () => {
@@ -45,7 +44,7 @@ export class Home extends Component {
    fd.append("uid", auth.currentUser.uid);
    fd.append("code", code);
    axios
-    .post("https://arch17-apis.herokuapp.com/api/validate-code", fd)
+    .post(`${API}validate-code`, fd)
     .then((response) => {
      console.log(response);
      this.setState({ verifying: false });

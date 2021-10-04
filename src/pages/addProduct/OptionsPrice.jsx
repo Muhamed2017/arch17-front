@@ -16,8 +16,9 @@ import {
 import axios from "axios";
 import imageCompression from "browser-image-compression";
 import ClipLoader from "react-spinners/ClipLoader";
+import { API } from "./../../utitlties";
 
-export const API = "https://arch17-apis.herokuapp.com/api/option-price/";
+export const END_POINT = `${API}option-price/`;
 export const compressImage = async (imageFile) => {
  const options = {
   maxSizeMB: 1,
@@ -227,7 +228,7 @@ class OptionsPrice extends Component {
    console.log(pair[0] + ", " + pair[1]);
   }
   return await axios
-   .post(`${API}${this.props.id}/${row.option_id}`, formData, {
+   .post(`${END_POINT}${this.props.id}/${row.option_id}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
    })
    .then((data) => {

@@ -31,7 +31,7 @@ const AddProductWrapper = (props) => {
     <Tabs OnSelect={(index) => setTabIndex(index)} forceRenderTabPanel={true}>
      <div id="tabs-wrapper">
       <TabList>
-       <Tab>1. Product Idntity</Tab>
+       <Tab>1. Product Idntity </Tab>
        <Tab>2. Options & Price</Tab>
        <Tab>3. Product Description</Tab>
        <Tab>4. Files Uploads</Tab>

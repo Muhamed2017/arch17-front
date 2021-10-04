@@ -20,6 +20,7 @@ import {
  logginOut,
  presistInfo,
  updateInfo,
+ emailPasswordSignupSuccess,
 } from "../redux/actions/authActions";
 import HashLoader from "react-spinners/HashLoader";
 import {
@@ -27,17 +28,18 @@ import {
  phoneSignupSuccess,
 } from "./../redux/actions/authActions";
 import en from "world_countries_lists/data/en/world.json";
-const strongRegex = new RegExp(
- "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})"
-);
-const mediumRegex = new RegExp(
- "^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})"
-);
+// const strongRegex = new RegExp(
+//  "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})"
+// );
+// const mediumRegex = new RegExp(
+//  "^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})"
+// );
 const hasCapital = new RegExp("^(?=.*[a-z])");
 const hasLower = new RegExp("^(?=.*[A-Z])");
 const hasNumeric = new RegExp("^(?=.*[0-9])");
 const hasSpecial = new RegExp("^(?=.[!@#$%^&])|(?=.*[!@#$%^&*])");
-
+// const API = "https://arch17-apis.herokuapp.com/api/";
+// const API = "https://arch17-apis.herokuapp.com/api/";
 const Register = (props) => {
  const [fname, setFname] = useState("");
  const [lname, setLname] = useState("");
@@ -116,7 +118,7 @@ const Register = (props) => {
   }
   if (emailSelected) {
    handleRegularSignup();
-   props.dispatchNormalSignup(fname, lname, email, password);
+   //  props.dispatchNormalSignup(fname, lname, email, password);
   }
  };
  const handleSignupPhoneHack = () => {
@@ -150,7 +152,7 @@ const Register = (props) => {
    });
  };
  const handleRegularSignup = () => {
-  props.dispatchRegularSignup(`${fname} ${lname}`, email, password);
+  props.dispatchRegularSignup(fname, lname, email, password, "regular");
   console.log(props.isLoggedIn);
  };
  const handleSuccess = (data) => {
@@ -564,8 +566,8 @@ const Register = (props) => {
  );
 };
 const mapDispatchToProps = (dispatch) => ({
- dispatchRegularSignup: (fullName, email, password) =>
-  dispatch(signupEmailPassword(fullName, email, password)),
+ dispatchRegularSignup: (fname, lname, email, password, method) =>
+  dispatch(signupEmailPassword(fname, lname, email, password, method)),
  dispatchFacebookSignup: () => dispatch(signupFacebook()),
  dispatchGoogleSignup: () => dispatch(signupGoogle()),
  dispatchNormalSignup: (fname, lname, email, password) =>
@@ -575,6 +577,7 @@ const mapDispatchToProps = (dispatch) => ({
  dispatchPhoneSigninSuccess: (info) => dispatch(phoneSignupSuccess(info)),
  dispatchLogOut: () => dispatch(logginOut()),
  updateInfo: (info) => dispatch(updateInfo(info)),
+ authenicated: (info) => dispatch(emailPasswordSignupSuccess(info)),
 });
 const mapStateToProps = (state) => {
  return {

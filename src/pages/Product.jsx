@@ -22,13 +22,12 @@ import sm1 from "../../src/sm1.jpg";
 import sm2 from "../../src/sm2.jpg";
 import sm4 from "../../src/sm4.jpg";
 import collection2 from "../../src/collection-2.jpg";
-
 import axios from "axios";
 import { GiCube } from "react-icons/gi";
-import { convertFromRaw, EditorState, convertToRaw } from "draft-js";
+import { convertFromRaw, EditorState } from "draft-js";
 import { Editor } from "react-draft-wysiwyg";
 import { Image, Transformation } from "cloudinary-react";
-//
+import { API } from "./../utitlties";
 const breakPoints = [{ width: 1200, itemsToShow: 1 }];
 class Product extends Component {
  constructor(props) {
@@ -55,9 +54,7 @@ class Product extends Component {
 
  async componentDidMount() {
   await axios
-   .get(
-    `https://arch17-apis.herokuapp.com/api/product/${this.state.product_id}`
-   )
+   .get(`${API}product/${this.state.product_id}`)
    .then((products) => {
     this.setState({ product: products.data.product });
     this.setState({ options: products.data.product.options });

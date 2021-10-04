@@ -9,6 +9,7 @@ import { Modal, Button } from "react-bootstrap";
 
 import axios from "axios";
 import ClipLoader from "react-spinners/ClipLoader";
+import { API } from "./../../utitlties";
 class UploadFiles extends Component {
  _2dcadFiles = [];
  _3dFiles = [];
@@ -59,7 +60,6 @@ class UploadFiles extends Component {
    this.fd.append("files_3d[]", files[0]);
    const file_src = URL.createObjectURL(files[0]);
    this._3dFiles.push(file_src);
-   console.log("SSSSS");
    console.log(this._3dFiles);
    this.setState({ _3dFiles: this._3dFiles });
    reader.addEventListener("load", () => {
@@ -93,15 +93,11 @@ class UploadFiles extends Component {
 
    setTimeout(() => {
     axios
-     .post(
-      `https://arch17-apis.herokuapp.com/api/files/${this.props.id}`,
-      this.fd,
-      {
-       headers: {
-        "Content-Type": "multipart/form-data",
-       },
-      }
-     )
+     .post(`${API}files/${this.props.id}`, this.fd, {
+      headers: {
+       "Content-Type": "multipart/form-data",
+      },
+     })
      .then((response) => {
       this.setState({ published: true });
       console.log(response);

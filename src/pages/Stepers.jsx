@@ -85,7 +85,7 @@ const DotsStepper = (props) => {
        }
      : {};
 
-    const visitedProps: any =
+    const visitedProps =
      step.isVisited && !step.isCurrent
       ? {
          bg: "white",

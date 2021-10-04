@@ -36,7 +36,8 @@ class UserProfile extends Component {
   //     }
  }
  render() {
-  if (!this.props.isLoggedIn && !auth.currentUser) return <Redirect to="/" />;
+  //   if (!this.props.isLoggedIn && !auth.currentUser) return <Redirect to="/" />;
+  if (!this.props.isLoggedIn || !this.props.info) return <Redirect to="/" />;
   return (
    <React.Fragment>
     <div id="user-profile" className="bg-white">

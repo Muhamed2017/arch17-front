@@ -18,6 +18,8 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { Redirect } from "react-router";
 import { logginOut } from "./../../redux/actions/authActions";
+import { API } from "./../../utitlties";
+
 import {
  signinEmailPassword,
  setUserInfoAction,
@@ -87,13 +89,11 @@ class Settings extends Component {
    .then((userCredentials) => {
     fd.append("uid", userCredentials.user.uid);
     fd.append("phone", this.state.phone);
-    axios
-     .post("https://arch17-apis.herokuapp.com/api/update-phone", fd)
-     .then((response) => {
-      console.log(response.data);
-      this.props.updateInfo(response.data.user);
-      presistInfo(response.data.user, true);
-     });
+    axios.post(`${API}update-phone`, fd).then((response) => {
+     console.log(response.data);
+     this.props.updateInfo(response.data.user);
+     presistInfo(response.data.user, true);
+    });
     this.setState({ phoneModal: false });
    })
    .catch((err) => {
@@ -246,7 +246,7 @@ class Settings extends Component {
     await compressImage(this.dataURLtoFile(this.state.cropped_profile, "file"))
    );
    axios
-    .post("https://arch17-apis.herokuapp.com/api/upload/5", fd)
+    .post(`${API}upload/5`, fd)
     .then((response) => {
      console.log(response.data.img[response.data.lastIndex].file_url);
      auth.currentUser
@@ -312,7 +312,9 @@ class Settings extends Component {
   this.setState({ changing: false });
  };
  render() {
-  if (!this.props.isLoggedIn || !auth.currentUser) return <Redirect to="/" />;
+  // if (!this.props.isLoggedIn || !auth.currentUser) return <Redirect to="/" />;
+  if (!this.props.isLoggedIn || !this.props.userInfo?.info)
+   return <Redirect to="/" />;
   return (
    <>
     <div id="user-settings">

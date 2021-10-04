@@ -1,5 +1,6 @@
 import * as actions from '../constants'
 import axios from 'axios'
+import { API } from './../../utitlties';
 const addProductIdentity = ()=>{
     return {
         type:actions.ADD_PRODUCT_IDENTITY_REQUEST
@@ -63,7 +64,7 @@ export const productIdentity = (name,
     product_file_kind, id)=>{
     return (dispatch)=>{
         dispatch(addProductIdentity());
-        axios.post(`https://arch17-apis.herokuapp.com/api/identity/${id}`, {
+        axios.post(`${API}identity/${id}`, {
             name,
             category,
             type,
@@ -93,7 +94,7 @@ export const productIdentity = (name,
 export const productDescription = (data, id)=>{
     return (dispatch)=>{
         dispatch(addProductDescription());
-        axios.post(`https://arch17-apis.herokuapp.com/api/desc/${id}`, data)
+        axios.post(`${API}desc/${id}`, data)
             .then(response => {
                 console.log(response)
                 dispatch(addProductDescriotionSuccess())

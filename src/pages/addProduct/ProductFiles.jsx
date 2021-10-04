@@ -18,6 +18,7 @@ import {
  productDescription,
 } from "../../redux/actions/addProductActions";
 import ClipLoader from "react-spinners/ClipLoader";
+import { API } from "./../../utitlties";
 class ProductFiles extends Component {
  galleriyFiles = [];
  embed_urls = [];
@@ -119,11 +120,7 @@ class ProductFiles extends Component {
    },
   };
   axios
-   .post(
-    `https://arch17-apis.herokuapp.com/api/desc/${this.state.product_id}`,
-    formData,
-    options
-   )
+   .post(`${API}desc/${this.state.product_id}`, formData, options)
    .then((response) => {
     console.log(response);
    })
@@ -140,10 +137,7 @@ class ProductFiles extends Component {
    formData.append("img[]", file);
    formData.append("desc_id", this.state.desc_id);
    axios
-    .post(
-     `https://arch17-apis.herokuapp.com/api/upload/${this.props.id}`,
-     formData
-    )
+    .post(`${API}upload/${this.props.id}`, formData)
     .then((response) => {
      resolve({
       data: { link: response.data.img[response.data.lastIndex].file_url },
@@ -189,10 +183,7 @@ class ProductFiles extends Component {
    );
    formDataOverview.append("desc_id", this.state.desc_id);
    axios
-    .post(
-     `https://arch17-apis.herokuapp.com/api/overviewContnet/${this.state.product_id}`,
-     formDataOverview
-    )
+    .post(`${API}overviewContnet/${this.state.product_id}`, formDataOverview)
     .then((response) => {
      this.setState({ loading: false });
      this.props.dispatchNextStep();

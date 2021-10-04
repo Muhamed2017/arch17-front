@@ -4,6 +4,7 @@ import './Demo.css'
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import Brand from './pages/Brand'
 import AuthProvider from './contexts/AuthContext';
 import { connect } from 'react-redux';
 import NavigationBar from './components/NavigationBar';
@@ -13,6 +14,7 @@ import TestUpload from './pages/TestUpload';
 import TestCrop from './pages/TestCrop';
 import Dropzones from './components/Dropzone'
 import { LinkedInPopUp } from 'react-linkedin-login-oauth2';
+import CreateBrand from './pages/CreateBrand'
 
 import Kind from './pages/addProduct/Kind'
 import Product from './pages/Product'
@@ -24,7 +26,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer} from 'react-toastify'
 import Settings from './pages/user_profile_tabs/Settings';
 import { Home } from './pages/Home';
-import CountryPhoneInput, { ConfigProvider } from 'antd-country-phone-input';
+import { ConfigProvider } from 'antd-country-phone-input';
 import en from 'world_countries_lists/data/en/world.json';
 
 import 'antd/dist/antd.css';
@@ -63,7 +65,9 @@ class App extends Component {
                 <Dropzones/>
               </Route>
               <Route path='/product/:id' component={Product} exact/>
-              <Route path='/identity/:id' component={AddProductWrapper} exact />
+              <Route path='/identity/:id' 
+              render={(state)=><AddProductWrapper {...state}/>}
+              exact />
               <Route path="/multi" exact>
                 <CoverTab/>
               </Route>
@@ -73,13 +77,17 @@ class App extends Component {
               <Route path='/user/settings' exact>
                 <Settings/>
               </Route>
-             <Route path="/add-product" exact><Kind />
-       </Route>
+             <Route path="/add-product/:id" exact component={Kind}/>
               <Route path="/editor" exact><TextEditor />
               </Route>
-              <Route path='/'>
+              <Route path='/' exact>
                 <Home/>
               </Route>
+              <Route path='/brandcreate' exact>
+                <CreateBrand />
+              </Route>
+              <Route path='/brand/:id' component={Brand} exact />
+
             </Switch>
           </Router>
         {/* <Router>

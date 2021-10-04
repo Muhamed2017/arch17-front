@@ -4,6 +4,7 @@ import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Editor } from "react-draft-wysiwyg";
 import axios from "axios";
 import { resolve } from "q";
+import { API } from "./../utitlties";
 class TextEditor extends Component {
  constructor(props) {
   super(props);
@@ -18,7 +19,7 @@ class TextEditor extends Component {
    formData.append("desc_gallery_files[]", file);
 
    axios
-    .post("https://arch17-apis.herokuapp.com/api/desc/385", formData)
+    .post(`${API}desc/385`, formData)
     .then((response) => {
      //  console.log(response.data.product_desc.desc_gallery_files[0]);
      //  resolve(res)

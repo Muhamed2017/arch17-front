@@ -16,7 +16,6 @@ import { store } from "react-notifications-component";
 // import "animate.css/animate.min.css";
 import { MdError } from "react-icons/md";
 import "react-notifications-component/dist/theme.css";
-
 import { Form, Col, Row, Modal, Button } from "react-bootstrap";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
@@ -24,6 +23,8 @@ import slide4 from "../../../src/slide4.jpg";
 import { connect } from "react-redux";
 import axios from "axios";
 import { compressImage } from "./OptionsPrice";
+import { API } from "./../../utitlties";
+
 import {
  ADD_INIT_PRICE,
  ADD_MATERIAL,
@@ -627,13 +628,9 @@ class OptionRow extends Component {
   console.log(files);
   if (files.length > 0) {
    axios
-    .post(
-     `https://arch17-apis.herokuapp.com/api/option-covers/${this.props.id}`,
-     fd,
-     {
-      headers: { "Content-Type": "multipart/form-data" },
-     }
-    )
+    .post(`${API}option-covers/${this.props.id}`, fd, {
+     headers: { "Content-Type": "multipart/form-data" },
+    })
     .then((response) => {
      this.setState({ loadCovers: false });
      //  this.setState({ option_id: response.data.option_id });

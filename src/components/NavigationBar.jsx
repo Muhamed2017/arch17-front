@@ -28,6 +28,7 @@ import { BsChatFill } from "react-icons/bs";
 import { IoNotifications } from "react-icons/io5";
 import axios from "axios";
 import { presistInfo } from "./../redux/actions/authActions";
+import { API } from "./../utitlties";
 class NavigationBar extends Component {
  constructor(props) {
   super(props);
@@ -87,37 +88,34 @@ class NavigationBar extends Component {
   this.setState({ validate_modal: false });
  };
  sendVerificationCode = () => {
-  if (auth.currentUser) {
+  if (auth.currentUser || this.props.info) {
    this.setState({ sendingVcode: true });
    this.setState({ verifying: true });
    const fd = new FormData();
-   fd.append("uid", auth.currentUser.uid);
-   axios
-    .post("https://arch17-apis.herokuapp.com/api/user", fd)
-    .then((response) => {
-     console.log(response);
-     this.setState({
-      validate_modal: true,
-      verifying: false,
-      sendingVcode: false,
-     });
+   fd.append("uid", this.props.info?.uid);
+   axios.post(`${API}user`, fd).then((response) => {
+    console.log(response);
+    this.setState({
+     validate_modal: true,
+     verifying: false,
+     sendingVcode: false,
     });
+   });
   }
  };
  verify = () => {
-  if (auth.currentUser) {
+  if (auth.currentUser || this.props.isLoggedIn) {
    let code = this.state.vCode;
    this.setState({ verifying: true });
    const fd = new FormData();
-   fd.append("uid", auth.currentUser.uid);
+   //  fd.append("uid", auth.currentUser.uid);
+   fd.append("uid", this.props.info.uid);
    fd.append("code", code);
    axios
-    .post("https://arch17-apis.herokuapp.com/api/validate-code", fd)
+    .post(`${API}validate-code`, fd)
     .then((response) => {
      console.log(response);
-
      this.props.updateInfo(response.data.user);
-
      presistInfo(response.data.user, true);
      this.setState({ verifying: false, validate_modal: false, verified: true });
      toast.success("Your email has been verified", {

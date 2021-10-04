@@ -72,6 +72,13 @@ export const restNavinfo = info =>({
     type: actions.SET_NAV_INFO,
     payload: info
 })
+export const createBrandVerifyNext = ()=>({
+    type: actions.CREATE_BRAND_VERIFY_NEXT,
+})
+export const createBrandBrandNext = () => ({
+    type: actions.CREATE_BRAND_BRAND_NEXT,
+})
+
 export const logout = ()=>{
     return {
         type: actions.LOGOUT
@@ -84,19 +91,37 @@ export const updateInfo = (information)=>{
     }
 }
 
-export const signupEmailPassword= (fullName, email, password)=>{
+export const signupEmailPassword= (fname,lname, email, password, method)=>{
+const displayName=`${fname} ${lname}`
     return (dispatch)=>{
         dispatch(emailPasswordSignup());
-        auth.createUserWithEmailAndPassword(email, password).then((userCredential) => {
+       if(method==='firebase'){
+            auth.createUserWithEmailAndPassword(email, password).then((userCredential) => {
             userCredential.user.updateProfile({
-                displayName: fullName,
+                displayName: displayName,
             }).then(()=>{
-                // setUserInfo(userCredential.user)
                 dispatch(emailPasswordSignupSuccess(userCredential.user))
-                // dispatch(updateInfo(userCredential.user))
                 presistInfo(userCredential.user, true)
             })
         })
+       }
+        if(method==='regular'){
+              const formData = new FormData();
+              formData.append("fname", fname);
+              formData.append("lname", lname);
+              formData.append("email", email);
+              formData.append("password", password);
+              axios
+              .post(`${actions.ENDPOINT}user/register`, formData)
+                    .then((response) => {
+                        console.log(response.data.user);
+                        dispatch(emailPasswordSignupSuccess(response.data.user))
+                        presistInfo(response.data.user, true);
+                    })
+                    .catch((error) => {
+                    console.log(error);
+                    });
+        }
        
     }
 }
@@ -128,26 +153,7 @@ return (dispatch)=>{
             color:"#fff"
             },
         });
-        // toast.success(   <h style={{ color: "#000" }}>
-        // `Welcome ${response.data.user.fname} ${response.data.user.lname}`,<a
-        // style={{ color: "#000", textDecoration: "underline" }}
-        // href="/user/settings">Update Your profile Now</a></h>,{
-        //     position: toast.POSITION.BOTTOM_CENTER,
-        //     theme: "white",
-        //     transition: Flip,
-        //     pauseOnHover: true,
-        //     closeOnClick: false,
-        //     style: {
-        //     fontFamily: "Roboto",
-        //     color: "#fff",
-        //     backgroundColor: "#EAEAEA",
-        //     padding: "25px 0",
-        //     margin: "auto",
-        //     },
-        //     autoClose: 20000,
-        //     className: "welcome-notify",
-        // })
-        console.log(response)
+             console.log(response)
     }
    )
 }
@@ -158,10 +164,7 @@ return (dispatch)=>{
     dispatch(emailPasswordSignin())
     auth.signInWithEmailAndPassword(email, password).then((userCredential)=>{
         dispatch(emailPasswordSigninSuccess(userCredential.user))
-        // setUserInfo(userCredential.user)
-        // setUserInfoAction(userCredential.user)
         dispatch(emailPasswordSignupSuccess(userCredential.user))
-        // dispatch(updateInfo(userCredential.user))
         presistInfo(userCredential.user, true)
         console.log(userCredential);
     })
@@ -181,8 +184,6 @@ export const signinEmailPassword = (email, password, newName, newEmail, phone) =
                 })
             } if (newEmail != "") {
                 userCredential.user.updateEmail(newEmail).then(() => {
-                    // setUserInfo(userCredential.user)
-                    // setUserInfoAction(userCredential.user)
                     console.log("email updated")
                     console.log(newEmail, auth.currentUser)
                 })
@@ -205,17 +206,8 @@ export const signinEmailPassword = (email, password, newName, newEmail, phone) =
 export const setUserInfoAction = (userData)=>{
     return (dispatch)=>{
         dispatch(setNavActionCreator(userData))
-    }
-    
+    }   
 }
-// export const setUserInfo = (userData)=>{
-//     const state = {
-//         user : userData,
-//         isLoggedIn:true,
-//         loading:false
-//     }
-//     localStorage.setItem('user',JSON.stringify(state))
-// }
 export const presistInfo = (info, loggingState)=>{
     const state = {
         info: info,
@@ -245,8 +237,6 @@ export const signupGoogle = () => {
             dispatch(googleSignuoSuccess(userCredential.user))
             dispatch(updateInfo(userCredential.user))
             presistInfo(userCredential.user, true)
-            // setUserInfo(userCredential.user)
-            // dispatch(setNavActionCreator(auth.currentUser))
         }).catch((error) => {
             console.log(error.message)
         })
@@ -282,3 +272,13 @@ export const logginOut = () => {
     }
 }
 
+// export const brandNext = ()=>{
+//     return (dispatch)=>{
+//         dispatch(createBrandNext())
+//     }  
+// }
+// export const brandPrevious = () => {
+//     return (dispatch) => {
+//         dispatch(createBrandPrevious())
+//     }
+// }

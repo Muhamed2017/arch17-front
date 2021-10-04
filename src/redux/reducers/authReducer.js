@@ -6,7 +6,8 @@ const userDefaultState ={
     loading:false,
     info:null,
     displayName:null,
-    photoURL:null
+    photoURL:null,
+    brandStep:0
 }
 
 const userInfo = JSON.parse(localStorage.getItem("user")) ?? userDefaultState;
@@ -60,7 +61,7 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 photoURL: action.payload.photoURL,
                 displayName: action.payload.displayName,
             }
-             case actions.VANILLA_SIGNIN_EMAIL_PASSWORD_SUCCESS:
+        case actions.VANILLA_SIGNIN_EMAIL_PASSWORD_SUCCESS:
             return {
                 ...state,
                 loading: false,
@@ -69,8 +70,7 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 info: action.payload,
                 photoURL: action.payload.photoURL,
                 displayName: action.payload.displayName,
-            }
-           
+            }   
         case actions.SIGNIN_EMAIL_PASSWORD_FAIL:
             return {
                 ...state,
@@ -92,7 +92,6 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 ...state,
                 loading: true,
             }
-
         case actions.GOOGLE_SIGNUP_SUCCESS:
             return {
                 ...state,
@@ -121,7 +120,7 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 displayName: action.payload.displayName,
 
             }
-            case actions.LOGOUT:
+        case actions.LOGOUT:
                 return {
                     ...state,
                     user:null,
@@ -134,10 +133,17 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                     displayName:action.payload.displayName,
                     photoURL:action.payload.photoURL,
                 email: action.payload.email,
-
-
-
                 }
+            case actions.CREATE_BRAND_VERIFY_NEXT:
+            return {
+                ...state,
+                brandStep: 1
+            }
+        case actions.CREATE_BRAND_BRAND_NEXT:
+            return {
+                ...state,
+                brandStep: 2
+            }
         default:
             return state;
     }

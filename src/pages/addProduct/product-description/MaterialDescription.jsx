@@ -4,6 +4,7 @@ import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Editor } from "react-draft-wysiwyg";
 import axios from "axios";
 import { resolve } from "q";
+import { API } from "./../../../utitlties";
 
 class MaterialDescription extends Component {
  constructor(props) {
@@ -21,10 +22,7 @@ class MaterialDescription extends Component {
    JSON.stringify(convertToRaw(this.state.editorState.getCurrentContent()))
   );
   axios
-   .post(
-    `https://arch17-apis.herokuapp.com/api/descContent/${this.props.id}`,
-    formData
-   )
+   .post(`${API}descContent/${this.props.id}`, formData)
    .then((response) => {
     console.log(response);
    })
@@ -38,7 +36,7 @@ class MaterialDescription extends Component {
 
    axios
     .post(
-     `https://arch17-apis.herokuapp.com/api/upload/${this.props.id}`,
+     `${API}upload/${this.props.id}`,
 
      formData
     )
