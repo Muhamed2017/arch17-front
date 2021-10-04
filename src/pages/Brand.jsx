@@ -150,9 +150,14 @@ class Brand extends Component {
             {/* "" */}
             {/* )} */}
             <Row span={24} className="types-row mb-4">
-             <Col md={24}>
-              <h6 className="bold">Product Types</h6>
-             </Col>
+             {this.state.brand.store?.products?.length > 0 && (
+              <>
+               <Col md={24}>
+                <h6 className="bold">Product Types</h6>
+               </Col>
+              </>
+             )}
+
              {this.state.brand.store?.products?.map((product, index) => {
               return (
                <>
