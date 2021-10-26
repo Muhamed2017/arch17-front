@@ -28,9 +28,10 @@ import Settings from './pages/user_profile_tabs/Settings';
 import { Home } from './pages/Home';
 import { ConfigProvider } from 'antd-country-phone-input';
 import en from 'world_countries_lists/data/en/world.json';
-
+import Preview from './pages/addProduct/Preview'
 import 'antd/dist/antd.css';
 import 'antd-country-phone-input/dist/index.css'
+import Search from './pages/Search';
 
 class App extends Component {
    constructor(props){
@@ -77,6 +78,9 @@ class App extends Component {
               <Route path='/user/settings' exact>
                 <Settings/>
               </Route>
+               <Route path='/search' exact>
+                <Search/>
+              </Route>
              <Route path="/add-product/:id" exact component={Kind}/>
               <Route path="/editor" exact><TextEditor />
               </Route>
@@ -87,6 +91,7 @@ class App extends Component {
                 <CreateBrand />
               </Route>
               <Route path='/brand/:id' component={Brand} exact />
+              {/* <Route path='/preview' component={Preview} exact /> */}
 
             </Switch>
           </Router>

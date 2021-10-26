@@ -22,9 +22,10 @@ class BrandSettingsTab extends Component {
   super(props);
   this.cropperRef = React.createRef();
   this.state = {
-   name: "",
-   email: "",
-   phone: "",
+   name: this.props.brand?.store?.name,
+   email: this.props.brand?.store?.email,
+   about: this.props.brand?.store?.about ?? "",
+   city: this.props.brand?.store?.city ?? "",
    prfl_loading: false,
    profile_modal: false,
    profile_src: "",
@@ -43,126 +44,35 @@ class BrandSettingsTab extends Component {
  onChangeProfile = (e) => {
   const file = e.target.files[0];
   const src = URL.createObjectURL(file);
-  // this.setState({ profile_img: file });
   this.setState({ profile_src: src });
   console.log(file);
   console.log(src);
  };
  componentDidMount() {
   this.setState({
-   name: this.props.displayName?.split(" ")[0],
-   //    phone: this.props.userInfo?.info?.phoneNumber ?? "",
-   //    email: this.props.userInfo.info?.email?.includes("+")
-   // ? "No Email"
-   // : this.props.userInfo?.info?.email,
+   name: this.props.brand?.store?.name,
+   email: this.props.brand?.store?.email,
+   about: this.props.brand?.store?.about,
+   city: this.props.brand?.store?.city,
   });
  }
 
- setUpRecaptch = () => {
-  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(
-   "recaptch-setting-container",
-   {
-    size: "invisible",
-    callback: (response) => {
-     console.log(response);
-    },
-   }
-  );
- };
-
- phoneModal_close = () => {
-  this.setState({ phoneModal: false });
- };
-
- handleDeleteSubmit = () => {
-  this.setState({ deletingAcc: true });
-  auth
-   .signInWithEmailAndPassword(
-    auth.currentUser.email,
-    this.state.deletePassword
-   )
-   .then((userCreds) => {
-    console.log(userCreds.user);
-    auth.currentUser.delete().then(() => {
-     this.props.dispatchLogOut();
-    });
+ handleUpdateProfile = () => {
+  const fd = new FormData();
+  fd.append("name", this.state.name);
+  fd.append("email", this.state.email);
+  fd.append("about", this.state.about);
+  fd.append("city", this.state.city);
+  axios
+   .post(`${API}brand/update/${this.props.brand.store.id}`, fd)
+   .then((response) => {
+    console.log(response);
+   })
+   .catch((err) => {
+    console.log(err);
    });
  };
- changePassword = () => {
-  this.setState({ pswrd_loading: true });
-  auth
-   .signInWithEmailAndPassword(auth.currentUser.email, this.state.password)
-   .then((userCreds) => {
-    userCreds.user
-     .updatePassword(this.state.new_password)
-     .then(() => {
-      console.log("Password Changed");
-      this.setState({ pswrd_loading: false });
-      this.setState({ change_password_modal: false });
-      toast.success("Password Updated Successfully", {
-       position: toast.POSITION.BOTTOM_LEFT,
-       theme: "colored",
-       transition: Flip,
-      });
-     })
-     .catch((err) => {
-      console.log(err);
-     });
-   })
-   .catch((err) => console.log(err));
- };
- changePasswordOpen = () => {
-  this.setState({ change_password_modal: true });
- };
- deleteAccountOpen = () => {
-  this.setState({ delete_acc_modal: true });
- };
- deleteAccClose = () => {
-  this.setState({ delete_acc_modal: false });
- };
- handleUpdateProfile = () => {
-  this.setState({ prfl_loading: true });
-  if (this.props.isLoggedIn) {
-   auth.currentUser
-    .updateProfile({
-     displayName: `${this.state.fname} ${this.state.lname}`,
-    })
-    .then(() => {
-     console.log("profile updated");
-     this.props.updateInfo(auth.currentUser);
-     presistInfo(auth.currentUser, true);
-     toast.success("Pofile Updated Successfully", {
-      position: toast.POSITION.BOTTOM_LEFT,
-      theme: "colored",
-      transition: Flip,
-      hideProgressBar: true,
-     });
-    });
 
-   setTimeout(() => {
-    this.setState({ prfl_loading: false });
-   }, 500);
-  }
-  if (
-   this.state.provider === "google.com" ||
-   this.state.provider === "facebook.com"
-  ) {
-   auth.currentUser
-    .updateProfile({
-     displayName: `${this.state.fname} ${this.state.lname}`,
-    })
-    .then(() => {
-     console.log("profile face or google updated updated");
-     console.log(auth.currentUser);
-     this.props.updateInfo(auth.currentUser);
-     presistInfo(auth.currentUser, true);
-     this.setState({ prfl_loading: false });
-    });
-   console.log(auth.currentUser);
-  } else {
-   console.log("not signed in, please sign in and try again");
-  }
- };
  dataURLtoFile = (dataurl, filename) => {
   var arr = dataurl.split(","),
    mime = arr[0].match(/:(.*?);/)[1],
@@ -222,17 +132,20 @@ class BrandSettingsTab extends Component {
   }
   console.log(fd);
  };
- handleFnameChange = (e) => {
-  this.setState({ fname: e.target.value });
+ handleCityChange = (e) => {
+  this.setState({ city: e.target.value });
  };
- handleLnameChange = (e) => {
-  this.setState({ lname: e.target.value });
+ handleNameChange = (e) => {
+  this.setState({ name: e.target.value });
  };
  handlePhoneChange = (e) => {
   this.setState({ phone: e.target.value });
  };
  handleEmailChange = (e) => {
   this.setState({ email: e.target.value });
+ };
+ handleAboutChange = (e) => {
+  this.setState({ about: e.target.value });
  };
 
  handlePasswordChange = (e) => {
@@ -316,19 +229,19 @@ class BrandSettingsTab extends Component {
          </Form.Group>
          <Form.Group as={Row} md={{ span: 12 }}>
           <Col md={6}>
-           <Form.Label>First Name</Form.Label>
+           <Form.Label>Name</Form.Label>
            <Form.Control
-            placeholder="First Name"
-            onChange={this.handleFnameChange}
+            placeholder="Name"
+            onChange={this.handleNameChange}
             value={this.state.name}
            />
           </Col>
           <Col md={6}>
-           <Form.Label>Last Name</Form.Label>
+           <Form.Label>City</Form.Label>
            <Form.Control
-            placeholder="Last Name"
-            onChange={this.handleLnameChange}
-            value={this.state.name}
+            placeholder="City"
+            onChange={this.handleCityChange}
+            value={this.state.city == "null" ? "" : this.state.city}
            />
           </Col>
          </Form.Group>
@@ -344,8 +257,9 @@ class BrandSettingsTab extends Component {
           <Form.Control
            as="textarea"
            placeholder="About"
-           onChange={this.handleEmailChange}
-           value={this.state.email}
+           onChange={this.handleAboutChange}
+           //  value={this.state.about}
+           value={this.state.about == "null" ? "" : this.state.about}
            style={{ height: "300px" }}
           />
          </Col>
@@ -372,8 +286,9 @@ class BrandSettingsTab extends Component {
         </Link>
        </Col>
        <Col md={2}>
-        {this.state.fname == this.props.displayName?.split(" ")[0] &&
-        this.state.lname == this.props.displayName?.split(" ")[1] ? (
+        {this.state.name === this.props.brand.store.name &&
+        this.state.email === this.props.brand.store.email &&
+        this.state.about === this.props.brand.store.about ? (
          <>
           <Button
            disabled

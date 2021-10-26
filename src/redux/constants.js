@@ -58,3 +58,11 @@ export const ADD_OPTION_ID = "ADD_OPTION_ID"
 export const DELETE_ROW = "DELETE_ROW"
 export const ADD_PRODUCT_PICTURES = "ADD_PRODUCT_PICTURES"
 export const OPTIONS_STORED ="OPTIONS_STORED"
+
+
+
+
+
+// entities and pages loaded data
+
+export const GET_BRAND_DATA = 'GET_BRAND_DATA'

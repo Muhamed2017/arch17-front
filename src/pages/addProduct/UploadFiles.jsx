@@ -6,7 +6,10 @@ import { IoIosCube } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa";
 import { Redirect } from "react-router-dom";
 import { Modal, Button } from "react-bootstrap";
-
+import {
+ nextTab,
+ productDescription,
+} from "../../redux/actions/addProductActions";
 import axios from "axios";
 import ClipLoader from "react-spinners/ClipLoader";
 import { API } from "./../../utitlties";
@@ -34,7 +37,8 @@ class UploadFiles extends Component {
   };
  }
  skip = () => {
-  this.setState({ published: true });
+  this.props.dispatchNextStep();
+  // this.setState({ published: true });
  };
 
  fd = new FormData();
@@ -99,7 +103,8 @@ class UploadFiles extends Component {
       },
      })
      .then((response) => {
-      this.setState({ published: true });
+      // this.setState({ published: true });
+      this.props.dispatchNextStep();
       console.log(response);
      });
    }, 2000);
@@ -107,160 +112,165 @@ class UploadFiles extends Component {
  };
  render() {
   // if (this.props.OptionsPrice.optionsStored && this.state.published) {
-  if (this.state.published) {
-   return <Redirect to={{ pathname: `/product/${this.props.id}` }} />;
-  } else {
-   return (
-    <>
-     <div className="step-form">
-      <button className="product-skip-btn" onClick={this.skip}>
-       Skip
-      </button>
-      <button
-       className="save-product-step-btn"
-       style={{
-        top: "-110px",
-        height: "20px",
-        background: this.state.loading ? "#898989" : "",
-       }}
-       onClick={this.handleNextStep}
-      >
-       {this.state.loading ? (
-        <ClipLoader
-         style={{ height: "20px" }}
-         color="#ffffff"
-         loading={this.state.loading}
-         size={20}
-        />
-       ) : (
-        "Save & Continue"
-       )}
-      </button>
-      <div className="step-head">
-       <h2>Upload Product Files</h2>
-       <p>CAD / 3D, and PDF files</p>
-      </div>
-      <div className="upload-container">
-       <div className="upload-block">
-        <div className="upload-head">
-         <h6>CAD / 2D Drawings Files</h6>
-        </div>
-        <div id="" className="upload-btns">
-         <div className="uploaded-files">
-          {this.state._2dcadFiles?.map((file, index) => {
-           return (
-            <div style={{ background: "#fff" }}>
-             <RiFilePdfFill style={{ color: "red", fontSize: "4.5rem" }} />
-            </div>
-           );
-          })}
-         </div>
-         <div className="upload-action">
-          <input
-           className="file-upload"
-           onChange={this.onChange2dcadFiles}
-           type="file"
-          />
-          <div className="upload-icon">
-           <FaCloudUploadAlt />
-          </div>
-          <p>Upload Files</p>
-         </div>
-        </div>
-       </div>
-       <div className="upload-block">
-        <div className="upload-head">
-         <h6>3D Files</h6>
-        </div>
-        <div className="upload-btns">
-         <div className="uploaded-files">
-          {this.state._3dFiles?.map((file, index) => {
-           return (
-            <div style={{ background: "#fff" }}>
-             <IoIosCube style={{ color: "red", fontSize: "4.5rem" }} />
-            </div>
-           );
-          })}
-         </div>
-         <div className="upload-action">
-          <input
-           className="file-upload"
-           onChange={this.onChange3dFiles}
-           type="file"
-          />
-          <div className="upload-icon">
-           <FaCloudUploadAlt />
-          </div>
-          <p>Upload Files</p>
-         </div>
-        </div>
-       </div>
-       <div className="upload-block">
-        <div className="upload-head">
-         <h6>Upload PDF and Catalogue files</h6>
-        </div>
-        <div id="" className="upload-btns">
-         <div className="uploaded-files">
-          {this.state._pdfFiles?.map((file, index) => {
-           return (
-            <div style={{ background: "#fff" }}>
-             <FaFilePdf style={{ color: "red", fontSize: "4.5rem" }} />
-            </div>
-           );
-          })}
-         </div>
-         <div className="upload-action">
-          <input
-           className="file-upload"
-           onChange={this.onChangePDF}
-           type="file"
-          />
-          <div className="upload-icon">
-           <FaCloudUploadAlt />
-          </div>
-          <p>Upload Files</p>
-         </div>
-        </div>
-       </div>
-      </div>
-      <Modal
-       id="price-request-modal"
-       className="arch-wide-modal product-modal pics-modal"
-       size="md"
-       show={this.state.skip_modal}
-       onHide={this.skip_modal_close}
-       aria-labelledby="example-modal-sizes-title-lg"
-      >
-       <Modal.Header closeButton></Modal.Header>
-       <Modal.Body>
-        <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
-         <h6>Skip Modal</h6>
-         <Button
-          variant="danger"
-          type="submit"
-          onClick={() => {
-           this.setState({ skip_modal: false });
-           this.setState({ published: true });
-          }}
-          style={{
-           textAlign: "right",
-           background: "#E41E15",
-           display: "block",
-           float: "right",
-           marginRight: "12px",
-          }}
-         >
-          Skip
-         </Button>
-        </div>
-       </Modal.Body>
-      </Modal>
+  // if (this.state.published) {
+  //  return <Redirect to={{ pathname: `/product/${this.props.id}` }} />;
+  // } else {
+  return (
+   <>
+    <div className="step-form">
+     <button className="product-skip-btn" onClick={this.skip}>
+      Skip
+     </button>
+     <button
+      className="save-product-step-btn"
+      style={{
+       top: "-110px",
+       height: "20px",
+       background: this.state.loading ? "#898989" : "",
+      }}
+      onClick={this.handleNextStep}
+     >
+      {this.state.loading ? (
+       <ClipLoader
+        style={{ height: "20px" }}
+        color="#ffffff"
+        loading={this.state.loading}
+        size={20}
+       />
+      ) : (
+       "Save & Continue"
+      )}
+     </button>
+     <div className="step-head">
+      <h2>Upload Product Files</h2>
+      <p>CAD / 3D, and PDF files</p>
      </div>
-    </>
-   );
-  }
+     <div className="upload-container">
+      <div className="upload-block">
+       <div className="upload-head">
+        <h6>CAD / 2D Drawings Files</h6>
+       </div>
+       <div id="" className="upload-btns">
+        <div className="uploaded-files">
+         {this.state._2dcadFiles?.map((file, index) => {
+          return (
+           <div style={{ background: "#fff" }}>
+            <RiFilePdfFill style={{ color: "red", fontSize: "4.5rem" }} />
+           </div>
+          );
+         })}
+        </div>
+        <div className="upload-action">
+         <input
+          className="file-upload"
+          onChange={this.onChange2dcadFiles}
+          type="file"
+         />
+         <div className="upload-icon">
+          <FaCloudUploadAlt />
+         </div>
+         <p>Upload Files</p>
+        </div>
+       </div>
+      </div>
+      <div className="upload-block">
+       <div className="upload-head">
+        <h6>3D Files</h6>
+       </div>
+       <div className="upload-btns">
+        <div className="uploaded-files">
+         {this.state._3dFiles?.map((file, index) => {
+          return (
+           <div style={{ background: "#fff" }}>
+            <IoIosCube style={{ color: "red", fontSize: "4.5rem" }} />
+           </div>
+          );
+         })}
+        </div>
+        <div className="upload-action">
+         <input
+          className="file-upload"
+          onChange={this.onChange3dFiles}
+          type="file"
+         />
+         <div className="upload-icon">
+          <FaCloudUploadAlt />
+         </div>
+         <p>Upload Files</p>
+        </div>
+       </div>
+      </div>
+      <div className="upload-block">
+       <div className="upload-head">
+        <h6>Upload PDF and Catalogue files</h6>
+       </div>
+       <div id="" className="upload-btns">
+        <div className="uploaded-files">
+         {this.state._pdfFiles?.map((file, index) => {
+          return (
+           <div style={{ background: "#fff" }}>
+            <FaFilePdf style={{ color: "red", fontSize: "4.5rem" }} />
+           </div>
+          );
+         })}
+        </div>
+        <div className="upload-action">
+         <input
+          className="file-upload"
+          onChange={this.onChangePDF}
+          type="file"
+         />
+         <div className="upload-icon">
+          <FaCloudUploadAlt />
+         </div>
+         <p>Upload Files</p>
+        </div>
+       </div>
+      </div>
+     </div>
+     <Modal
+      id="price-request-modal"
+      className="arch-wide-modal product-modal pics-modal"
+      size="md"
+      show={this.state.skip_modal}
+      onHide={this.skip_modal_close}
+      aria-labelledby="example-modal-sizes-title-lg"
+     >
+      <Modal.Header closeButton></Modal.Header>
+      <Modal.Body>
+       <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
+        <h6>Skip Modal</h6>
+        <Button
+         variant="danger"
+         type="submit"
+         onClick={() => {
+          this.setState({ skip_modal: false });
+          // this.setState({ published: true });
+          this.props.dispatchNextStep();
+         }}
+         style={{
+          textAlign: "right",
+          background: "#E41E15",
+          display: "block",
+          float: "right",
+          marginRight: "12px",
+         }}
+        >
+         Skip
+        </Button>
+       </div>
+      </Modal.Body>
+     </Modal>
+    </div>
+   </>
+  );
  }
 }
-
+// }
+const mapDispatchToProps = (dispatch) => ({
+ dispatchDescriptionStep: (data, id) => dispatch(productDescription(data, id)),
+ dispatchNextStep: () => dispatch(nextTab()),
+});
 const mapStateToProps = (state) => ({ OptionsPrice: state.optionsPrice });
-export default connect(mapStateToProps)(UploadFiles);
+
+export default connect(mapStateToProps, mapDispatchToProps)(UploadFiles);

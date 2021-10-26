@@ -149,14 +149,6 @@ class CreateBrandFinish extends Component {
              onChange={this.handleProductTypesChange}
              optionLabelProp="label"
             >
-             {/* <Option value="china" label="China">
-              <div className="demo-option-label-item">
-               <span role="img" aria-label="China">
-                🇨🇳
-               </span>
-               China (中国)
-              </div>
-             </Option> */}
              {utility.BRAND_TYPES.map((type, index) => {
               return (
                <>

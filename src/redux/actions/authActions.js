@@ -3,7 +3,6 @@ import * as actions from '../constants'
 import { auth, googleProvider, facebookProvider} from './../../firebase';
 import axios from 'axios'
 import {toast, Flip, Bounce } from 'react-toastify';
-import firebase from 'firebase';
 export const emailPasswordSignup = ()=>({
     type:actions.SIGNUP_EMAIL_PASSWORD_REQUEST
 })

@@ -190,25 +190,6 @@ class Brand extends Component {
              </Col> */}
             </Row>
             <Row span={24}>
-             {/* <Col lg={4} sm={6} xs={12} className="collection-col">
-              <div className="collection-box">
-               <div
-                className="rect rect-0"
-                style={{ backgroundImage: `url(${collection1})` }}
-               ></div>
-               <div
-                className="rect rect-1"
-                style={{ backgroundImage: `url(${collection2})` }}
-               ></div>
-               <div
-                className="rect rect-2"
-                style={{ backgroundImage: `url(${collection3})` }}
-               ></div>
-              </div>
-              <div className="collection-text">
-               <h5>Collection Name</h5>
-              </div>
-             </Col> */}
              {this.state.collections?.map((col, index) => {
               return (
                <>
@@ -264,14 +245,14 @@ class Brand extends Component {
                   <div
                    className="p-img"
                    style={{
-                    background: `url(${product.options[1]?.cover[0]})`,
+                    // background: `url(${product.options[1]?.cover[0]})`,
+                    background: `url(${product.identity[0]?.preview_cover})`,
                    }}
                   ></div>
                   <h5 className="product-store">{brand.store.name}</h5>
                   <p className="product-name">{product.identity[0]?.name}</p>
                   <div className="product-price">
-                   {/* <span>¥ {product.options[1]?.price}</span> */}
-                   {product.options[1]?.price && (
+                   {product.identity[0]?.preview_price ?? (
                     <>
                      <span>¥ {product.options[1]?.price}</span>
                     </>
@@ -303,7 +284,7 @@ class Brand extends Component {
           {isOwner ? (
            <>
             <TabPane tab="Settings" key="8">
-             <BrandSettingTab />
+             <BrandSettingTab brand={this.state.brand} />
             </TabPane>
            </>
           ) : (
