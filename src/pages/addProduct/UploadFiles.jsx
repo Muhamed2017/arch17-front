@@ -62,10 +62,10 @@ class UploadFiles extends Component {
   const reader = new FileReader();
   if (files && files.length > 0) {
    this.fd.append("files_3d[]", files[0]);
-   const file_src = URL.createObjectURL(files[0]);
-   this._3dFiles.push(file_src);
+   //  const file_src = URL.createObjectURL(files[0]);
+   //  this._3dFiles.push(file_src);
    console.log(this._3dFiles);
-   this.setState({ _3dFiles: this._3dFiles });
+   //  this.setState({ _3dFiles: this._3dFiles });
    reader.addEventListener("load", () => {
     this.setState({ o_image: files[0] });
    });

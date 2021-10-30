@@ -6,74 +6,111 @@ import {
  Row,
  Col,
  Form,
- message,
  Menu,
  Breadcrumb,
  Layout,
+ Select,
  Checkbox,
  Dropdown,
  Button,
  Slider,
 } from "antd";
-import {
- UserOutlined,
- LaptopOutlined,
- NotificationOutlined,
-} from "@ant-design/icons";
+import { UserOutlined } from "@ant-design/icons";
+import { API } from "./../utitlties";
 const { SubMenu } = Menu;
 const { Sider } = Layout;
-
+const { Option } = Select;
 class Search extends Component {
  constructor(props) {
   super(props);
   this.state = {
-   category: "",
-   material: "",
-   style: "",
-   shape: "",
-   price: "",
+   categories: [],
+   materials: [],
+   styles: [],
+   shapes: [],
+   price: [],
+   types: [],
    collapsed: false,
    products: [],
+   fetching: false,
   };
  }
+ onTest = () => {
+  axios
+   .get("https://jsonplaceholder.typicode.com/posts")
+   .then((response) => console.log(response));
+ };
  menu = (
   <Menu onClick={this.handleMenuClick}>
-   <Menu.Item key="1" icon={<UserOutlined />}>
-    1st menu item
-   </Menu.Item>
+   <Menu.Item key="1">1st menu item</Menu.Item>
    <Menu.Item key="2" icon={<UserOutlined />}>
     2nd menu item
    </Menu.Item>
-   <Menu.Item key="3" icon={<UserOutlined />}>
-    3rd menu item
-   </Menu.Item>
+   <Menu.Item key="3">3rd menu item</Menu.Item>
   </Menu>
  );
+ onItemClick = () => {
+  console.log(
+   // {
+   //  ...this.state.materials,
+   this.state.categories
+   //  ...this.state.styles,
+   // }
+  );
+ };
+ fetchProducts = () => {
+  this.setState({ fetching: true });
+  axios
+   //  .get(`${API}search?filter[category]=Furniture&filter[type]=Bed Headboard`)
+   .get(
+    `${API}search?filter[category]=${this.state.categories}&filter[type]=${this.state.types}&filter[style]=${this.state.styles}`
+   )
+   .then((response) => {
+    console.log(response);
+    this.setState({ products: response.data.products, fetching: false });
+   });
+ };
  onCollapse = (collapsed) => {
   console.log(collapsed);
   this.setState({ collapsed });
  };
- handleButtonClick(e) {
-  message.info("Click on left button.");
-  console.log("click left button", e);
- }
+ onCategoriesSelect = (items) => {
+  this.setState({ categories: items.selectedKeys }, () => {
+   this.fetchProducts();
+  });
+ };
+ onMaterialsSelect = (items) => {
+  this.setState({ materials: items.selectedKeys });
+  this.fetchProducts();
+ };
+ onStylesSelect = (items) => {
+  this.setState({ styles: items.selectedKeys });
+  this.fetchProducts();
+ };
+ handleButtonClick = () => {
+  // message.info("Click on left button.");
+  // console.log("click left button", e);
+  console.log(this.state);
+ };
  componentDidMount() {
   axios
    //    .get(`${utility.API}brand/${this.state.brand_id}`)
-   .get(`${utility.API}brand/25`)
+   //  .get(`${utility.API}brand/25`)
+   .get(`${API}search?filter[category]=${this.state.categories}&filter[type]=`)
    .then((response) => {
     console.log(response);
     this.setState({
-     products: response.data.store.products,
+     products: response.data.products,
     });
    })
    .catch((error) => {
     console.log(error);
    });
  }
+ onFilterChange = (values) => {
+  console.log(values.value);
+ };
  render() {
-  const { collapsed } = this.state;
-
   return (
    <>
     <div id="search-page">
@@ -92,46 +129,76 @@ class Search extends Component {
          <Breadcrumb.Item>List</Breadcrumb.Item>
          <Breadcrumb.Item>App</Breadcrumb.Item>
         </Breadcrumb>
-        <Menu
-         mode="inline"
-         defaultSelectedKeys={["1"]}
-         defaultOpenKeys={["sub1"]}
-         style={{ height: "100%", borderRight: 0, width: "100%" }}
-        >
-         <SubMenu key="sub1" icon={<UserOutlined />} title="All Categories">
-          <Menu.Item key="1">option1</Menu.Item>
-          <Menu.Item key="2">option2</Menu.Item>
-          <Menu.Item key="3">option3</Menu.Item>
-          <Menu.Item key="4">option4</Menu.Item>
-         </SubMenu>
-         <SubMenu key="sub2" icon={<LaptopOutlined />} title="Materials">
-          <Menu.Item key="5">option5</Menu.Item>
-          <Menu.Item key="6">option6</Menu.Item>
-          <Menu.Item key="7">option7</Menu.Item>
-          <Menu.Item key="8">option8</Menu.Item>
-         </SubMenu>
-         <SubMenu key="sub3" icon={<NotificationOutlined />} title="Style">
-          <Menu.Item key="9">option9</Menu.Item>
-          <Menu.Item key="10">option10</Menu.Item>
-          <Menu.Item key="11">option11</Menu.Item>
-          <Menu.Item key="12">option12</Menu.Item>
-         </SubMenu>
-         <SubMenu key="price" title="Price">
-          <Slider
-           marks={
-            {
-             // 0: "",
-             // 50: "",
-             // 100: "C",
-             // 150: "D",
-             // 200: "E",
-             // 250: "F",
-             // 100000: "",
-            }
-           }
-          />
-         </SubMenu>
-        </Menu>
+        <Form onFieldsChange={this.onFilterChange}>
+         <Menu
+          mode="inline"
+          // multiple={true}
+          onSelect={this.onCategoriesSelect}
+          onDeselect={this.onCategoriesSelect}
+          defaultOpenKeys={["categories"]}
+          style={{ height: "100%", borderRight: 0, width: "100%" }}
+         >
+          <SubMenu
+           key="categories"
+           title="All Categories"
+           //  onItemClick={this.onItemClick}
+           onTitleClick={this.onItemClick}
+          >
+           <Menu.Item key="furniture">Furniture</Menu.Item>
+           <Menu.Item key="Lighting">Lighting</Menu.Item>
+           <Menu.Item key="Decore">Decore</Menu.Item>
+           <Menu.Item key="Kitchen">Kitchen</Menu.Item>
+           <Menu.Item key="Wellness">Wellness</Menu.Item>
+           <Menu.Item key="Finishes">Finishes</Menu.Item>
+           <Menu.Item key="Materials">Materials</Menu.Item>
+           <Menu.Item key="Construction">Construction Products</Menu.Item>
+          </SubMenu>
+         </Menu>
+         <Menu
+          mode="inline"
+          multiple={true}
+          // mode="inline"
+          // multiple={true}
+          onSelect={this.onMaterialsSelect}
+          onDeselect={this.onMaterialsSelect}
+         >
+          <SubMenu key="materials" title="Materials">
+           <Menu.Item onSelect={() => this.onTest} key="Velvet">
+            Velvet
+           </Menu.Item>
+           <Menu.Item key="Fabric">Fabric</Menu.Item>
+           <Menu.Item key="Synthetic fiber">Synthetic fiber</Menu.Item>
+           <Menu.Item key="Polyester">Polyester</Menu.Item>
+           <Menu.Item key="Dacron®">Dacron®</Menu.Item>
+           <Menu.Item key="Microfiber">Microfiber</Menu.Item>
+           <Menu.Item key="Polyester">Polyester</Menu.Item>
+           <Menu.Item key="Janus-fiber®">Janus-fiber®</Menu.Item>
+           <Menu.Item key="Sunbrella®">Sunbrella®</Menu.Item>
+           <Menu.Item key="Textilene">Textilene</Menu.Item>
+           {/* <Menu.Item key="Polyester">Polyester</Menu.Item> */}
+           {/* <Menu.Item key="Polyester">Polyester</Menu.Item> */}
+          </SubMenu>
+         </Menu>
+         <Menu
+          mode="inline"
+          multiple={true}
+          onSelect={this.onStylesSelect}
+          onDeselect={this.onStylesSelect}
+         >
+          <SubMenu key="styles" title="Style">
+           <Menu.Item key="Contemporary">Contemporary</Menu.Item>
+           <Menu.Item key="Eclectic">Eclectic</Menu.Item>
+           <Menu.Item key="Modern">Modern</Menu.Item>
+           <Menu.Item key="Traditional">Traditional</Menu.Item>
+           <Menu.Item key="Asian">Asian</Menu.Item>
+           <Menu.Item key="Rustic">Rustic</Menu.Item>
+           <Menu.Item key="Traditional">Traditional</Menu.Item>
+          </SubMenu>
+          {/* <SubMenu key="price" title="Price">
+           <Slider marks={{}} />
+          </SubMenu> */}
+         </Menu>
+        </Form>
        </Sider>
       </Col>
       <Col md={18} className="px-3">
@@ -143,6 +210,9 @@ class Search extends Component {
            style={{
             lineHeight: "32px",
             marginRight: "25px",
+            borderRadius: "25px",
+            padding: "0px 15px",
+            border: "0.5px solid #EAEAEA",
            }}
           >
            Outdoor
@@ -152,6 +222,9 @@ class Search extends Component {
            style={{
             lineHeight: "32px",
             marginRight: "25px",
+            borderRadius: "25px",
+            padding: "0px 15px",
+            border: "0.5px solid #EAEAEA",
            }}
           >
            For Kids
@@ -161,6 +234,9 @@ class Search extends Component {
            style={{
             lineHeight: "32px",
             marginRight: "25px",
+            borderRadius: "25px",
+            padding: "0px 15px",
+            border: "0.5px solid #EAEAEA",
            }}
           >
            3D / Cad
@@ -177,10 +253,14 @@ class Search extends Component {
           }}
          >
           <Dropdown overlay={this.menu}>
-           <Button>Button</Button>
+           <Button style={{ border: "none", boxShadow: "none" }}>
+            Room /Space
+           </Button>
           </Dropdown>
           <Dropdown overlay={this.menu}>
-           <Button>Button</Button>
+           <Button style={{ border: "none", boxShadow: "none" }}>
+            Sort By
+           </Button>
           </Dropdown>
          </div>
         </Col>
@@ -197,16 +277,20 @@ class Search extends Component {
                className="p-img"
                style={{
                 // background: `url(${product.options[1]?.cover[0]})`,
-                background: `url(${product.identity[0]?.preview_cover})`,
+                // background: `url(${product.identity[0]?.preview_cover})`,
+                background: `url(${product.preview_cover})`,
                }}
               ></div>
               {/* <h5 className="product-store">{brand.store.name}</h5> */}
-              <p className="product-name">{product.identity[0]?.name}</p>
+              {/* <p className="product-name">{product.identity[0]?.name}</p> */}
+              <p className="product-name">{product.name}</p>
               <div className="product-price">
-               {product.identity[0]?.preview_price ?? (
+               {product.preview_price ? (
                 <>
-                 <span>¥ {product.options[1]?.price}</span>
+                 <span>¥ {product.preview_price}</span>
                 </>
+               ) : (
+                ""
                )}
               </div>
              </div>

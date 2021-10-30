@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import blank from "../../src/blank.jpg";
+import { Link } from "react-router-dom";
+
 import { auth } from "../firebase";
 import firebase from "firebase/app";
 import { connect } from "react-redux";
@@ -12,7 +14,7 @@ import { IoMdCloudUpload } from "react-icons/io";
 import "cropperjs/dist/cropper.css";
 import { compressImage } from "./addProduct/OptionsPrice";
 import axios from "axios";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import { Redirect } from "react-router";
 import { logginOut } from "../redux/actions/authActions";
 import { updateInfo, presistInfo } from "../redux/actions/authActions";
@@ -67,6 +69,8 @@ class BrandSettingsTab extends Component {
    .post(`${API}brand/update/${this.props.brand.store.id}`, fd)
    .then((response) => {
     console.log(response);
+    const { store } = response.data;
+    this.setState({ name: store.name });
    })
    .catch((err) => {
     console.log(err);

@@ -29,7 +29,10 @@ const AddProductWrapper = (props) => {
   <React.Fragment>
    <ReactNotification />
    <div id="add-product-wrapper">
-    <Tabs OnSelect={(index) => setTabIndex(index)} forceRenderTabPanel={true}>
+    <Tabs
+     OnSelect={(index) => setTabIndex(index)}
+     // forceRenderTabPanel={true}
+    >
      <div id="tabs-wrapper">
       <TabList>
        <Tab>1. Product Idntity </Tab>
@@ -51,7 +54,7 @@ const AddProductWrapper = (props) => {
      <TabPanel>
       <UploadFiles id={params.id} forceRender />
      </TabPanel>
-     <TabPanel>
+     <TabPanel forceRender={false}>
       <Preview id={params.id} />
      </TabPanel>
     </Tabs>

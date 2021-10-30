@@ -21,24 +21,16 @@ class Preview extends Component {
 
   this.state = {
    loading: false,
-   cropped_profile: null,
-   addProfileLoad: false,
-   confResult: "",
-   phoneModal: false,
-   status: "process",
-   changing: false,
    product_options: null,
    active: 0,
    product_covers: [],
    cropper_imgs: this.props.options,
-   product_identity: null,
+   product_identity: this.props.identity,
    cropped_cover: "",
    published: false,
-   displayName: null,
-   displayPrice: "",
-   price: "",
+   displayName: this.props.identity.name,
+   displayPrice: this.props.displayPrice,
    img: null,
-   className: "",
    initialized: false,
    covers: this.props.options,
   };
@@ -54,23 +46,26 @@ class Preview extends Component {
   }
  };
  componentDidMount() {
-  // axios
-  //  .get(`${API}product/${this.props.id}`)
-  //  .then((response) => {
-  //   console.log(response);
-  //   const product = response.data.product;
-  //   this.setState({
-  //    product_identity: product.identity[0],
-  //    displayName: product.identity[0].name,
-  //    product_covers: product.options[1].cover,
-  //    product_options: product.options,
-  //    img: product.options[1].cover[0],
-  //    displayPrice: product.options[1].price ?? "",
-  //   });
-  //  })
-  //  .catch((err) => {
-  //   console.log(err);
-  //  });
+  console.log(this.props.displayPrice);
+  axios
+   .get(`${API}product/${this.props.id}`)
+   .then((response) => {
+    console.log(response);
+    const product = response.data.product;
+    this.setState({
+     product_identity: product.identity[0],
+     covers: product.option[1]?.cover,
+     displayName: product.identity[0].name,
+     //  product_covers: product.options[1].cover,
+     //  product_options: product.options,
+     //  img: product.options[1].cover[0],
+     //  displayPrice: product.options[1].price ?? "",
+    });
+   })
+   .catch((err) => {
+    console.log(err);
+   });
+
   // console.log(this.props.identity);
   // console.log(this.props.options);
   // console.log(this.props.options);
@@ -85,26 +80,21 @@ class Preview extends Component {
  onCropChange = (crop) => {
   this.setState({ crop });
  };
-
- onCropComplete = (croppedArea, croppedAreaPixels) => {
-  console.log(croppedArea, croppedAreaPixels);
- };
  _crop() {
   const imageElement = this.cropperRef?.current;
   const cropper = imageElement?.cropper;
-  // let cropped = cropper.getCroppedCanvas().toDataURL();
-  // this.setState({ cropped_cover: cropped });
+  let cropped = cropper.getCroppedCanvas()?.toDataURL();
+  this.setState({ cropped_cover: cropped });
  }
+ onCropComplete = (croppedArea, croppedAreaPixels) => {
+  console.log(croppedArea, croppedAreaPixels);
+ };
+
  handlePreview = (c) => {
   this.setState({ active: c.target.currentSrc });
   console.log(c);
  };
- handlePreviewLive = (c) => {
-  // const imageElement = this.cropperRef?.current;
-  // const cropper = imageElement?.cropper;
-  // let cropped = cropper.getCroppedCanvas().toDataURL();
-  // this.setState({ active: cropped });
- };
+ 
  dataURLtoFile = (dataurl, filename) => {
   var arr = dataurl.split(","),
    mime = arr[0].match(/:(.*?);/)[1],
@@ -179,11 +169,14 @@ class Preview extends Component {
         return (
          <>
           <TabPane
-           forceRender
            tab={
             <>
-             <div onClick={() => this.handleClickThumb(index)}>
-              Tabs {index}
+             <div key={index} onClick={() => this.handleClickThumb(index)}>
+              <img
+               src={cover.url}
+               alt=""
+               style={{ width: "100%", height: "100%", display: "block" }}
+              />
              </div>
             </>
            }
@@ -195,7 +188,9 @@ class Preview extends Component {
               <div className={"preview image-preview-" + index}></div>
              </div>
              <div className="preview-store">Kelly Wearstler</div>
-             <div className="preview-name">{this.state.displayName}</div>
+             <div className="preview-name">
+              {this.state.displayName ?? this.props.identity.name}
+             </div>
              <div className="preview-price">¥ {this.state.displayPrice}</div>
             </Col>
             <Col md={1}>
@@ -211,7 +206,7 @@ class Preview extends Component {
                 // Cropper.js options
                 ref={this.cropperRef}
                 initialAspectRatio="free"
-                guides={false}
+                // guides={false}
                 cropend={this._crop.bind(this)}
                 ready={this._crop.bind(this)}
                 crossOrigin="anonymous"
@@ -230,12 +225,12 @@ class Preview extends Component {
         );
        })}
       </Tabs>
-      <div>
-       <Row md={24}>
-        <Col md={8}>
+      <div className="p-5">
+       <Row md={12} style={{ justifyContent: "flex-end" }}>
+        <Col md={4}>
          <Form.Label>Display Name</Form.Label>
         </Col>
-        <Col md={16}>
+        <Col md={8}>
          <Form.Control
           placeholder="Display Name"
           onChange={this.handleDisplayNameChange}
@@ -247,34 +242,40 @@ class Preview extends Component {
          />
         </Col>
        </Row>
-       <Row md={24} className="my-5">
-        <Col md={8}>
+       <Row md={12} className="my-5" style={{ justifyContent: "flex-end" }}>
+        <Col md={4}>
          <Form.Label>Display Price</Form.Label>
         </Col>
-        <Col md={16}>
+        <Col md={8}>
          <Select
           listHeight={350}
           style={{ width: "100%" }}
           allowClear={true}
           showArrow={true}
-          placeholder="Available Prices"
+          // placeholder="Available Prices"
           size="large"
+          value={this.state.displayPrice}
           onChange={this.handleDisplayPriceChange}
           optionLabelProp="label"
          >
-          {this.state.product_options?.map((option, index) => {
-           if (option.cover) {
-            return (
-             <>
-              <Option value={option?.price} label={option?.price} key={index}>
-               <div className="demo-option-label-item">
-                <span role="img" aria-label={option?.price}></span>
-                {option?.price}
-               </div>
-              </Option>
-             </>
-            );
-           }
+          {/* {this.state.product_options?.map((option, index) => { */}
+          {this.props.rows?.map((option, index) => {
+           //  if (option.cover) {
+           return (
+            <>
+             <Option
+              value={option.price ?? ""}
+              label={option.price ?? ""}
+              key={index}
+             >
+              <div className="demo-option-label-item">
+               <span role="img" aria-label={option?.price}></span>
+               {option?.price}
+              </div>
+             </Option>
+            </>
+           );
+           //  }
           })}
          </Select>
         </Col>
@@ -290,7 +291,9 @@ class Preview extends Component {
 // const mapDispatchToProps = (dispatch) => ({});
 const mapStateToProps = (state) => ({
  loading: state.addProduct.loading,
+ rows: state.optionsPrice.rows,
  options: state.optionsPrice?.rows[0]?.productPictures ?? [],
+ displayPrice: state.optionsPrice?.rows[0]?.price ?? "",
  identity: state.addProduct?.identity,
 });
 export default connect(mapStateToProps, null)(Preview);

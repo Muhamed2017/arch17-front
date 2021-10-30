@@ -2280,6 +2280,11 @@
   resolved "https://registry.yarnpkg.com/@formiz/validations/-/validations-1.0.0.tgz#d61041076b8423d6f439a6b7acb0581caca37d9d"
   integrity sha512-pGTf0IQmSDhK7+4oTYjwtkn5TXqts33URSFXcUBMidDJgd1bSUzTQMNftg7YCeRPY8ROSsaJNWP7bFwtwHQeSA==
 
+"@fortawesome/fontawesome-free@^5.15.4":
+  version "5.15.4"
+  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-free/-/fontawesome-free-5.15.4.tgz#ecda5712b61ac852c760d8b3c79c96adca5554e5"
+  integrity sha512-eYm8vijH/hpzr/6/1CJ/V/Eb1xQFW2nnUKArb3z+yUWv7HTwj6M7SP957oMjfZjAHU6qpoNc2wQvIxBLWYa/Jg==
+
 "@google-cloud/common@^3.7.0":
   version "3.7.2"
   resolved "https://registry.yarnpkg.com/@google-cloud/common/-/common-3.7.2.tgz#2f1feef9aaeb4f392d627ceab06e7eaa03329f58"
