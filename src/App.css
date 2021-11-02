@@ -1353,6 +1353,9 @@ span.learn-more {
  right: 0;
  bottom: 80px;
 }
+#add-product-wrapper .ant-tabs-nav{
+margin-right:10px !important
+}
 
 /* end of product preview  */
 

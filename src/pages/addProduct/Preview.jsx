@@ -13,7 +13,7 @@ import { connect } from "react-redux";
 
 const { TabPane } = Tabs;
 const { Option } = Select;
-
+const cropped_imgs = [];
 class Preview extends Component {
  constructor(props) {
   super(props);
@@ -27,14 +27,17 @@ class Preview extends Component {
    cropper_imgs: this.props.options,
    product_identity: this.props.identity,
    cropped_cover: "",
+   cropped_previews: [],
    published: false,
    displayName: this.props.identity.name,
    displayPrice: this.props.displayPrice,
    img: null,
    initialized: false,
    covers: this.props.options,
+   selectedPreviewIndex: 0,
   };
  }
+
  onCropperInit = (cropper) => {
   this.cropper = cropper;
  };
@@ -84,7 +87,10 @@ class Preview extends Component {
   const imageElement = this.cropperRef?.current;
   const cropper = imageElement?.cropper;
   let cropped = cropper.getCroppedCanvas()?.toDataURL();
+
   this.setState({ cropped_cover: cropped });
+  cropped_imgs.push(cropped);
+  this.setState({ cropped_previews: cropped_imgs });
  }
  onCropComplete = (croppedArea, croppedAreaPixels) => {
   console.log(croppedArea, croppedAreaPixels);
@@ -94,7 +100,7 @@ class Preview extends Component {
   this.setState({ active: c.target.currentSrc });
   console.log(c);
  };
- 
+
  dataURLtoFile = (dataurl, filename) => {
   var arr = dataurl.split(","),
    mime = arr[0].match(/:(.*?);/)[1],
@@ -109,6 +115,11 @@ class Preview extends Component {
   return new File([u8arr], filename, { type: mime });
  };
  handlePublishProduct = (e) => {
+  this.setState({ loading: true });
+  // console.log(this.state.cropped_previews)
+  // console.log(
+  //  this.dataURLtoFile(this.state.cropped_previews[this.state.active], "file")
+  // );
   e.preventDefault();
   const fd = new FormData();
 
@@ -123,9 +134,10 @@ class Preview extends Component {
    .post(`${API}preview`, fd)
    .then((response) => {
     console.log(response);
-    this.setState({ published: true });
+    this.setState({ published: true, loading: false });
    })
    .catch((err) => console.log(err));
+  this.setState({ loading: false });
  };
  handleClickThumb = (index) => {
   console.log(this.state.img);
@@ -154,9 +166,9 @@ class Preview extends Component {
       >
        {this.state.loading ? (
         <ClipLoader
-         style={{ height: "20px" }}
+         //  style={{ height: "20px" }}
          color="#ffffff"
-         loading={this.state.loading}
+         loading={true}
          size={18}
         />
        ) : (
@@ -171,7 +183,11 @@ class Preview extends Component {
           <TabPane
            tab={
             <>
-             <div key={index} onClick={() => this.handleClickThumb(index)}>
+             <div
+              key={index}
+              onClick={() => this.handleClickThumb(index)}
+              style={{ width: "55px" }}
+             >
               <img
                src={cover.url}
                alt=""

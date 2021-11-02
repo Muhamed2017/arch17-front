@@ -1,0 +1,60 @@
+.project-filter-panel ul li{
+    font-family: 'Roboto';
+    color:  #707070;
+    font-weight: 400;
+    font-size: 16px;
+    cursor: pointer;
+}
+.project-filter-panel ul li.active{
+    font-weight: 700;
+    color: #000;
+}
+.v-line{
+    height: 25px;
+    width: 1px;
+    background-color: #707070;
+}
+
+@media(max-width : 1200px ){
+    .project-filter-panel{
+        padding: 8px 0px 8px 0px  !important;
+    }
+    .v-line{
+        height: 15px;
+        width: 1px;
+        background-color: #707070;
+    }
+    .project-filter-panel ul li{
+        font-size: 12px;
+        padding: 0px !important;
+        margin: 0px 7px 0px 7px !important;    
+    }
+}
+
+@media(max-width : 768px ){
+    .project-filter-panel-container{
+        margin: auto !important;
+        padding: 0px;
+    }
+    .project-filter-panel{
+        padding: 8px 0px 8px 0px  !important;
+    }
+    .v-line{
+        height: 15px;
+        width: 1px;
+        background-color: #707070;
+    }
+    .project-filter-panel ul li , .project-filter-panel ul li .dropdown button{
+        font-size: 12px;
+        padding: 0px !important;
+        margin: 0px 0px 0px 6px !important;
+        border: none !important;
+    }
+}
+
+@media(max-width : 576px){
+    .project-filter-panel ul li{
+        padding: 0px !important;
+        margin: 0 !important;  
+    }
+}

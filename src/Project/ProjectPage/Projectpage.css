@@ -1,0 +1,198 @@
+.project-page-header{
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    height: 372px;
+    border-radius: 25px 25px 0px 0px;
+    background-size: 100% auto;
+}
+.project-info h1{
+    color: #000000;
+    font-family:'Roboto' ;
+    font-size: 32px;
+    font-weight: 400;
+}
+.project-info-detailes{
+    color: #A0A0A0;
+    font-family:'Roboto' ;
+    font-size: 14px;
+    font-weight: 400;
+}
+.descigner-box{
+    background-color: #FFF;
+    border-radius: 25px ;
+    padding: 16px;
+}
+.descigner-box h5{
+    font-family: 'Roboto';
+    font-weight: bold;
+    color: #747474;
+    font-size: 15px;
+}
+.descigner-more{
+    margin-right: 16px;
+    text-align: right;
+    cursor: pointer;
+    font-family: 'Roboto';
+    font-weight: bold;
+    color: #747474;
+    font-size: 15px;
+}
+.designer-image{
+    width: 100px;
+    height: 100px;
+    border: 1px solid #dddddd;
+    border-radius: 50%;
+}
+.designer-info-name{
+    color: #000000;
+    font-family:'Roboto' ;
+    font-size: 16px;
+    font-weight: 700;
+}
+.designer-info-profession{
+    color: #747474;
+    font-family:'Roboto' ;
+    font-size: 14px;
+    font-weight: 400;
+}
+.designer-info button{
+    font-family: 'Roboto';
+    font-weight: 400;
+    font-size: 14px;
+}
+.designer-info button.follow-btn{
+    background-color: #A3A3A3;
+    border-color:#A3A3A3;
+    color: #FFF;
+}
+
+
+
+.brand-box{
+    background-color: #FFF;
+    border-radius: 25px ;
+    padding: 16px;
+}
+.brand-box h5{
+    font-family: 'Roboto';
+    font-weight: bold;
+    color: #747474;
+    font-size: 15px;
+}
+.brand-more{
+    margin-right: 16px;
+    text-align: right;
+    cursor: pointer;
+    font-family: 'Roboto';
+    font-weight: bold;
+    color: #747474;
+    font-size: 15px;
+}
+.brand-image{
+    width: 100px;
+    height: 100px;
+    border: 1px solid #dddddd;
+    border-radius: 50%;
+}
+.brand-info-name{
+    color: #000000;
+    font-family:'Roboto' ;
+    font-size: 16px;
+    font-weight: 700;
+}
+.brand-info-country{
+    color: #747474;
+    font-family:'Roboto' ;
+    font-size: 14px;
+    font-weight: 400;
+}
+.brand-info button{
+    font-family: 'Roboto';
+    font-weight: 400;
+    font-size: 14px;
+}
+.brand-info button.follow-btn{
+    background-color: #A3A3A3;
+    border-color:#A3A3A3;
+    color: #FFF;
+}
+.carousel-indicators{
+    display: none !important;
+}
+.carousel-control-next, .carousel-control-prev {
+    margin-top: 16px;
+    position: relative;
+    display: inline-flex;
+}
+.carousel-control-prev{
+    left:70%;
+}
+.carousel-control-next{
+    right:-70%;
+}
+.brand-product{
+    display: inline-flex;
+}
+.brand-product img{
+    width: 125px;
+    height: 125px;
+    border-radius: 25px;
+    border:1px solid #f0f0f0;
+    margin: 2px;
+}
+.project-right-side{
+
+}
+
+.project-left-side{
+    margin-top: -75px;
+}
+.actions-container-scroll{
+    z-index: 1010; 
+    top: 70px;
+}
+.none-descktop{
+    display: none;
+}
+.action-li{
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    cursor:pointer;
+}
+@media(max-width : 1200px ){
+    .action-li{
+        align-items: center;
+        width: 30px;
+        height: 30px;
+        cursor:pointer;
+    }
+}
+@media(max-width : 768px ){
+    .action-li{
+        align-items: center;
+        width: 30px;
+        height: 30px;
+        cursor:pointer;
+    }
+}
+@media(max-width : 576px){
+    .project-left-side{
+        margin-top: 0px;
+    }
+    .none-mobile{
+        display: none;
+    }
+    .none-descktop{
+        display: block;
+    }
+    .action-li{
+        align-items: center;
+        width: 30px;
+        height: 30px;
+        cursor:pointer;
+    }
+    .actions-btn-mobile{
+        font-size: 15px;
+    }
+}

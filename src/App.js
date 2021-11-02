@@ -5,6 +5,7 @@ import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Brand from './pages/Brand'
+import HomePage from './HomePage/HomePage'
 import AuthProvider from './contexts/AuthContext';
 import { connect } from 'react-redux';
 import NavigationBar from './components/NavigationBar';
@@ -80,6 +81,9 @@ class App extends Component {
               </Route>
                <Route path='/search' exact>
                 <Search/>
+              </Route>
+              <Route path='/' exact>
+                <HomePage/>
               </Route>
              <Route path="/add-product/:id" exact component={Kind}/>
               <Route path="/editor" exact><TextEditor />

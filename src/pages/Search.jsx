@@ -1,7 +1,10 @@
 import React, { Component } from "react";
 import axios from "axios";
 import * as utility from "../utitlties";
-
+import {
+ kind_options,
+ furniture_styles,
+} from "./addProduct/ProductClassifications";
 import {
  Row,
  Col,
@@ -13,7 +16,7 @@ import {
  Checkbox,
  Dropdown,
  Button,
- Slider,
+ Spin,
 } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { API } from "./../utitlties";
@@ -33,6 +36,12 @@ class Search extends Component {
    collapsed: false,
    products: [],
    fetching: false,
+   selectedKindTitle: "Furniture",
+   selectedKindOptions: [],
+   selectedStyleOptions: [],
+   kidsChecked: false,
+   outdoorChecked: true,
+   productFileKind: false,
   };
  }
  onTest = () => {
@@ -50,20 +59,18 @@ class Search extends Component {
   </Menu>
  );
  onItemClick = () => {
-  console.log(
-   // {
-   //  ...this.state.materials,
-   this.state.categories
-   //  ...this.state.styles,
-   // }
-  );
+  console.log(this.state.categories);
  };
  fetchProducts = () => {
   this.setState({ fetching: true });
+
   axios
-   //  .get(`${API}search?filter[category]=Furniture&filter[type]=Bed Headboard`)
    .get(
-    `${API}search?filter[category]=${this.state.categories}&filter[type]=${this.state.types}&filter[style]=${this.state.styles}`
+    `${API}search?filter[category]=${this.state.categories}
+    &filter[type]=${this.state.types}
+    &filter[style]=${this.state.styles}
+    &filter[is_for_kids]=${this.state.kidsChecked ? "yes" : ""}
+    &filter[is_outdoor]=${this.state.outdoorChecked ? "yes" : ""}`
    )
    .then((response) => {
     console.log(response);
@@ -75,9 +82,23 @@ class Search extends Component {
   this.setState({ collapsed });
  };
  onCategoriesSelect = (items) => {
-  this.setState({ categories: items.selectedKeys }, () => {
-   this.fetchProducts();
-  });
+  this.setState(
+   { categories: items.selectedKeys, selectedKindTitle: `${items.key}` },
+   () => {
+    this.fetchProducts();
+   }
+  );
+  if (items.key === "furniture") {
+   this.setState({
+    selectedKindOptions: kind_options,
+    selectedStyleOptions: furniture_styles,
+   });
+  } else if (items.key === "Lighting") {
+   this.setState({
+    selectedKindOptions: [],
+    selectedStyleOptions: [],
+   });
+  }
  };
  onMaterialsSelect = (items) => {
   this.setState({ materials: items.selectedKeys });
@@ -87,16 +108,14 @@ class Search extends Component {
   this.setState({ styles: items.selectedKeys });
   this.fetchProducts();
  };
+
  handleButtonClick = () => {
-  // message.info("Click on left button.");
-  // console.log("click left button", e);
   console.log(this.state);
  };
+
  componentDidMount() {
   axios
-   //    .get(`${utility.API}brand/${this.state.brand_id}`)
-   //  .get(`${utility.API}brand/25`)
-   .get(`${API}search?filter[category]=${this.state.categories}&filter[type]=`)
+   .get(`${API}search?filter[category]=${this.state.categories}`)
    .then((response) => {
     console.log(response);
     this.setState({
@@ -114,18 +133,18 @@ class Search extends Component {
   return (
    <>
     <div id="search-page">
-     <Row span={24}>
+     <Row span={24} style={{ position: "relative" }}>
       <Col md={6} style={{ background: "" }}>
        <Sider
         // collapsible
-        // collapsed={collapsed}
-        // onCollapse={this.onCollapse}
+        collapsed={this.state.collapsed}
+        onCollapse={this.onCollapse}
         width={"100%"}
         className="site-layout-background"
         style={{ background: "#fff" }}
        >
         <Breadcrumb style={{ margin: "16px 0", background: "#fff" }}>
-         <Breadcrumb.Item>Home</Breadcrumb.Item>
+         <Breadcrumb.Item>{this.state.selectedKindTitle}</Breadcrumb.Item>
          <Breadcrumb.Item>List</Breadcrumb.Item>
          <Breadcrumb.Item>App</Breadcrumb.Item>
         </Breadcrumb>
@@ -157,8 +176,22 @@ class Search extends Component {
          <Menu
           mode="inline"
           multiple={true}
-          // mode="inline"
-          // multiple={true}
+          onSelect={this.onKindSelect}
+          onDeselect={this.onKindSelect}
+         >
+          <SubMenu key="kinds" title={"All " + this.state.selectedKindTitle}>
+           {this.state.selectedKindOptions.map((option, index) => {
+            return (
+             <>
+              <Menu.Item key={option.value}>{option.value}</Menu.Item>
+             </>
+            );
+           })}
+          </SubMenu>
+         </Menu>
+         <Menu
+          mode="inline"
+          multiple={true}
           onSelect={this.onMaterialsSelect}
           onDeselect={this.onMaterialsSelect}
          >
@@ -179,25 +212,29 @@ class Search extends Component {
            {/* <Menu.Item key="Polyester">Polyester</Menu.Item> */}
           </SubMenu>
          </Menu>
-         <Menu
-          mode="inline"
-          multiple={true}
-          onSelect={this.onStylesSelect}
-          onDeselect={this.onStylesSelect}
-         >
-          <SubMenu key="styles" title="Style">
-           <Menu.Item key="Contemporary">Contemporary</Menu.Item>
-           <Menu.Item key="Eclectic">Eclectic</Menu.Item>
-           <Menu.Item key="Modern">Modern</Menu.Item>
-           <Menu.Item key="Traditional">Traditional</Menu.Item>
-           <Menu.Item key="Asian">Asian</Menu.Item>
-           <Menu.Item key="Rustic">Rustic</Menu.Item>
-           <Menu.Item key="Traditional">Traditional</Menu.Item>
-          </SubMenu>
-          {/* <SubMenu key="price" title="Price">
+         {this.state.selectedStyleOptions.length > 0 && (
+          <>
+           <Menu
+            mode="inline"
+            multiple={true}
+            onSelect={this.onStylesSelect}
+            onDeselect={this.onStylesSelect}
+           >
+            <SubMenu key="styles" title="Style">
+             {this.state.selectedStyleOptions.map((style, index) => {
+              return (
+               <>
+                <Menu.Item key={style.value}>{style.value}</Menu.Item>;
+               </>
+              );
+             })}
+            </SubMenu>
+            {/* <SubMenu key="price" title="Price">
            <Slider marks={{}} />
           </SubMenu> */}
-         </Menu>
+           </Menu>
+          </>
+         )}
         </Form>
        </Sider>
       </Col>
@@ -206,7 +243,17 @@ class Search extends Component {
         <Col md={12}>
          <div className="checkboxes">
           <Checkbox
-           value="Outdoor"
+           //  value={this.state.outdoorChecked}
+           onChange={(e) => {
+            this.setState(
+             {
+              outdoorChecked: e.target.checked,
+             },
+             () => {
+              this.fetchProducts();
+             }
+            );
+           }}
            style={{
             lineHeight: "32px",
             marginRight: "25px",
@@ -218,7 +265,17 @@ class Search extends Component {
            Outdoor
           </Checkbox>
           <Checkbox
-           value="kids"
+           //  value="yes"
+           onChange={(e) => {
+            this.setState(
+             {
+              kidsChecked: e.target.checked,
+             },
+             () => {
+              this.fetchProducts();
+             }
+            );
+           }}
            style={{
             lineHeight: "32px",
             marginRight: "25px",
@@ -266,6 +323,15 @@ class Search extends Component {
         </Col>
        </Row>
        <Row gutter={24} className="my-3">
+        {this.state.fetching && (
+         <>
+          {" "}
+          <Spin
+           size="large"
+           style={{ position: "absolute", top: "50%", right: "50%" }}
+          />
+         </>
+        )}
         {/* <div id="search-products-container"> */}
         {this.state.products?.map((product, index) => {
          return (

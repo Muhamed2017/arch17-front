@@ -11,7 +11,6 @@ import { Provider } from 'react-redux';
 // import "https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css"
 import 'antd-country-phone-input/dist/index.css';
 
-
 const store = configureStore();
 ReactDOM.render(
   <Provider store={store}>

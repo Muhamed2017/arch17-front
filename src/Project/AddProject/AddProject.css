@@ -1,0 +1,562 @@
+/* add project navbar */
+.add-project-skip-btn{
+    background-color: #888888;
+    color: #FFF;
+    border: none;
+    border-radius: 5px;
+    font-family: 'Arial';
+    font-weight: normal;
+    font-size: 16px;
+    padding: 5px 26px;
+}
+.add-project-save-btn{
+    background-color:#E41E15;
+    color: #FFF;
+    border: none;
+    border-radius: 5px;
+    font-family: 'Arial';
+    font-weight: normal;
+    font-size: 16px;
+    padding: 5px 26px;
+}
+.add-project-back-btn{
+    display: none;
+}
+.add-project-nav-link{
+    color: #B4B4B4;
+    display: block;
+    padding: .5rem 1rem;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: 'Arial';
+}
+.add-project-nav-link:hover{
+    color: #000000;
+    display: block;
+    padding: .5rem 1rem;
+    text-decoration: unset;
+}
+.nav-link-separator{
+    font-size: 16px;
+    color: #B4B4B4;
+    font-weight: 100;
+    line-height: 2;
+}
+.add-project-nav-active{
+    color: #000000;
+    font-weight: bold;
+}
+
+/* all add projects page */
+.add-project-box{
+    min-height: 1000px;
+    background-color: #FFF;
+    margin-top: 40px;
+    padding: 100px;
+}
+
+.form-label{
+    color: #000000;
+    text-align: left;
+    font-family: 'Arial';
+    font-size: 16px;
+    font-weight: bold ;
+}
+/* project info */
+.add-project-name{
+    height: 75px;
+    font-size: 24px;
+    color: #B4B4B4;
+}
+
+/* project content */
+.p-c-margin{
+    margin-right: 3rem;
+    padding-left: 20px;
+}
+.p-c-heading{
+    font-family: 'Roboto';
+    font-size: 36px;
+    color: #B4B4B4;
+    font-weight: 300;
+    margin-top: 200px;
+}
+.btn-content{
+    border: none;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    background-color: #ACACAC;
+    color: #FFFFFF;
+    font-size: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.btn-content-media{
+    background-color: #E41E15;
+    position: relative;
+    z-index: 20;
+}
+.btn-content-text{
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+.btn-plus:not(:disabled):not(.disabled).active, .btn-plus:not(:disabled):not(.disabled):active, .show>.btn-plus.dropdown-toggle{
+    background-color: #E41E15;
+}
+.conten-dropdown-menu{
+    border: none;
+    font-size: 12px;
+    text-align: left;
+    color: #fff !important;
+    padding: 8px 8px;
+    background: #333 !important;
+    transform: translate(-36px, 102.667px) !important;
+    width: 180px;
+}
+.conten-dropdown-item{
+    color: #FFF;
+    padding: 6px 10px;
+    font-size: 16px;
+    font-family: 'Arial';
+}
+.conten-dropdown-btn{
+    background-color: transparent;
+    color: #fff;
+    font-size: 1rem;
+    border: none;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.conten-dropdown-btn:hover ,
+.conten-dropdown-btn:focus ,
+.conten-dropdown-btn:active{
+    background-color: transparent;
+    border:none !important;
+    box-shadow: none !important;
+    outline: none;
+}
+.conten-dropdown-item:hover{
+    background-color: #555 !important;
+    color: #FFF;
+}
+.tox-statusbar{
+    display: none !important;
+}
+.desc-ele{
+    position: relative;
+    box-sizing: content-box;
+    border: 1px solid transparent ;
+
+}
+.controles{
+    position: absolute;
+    top: -3%;
+    right: -2%;
+    z-index: 80;
+    display: none;
+}
+.controles .dropdown-toggle{
+    width:40px;
+    height:40px;
+    border-radius: 50%;
+    font-size: 12px;
+    outline: none !important;
+    border: none !important;
+    background-color: #E41E15  !important ;
+    box-shadow: none !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.controles .dropdown-toggle:focus,.controles .dropdown-toggle:active,.controles .dropdown-toggle:hover{
+    outline: none !important;
+    border: none !important;
+    background-color: #E41E15   !important;
+    box-shadow: none !important;
+}
+.controles .dropdown-toggle::after{
+    display: none;
+}
+.desc-ele:hover .controles{
+    display: block;
+}
+.desc-ele:hover {
+    border-color: #E41E15 ;
+}
+.replace-file-btn{
+    outline: none !important;
+    border: none !important;
+    background-color: transparent !important ;
+    color: #FFF;
+
+}
+.desc-text .controles{
+    top: -15%;
+    right: -2%;
+}
+/* project Role */
+.p-r-heading{
+    font-family: 'Roboto';
+    font-weight: bold;
+    font-size: 24px;
+}
+.btn-trash{
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    background-color: transparent;
+    color:#888888;
+    font-size: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.role-row {
+    border-bottom: 1px solid #dddddd;
+}
+.role-head{
+    font-family: 'Roboto';
+    color: #000000;
+    font-weight: bold;
+    font-size: 22px;
+}
+.btn-plus{
+    border: none;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    background-color: #E41E15;
+    color:#FFFFFF;
+    font-size: 36px;
+    font-weight: bold ;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.btn-plus:hover ,
+.btn-plus:focus,
+.btn-plus:active{
+    background-color: #aa1f24 !important;
+    border:none !important;
+    box-shadow: none !important;
+}
+.btn-plus::after{
+    display: none !important;
+}
+.btn-desc{
+    font-size: 20px;
+    font-family: 'Arial';
+    color: #B4B4B4;
+    font-weight: normal;
+}
+.content-btn-desc{
+    font-family: 'Arial';
+    color: #B4B4B4;
+    font-weight: normal;
+    font-size: 20px;
+}
+
+.dropdown-designer{
+    background-color: transparent;
+    color: #000;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+
+}
+.dropdown-designer .dropdown-designer-img{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+.dropdown-designer-name{
+    font-size: 12px;
+    color: #000000;
+    font-family: 'Arial';
+    font-weight: normal;
+}
+.dropdown-designer-profession{
+    font-size: 8px !important;
+    color: #8D8D8D;
+    font-family: 'Arial';
+    font-weight: normal;
+}
+.designers-dropdown-menu{
+    position: absolute;
+    width: 390px;
+    height: 190px;
+    padding: 10px;
+    background-color: #fff;
+    overflow: auto;
+    border: 1px solid #ced4da ;
+    border-radius: 10px;
+    top: 45px;
+    z-index: 80;
+}
+.designers-dropdown-menu::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    box-shadow:inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #F5F5F5;
+}
+
+.designers-dropdown-menu::-webkit-scrollbar
+{
+	width: 12px;
+	background-color: #F5F5F5;
+}
+
+.designers-dropdown-menu::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #8f8f8f;
+}
+/* project products */
+.p-p-heading{
+    font-family: 'Arial';
+    font-weight: bold;
+    font-size: 24px;
+}
+/* project Cover */
+
+.project-name{
+    font-family: 'Times New Roman', Times, serif  !important;
+    font-size: 20px;
+    color: #2e2e2e;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-weight: normal;
+    line-height: 25px;
+    padding-left: 12px;
+    cursor: pointer;
+}
+.project-name:hover{
+    text-decoration: underline;
+}
+.project-category{
+    font-size: 12px;
+    color: #d1d1d1 !important;
+    font-family: "Arial" !important;
+    padding-left: 12px;
+    cursor: pointer;
+}
+.project-category:hover{
+    color: #7f7f7f !important
+}
+.project-type{
+    font-size: 12px;
+    color: #d1d1d1 !important;
+    font-family: "Arial" !important;
+    padding-left: 12px;
+    cursor: pointer;
+}
+.project-type p:hover{
+    color: #7f7f7f !important
+}
+
+.image-preview{
+    overflow: hidden;
+    width: 100% !important;
+    height: 238.667px !important;
+    text-align: center;
+}
+
+.image-zoom-input {
+    display: inline-block !important;
+    -webkit-appearance: none; 
+    -moz-appearance: none;
+    appearance: none;
+    height: 3px;
+    background-color: #d3d3d3; 
+    outline: none;
+    width: 170px;
+    margin: 0 10px;
+    vertical-align: middle;
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.image-zoom-input::-webkit-slider-thumb,
+.image-zoom-input::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 17px; /* Set a specific slider handle width */
+    height: 17px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    border: 1px solid #d3d3d3;
+    cursor: pointer; /* Cursor on hover */
+}
+
+.image-zoom-input::-moz-range-thumb,
+.image-zoom-input::-moz-range-thumb {
+    width: 17px; /* Set a specific slider handle width */
+    height: 17px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    border: 1px solid #d3d3d3;
+    cursor: pointer; /* Cursor on hover */
+}
+
+.image-zoom-input::-webkit-slider-thumb:hover,
+.image-zoom-input::-webkit-slider-thumb:focus,
+.image-zoom-input::-webkit-slider-thumb:active,
+.image-zoom-input::-webkit-slider-thumb:hover,
+.image-zoom-input::-webkit-slider-thumb:focus,
+.image-zoom-input::-webkit-slider-thumb:active {
+    background-color: #b9131d;
+    /*border: 1px solid #b9131d;*/
+}
+
+.image-zoom-input::-moz-range-thumb:hover,
+.image-zoom-input::-moz-range-thumb:focus,
+.image-zoom-input::-moz-range-thumb:active,
+.image-zoom-input::-moz-range-thumb:hover,
+.image-zoom-input::-moz-range-thumb:focus,
+.image-zoom-input::-moz-range-thumb:active {
+    background-color: #b9131d;
+    /*border: 1px solid #b9131d;*/
+}
+.image-thum-box{
+    width: 100px;
+    height: 100px;
+    margin: 10px;
+    cursor: pointer;
+    border: 1px solid #A70000;
+    display: flex;
+    align-items: center;
+}
+@media(min-width : 1200px ){
+    /* add project navigation bar */
+
+    /* project info */
+    .add-project-name{
+        height: 75px;
+        font-size: 24px;
+    }
+    /* project content */
+    .p-c-margin{
+        margin-right: 3rem;
+    }
+    .p-c-heading{
+        font-size: 36px;
+    }
+    /* project Role */
+}
+@media(max-width : 768px ){
+    /* add project navigation bar */
+    .add-project-nav-link {
+        padding: .5rem 1rem;
+        font-size: 13px;
+        padding: 6px;
+    }
+    .add-project-save-btn {
+        background-color: #E41E15;
+        color: #FFF;
+        border: none;
+        border-radius: 5px;
+        font-family: 'Arial';
+        font-weight: normal;
+        font-size: 13px;
+        padding: 5px 12px;
+    }
+    .add-project-skip-btn {
+        background-color: #888888;
+        color: #FFF;
+        border: none;
+        border-radius: 5px;
+        font-family: 'Arial';
+        font-weight: normal;
+        font-size: 13px;
+        padding: 5px 12px;
+    }
+    /* project info */
+    
+    /* project content */
+    
+    /* project Role */
+}
+@media(max-width : 576px){
+    /* add project navigation bar */
+    .nav-container{
+        display: none;
+    }
+    .add-project-nav-link {
+        font-size: 13px;
+        padding: 6px;
+    }
+    .add-project-save-btn {
+        background-color: #E41E15;
+        color: #FFF;
+        border: none;
+        border-radius: 5px;
+        font-family: 'Arial';
+        font-weight: normal;
+        font-size: 13px;
+        padding: 5px 12px;
+    }
+    .add-project-skip-btn {
+        background-color: #888888;
+        color: #FFF;
+        border: none;
+        border-radius: 5px;
+        font-family: 'Arial';
+        font-weight: normal;
+        font-size: 13px;
+        padding: 5px 12px;
+    }
+    .add-project-back-btn{
+        background-color: #888888;
+        color: #FFF;
+        border: none;
+        border-radius: 5px;
+        font-family: 'Arial';
+        font-weight: normal;
+        font-size: 13px;
+        padding:5px 18px 5px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    /* project info */
+    .add-project-box{
+        padding: 30px;
+        margin-top: 20px;
+    }
+    /* project content */
+    .p-c-margin{
+        margin-right: 40px;
+    }
+    .p-c-heading{
+        font-size: 22px;
+        margin-top: 15px;
+    }
+    /* project Role */
+    .p-r-heading{
+        font-size: 20px;
+    }
+    .role-head {
+        font-size: 18px;
+    }
+    .role-row {
+        margin-top: 10px !important;
+        padding-right:10px !important;
+        padding-left: 10px !important;
+    }
+    .btn-plus{
+        width: 75px;
+        height: 75px;
+        font-size: 24px;
+    }
+    .btn-desc{
+        font-size: 18px;
+    }
+}

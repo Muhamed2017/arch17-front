@@ -1,0 +1,54 @@
+.project-box{
+    cursor: pointer;
+    overflow: hidden;
+
+}
+.project-box img{
+    -webkit-transition: -webkit-transform 1s;
+    transition: -webkit-transform 1s;
+    -o-transition: transform 1s;
+    transition: transform 1s;
+    transition: transform 1s , -webkit-transform 1s;
+}
+.project-box:hover .project-img img{
+    -webkit-transform: scale(1.1);
+    -ms-transform: scale(1.1);
+    transform: scale(1.1);  
+}
+.project-img{
+    overflow: hidden;
+}
+.project-name h4{
+    font-family: 'Times New Roman', Times, serif  !important;
+    font-size: 15px !important;
+    color: #2e2e2e;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-weight: normal;
+    line-height: 25px;
+    padding-left: 12px;
+    cursor: pointer;
+}
+.project-name:hover{
+    text-decoration: underline;
+}
+.project-category{
+    font-size: 12px;
+    color: #d1d1d1 !important;
+    font-family: "Arial" !important;
+    padding-left: 12px;
+    cursor: pointer;
+}
+.project-category:hover{
+    color: #7f7f7f !important
+}
+.project-type{
+    font-size: 12px;
+    color: #d1d1d1 !important;
+    font-family: "Arial" !important;
+    padding-left: 12px;
+    cursor: pointer;
+}
+.project-type p:hover{
+    color: #7f7f7f !important
+}
