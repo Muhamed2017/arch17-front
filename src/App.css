@@ -765,41 +765,41 @@ button.save-product-step-btn {
 .react-tabs__tab-panel {
  box-shadow: 0 2px 4px 0 rgb(0 0 0 / 9%), 0 2px 4px 0 rgb(0 0 0 / 7%);
 }
-#options-wrapper thead th {
+.options-wrapper thead th {
  font-family: "Arial Black" !important;
  font-size: 12px !important;
 }
-#options-wrapper table {
+.options-wrapper table {
  width: 100%;
 }
-#options-wrapper table td,
+.options-wrapper table td,
 th {
  min-width: 120px;
  text-align: center;
 }
 
-#options-wrapper table th span {
+.options-wrapper table th span {
  padding: 2.5px;
  vertical-align: middle;
 }
-#options-wrapper table td:first-child {
+.options-wrapper table td:first-child {
  font-size: 2.1rem;
 }
-#options-wrapper svg {
+.options-wrapper svg {
  color: #b4b4b4;
  margin: auto;
 }
-#options-wrapper td input {
+.options-wrapper td input {
  width: 112px;
  margin: auto;
  border-radius: 7.5px;
 }
-#options-wrapper tbody tr td {
+.options-wrapper tbody tr td {
  padding: 35px 6px;
  border-top: 1.8px solid #d6d6d6;
  border-bottom: 1.8px solid #d6d6d6;
 }
-#options-wrapper table th {
+.options-wrapper table th {
  font-size: 0.85rem;
  font-weight: 900;
  padding-bottom: 20px !important;
@@ -2565,14 +2565,31 @@ p.designer-name-select {
 .ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected,.ant-menu-sub.ant-menu-inline,.ant-menu-item:active, .ant-menu-submenu-title:active {
     background-color: #fff !important;
     color:""
+    
 }
 #search-page .ant-menu-vertical .ant-menu-item::after, .ant-menu-vertical-left .ant-menu-item::after, .ant-menu-vertical-right .ant-menu-item::after, .ant-menu-inline .ant-menu-item::after{
-    border-right: 3px solid #000 !important;
+    border-right: 3px solid #fff !important;
+        content: "\2713" !important;
+    font-size: 1.2rem;
+    font-weight: bolder !important;
+    left:25px !important;
+
+}
+#search-page .ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected{
+font-weight: bolder !important;
+}
+.ant-menu-light .ant-menu-item:hover, .ant-menu-light .ant-menu-item-active{
+    color: #000 !important; 
 }
 .ant-menu-submenu-open{
 background: #F7F8FA  !important;
 }
 .ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title{
     height: 60px;
+}
+.scrollable-menu .ant-menu-sub.ant-menu-inline{
+    max-height: 380px;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 /* end of search page stykes */

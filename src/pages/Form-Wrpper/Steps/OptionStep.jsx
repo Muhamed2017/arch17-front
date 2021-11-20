@@ -20,16 +20,17 @@ import { Row, Modal, Button, Form, Col } from "react-bootstrap";
 
 import "cropperjs/dist/cropper.css";
 import { connect } from "react-redux";
-import OptionsRow from "./optionsRow";
 import {
  ADD_PRODUCT_NEXT_TAB,
  ADD_ROW,
  OPTIONS_STORED,
-} from "../../redux/constants";
+} from "../../../redux/constants";
 import axios from "axios";
 import imageCompression from "browser-image-compression";
 import ClipLoader from "react-spinners/ClipLoader";
 import { API } from "./../../utitlties";
+import OptionRow from "./OptionRow";
+// import OptionRow from "./../../addProduct/optionsRow";
 
 export const END_POINT = `${API}option-price/`;
 export const compressImage = async (imageFile) => {
@@ -47,7 +48,7 @@ export const compressImage = async (imageFile) => {
   throw new Error(error);
  }
 };
-class OptionsPrice extends Component {
+class OptionStep extends Component {
  constructor(props) {
   super(props);
   this.cropperRef = React.createRef();
@@ -501,7 +502,7 @@ class OptionsPrice extends Component {
         if (!row) return;
         return (
          <tbody>
-          <OptionsRow row_data={row} id={this.props.id} />
+          <OptionRow row_data={row} id={this.props.id} />
          </tbody>
         );
        })}
@@ -854,4 +855,4 @@ class OptionsPrice extends Component {
  }
 }
 const mapStateToProps = (state) => ({ OptionsPrice: state.optionsPrice });
-export default connect(mapStateToProps)(OptionsPrice);
+export default connect(mapStateToProps)(OptionStep);

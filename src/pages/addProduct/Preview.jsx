@@ -49,7 +49,8 @@ class Preview extends Component {
   }
  };
  componentDidMount() {
-  console.log(this.props.displayPrice);
+  // console.log(this.props.displayPrice);
+  console.log(this.props.test);
   axios
    .get(`${API}product/${this.props.id}`)
    .then((response) => {
@@ -307,6 +308,7 @@ class Preview extends Component {
 // const mapDispatchToProps = (dispatch) => ({});
 const mapStateToProps = (state) => ({
  loading: state.addProduct.loading,
+ test: state,
  rows: state.optionsPrice.rows,
  options: state.optionsPrice?.rows[0]?.productPictures ?? [],
  displayPrice: state.optionsPrice?.rows[0]?.price ?? "",

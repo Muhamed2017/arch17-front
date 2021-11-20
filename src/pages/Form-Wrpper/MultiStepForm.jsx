@@ -1,55 +1,44 @@
-import React from "react";
-import { useForm, useStep } from "react-hooks-helper";
-import { Names } from "./stepForm/Names";
-import { Address } from "./stepForm/Address";
-import { Contact } from "./stepForm/Contact";
-import { Review } from "./stepForm/Review";
-import { Submit } from "./stepForm/Submit";
-const defaultData = {
- name: "",
- kind: "",
- category: "",
- style: "",
- base: "",
- type: "",
- country: "",
- shape: "",
- seats: "",
- material: "",
- places_tags: "",
- is_outdoor: "",
- is_for_kids: false,
-};
-const steps = [
- { id: "names" },
- { id: "address" },
- { id: "contact" },
- { id: "review" },
- { id: "submit" },
-];
+import React, { Component } from "react";
+import { Tabs } from "antd";
+import Identity from "./../addProduct/Identity";
+// import OptionsPrice from "./../addProduct/OptionsPrice";
+import OptionStep from "./Steps/OptionRow";
 
-const MultiStepForm = () => {
- const [formData, setForm] = useForm(defaultData);
- const { step, navigation } = useStep({
-  steps,
-  initialStep: 0,
- });
-
- const props = { formData, setForm, navigation };
-
- switch (step.id) {
-  case "names":
-   return <Names {...props} />;
-  case "address":
-   return <Address {...props} />;
-  case "contact":
-   return <Contact {...props} />;
-  case "review":
-   return <Review {...props} />;
-  case "submit":
-   return <Submit {...props} />;
-  default:
-   return "";
+const { TabPane } = Tabs;
+class MultiStepForm extends Component {
+ constructor(props) {
+  super(props);
+  this.state = {
+   activeStep: "0",
+  };
  }
-};
+
+ render() {
+  return (
+   <>
+    <div style={{ minHeight: "100vh" }} className="options-wrapper step-form">
+     <Tabs defaultActiveKey={this.state.activeStep} centered>
+      <TabPane tab="1.Identity" key={1}>
+       <Identity />
+      </TabPane>
+      <TabPane tab="2.Options & Prices" key={2}>
+       {/* Content of Tab Pane 2 */}
+       <OptionStep />
+      </TabPane>
+      <TabPane tab="3.Product Description" key={3}>
+       Content of Tab Pane 3
+      </TabPane>
+      <TabPane tab="4.Files Uploads" key={4}>
+       Content of Tab Pane 4
+      </TabPane>
+      <TabPane tab="5.Product Preview" key={5}>
+       Content of Tab Pane 5
+      </TabPane>
+     </Tabs>
+    </div>
+   </>
+  );
+ }
+}
+
 export default MultiStepForm;

@@ -48,6 +48,7 @@ export const ADD_PRODUCT_NEXT_TAB ='ADD_PRODUCT_NEXT_TAB'
 export const GO_TO_TAB_STEP= 'GO_TO_TAB_STEP'
 // sharl
 export const ADD_ROW = "ADD_ROW"
+export const SET_ROWS = "SET_ROW"
 export const ADD_MATERIAL = "ADD_MATERIAL"
 export const ADD_SIZE = "ADD_SIZE"
 export const ADD_INIT_PRICE = "ADD_INIT_PRICE"

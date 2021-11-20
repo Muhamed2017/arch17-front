@@ -2,27 +2,70 @@ import React, { useState, useEffect } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 
-import Identity from "./Identity";
-import OptionsPrice from "./OptionsPrice";
-import ProductFiles from "./ProductFiles";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import { productIdentity } from "../../redux/actions/addProductActions";
-import UploadFiles from "./UploadFiles";
 import { useParams } from "react-router-dom";
 import ReactNotification, { store } from "react-notifications-component";
 import "react-notifications-component/dist/theme.css";
-import Preview from "./Preview";
-// import IdentityStep from "./IdentityStep";
 import axios from "axios";
 import { API } from "./../../utitlties";
-const AddProductWrapper = (props) => {
+import { SET_ROWS } from "../../redux/constants";
+import EditIdentity from "./EditIdentity";
+import OptionsPrice from "./../addProduct/OptionsPrice";
+const _rows = [];
+
+const EditProductWrapper = (props) => {
  const [tabIndex, setTabIndex] = useState(props.tabIndex);
  const [rows, setRows] = useState([]);
+ const dispatch = useDispatch();
  const [loaded, setLoaded] = useState(false);
  const params = useParams();
 
+ const setinitialRows = (rows) => {
+  dispatch({
+   type: SET_ROWS,
+   payload: rows,
+  });
+ };
  useEffect(() => {
   setTabIndex(props.tabIndex);
+  console.log(props);
+  props.location.state.product.options.map((option, index) => {
+   if (!option || loaded) return;
+   return _rows.push({
+    row_index: index,
+    row_number: index + 1,
+
+    ver: 0,
+    size: {
+     L: 1000,
+     W: 1000,
+     H: 1000,
+    },
+    material: {
+     name: option.material_name,
+     image: option.material_image,
+     thumbnail: option.material_image,
+     nameValidation: true,
+     imageValidation: true,
+    },
+    // productPictures: [
+    //  {
+    //   url:
+    //    "https://res.cloudinary.com/azharuniversity/image/upload/v1637114629/vljckc9udhkofvn239qv.png",
+    //   cropped:
+    //    "https://res.cloudinary.com/azharuniversity/image/upload/v1637114629/vljckc9udhkofvn239qv.png",
+    //  },
+    // ],
+    offerPrice: option.offer_price ?? null,
+    price: option.price ?? null,
+    quantity: option.code ?? 0,
+    code: option.code ?? null,
+    option_id:option.id
+   });
+  }, []);
+  setinitialRows(_rows);
+  // localStorage.setItem("rows", JSON.stringify(_rows));
 
   if (loaded) {
    return;
@@ -63,21 +106,27 @@ const AddProductWrapper = (props) => {
       </TabList>
      </div>
      <TabPanel forceRender>
-      {/* <Identity id={params.id} /> */}
-      <Identity id={params.id} />
+      <EditIdentity
+       id={params.id}
+       data={props.location.state.product.identity[0]}
+      />
      </TabPanel>
      <TabPanel forceRender>
-      <OptionsPrice id={params.id} rows={rows} />
+      <OptionsPrice
+       //  id={params.id}
+       id={props.location.state.product.id}
+       data={props.location.state.product.options}
+      />
      </TabPanel>
-     <TabPanel forceRender>
+     {/* <TabPanel forceRender>
       <ProductFiles id={params.id} />
-     </TabPanel>
-     <TabPanel>
+     </TabPanel> */}
+     {/* <TabPanel>
       <UploadFiles id={params.id} forceRender />
      </TabPanel>
      <TabPanel forceRender={false}>
       <Preview id={params.id} />
-     </TabPanel>
+     </TabPanel> */}
     </Tabs>
    </div>
   </React.Fragment>
@@ -116,6 +165,7 @@ const mapDispatchToProps = (dispatch) => ({
     id
    )
   ),
+
  //  dispatchGotoStep: s() => dispatch(gotoTap(step)),
 });
 
@@ -125,4 +175,4 @@ const mapStateToProps = (state) => {
   // tabIndex: 1,
  };
 };
-export default connect(mapStateToProps, mapDispatchToProps)(AddProductWrapper);
+export default connect(mapStateToProps, mapDispatchToProps)(EditProductWrapper);

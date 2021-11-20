@@ -13,7 +13,7 @@ import axios from "axios";
 
 const { Option } = Select;
 
-const colourStyles = {
+export const colourStyles = {
  option: (styles, { data, isDisabled, isFocused, isSelected }) => {
   return {
    ...styles,
@@ -54,7 +54,7 @@ const colourStyles = {
   },
  }),
 };
-const material_styles = {
+export const material_styles = {
  option: (provided, state) => ({
   ...provided,
   // fontWeight: state.bold == "Fuck" ? "bold" : "normal",
@@ -71,7 +71,7 @@ const material_styles = {
  }),
 };
 
-const TagsOptions = [
+export const TagsOptions = [
  { value: "kitchen", label: "Kitchen" },
  { value: "bedroom", label: "Bedroom" },
  { value: "living room", label: "Living Room" },
@@ -82,7 +82,7 @@ const TagsOptions = [
  { value: "villa", label: "Villa" },
 ];
 
-const desingersOptions = [
+export const desingersOptions = [
  {
   value: "muhamedgomaa",
   label: (
@@ -161,7 +161,7 @@ const desingersOptions = [
 //   ),
 //  },
 // ];
-const collectionsOptions = [
+export const collectionsOptions = [
  {
   label: "Colelction one",
   value: 1,
@@ -171,7 +171,7 @@ const collectionsOptions = [
   value: 2,
  },
 ];
-const filterDesigners = (inputValue = "") => {
+export const filterDesigners = (inputValue = "") => {
  return desingersOptions.filter((i) =>
   i.value.toLowerCase().includes(inputValue.toLowerCase())
  );
@@ -197,7 +197,7 @@ const Identity = ({ ...props }) => {
  const [category, setCategory] = useState("Furniture");
  const [type, setType] = useState("");
  const [kind, setKind] = useState("");
- const [style, setStyle] = useState("");
+ const [style, setStyle] = useState([]);
  const [country, setCountry] = useState("");
  const [is_outdoor, setOutdoor] = useState("yes");
  const [brand_id, setBrandId] = useState(null);
@@ -209,7 +209,6 @@ const Identity = ({ ...props }) => {
  const [styles, setStyles] = useState([]);
  //  const [styles_label, setStylesLabel] = useState([]);
  const [product_id, setId] = useState(props.id);
- const [inputValue, setInputValue] = useState("");
 
  const [types, setTypes] = useState([]);
  const [types_label, setTypesLabel] = useState([]);
@@ -223,6 +222,7 @@ const Identity = ({ ...props }) => {
  const [seats_label, setSeatsLabel] = useState([]);
  const [furniture, setFurniture] = useState({});
  const [collections, setCollections] = useState([]);
+ const [identity, setIdentity] = useState(null);
 
  const fetchStoreCollections = (store_id) => {
   axios.get(`${API}collections/${store_id}`).then((response) => {
@@ -250,12 +250,14 @@ const Identity = ({ ...props }) => {
    fds.append("store_id", brand_id);
    axios
     .post(`${API}collect`, fds)
+
     .then((response) => {
      console.log(response);
     })
     .catch((err) => console.log(err));
   }
  };
+
  const getStoreId = () => {
   axios
    .get(`${API}store-id/${props.id}`)
@@ -265,9 +267,10 @@ const Identity = ({ ...props }) => {
    })
    .catch((err) => console.log(err));
  };
+
  useEffect(() => {
-  // console.log(types, shapes, styles, seats, bases, materials);
   setId(props.id);
+
   if (kind.value === "Chairs") {
    setFurniture(productClass.chair);
   } else if (kind.value === "Beds") {
@@ -305,8 +308,6 @@ const Identity = ({ ...props }) => {
 
  const onChangeKind = (selectedOption) => {
   setKind(selectedOption);
-  // setFurniture({});
-  // setBases([]);
   setShapesLabel([]);
   setBasesLabel([]);
   setSeatsLabel([]);
@@ -451,7 +452,6 @@ const Identity = ({ ...props }) => {
       <Col md={4}>
        {/* <Select */}
        <ReactSelect
-        // options={SelectOptions}
         value="Furniture"
         placeholder="Furniture"
         isDisabled
@@ -559,7 +559,7 @@ const Identity = ({ ...props }) => {
        <ReactSelect
         isMulti
         options={productClass.furniture_styles}
-        value={style ?? ""}
+        value={style}
         onChange={onChangeStyle}
         theme={(theme) => ({
          ...theme,
@@ -694,9 +694,9 @@ const Identity = ({ ...props }) => {
         onChange={handleChange}
         onSearch={(e) => console.log(e, collections)}
         onSelect={(e) => collect(e)}
-        filterOption={(input, option) =>
-         option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-        }
+        // filterOption={(input, option) =>
+        //  option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+        // }
         size="large"
        >
         {collections.map((collection) => {

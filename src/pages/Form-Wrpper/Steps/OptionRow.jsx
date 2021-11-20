@@ -17,11 +17,11 @@ import "react-notifications-component/dist/theme.css";
 import { Form, Col, Row, Modal, Button } from "react-bootstrap";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
-import slide4 from "../../../src/slide4.jpg";
+import slide4 from "./../../../../src/slide4.jpg";
 import { connect } from "react-redux";
 import axios from "axios";
-import { compressImage } from "./OptionsPrice";
-import { API } from "./../../utitlties";
+import { compressImage } from "./../../addProduct/OptionsPrice";
+import { API } from "./../../../utitlties";
 
 import {
  ADD_INIT_PRICE,
@@ -33,9 +33,9 @@ import {
  ADD_OPTION_ID,
  DELETE_ROW,
  ADD_PRODUCT_PICTURES,
-} from "../../redux/constants";
+} from "../../../redux/constants";
 
-class OptionRow extends Component {
+class OptionStep extends Component {
  constructor(props) {
   super(props);
   this.cropperRef = React.createRef();
@@ -525,7 +525,14 @@ class OptionRow extends Component {
  }
 
  displaySizeValue() {
-  const { L, W, H } = this.state?.size;
+  //   const { L, W, H } = this.state?.size;
+  const size = {
+   L: 500,
+   W: 300,
+   H: 100,
+  };
+  const { L, W, H } = size;
+
   if (L && W && H) {
    return (
     <div>
@@ -690,8 +697,8 @@ class OptionRow extends Component {
      <td onClick={this.pics_open}>{this.displayProductImages()}</td>
      <td>
       {this.displayImage(
-       this.state.material.name,
-       this.state.material.image,
+       this.state.material?.name,
+       this.state.material?.image,
        this.material_open
       )}
      </td>
@@ -1060,4 +1067,4 @@ class OptionRow extends Component {
 }
 
 const mapStateToProps = (state) => ({ OptionsPrice: state.optionsPrice });
-export default connect(mapStateToProps)(OptionRow);
+export default connect(mapStateToProps)(OptionStep);

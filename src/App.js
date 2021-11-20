@@ -11,12 +11,12 @@ import { connect } from 'react-redux';
 import NavigationBar from './components/NavigationBar';
 import { ChakraProvider } from "@chakra-ui/react"
 import AddProductWrapper from './pages/addProduct/AddProductWrapper';
+import NewWrapper from './pages/addProduct/NewWrapper';
 import TestUpload from './pages/TestUpload';
 import TestCrop from './pages/TestCrop';
 import Dropzones from './components/Dropzone'
 import { LinkedInPopUp } from 'react-linkedin-login-oauth2';
 import CreateBrand from './pages/CreateBrand'
-
 import Kind from './pages/addProduct/Kind'
 import Product from './pages/Product'
 import CoverTab from './pages/addProduct/CoverTab';
@@ -33,6 +33,10 @@ import Preview from './pages/addProduct/Preview'
 import 'antd/dist/antd.css';
 import 'antd-country-phone-input/dist/index.css'
 import Search from './pages/Search';
+import EditKind from './pages/editProduct/EditKind';
+import MultiStepForm from './pages/Form-Wrpper/MultiStepForm'
+import EditProductWrapper from './pages/editProduct/EditProductWrapper';
+
 
 class App extends Component {
    constructor(props){
@@ -70,8 +74,15 @@ class App extends Component {
               <Route path='/identity/:id' 
               render={(state)=><AddProductWrapper {...state}/>}
               exact />
-              <Route path="/multi" exact>
-                <CoverTab/>
+
+                 {/* <Route path='/identity/:id' 
+              render={(state)=><NewWrapper {...state}/>}
+              exact /> */}
+               <Route path='/edit' 
+              render={(state)=><EditProductWrapper {...state}/>}
+              exact />
+              <Route path="/add" exact>
+                <MultiStepForm/>
               </Route>
                <Route path="/user" exact>
                 <UserProfile/>
@@ -86,6 +97,8 @@ class App extends Component {
                 <HomePage/>
               </Route>
              <Route path="/add-product/:id" exact component={Kind}/>
+             <Route path="/edit-product/:id" exact component={EditKind}/>
+
               <Route path="/editor" exact><TextEditor />
               </Route>
               <Route path='/' exact>

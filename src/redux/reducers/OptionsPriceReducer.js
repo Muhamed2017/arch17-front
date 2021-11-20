@@ -1,5 +1,6 @@
 import {
   ADD_ROW,
+  SET_ROWS,
   ADD_MATERIAL,
   ADD_SIZE,
   ADD_INIT_PRICE,
@@ -13,7 +14,11 @@ import {
 } from "../constants";
 
 const defaultState = {
-  rows: [],
+  rows:[],
+// rows : JSON.parse(localStorage.getItem("rows")) ?? [],
+  // rows: [{row_index:0, row_number:1, ver:0, size:{L:522, W:211, H:100}, material:{image:null, name:"SSSS", thumbnail:null}, nameValidation:true, imageValidation:true, 
+  // offerPrice: null, price: null, quantity: 5, code:142}],
+  
   optionsStored:false
 };
 
@@ -41,11 +46,14 @@ export default function userReducer(state = defaultState, action) {
             },
             offerPrice: null,
             price: null,
-            quantity: 0
+            quantity: 0,
           },
         ],
       };
-
+      case SET_ROWS:
+        return {
+          rows:action.payload
+        }
     case ADD_MATERIAL:
       state.rows[action.row_index]["material"] = action.data;
       state.rows[action.row_index]["ver"] += 1;

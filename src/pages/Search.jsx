@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
-import * as utility from "../utitlties";
+// import * as utility from "../utitlties";
+
 import {
  kind_options,
  furniture_styles,
@@ -17,12 +18,17 @@ import {
  Dropdown,
  Button,
  Spin,
+ Input,
 } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { API } from "./../utitlties";
 const { SubMenu } = Menu;
 const { Sider } = Layout;
 const { Option } = Select;
+const children = [];
+for (let i = 10; i < 36; i++) {
+ children.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
+}
 class Search extends Component {
  constructor(props) {
   super(props);
@@ -40,15 +46,11 @@ class Search extends Component {
    selectedKindOptions: [],
    selectedStyleOptions: [],
    kidsChecked: false,
-   outdoorChecked: true,
+   outdoorChecked: false,
    productFileKind: false,
   };
  }
- onTest = () => {
-  axios
-   .get("https://jsonplaceholder.typicode.com/posts")
-   .then((response) => console.log(response));
- };
+
  menu = (
   <Menu onClick={this.handleMenuClick}>
    <Menu.Item key="1">1st menu item</Menu.Item>
@@ -125,9 +127,23 @@ class Search extends Component {
    .catch((error) => {
     console.log(error);
    });
+  this.setState({
+   selectedKindOptions: kind_options,
+   selectedStyleOptions: furniture_styles,
+  });
  }
  onFilterChange = (values) => {
   console.log(values.value);
+ };
+
+ handleChange = (value) => {
+  console.log(`selected ${value}`);
+ };
+ searchKind = (e) => {
+  // console.log(e.target.value);
+  this.state.selectedKindOptions.filter((i) => {
+   return i.includes(e.target.value);
+  });
  };
  render() {
   return (
@@ -154,13 +170,14 @@ class Search extends Component {
           // multiple={true}
           onSelect={this.onCategoriesSelect}
           onDeselect={this.onCategoriesSelect}
-          defaultOpenKeys={["categories"]}
+          // defaultOpenKeys={["categories"]}
+          defaultSelectedKeys={["furniture"]}
           style={{ height: "100%", borderRight: 0, width: "100%" }}
          >
           <SubMenu
            key="categories"
            title="All Categories"
-           //  onItemClick={this.onItemClick}
+           default={["furniture"]}
            onTitleClick={this.onItemClick}
           >
            <Menu.Item key="furniture">Furniture</Menu.Item>
@@ -179,7 +196,16 @@ class Search extends Component {
           onSelect={this.onKindSelect}
           onDeselect={this.onKindSelect}
          >
-          <SubMenu key="kinds" title={"All " + this.state.selectedKindTitle}>
+          <SubMenu
+           key="kinds"
+           title={"All " + this.state.selectedKindTitle}
+           className="scrollable-menu"
+          >
+           <Input
+            style={{ width: "75%", margin: "10px auto" }}
+            placeholder={`Search ${this.state.selectedKindTitle}`}
+            onChange={this.searchKind}
+           />
            {this.state.selectedKindOptions.map((option, index) => {
             return (
              <>
@@ -187,6 +213,23 @@ class Search extends Component {
              </>
             );
            })}
+           {/* <Select
+            mode="multiple"
+            allowClear={true}
+            defaultOpen={true}
+            style={{ width: "100%" }}
+            placeholder={`Search ${this.state.selectedKindTitle}`}
+            autoFocus={true}
+            dropdownMatchSelectWidth={50}
+            maxTagCount={3}
+            // open={true}
+            // defaultValue={["a10", "c12"]}
+            // bordered={false}
+
+            onChange={this.handleChange}
+           >
+            {children}
+           </Select> */}
           </SubMenu>
          </Menu>
          <Menu
@@ -196,15 +239,12 @@ class Search extends Component {
           onDeselect={this.onMaterialsSelect}
          >
           <SubMenu key="materials" title="Materials">
-           <Menu.Item onSelect={() => this.onTest} key="Velvet">
-            Velvet
-           </Menu.Item>
+           <Menu.Item key="Velvet">Velvet</Menu.Item>
            <Menu.Item key="Fabric">Fabric</Menu.Item>
            <Menu.Item key="Synthetic fiber">Synthetic fiber</Menu.Item>
            <Menu.Item key="Polyester">Polyester</Menu.Item>
            <Menu.Item key="Dacron®">Dacron®</Menu.Item>
            <Menu.Item key="Microfiber">Microfiber</Menu.Item>
-           <Menu.Item key="Polyester">Polyester</Menu.Item>
            <Menu.Item key="Janus-fiber®">Janus-fiber®</Menu.Item>
            <Menu.Item key="Sunbrella®">Sunbrella®</Menu.Item>
            <Menu.Item key="Textilene">Textilene</Menu.Item>
@@ -243,7 +283,7 @@ class Search extends Component {
         <Col md={12}>
          <div className="checkboxes">
           <Checkbox
-           //  value={this.state.outdoorChecked}
+           value={this.state.outdoorChecked}
            onChange={(e) => {
             this.setState(
              {
@@ -265,7 +305,7 @@ class Search extends Component {
            Outdoor
           </Checkbox>
           <Checkbox
-           //  value="yes"
+           value={this.state.kidsChecked}
            onChange={(e) => {
             this.setState(
              {
