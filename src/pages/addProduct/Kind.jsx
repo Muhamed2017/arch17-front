@@ -13,6 +13,7 @@ class Kind extends Component {
    loading: false,
    id: null,
    brand_id: this.props.match.params.id,
+   collections: [],
   };
  }
  addProduct = (e) => {
@@ -25,7 +26,9 @@ class Kind extends Component {
    .then((response) => {
     this.setState({ loading: false });
     this.setState({ id: response.data.product.id });
+    this.setState({ collections: response.data.store?.collections });
     this.setState({ added: true });
+    // console.log(response);
    })
    .catch((err) => this.setState({ loading: false }));
  };
@@ -35,7 +38,10 @@ class Kind extends Component {
     <Redirect
      to={{
       pathname: `/identity/${this.state.id}`,
-      state: { brand_id: this.state.brand_id },
+      state: {
+       brand_id: this.state.brand_id,
+       collections: this.state.collections,
+      },
      }}
     />
    );

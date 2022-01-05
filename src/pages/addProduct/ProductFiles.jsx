@@ -7,7 +7,7 @@ import ProgressBar from "react-bootstrap/ProgressBar";
 // import { PulseLoader } from "react-spinners/PulseLoader";
 // import { ADD_PRODUCT_NEXT_TAB } from "../../redux/constants";
 import { Form, Col, Row, Modal, Button } from "react-bootstrap";
-import { convertToRaw, EditorState } from "draft-js";
+import { convertToRaw, EditorState, convertFromRaw } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Editor } from "react-draft-wysiwyg";
 import { connect } from "react-redux";
@@ -23,8 +23,11 @@ class ProductFiles extends Component {
  galleriyFiles = [];
  embed_urls = [];
  //  loaded = [];
+
  constructor(props) {
   super(props);
+  console.log(this.props);
+
   this.state = {
    modals: {
     overview_ex_modal: false,
@@ -47,9 +50,21 @@ class ProductFiles extends Component {
    overviews_files: [],
    loading: false,
    product_id: null,
-   overViewEditorState: EditorState.createEmpty(),
-   materialDesceditorState: EditorState.createEmpty(),
-   sizeDescEditorState: EditorState.createEmpty(),
+   overViewEditorState: this.props.edit
+    ? EditorState.createWithContent(
+       convertFromRaw(JSON.parse(this.props?.description?.overview_content))
+      )
+    : EditorState.createEmpty(),
+   materialDesceditorState: this.props.edit
+    ? EditorState.createWithContent(
+       convertFromRaw(JSON.parse(this.props?.description?.mat_desc_content))
+      )
+    : EditorState.createEmpty(),
+   sizeDescEditorState: this.props.edit
+    ? EditorState.createWithContent(
+       convertFromRaw(JSON.parse(this.props?.description?.size_content))
+      )
+    : EditorState.createEmpty(),
    overviewLength: 0,
    sizeLength: 0,
    materialLength: 0,
@@ -79,7 +94,21 @@ class ProductFiles extends Component {
   Tabs.defaultProps = {
    selectedIndex: this.state.index,
   };
-  this.setState({ product_id: this.props.id });
+  // const overViewEditorState = EditorState.createWithContent(
+  //  convertFromRaw(JSON.parse(this.props?.description?.overview_content))
+  // );
+  // const materialDesceditorState = EditorState.createWithContent(
+  //  convertFromRaw(JSON.parse(this.props?.description?.mat_desc_content))
+  // );
+  // const sizeDescEditorState = EditorState.createWithContent(
+  //  convertFromRaw(JSON.parse(this.props?.description?.size_content))
+  // );
+  this.setState({
+   product_id: this.props.id,
+   //  overViewEditorState,
+   //  sizeDescEditorState,
+   //  materialDesceditorState,
+  });
   console.log(this.state.index);
  }
 

@@ -9,11 +9,27 @@ import ReactNotification, { store } from "react-notifications-component";
 import "react-notifications-component/dist/theme.css";
 import axios from "axios";
 import { API } from "./../../utitlties";
-import { SET_ROWS } from "../../redux/constants";
+import { SET_ROWS, ADD_MATERIAL } from "../../redux/constants";
 import EditIdentity from "./EditIdentity";
 import OptionsPrice from "./../addProduct/OptionsPrice";
+import Preview from "./../addProduct/Preview";
+import TableStep from "./../TableStep";
+import ProductFiles from "./../addProduct/ProductFiles";
+import FilesUpload from "./../addProduct/FilesUpload";
 const _rows = [];
+const dataURLtoFile = (dataurl, filename) => {
+ var arr = dataurl.split(","),
+  mime = arr[0].match(/:(.*?);/)[1],
+  bstr = atob(arr[1]),
+  n = bstr.length,
+  u8arr = new Uint8Array(n);
 
+ while (n--) {
+  u8arr[n] = bstr.charCodeAt(n);
+ }
+
+ return new File([u8arr], filename, { type: mime });
+};
 const EditProductWrapper = (props) => {
  const [tabIndex, setTabIndex] = useState(props.tabIndex);
  const [rows, setRows] = useState([]);
@@ -31,42 +47,21 @@ const EditProductWrapper = (props) => {
   setTabIndex(props.tabIndex);
   console.log(props);
   props.location.state.product.options.map((option, index) => {
-   if (!option || loaded) return;
+   if (loaded) return;
+
    return _rows.push({
-    row_index: index,
-    row_number: index + 1,
-
-    ver: 0,
-    size: {
-     L: 1000,
-     W: 1000,
-     H: 1000,
-    },
-    material: {
-     name: option.material_name,
-     image: option.material_image,
-     thumbnail: option.material_image,
-     nameValidation: true,
-     imageValidation: true,
-    },
-    // productPictures: [
-    //  {
-    //   url:
-    //    "https://res.cloudinary.com/azharuniversity/image/upload/v1637114629/vljckc9udhkofvn239qv.png",
-    //   cropped:
-    //    "https://res.cloudinary.com/azharuniversity/image/upload/v1637114629/vljckc9udhkofvn239qv.png",
-    //  },
-    // ],
-    offerPrice: option.offer_price ?? null,
-    price: option.price ?? null,
-    quantity: option.code ?? 0,
-    code: option.code ?? null,
-    option_id:option.id
+    key: index,
+    option_id: option.id,
+    covers: option.covers,
+    code: option.code,
+    material: option.material_name,
+    price: option.price,
+    offer_price: option.offer_price,
+    quantity: option.quantity,
+    size: option.size,
    });
-  }, []);
-  setinitialRows(_rows);
-  // localStorage.setItem("rows", JSON.stringify(_rows));
-
+  });
+  // setinitialRows(_rows);
   if (loaded) {
    return;
   }
@@ -76,12 +71,10 @@ const EditProductWrapper = (props) => {
     setRows(response.data.product.options);
     console.log(response.data.product);
     setLoaded(true);
-    // return;
    })
    .catch((err) => {
     console.log(err);
     setLoaded(true);
-    // return;
    });
  });
 
@@ -102,7 +95,7 @@ const EditProductWrapper = (props) => {
        <Tab>2. Options & Price</Tab>
        <Tab>3. Product Description</Tab>
        <Tab>4. Files Uploads</Tab>
-       <Tab>5. Product Preview</Tab>
+       <Tab>5. Product Cover</Tab>
       </TabList>
      </div>
      <TabPanel forceRender>
@@ -112,21 +105,25 @@ const EditProductWrapper = (props) => {
       />
      </TabPanel>
      <TabPanel forceRender>
-      <OptionsPrice
-       //  id={params.id}
+      <TableStep
        id={props.location.state.product.id}
-       data={props.location.state.product.options}
+       rows={props.location.state.product.options}
+       edit={true}
       />
      </TabPanel>
-     {/* <TabPanel forceRender>
-      <ProductFiles id={params.id} />
-     </TabPanel> */}
-     {/* <TabPanel>
-      <UploadFiles id={params.id} forceRender />
+     <TabPanel forceRender>
+      <ProductFiles
+       id={props.location.state.product?.id}
+       edit={true}
+       description={props.location.state.product?.description[0]}
+      />
      </TabPanel>
      <TabPanel forceRender={false}>
-      <Preview id={params.id} />
-     </TabPanel> */}
+      <FilesUpload id={params.id} files={props.location.state.product?.files} />
+     </TabPanel>
+     <TabPanel forceRender={false}>
+      <Preview id={params.id} covers={props.location.state.product?.options} />
+     </TabPanel>
     </Tabs>
    </div>
   </React.Fragment>

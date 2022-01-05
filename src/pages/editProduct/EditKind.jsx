@@ -14,7 +14,6 @@ class EditKind extends Component {
    kind_edited: false,
   };
  }
-
  componentDidMount() {
   axios
    .get(`${API}product/${this.state.product_id}`)
@@ -113,19 +112,31 @@ class EditKind extends Component {
        </div>
        <Link
         to={{
-         pathname: "/edit",
+         pathname: `/edit/${this.state.product.id}`,
          state: {
           product: this.state.product,
          },
         }}
         style={{
-         margin: "45px 0",
-         backgroundColor: "#000",
+         margin: "48px 0",
+         backgroundColor: "rgb(125 125 125)",
          color: "#fff",
          padding: "10px 25px",
+         display: "inline-block",
         }}
+        onClick={() => this.setState({ loading: true })}
        >
         Conitnue
+        {this.state.loading && (
+         <>
+          <ClipLoader
+           style={{ height: "20px" }}
+           color="#ffffff"
+           loading={this.state.loading}
+           size={20}
+          />
+         </>
+        )}
        </Link>
       </div>
      </div>

@@ -624,7 +624,6 @@ class OptionRow extends Component {
    }
   }
   this.pics_close();
-
   console.log(files);
   if (files.length > 0) {
    axios
@@ -633,7 +632,6 @@ class OptionRow extends Component {
     })
     .then((response) => {
      this.setState({ loadCovers: false });
-     //  this.setState({ option_id: response.data.option_id });
      this.setOptionId(response.data.option_id);
      console.log(response);
     })
@@ -680,11 +678,6 @@ class OptionRow extends Component {
        placeholder="Code"
        onChange={this.setCode}
        value={this.state?.code}
-       style={
-        {
-         // borderColor: this.displayInputValidation(this.state?.code > 0),
-        }
-       }
       />
      </td>
      <td onClick={this.pics_open}>{this.displayProductImages()}</td>

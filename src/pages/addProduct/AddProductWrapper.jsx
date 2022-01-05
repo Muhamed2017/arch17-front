@@ -3,27 +3,29 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 
 import Identity from "./Identity";
+import EditIdentity from "../editProduct/EditIdentity";
 import OptionsPrice from "./OptionsPrice";
 import ProductFiles from "./ProductFiles";
 import { connect } from "react-redux";
 import { productIdentity } from "../../redux/actions/addProductActions";
-import UploadFiles from "./UploadFiles";
+import FilesUpload from "./FilesUpload";
 import { useParams } from "react-router-dom";
 import ReactNotification, { store } from "react-notifications-component";
 import "react-notifications-component/dist/theme.css";
 import Preview from "./Preview";
+import TableStep from "../TableStep";
 // import IdentityStep from "./IdentityStep";
 import axios from "axios";
 import { API } from "./../../utitlties";
 const AddProductWrapper = (props) => {
  const [tabIndex, setTabIndex] = useState(props.tabIndex);
+ //  const [tabIndex, setTabIndex] = useState(0);
  const [rows, setRows] = useState([]);
  const [loaded, setLoaded] = useState(false);
  const params = useParams();
 
  useEffect(() => {
   setTabIndex(props.tabIndex);
-
   if (loaded) {
    return;
   }
@@ -55,25 +57,53 @@ const AddProductWrapper = (props) => {
     >
      <div id="tabs-wrapper">
       <TabList>
-       <Tab>1. Product Idntity </Tab>
-       <Tab>2. Options & Price</Tab>
-       <Tab>3. Product Description</Tab>
-       <Tab>4. Files Uploads</Tab>
-       <Tab>5. Product Preview</Tab>
+       <Tab onClick={() => setTabIndex(0)}>1. Product Idntity </Tab>
+       <Tab
+        onClick={() => {
+         setTabIndex(1);
+        }}
+       >
+        2. Options & Price
+       </Tab>
+       <Tab onClick={() => setTabIndex(2)}>3. Product Description</Tab>
+       <Tab onClick={() => setTabIndex(3)}>4. Files Uploads</Tab>
+       <Tab onClick={() => setTabIndex(4)}>5. Product Cover</Tab>
       </TabList>
      </div>
      <TabPanel forceRender>
-      {/* <Identity id={params.id} /> */}
-      <Identity id={params.id} />
+      <EditIdentity
+       id={params.id}
+       data={{ params }}
+       //  collections={props.location.state.collections}
+       collections={[
+        {
+         collection_name: "Collection One",
+         id: 5,
+        },
+
+        {
+         collection_name: "Collection Two",
+         id: 15,
+        },
+        {
+         collection_name: "Collection Three",
+         id: 25,
+        },
+        {
+         collection_name: "Collection Four",
+         id: 35,
+        },
+       ]}
+      />
+     </TabPanel>
+     <TabPanel forceRender id="options-step">
+      <TableStep edit={false} id={params.id} rows={rows} />
      </TabPanel>
      <TabPanel forceRender>
-      <OptionsPrice id={params.id} rows={rows} />
-     </TabPanel>
-     <TabPanel forceRender>
-      <ProductFiles id={params.id} />
+      <ProductFiles id={params.id} edit={false} />
      </TabPanel>
      <TabPanel>
-      <UploadFiles id={params.id} forceRender />
+      <FilesUpload id={params.id} forceRender />
      </TabPanel>
      <TabPanel forceRender={false}>
       <Preview id={params.id} />

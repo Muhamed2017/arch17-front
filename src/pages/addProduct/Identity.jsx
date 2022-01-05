@@ -13,6 +13,33 @@ import axios from "axios";
 
 const { Option } = Select;
 
+export const collectionSelectStyles = {
+ option: (styles, { data, isDisabled, isFocused, isSelected }) => {
+  return {
+   ...styles,
+   backgroundColor: "#fff",
+   height: "46px",
+   ":hover": {
+    backgroundColor: "#f8f8f8",
+   },
+   ":focus": {
+    backgroundColor: "#EAEAEA",
+   },
+  };
+ },
+ multiValue: (styles, { data }) => {
+  return {
+   ...styles,
+   color: "#fff",
+   backgroundColor: "#6c757d",
+  };
+ },
+ multiValueLabel: (styles, { data }) => ({
+  ...styles,
+  color: "#fff",
+ }),
+};
+
 export const colourStyles = {
  option: (styles, { data, isDisabled, isFocused, isSelected }) => {
   return {
@@ -57,12 +84,7 @@ export const colourStyles = {
 export const material_styles = {
  option: (provided, state) => ({
   ...provided,
-  // fontWeight: state.bold == "Fuck" ? "bold" : "normal",
-  // color: state.label == "Fuck" ? "red" : "blue",
   fontWeight: state.data.bold ?? "normal",
-  // color: "red",
-  // backgroundColor: state.data.color,
-  // fontSize: state.selectProps.myFontSize
  }),
  singleValue: (provided, state) => ({
   ...provided,
@@ -212,7 +234,7 @@ const Identity = ({ ...props }) => {
 
  const [types, setTypes] = useState([]);
  const [types_label, setTypesLabel] = useState([]);
- const [materials, setMaterials] = useState(["Wood"]);
+ const [materials, setMaterials] = useState([""]);
  const [materials_label, setMaterialsLabel] = useState([]);
  const [shapes, setShapes] = useState(["Round"]);
  const [shapes_label, setShapesLabel] = useState([]);
@@ -222,14 +244,7 @@ const Identity = ({ ...props }) => {
  const [seats_label, setSeatsLabel] = useState([]);
  const [furniture, setFurniture] = useState({});
  const [collections, setCollections] = useState([]);
- const [identity, setIdentity] = useState(null);
 
- const fetchStoreCollections = (store_id) => {
-  axios.get(`${API}collections/${store_id}`).then((response) => {
-   console.log(response);
-   setCollections(response.data.collections);
-  });
- };
  const collect = (collection) => {
   console.log(typeof collection);
 
@@ -250,7 +265,6 @@ const Identity = ({ ...props }) => {
    fds.append("store_id", brand_id);
    axios
     .post(`${API}collect`, fds)
-
     .then((response) => {
      console.log(response);
     })
@@ -263,7 +277,6 @@ const Identity = ({ ...props }) => {
    .get(`${API}store-id/${props.id}`)
    .then((response) => {
     setBrandId(response.data.store_id);
-    fetchStoreCollections(response.data.store_id);
    })
    .catch((err) => console.log(err));
  };
@@ -425,10 +438,7 @@ const Identity = ({ ...props }) => {
      <Form.Group>
       <Form.Row>
        <Col>
-        <Form.Label>
-         Product Name
-         {/* <Us />*/}
-        </Form.Label>
+        <Form.Label>Product Name</Form.Label>
         <Form.Control
          className="py-3"
          placeholder="Product name"

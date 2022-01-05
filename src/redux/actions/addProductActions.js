@@ -41,13 +41,26 @@ const nextTabAction = () => {
         type: actions.ADD_PRODUCT_NEXT_TAB
     }
 }
-const gotoTabStep = (step)=>{
+
+const openProductRequest=()=>{
     return {
-        type:actions.GO_TO_TAB_STEP,
-        payload:step
+        type:actions.OPEN_PRODUCT_REQUEST_MODAL
     }
 }
 
+const closeProductRequest=()=>{
+    return {
+        type:actions.CLOSE_PRODUCT_REQUEST_MODAL
+    }
+}
+
+const addOptions = (options)=>{
+
+    return {
+        type:actions.SET_OPTIONS,
+        payload:options
+    }
+}
 export const productIdentity = (name,
     category,
     type,
@@ -124,6 +137,22 @@ export const nextTab = () => {
     return (dispatch)=>{
         dispatch(nextTabAction())        
     }
+}
+export const addOptionAction=(option)=>{
+    return (dispatch)=>{
+        dispatch(addOptions(option))
+    }
+}
+
+export const openProductRequestAction=()=>{
+ return (dispatch)=>{
+     dispatch(openProductRequest())
+ }   
+}
+export const closeProductRequestAction=()=>{
+ return (dispatch)=>{
+     dispatch(closeProductRequest())
+ }   
 }
 
 // export const gotoTap = (step) => {

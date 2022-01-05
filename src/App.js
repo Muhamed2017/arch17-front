@@ -33,6 +33,7 @@ import Preview from './pages/addProduct/Preview'
 import 'antd/dist/antd.css';
 import 'antd-country-phone-input/dist/index.css'
 import Search from './pages/Search';
+import TableStep from './pages/TableStep';
 import EditKind from './pages/editProduct/EditKind';
 import MultiStepForm from './pages/Form-Wrpper/MultiStepForm'
 import EditProductWrapper from './pages/editProduct/EditProductWrapper';
@@ -78,7 +79,7 @@ class App extends Component {
                  {/* <Route path='/identity/:id' 
               render={(state)=><NewWrapper {...state}/>}
               exact /> */}
-               <Route path='/edit' 
+               <Route path='/edit/:id' 
               render={(state)=><EditProductWrapper {...state}/>}
               exact />
               <Route path="/add" exact>
@@ -110,6 +111,9 @@ class App extends Component {
               <Route path='/brand/:id' component={Brand} exact />
               {/* <Route path='/preview' component={Preview} exact /> */}
 
+               <Route path='/product/edit/122' exact>
+                <TableStep/>
+              </Route>
             </Switch>
           </Router>
         {/* <Router>

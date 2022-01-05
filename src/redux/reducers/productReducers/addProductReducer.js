@@ -5,7 +5,8 @@ const initialState = {
     identity:{},
     options:{},
     tabIndex:0,
-    optionsAdded:false
+    optionsAdded:false,
+    requesting:false
 }
 
 export const AddProductReducer = (state= initialState, action)=>{
@@ -41,6 +42,16 @@ export const AddProductReducer = (state= initialState, action)=>{
             return {
                 ...state,
                 tabIndex:state.tabIndex + 1
+            }
+            case actions.OPEN_PRODUCT_REQUEST_MODAL:
+            return {
+                ...state,
+                requesting:true
+            }
+              case actions.CLOSE_PRODUCT_REQUEST_MODAL:
+            return {
+                ...state,
+                requesting:false
             }
         default:
             return state;

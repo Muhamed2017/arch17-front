@@ -107,7 +107,7 @@ class OptionsPrice extends Component {
   console.log(this.props.rows);
 
   const validRows = this.props.OptionsPrice.rows.filter((row) => !!row);
-  if (validRows.length < 1) {
+  if (validRows.length < 1 && this.props.OptionsPrice.rows.length < 1) {
    this.props.dispatch({ type: ADD_ROW });
   } else {
    console.log(validRows);
@@ -163,26 +163,13 @@ class OptionsPrice extends Component {
    const { nameValidation, imageValidation } = row?.material;
    if (!nameValidation)
     validation_messages.push("material name at row#" + row.row_number);
-
    if (!imageValidation)
     validation_messages.push("material image at row#" + row.row_number);
-
-   //  if (!quantity) validation_messages.push("quantity at row#" + row.row_number);
-   //  if (!price && this.state.validate_price)
-   //   validation_messages.push("initial price at row#" + row.row_number);
-   //  if (!offerPrice && this.state.validate_offerPrice)
-   //   validation_messages.push("offer price at row#" + row.row_number);
    if (!productPictures?.length)
     validation_messages.push(
      "upload at least one image of the product at row#" + row.row_number
     );
-
-   //  if (!L && !W && !H && this.state.validate_size)
-   // validation_messages.push(
-   //  "size (Length, Width, Height) at row#" + row.row_number
-   // );
   });
-
   if (validation_messages.length > 0) {
    this.setState({ validation_modal: true, validation_messages });
    return;
@@ -196,10 +183,10 @@ class OptionsPrice extends Component {
     if (!row) continue;
     await this.saveRow(row);
    }
+   //  console.log(this.props.OptionsPrice.rows[0]?.productPictures[0].cropped);
    this.props.dispatch({ type: OPTIONS_STORED });
   }
  }
-
  async convertImage(url) {
   return new Promise((r, j) => {
    fetch(url)
@@ -209,7 +196,6 @@ class OptionsPrice extends Component {
     });
   });
  }
-
  dataURLtoFile(dataurl, filename) {
   var arr = dataurl.split(","),
    mime = arr[0].match(/:(.*?);/)[1],
@@ -226,14 +212,6 @@ class OptionsPrice extends Component {
 
  saveRow = async (row) => {
   const formData = new FormData();
-  // for (let i = 0; i < row.productPictures.length; i++) {
-  //  formData.append(
-  //   `cover[${i}]`,
-  //   await compressImage(
-  //    this.dataURLtoFile(row.productPictures[i]?.cropped, "file")
-  //   )
-  //  );
-  // }
   formData.append(
    `material_image`,
    await compressImage(await this.convertImage(row.material.image))

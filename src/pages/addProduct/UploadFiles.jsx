@@ -111,10 +111,7 @@ class UploadFiles extends Component {
   }
  };
  render() {
-  // if (this.props.OptionsPrice.optionsStored && this.state.published) {
-  // if (this.state.published) {
-  //  return <Redirect to={{ pathname: `/product/${this.props.id}` }} />;
-  // } else {
+
   return (
    <>
     <div className="step-form">

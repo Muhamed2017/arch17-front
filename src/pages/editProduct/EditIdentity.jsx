@@ -9,8 +9,17 @@ import ClipLoader from "react-spinners/ClipLoader";
 import * as cnst from "./../addProduct/Identity";
 import { productIdentity } from "./../../redux/actions/addProductActions";
 import { connect } from "react-redux";
-
+import { FaPencilAlt } from "react-icons/fa";
+import CreatableSelect from "react-select/creatable";
+import { ActionMeta, OnChangeValue } from "react-select";
+import { PlusOutlined } from "@ant-design/icons";
+import { collectionSelectStyles } from "./../addProduct/Identity";
 const { Option } = Select;
+const colorOptions = [
+ { label: "Muhamed", value: "Muhamed" },
+ { label: "Mustafa", value: "Mustafa" },
+ { label: "Ahmed", value: "Ahmed" },
+];
 class EditIdentity extends Component {
  constructor(props) {
   super(props);
@@ -33,10 +42,10 @@ class EditIdentity extends Component {
    materials: [],
    types_label: [],
    types: [],
-   product_id: this.props.data.product_id,
+   product_id: this.props.data.product_id ?? this.props.id,
    places_tags_label: [],
    places_tags: [],
-   country: "",
+   country: this.props.data.country ?? "",
    is_outdoor: "yes",
    brand_id: null,
    product_file_kind: "",
@@ -49,9 +58,9 @@ class EditIdentity extends Component {
    selectedMaterials: [],
   };
  }
- selected_materials = [];
- materials = [];
-
+ places_tags_label = [];
+ places_tags = [];
+ collections = [];
  filterDesigners = (inputValue = "") => {
   return cnst.desingersOptions.filter((i) =>
    i.value.toLowerCase().includes(inputValue.toLowerCase())
@@ -167,17 +176,29 @@ class EditIdentity extends Component {
  };
 
  onChangeStyle = (selectedOption) => {
-  this.setState({ style: selectedOption });
-  console.log(`Option selected:`, selectedOption);
+  this.setState({
+   styles_label: selectedOption,
+   styles: Array.isArray(this.state.materials_label)
+    ? selectedOption.map((x) => x.value)
+    : [],
+  });
  };
- handleChange = (value) => {
-  console.log(`selected ${value}`);
- };
- collectionSelectFilter = (inputValue = "") => {
-  return cnst.collectionsOptions.filter((i) =>
-   i.value.toLowerCase().includes(inputValue.toLowerCase())
-  );
- };
+
+ //  antd select
+ //  handleChange = (value) => {
+ //   console.log(`selected ${value}`);
+ //  };
+
+ //  handleChange = () =>
+ //   newValue: OnChangeValue(colorOptions, true),
+ //   actionMeta: ActionMeta(colorOptions)
+ //   {
+ //    console.group("Value Changed");
+ //    console.log(newValue);
+ //    console.log(`action: ${actionMeta.action}`);
+ //    console.groupEnd();
+ //   };
+
  promiseOptions = (inputValue) =>
   new Promise((resolve) => {
    setTimeout(() => {
@@ -186,15 +207,32 @@ class EditIdentity extends Component {
   });
 
  componentDidMount() {
-  console.log(this.props);
-  this.props?.data?.material.map((m) => {
-   this.selected_materials.push({ label: m, value: m });
-   return this.materials.push(m);
+  this.props?.data?.places_tags?.map((m) => {
+   this.places_tags_label.push({ label: m, value: m });
+   return this.places_tags.push(m);
+  });
+  this.props?.collections?.map((collection, index) => {
+   this.collections.push({
+    label: collection.collection_name,
+    value: collection.collection_name,
+   });
   });
 
   this.setState({
-   materials_label: this.selected_materials,
-   materials: this.materials,
+   places_tags_label: this.places_tags_label,
+   materials_label: this.props.data.material,
+   materials: this.props.data.material,
+   types_label: this.props.data.type,
+   types: this.props.data.type,
+   seats_label: this.props.data.seats,
+   seats: this.props.data.seats,
+   shapes_label: this.props.data.shape,
+   shapes: this.props.data.shape,
+   bases_label: this.props.data.base,
+   bases: this.props.data.base,
+   styles_label: this.props.data.style,
+   styles: this.props.data.style,
+   places_tags: this.props.data.places_tags,
   });
   console.log(this.state.selectedMaterials);
   if (this.state.kind?.value === "Chairs") {
@@ -224,39 +262,17 @@ class EditIdentity extends Component {
   }
  }
  handleIdentitySubmit = (e) => {
-  // const {
-  //  name,
-  //  category,
-  //  types,
-  //  materials,
-  //  seats,
-  //  country,
-  //  shapes,
-  //  bases,
-  //  kind,
-  // } = this.state;
-  // console.log(
-  //  name,
-  //  category,
-  //  types,
-  //  kind,
-  //  materials,
-  //  seats,
-  //  country,
-  //  shapes,
-  //  bases
-  // );
   this.props.dispatchAddIdentity(
    this.state.name,
    this.state.category,
-   this.state.types,
-   this.state.materials,
+   JSON.stringify(this.state.types_label),
+   JSON.stringify(this.state.materials_label),
    this.state.country,
-   this.state.seats,
-   this.state.bases,
-   this.state.shapes,
+   JSON.stringify(this.state.seats_label),
+   JSON.stringify(this.state.bases_label),
+   JSON.stringify(this.state.shapes_label),
    this.state.kind.value,
-   this.state.styles,
+   JSON.stringify(this.state.styles_label),
    this.state.places_tags,
    this.state.is_outdoor,
    this.state.is_for_kids,
@@ -264,7 +280,9 @@ class EditIdentity extends Component {
    this.state.product_id
   );
  };
+
  render() {
+  const collections = this.props.collections;
   return (
    <>
     <div className="step-form identity">
@@ -427,7 +445,7 @@ class EditIdentity extends Component {
          <ReactSelect
           isMulti
           options={productClass.furniture_styles}
-          value={this.state.style}
+          value={this.state.styles_label}
           onChange={this.onChangeStyle}
           theme={(theme) => ({
            ...theme,
@@ -448,9 +466,7 @@ class EditIdentity extends Component {
          <ReactSelect
           isMulti
           options={productClass.furniture_materials}
-          //   selectedOption={["fabric"]}
           value={this.state.materials_label}
-          //  value={["Fabric", "SSSS"]}
           onChange={this.onChangeMaterial}
           styles={this.state.material_styles}
           theme={(theme) => ({
@@ -555,29 +571,47 @@ class EditIdentity extends Component {
        </Form.Group>
       </div>
       <Form.Group as={Row}>
-       <Col md={7}>
+       <Col md={5}>
         <Form.Label>Collections / Sereies</Form.Label>
         <div>
-         <Select
-          mode="tags"
-          style={{ width: "100%" }}
-          placeholder="Add to an existing collection or create a new one "
-          onChange={this.handleChange}
-          onSearch={(e) => console.log(e, this.state.collections)}
-          //  onSelect={(e) => collect(e)}
-          filterOption={(input, option) =>
-           option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-          }
-          size="large"
-         >
-          {this.state.collections.map((collection) => {
+         <CreatableSelect
+          isMulti
+          styles={collectionSelectStyles}
+          // onChange={this.handleChange}
+          createOptionPosition={"first"}
+          formatCreateLabel={(input) => {
            return (
-            <Option key={collection.id} value={collection.id}>
-             {collection.collection_name}
-            </Option>
+            <>
+             <div
+              style={{
+               position: "relative",
+               paddingTop: "4px",
+               marginBottom: "30px",
+               paddingBottom: "10px",
+               borderBottom: "1px solid #666",
+              }}
+             >
+              Create:
+              <span
+               style={{
+                display: "inline",
+                fontWeight: "900",
+                position: "relative",
+               }}
+              >
+               {` ${input}`}
+              </span>
+              <button className="collect-new">
+               <PlusOutlined />
+              </button>
+             </div>
+
+             <Divider />
+            </>
            );
-          })}
-         </Select>
+          }}
+          options={this.collections}
+         />
         </div>
         {/* ,mountNode */}
         <p className="light">
@@ -652,6 +686,7 @@ class EditIdentity extends Component {
         <Form.Label>Product Country or Origin</Form.Label>
         <ReactFlagsSelect
          selected={this.state.country}
+         //  selected={}
          selectedSize={20}
          optionsSize={20}
          searchable
