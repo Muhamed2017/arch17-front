@@ -14,23 +14,36 @@ class Kind extends Component {
    id: null,
    brand_id: this.props.match.params.id,
    collections: [],
+   selected_collections: [],
+   category: "Furniture",
   };
  }
- addProduct = (e) => {
+ addProduct = (e, category) => {
   e.preventDefault();
-  this.setState({ loading: true });
-  axios
-   .post(`${API}addproduct/${this.state.brand_id}`, {
-    kind: "Furniture",
-   })
-   .then((response) => {
-    this.setState({ loading: false });
-    this.setState({ id: response.data.product.id });
-    this.setState({ collections: response.data.store?.collections });
-    this.setState({ added: true });
-    // console.log(response);
-   })
-   .catch((err) => this.setState({ loading: false }));
+
+  this.setState(
+   {
+    category,
+   },
+   () => {
+    this.setState({ loading: true });
+    axios
+     .post(`${API}addproduct/${this.state.brand_id}`, {
+      // kind: "Furniture",
+      kind: category,
+     })
+     .then((response) => {
+      this.setState({ loading: false, category });
+      this.setState({ id: response.data.product.id });
+      this.setState({
+       collections: response.data.product.store?.collections,
+       selected_collections: response.data.product.collections,
+      });
+      this.setState({ added: true });
+     })
+     .catch((err) => this.setState({ loading: false }));
+   }
+  );
  };
  render() {
   if (this.state.added) {
@@ -41,6 +54,9 @@ class Kind extends Component {
       state: {
        brand_id: this.state.brand_id,
        collections: this.state.collections,
+       selected_collections: this.state.selected_collections,
+       //  category: "Furniture",
+       category: this.state.category,
       },
      }}
     />
@@ -56,9 +72,12 @@ class Kind extends Component {
        <div className="product-kinds">
         <a
          href="/identity"
-         onClick={this.addProduct}
+         onClick={(e) => this.addProduct(e, "Furniture")}
          style={{
-          backgroundColor: this.state.loading ? "#898989" : "",
+          backgroundColor:
+           this.state.loading && this.state.category === "Furniture"
+            ? "#898989"
+            : "",
           position: "relative",
          }}
         >
@@ -68,7 +87,7 @@ class Kind extends Component {
            <span style={{ position: "absolute", right: "35px", top: "7px" }}>
             <ClipLoader
              color="#fff"
-             loading={this.state.loading}
+             loading={this.state.loading && this.state.category === "Furniture"}
              size={22}
              style={{
               height: "1px",
@@ -81,47 +100,230 @@ class Kind extends Component {
          )}
          <BiChevronRight />
         </a>
-        <a href="#" onClick={(e) => e.preventDefault}>
-         Lighting
+        <a
+         href="/identity"
+         onClick={(e) => this.addProduct(e, "Lighting")}
+         style={{
+          backgroundColor:
+           this.state.loading && this.state.category === "Lighting"
+            ? "#898989"
+            : "",
+          position: "relative",
+         }}
+        >
+         {this.state.loading && this.state.category === "Lighting" ? (
+          <>
+           Lighting
+           <span style={{ position: "absolute", right: "35px", top: "7px" }}>
+            <ClipLoader
+             color="#fff"
+             loading={this.state.loading && this.state.category === "Lighting"}
+             size={22}
+             style={{
+              height: "1px",
+             }}
+            />
+           </span>
+          </>
+         ) : (
+          "Lighting"
+         )}
+         <BiChevronRight />
+        </a>
+        <a
+         href="/identity"
+         onClick={(e) => this.addProduct(e, "Decore")}
+         style={{
+          backgroundColor:
+           this.state.loading && this.state.category === "Decore"
+            ? "#898989"
+            : "",
+          position: "relative",
+         }}
+        >
+         {this.state.loading ? (
+          <>
+           Decore
+           <span style={{ position: "absolute", right: "35px", top: "7px" }}>
+            <ClipLoader
+             color="#fff"
+             loading={this.state.loading && this.state.category === "Decore"}
+             size={22}
+             style={{
+              height: "1px",
+             }}
+            />
+           </span>
+          </>
+         ) : (
+          "Decore"
+         )}
+         <BiChevronRight />
+        </a>
+        <a
+         //  Bathroom
+         //  <span>
+         //   <BiChevronRight />
+         //  </span>
+         href="#0"
+         onClick={(e) => this.addProduct(e, "Bathroom")}
+         style={{
+          backgroundColor:
+           this.state.loading && this.state.category === "Bathroom"
+            ? "#898989"
+            : "",
+          position: "relative",
+         }}
+        >
+         {this.state.loading ? (
+          <>
+           Bathroom
+           <span style={{ position: "absolute", right: "35px", top: "7px" }}>
+            <ClipLoader
+             color="#fff"
+             loading={this.state.loading && this.state.category === "Bathroom"}
+             size={22}
+             style={{
+              height: "1px",
+             }}
+            />
+           </span>
+          </>
+         ) : (
+          "Bathroom"
+         )}
          <span>
           <BiChevronRight />
          </span>
         </a>
-        <a href="#">
-         Decore
+        <a
+         href="#0"
+         onClick={(e) => this.addProduct(e, "Wellness")}
+         style={{
+          backgroundColor:
+           this.state.loading && this.state.category === "Wellness"
+            ? "#898989"
+            : "",
+          position: "relative",
+         }}
+        >
+         {this.state.loading ? (
+          <>
+           Wellness
+           <span style={{ position: "absolute", right: "35px", top: "7px" }}>
+            <ClipLoader
+             color="#fff"
+             loading={this.state.loading && this.state.category === "Wellness"}
+             size={22}
+             style={{
+              height: "1px",
+             }}
+            />
+           </span>
+          </>
+         ) : (
+          "Wellness"
+         )}
          <span>
           <BiChevronRight />
          </span>
         </a>
-        <a href="#">
-         Bathroom
+        <a
+         href="#0"
+         onClick={(e) => this.addProduct(e, "Kitchen")}
+         style={{
+          backgroundColor:
+           this.state.loading && this.state.category === "Kitchen"
+            ? "#898989"
+            : "",
+          position: "relative",
+         }}
+        >
+         {this.state.loading ? (
+          <>
+           Kitchen
+           <span style={{ position: "absolute", right: "35px", top: "7px" }}>
+            <ClipLoader
+             color="#fff"
+             loading={this.state.loading && this.state.category === "Kitchen"}
+             size={22}
+             style={{
+              height: "1px",
+             }}
+            />
+           </span>
+          </>
+         ) : (
+          "Kitchen"
+         )}
+         {/* <BiChevronRight /> */}
          <span>
           <BiChevronRight />
          </span>
         </a>
-        <a href="#">
-         Wellness
-         <span>
-          <BiChevronRight />
-         </span>
+
+        <a
+         href="/identity"
+         onClick={(e) => this.addProduct(e, "Finishes")}
+         style={{
+          backgroundColor:
+           this.state.loading && this.state.category === "Finishes"
+            ? "#898989"
+            : "",
+          position: "relative",
+         }}
+        >
+         {this.state.loading ? (
+          <>
+           Finishes
+           <span style={{ position: "absolute", right: "35px", top: "7px" }}>
+            <ClipLoader
+             color="#fff"
+             loading={this.state.loading && this.state.category === "Finishes"}
+             size={22}
+             style={{
+              height: "1px",
+             }}
+            />
+           </span>
+          </>
+         ) : (
+          "Finishes"
+         )}
+         <BiChevronRight />
         </a>
-        <a href="#">
-         Kitchen
-         <span>
-          <BiChevronRight />
-         </span>
-        </a>
-        <a href="#">
-         Finishes Materials
-         <span>
-          <BiChevronRight />
-         </span>
-        </a>
-        <a href="#">
-         Construction Products
-         <span>
-          <BiChevronRight />
-         </span>
+        <a
+         href="#0"
+         //  href="/identity"
+         onClick={(e) => this.addProduct(e, "Construction")}
+         style={{
+          backgroundColor:
+           this.state.loading && this.state.category === "Construction"
+            ? "#898989"
+            : "",
+          position: "relative",
+         }}
+        >
+         {this.state.loading ? (
+          <>
+           Construction
+           <span style={{ position: "absolute", right: "35px", top: "7px" }}>
+            <ClipLoader
+             color="#fff"
+             loading={
+              this.state.loading && this.state.category === "Construction"
+             }
+             size={22}
+             style={{
+              height: "1px",
+             }}
+            />
+           </span>
+          </>
+         ) : (
+          "Construction"
+         )}
+         <BiChevronRight />
         </a>
        </div>
       </div>

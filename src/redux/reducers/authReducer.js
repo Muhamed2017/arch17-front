@@ -99,7 +99,7 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 user: action.payload,
                 isLoggedIn: true,
                 info: action.payload,
-                 photoURL: action.payload.photoURL,
+                photoURL: action.payload.photoURL,
                 displayName: action.payload.displayName,
             }
             case actions.PHONE_SIGNUP_REQUEST:
@@ -131,7 +131,7 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
                 return {
                     ...state,
                     displayName:action.payload.displayName,
-                    photoURL:action.payload.photoURL,
+                    photoURL:action.payload.photoURL?? action.payload.photoUrl,
                 email: action.payload.email,
                 }
             case actions.CREATE_BRAND_VERIFY_NEXT:

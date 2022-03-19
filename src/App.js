@@ -5,6 +5,11 @@ import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Brand from './pages/Brand'
+import DesignerAccount from './pages/DesignerAccount'
+import Collection from './pages/Collection'
+import UserCollection from './pages/UserCollection'
+import Type from './pages/Type'
+import TestOptionPrice from './pages/TestOptionPrice'
 import HomePage from './HomePage/HomePage'
 import AuthProvider from './contexts/AuthContext';
 import { connect } from 'react-redux';
@@ -50,10 +55,15 @@ class App extends Component {
     <ChakraProvider>
     <AuthProvider>
     <React.Fragment>
-          <NavigationBar />
+          {/* <NavigationBar /> */}
           <ConfigProvider locale={en}>
           </ConfigProvider>
           <Router>
+          <NavigationBar />
+
+             {/* <NavigationBar />
+          <ConfigProvider locale={en}>
+          </ConfigProvider> */}
             <Switch>
               <Route path="/signup" exact>
                 {this.props.isLoggedIn ? <Redirect to="/" /> : <Register />}
@@ -72,34 +82,40 @@ class App extends Component {
                 <Dropzones/>
               </Route>
               <Route path='/product/:id' component={Product} exact/>
+              {/* <Route path="/search" component={Search} exact /> */}
+              <Route path='/products' 
+              render={(state)=> <Search {...state}/>}
+              exact />
+               <Route path='/products/:category' 
+              render={(state)=> <Search {...state}/>}
+              exact />
+               <Route path='/products/:category/:type' 
+              render={(state)=> <Search {...state}/>}
+               exact />
               <Route path='/identity/:id' 
               render={(state)=><AddProductWrapper {...state}/>}
               exact />
 
-                 {/* <Route path='/identity/:id' 
-              render={(state)=><NewWrapper {...state}/>}
-              exact /> */}
                <Route path='/edit/:id' 
               render={(state)=><EditProductWrapper {...state}/>}
               exact />
               <Route path="/add" exact>
                 <MultiStepForm/>
               </Route>
-               <Route path="/user" exact>
-                <UserProfile/>
-              </Route>
-              <Route path='/user/settings' exact>
+              
+              {/* <Route path='/profile/settings' exact>
                 <Settings/>
-              </Route>
-               <Route path='/search' exact>
-                <Search/>
-              </Route>
+              </Route> */}
+              <Route path="/profile/settings" exact component= {Settings} />
+                <Route path="/user/:uid" exact component={UserProfile } />
+               
               <Route path='/' exact>
                 <HomePage/>
               </Route>
              <Route path="/add-product/:id" exact component={Kind}/>
              <Route path="/edit-product/:id" exact component={EditKind}/>
-
+              <Route path='/designeraccount' component={DesignerAccount} exact />
+             
               <Route path="/editor" exact><TextEditor />
               </Route>
               <Route path='/' exact>
@@ -109,13 +125,20 @@ class App extends Component {
                 <CreateBrand />
               </Route>
               <Route path='/brand/:id' component={Brand} exact />
-              {/* <Route path='/preview' component={Preview} exact /> */}
-
+              <Route path='/collection/:id' component={Collection} exact />
+              <Route path='/profile' component={UserProfile} exact />
+              <Route path='/usercollection/:id' component={UserCollection} exact />
+              <Route path='/types/:store_id/:type_name' component={Type} exact />
                <Route path='/product/edit/122' exact>
                 <TableStep/>
               </Route>
+               <Route path='/prices' 
+              render={(state)=><TestOptionPrice {...state}/>}
+              exact />
+              
             </Switch>
           </Router>
+          
         {/* <Router>
           <Switch>
             <Route path="/signup" exact>

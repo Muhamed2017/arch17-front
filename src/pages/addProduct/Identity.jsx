@@ -18,15 +18,24 @@ export const collectionSelectStyles = {
   return {
    ...styles,
    backgroundColor: "#fff",
-   height: "46px",
+   height: "auto",
+   padding: "12px",
+   fontFamily: "Roboto",
    ":hover": {
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "transparent",
+    cursor: "pointer",
+    textDecoration: "underline",
    },
    ":focus": {
     backgroundColor: "#EAEAEA",
    },
   };
  },
+ menu: (provided, state) => ({
+  ...provided,
+  padding: "16px 0 12px 0",
+  // padding: "20px 12px 0 ",
+ }),
  multiValue: (styles, { data }) => {
   return {
    ...styles,

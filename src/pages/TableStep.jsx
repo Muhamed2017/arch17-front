@@ -8,7 +8,7 @@ import {
  Row,
  Modal,
 } from "react-bootstrap";
-import { compressImage } from "./addProduct/OptionsPrice";
+// import { compressImage } from "./addProduct/OptionsPrice";
 import { CloseCircleFilled } from "@ant-design/icons";
 import {
  FaCloudUploadAlt,
@@ -26,7 +26,13 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { API } from "./../utitlties";
 import axios from "axios";
 import { connect } from "react-redux";
-import { nextTab } from "../redux/actions/addProductActions";
+import {
+ addProductPrices,
+ nextTab,
+ addProductModalCodes,
+ resetProductPrices,
+ resetProductModalCodes,
+} from "../redux/actions/addProductActions";
 import { addOptionAction } from "./../redux/actions/addProductActions";
 const { TabPane } = Tabs;
 const EditableContext = React.createContext(null);
@@ -94,24 +100,39 @@ const EditableCell = ({
  if (editable) {
   childNode = editing ? (
    <Form.Item
+    focused={true}
     style={{
-     margin: 0,
+     width: "100px",
+     margin: "auto",
     }}
     name={dataIndex}
     rules={[
      {
-      required: true,
-      message: `${title} is required.`,
+      // required:true,
+      // message: `${title} is required.`,
      },
     ]}
    >
-    <Input ref={inputRef} onPressEnter={save} onBlur={save} />
+    <Input
+     ref={inputRef}
+     onPressEnter={save}
+     onBlur={save}
+     className="table-editing-input"
+     style={{ maxWidth: "100px", margin: "auto" }}
+    />
    </Form.Item>
   ) : (
    <div
-    className="editable-cell-value-wrap"
     style={{
-     paddingRight: 24,
+     width: "100px",
+     margin: "auto",
+     height: "32px",
+     border: "1px solid #ced4da",
+     borderRadius: "10px",
+     fontSize: ".8rem",
+     fontWeight: "600",
+     padding: "5px 0 0 10px",
+     textAlign: "left",
     }}
     onClick={toggleEdit}
    >
@@ -240,7 +261,7 @@ class TableStep extends React.Component {
          }}
         />
        )}
-       {record.material.image && (
+       {record.material.image && record.material_name != "null" && (
         <>
          <div className="material-cell option-cell">
           <img src={record.material.image} alt="" />
@@ -263,6 +284,7 @@ class TableStep extends React.Component {
    {
     title: "Size",
     dataIndex: "size",
+
     render: (_, record) => {
      return (
       <>
@@ -333,35 +355,18 @@ class TableStep extends React.Component {
     },
    },
    {
-    title: "Quantity",
+    title: "CPM",
     dataIndex: "quantity",
-    focus: true,
     editable: true,
-    render: (_, record) => {
-     return (
-      <>
-       {record.quantity < 1 && <FaPlus />}
-       {record.quantity > 1 && (
-        <>
-         {/* <Input value={record.quantity} /> */}
-         {record.quantity}
-         <FaPencilAlt />
-        </>
-       )}
-       {/* <Input placeholder="Quantity" value/> */}
-      </>
-     );
-    },
    },
    {
     title: "",
     dataIndex: "operation",
-    // width: "5%",
     render: (_, record) =>
      this.state.dataSource.length >= 1 ? (
       <Popconfirm
        title="Sure to delete?"
-       onConfirm={() => this.handleDelete(record.key)}
+       onConfirm={() => this.handleDelete(record.key, record.option_id)}
       >
        <a>
         <FaTrashAlt />
@@ -377,6 +382,7 @@ class TableStep extends React.Component {
    items: [],
    pics_modal: false,
    covers_modal: false,
+   cover_box_index: 0,
    tempCover: "",
    dataSource:
     this.props.rows.options & this.props.edit
@@ -384,20 +390,20 @@ class TableStep extends React.Component {
      : [
         {
          key: 0,
-         code: "",
+         code: null,
          covers: [],
          size: {
           l: null,
           h: null,
           w: null,
          },
-         price: "",
+         price: null,
          offer_price: "",
          material: {
-          name: "",
-          image: "",
+          name: null,
+          image: null,
          },
-         quantity: "",
+         quantity: null,
          option_id: null,
         },
        ],
@@ -405,7 +411,7 @@ class TableStep extends React.Component {
    modal_covers: [],
    editing_row: null,
    material_modal: false,
-   material_name: "",
+   material_name: null,
    material_image: null,
    price_modal: false,
    price: 0,
@@ -448,6 +454,7 @@ class TableStep extends React.Component {
    this.setState({ size_h: e.target.value });
   }
  };
+
  price_modal_open = (editing_row, price) => {
   this.setState({ price_modal: true, editing_row, price });
   console.log(this.state.editing_row);
@@ -489,8 +496,10 @@ class TableStep extends React.Component {
  _crop() {
   const imageElement = this.cropperRef?.current;
   const cropper = imageElement?.cropper;
-  console.log(cropper);
+  const data = cropper.getData();
+  console.log(data);
  }
+
  //edit option picture modal
  handleAddCover = (row_key, covers) => {
   const boxes = [];
@@ -521,7 +530,7 @@ class TableStep extends React.Component {
    covers_modal: true,
    active_covers: covers,
    modal_covers: [...covers, ...boxes],
-   // editing_row: row_key,
+   editing_row: row_key,
   });
  };
 
@@ -546,17 +555,10 @@ class TableStep extends React.Component {
  };
 
  onCroppChange = (cropping_data) => {
-  this.tempData = cropping_data;
- };
-
- onCropEnd = (cover_index) => {
-  const tempCovers = this.state.modal_covers;
-  tempCovers[cover_index].cropping_data = this.tempData;
-  this.setState({ modal_covers: tempCovers });
+  console.log(cropping_data);
  };
  handleAddOrUpdatePicture = (row_index) => {
   const tempDataSource = this.state.dataSource;
-  // tempDataSource[row_index].covers = this.state.modal_covers;
   tempDataSource.map((row) => {
    if (row.key == row_index) {
     row["covers"] = this.state.modal_covers;
@@ -580,12 +582,19 @@ class TableStep extends React.Component {
        key: index,
        option_id: item.id,
        covers: item.covers,
-       material: item.material,
-       code: item.code,
+       material:
+        item.material?.name != "null"
+         ? item.material
+         : { name: null, image: null },
+       code: item.code != "null" ? item.code : null,
        price: item.price,
        offer_price: item.offer_price,
-       quantity: item.quantity,
-       size: item.size,
+       quantity:
+        item.quantity && item.quantity != "null" ? item.quantity : null,
+       size:
+        item.size.l + item.size.h + item.size.w > 0
+         ? item.size
+         : { l: null, h: null, w: null },
       },
      ],
     }),
@@ -604,15 +613,37 @@ class TableStep extends React.Component {
   this.setState({ selectedRowKeys });
  };
 
- handleDelete = (key) => {
+ // new delete option api
+ handleDelete = (key, option_id) => {
   const dataSource = [...this.state.dataSource];
-  this.setState({
-   dataSource: dataSource.filter((item) => item.key !== key),
-  });
+  if (option_id) {
+   axios
+    .post(`${API}product/delete/option/${option_id}`)
+    .then((response) => {
+     console.log(response);
+     this.setState({
+      dataSource: dataSource.filter((item) => item.key !== key),
+     });
+    })
+    .catch((err) => {
+     console.log(err);
+    });
+  } else {
+   this.setState({
+    dataSource: dataSource.filter((item) => item.key !== key),
+   });
+  }
+  // this.setState({
+  //  dataSource: dataSource.filter((item) => item.key !== key),
+  // });
+  console.log(dataSource);
  };
 
  async saveAndContinue() {
   this.setState({ loading: true });
+
+  this.props.dispatchResetPrices();
+  this.props.dispatchResetCodes();
 
   let _previews = [];
   for (let row of this.state.dataSource) {
@@ -621,17 +652,12 @@ class TableStep extends React.Component {
    _previews.push(...row.covers);
   }
 
-  // this.props.dispatchAddOptionsforPreview(
-  //  _previews.filter((cover) => {
-  //   return cover.src != "" && cover.src;
-  //  })
-  // );
   this.props.dispatchNextStep();
-
   this.setState({ loading: false });
  }
 
  saveRow = async (row) => {
+  //  saveRow = (row) => {
   const formData = new FormData();
   formData.append(`option_id`, row.option_id);
   formData.append(`material_image`, row.material.image);
@@ -643,41 +669,48 @@ class TableStep extends React.Component {
   formData.append(`size_w`, Number(row.size.w));
   formData.append(`size_h`, Number(row.size.h));
   formData.append(`code`, row.code);
-  formData.append(`quantity`, Number(row.quantity));
+  formData.append(`quantity`, row.quantity);
+  this.addPriceForPreview(Number(row.price), row.code);
+
   return await axios
    .post(`${API}upcrop/${this.props.id}`, formData, {})
    .then((data) => {
     console.log(data);
    });
  };
-
+ addPriceForPreview = (price, code) => {
+  // if (price > 0) this.props.dispatchPricesForPreview(price);
+  // if (code) this.props.dispatchModalCodesForFileUpload(code);
+  this.props.dispatchPricesForPreview(price);
+  this.props.dispatchModalCodesForFileUpload(code);
+ };
  handleAdd = () => {
   console.log(this.props.id);
-
   const { count, dataSource } = this.state;
   const newData = {
-   key: count,
-   code: "",
+   key: count + 1,
+   code: null,
    covers: [],
    size: {
     l: null,
     h: null,
     w: null,
    },
-   price: "",
-   offer_price: "",
+   price: null,
+   offer_price: null,
    material: {
-    name: "",
-    image: "",
+    name: null,
+    image: null,
    },
-   quantity: "",
+   quantity: null,
    option_id: null,
   };
   this.setState({
    dataSource: [...dataSource, newData],
    count: count + 1,
+   //  editing_row: count + 1,
   });
-  // console.log(this.state.dataSource);
+  console.log(this.state.dataSource);
  };
 
  handleUploadMaterialImage = (e, row_index) => {
@@ -699,6 +732,7 @@ class TableStep extends React.Component {
    });
   }
  };
+
  handleUploadProductImg = (e, img_index) => {
   let file = e.target.files[0];
   if (!file) {
@@ -708,9 +742,11 @@ class TableStep extends React.Component {
    console.log("Size is to Large");
    return;
   } else {
+   this.setState({ cover_box_index: img_index });
+   //  this.setState({ cover_box_index: img_index });
    const tempCovers = this.state.modal_covers;
    tempCovers[img_index].src = URL.createObjectURL(file);
-   tempCovers[img_index].cropping_data = {};
+   //  tempCovers[img_index].cropping_data = {};
 
    const fd = new FormData();
    fd.append("cover", file);
@@ -727,6 +763,7 @@ class TableStep extends React.Component {
      }
     },
    };
+   //
    axios.post(`${API}cover-upload`, fd, options).then((response) => {
     console.log(response.data);
     tempCovers[img_index]._src = response.data.cover.src;
@@ -737,10 +774,14 @@ class TableStep extends React.Component {
     });
    });
 
-   this.setState({ modal_covers: tempCovers });
+   // comment this for error in add cover
+
+   //  this.setState({ modal_covers: tempCovers });
    const tempDataSource = this.state.dataSource;
-   tempDataSource[this.state.editing_row].covers = tempCovers;
-   this.setState({ dataSource: tempDataSource });
+   //  tempDataSource[this.state.editing_row].covers = tempCovers;
+   // this.setState({ dataSource: tempDataSource });
+   console.log(this.state.tempDataSource);
+   console.log(this.state.editing_row);
   }
  };
  handleSave = (row) => {
@@ -797,12 +838,7 @@ class TableStep extends React.Component {
       onClick={this.saveAndContinue.bind(this)}
      >
       {this.state.loading ? (
-       <ClipLoader
-        style={{ height: "20px" }}
-        color="#ffffff"
-        // loading={this.state.loading}
-        size={20}
-       />
+       <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
       ) : (
        "Save & Continue"
       )}
@@ -821,7 +857,6 @@ class TableStep extends React.Component {
         pagination={false}
         components={components}
         rowClassName={() => "editable-row"}
-        // style={{ maxWidth: "920px", margin: "auto" }}
         dataSource={dataSource}
         columns={columns}
         rowSelection={rowSelection}
@@ -834,6 +869,8 @@ class TableStep extends React.Component {
        </div>
        <>
         {/* offer modal */}
+
+        {/* d,dl */}
         <Modal
          id="offer_modal"
          className="arch-wide-modal product-modal"
@@ -906,6 +943,7 @@ class TableStep extends React.Component {
              return (
               <>
                <TabPane
+                // forceRender
                 tab={
                  cover.src ? (
                   <>
@@ -1003,7 +1041,6 @@ class TableStep extends React.Component {
                   <>
                    <Cropper
                     key={index}
-                    // src={cover?.src}
                     src={cover?.src}
                     viewMode={2}
                     style={{ height: "100%", width: "100%" }}
@@ -1011,22 +1048,18 @@ class TableStep extends React.Component {
                     ref={this.cropperRef}
                     initialAspectRatio="free"
                     guides={false}
-                    cropend={() => {
-                     this._crop.bind(this);
-                     this.onCropEnd(index);
-                    }}
+                    cropend={this._crop.bind(this)}
                     ready={this._crop.bind(this)}
+                    // crop={() => this._crop(this.state.editing_row)}
                     crossOrigin="anonymous"
                     // preview=".image-preview"
                     scalable={false}
                     aspectRatio={"free"}
                     data={cover?.cropping_data}
                     autoCropArea={1}
-                    // viewMode={1}
                     dragMode="move"
                     rotatable={false}
-                    // crop={(cropper) => this.onCroppChange(cropper.detail)}
-                    zoomOnWheel={true}
+                    // zoomOnWheel={true}
                     cropBoxMovable={false}
                     cropBoxResizable={true}
                     wheelZoomRatio
@@ -1264,5 +1297,10 @@ class TableStep extends React.Component {
 const mapDispatchToProps = (dispatch) => ({
  dispatchNextStep: () => dispatch(nextTab()),
  dispatchAddOptionsforPreview: (rows) => dispatch(addOptionAction(rows)),
+ dispatchPricesForPreview: (price) => dispatch(addProductPrices(price)),
+ dispatchModalCodesForFileUpload: (code) =>
+  dispatch(addProductModalCodes(code)),
+ dispatchResetPrices: () => dispatch(resetProductPrices()),
+ dispatchResetCodes: () => dispatch(resetProductModalCodes()),
 });
 export default connect(null, mapDispatchToProps)(TableStep);

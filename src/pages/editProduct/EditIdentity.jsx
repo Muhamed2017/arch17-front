@@ -3,35 +3,31 @@ import { Form, Col, Row } from "react-bootstrap";
 import ReactSelect from "react-select";
 import ReactFlagsSelect from "react-flags-select";
 import AsyncSelect from "react-select/async";
-import { Select, Divider, Input } from "antd";
+import { Row as AntRow, Col as AntCol, Checkbox } from "antd";
 import * as productClass from "./../addProduct/ProductClassifications";
 import ClipLoader from "react-spinners/ClipLoader";
 import * as cnst from "./../addProduct/Identity";
 import { productIdentity } from "./../../redux/actions/addProductActions";
 import { connect } from "react-redux";
-import { FaPencilAlt } from "react-icons/fa";
 import CreatableSelect from "react-select/creatable";
-import { ActionMeta, OnChangeValue } from "react-select";
 import { PlusOutlined } from "@ant-design/icons";
 import { collectionSelectStyles } from "./../addProduct/Identity";
-const { Option } = Select;
-const colorOptions = [
- { label: "Muhamed", value: "Muhamed" },
- { label: "Mustafa", value: "Mustafa" },
- { label: "Ahmed", value: "Ahmed" },
-];
+import axios from "axios";
+import { API } from "./../../utitlties";
+
 class EditIdentity extends Component {
  constructor(props) {
   super(props);
   this.state = {
-   name: this.props.data.name,
-   category: "Furniture",
+   name: this.props?.data?.name,
+   category: this.props?.category,
+   kindsOptions: [],
    type: "",
    styles_label: [],
    collectionValue: "",
    style: [],
    furniture: {},
-   collections: [],
+   selected_collections: [],
    seats_label: [],
    seats: [],
    bases: ["4-base"],
@@ -42,25 +38,47 @@ class EditIdentity extends Component {
    materials: [],
    types_label: [],
    types: [],
-   product_id: this.props.data.product_id ?? this.props.id,
+   product_id: this.props?.data?.product_id ?? this.props.id,
    places_tags_label: [],
    places_tags: [],
-   country: this.props.data.country ?? "",
+   country: this.props?.data?.country ?? "",
    is_outdoor: "yes",
    brand_id: null,
-   product_file_kind: "",
-   is_for_kids: "yes",
+   product_file_kind: this.props?.data?.product_file_kind,
+
+   is_for_kids: this.props?.data?.is_for_kids ?? "no",
+
+   for_kids: this.props?.data?.is_for_kids == "yes" ? true : false,
+   collections: this.props.collections ?? [],
    styles: [],
    kind: {
-    label: this.props.data.kind,
-    value: this.props.data.kind,
+    label: this.props?.data?.kind,
+    value: this.props?.data?.kind,
    },
+
    selectedMaterials: [],
+   default_collections: this.props?.selected_collections ?? [],
+   lighting_types: [],
+   lighting_shapes: [],
+   lighting_types_label: [],
+   colorTemp_label: [],
+   installation_label: [],
+   bulbType_label: [],
+   finishes_applied_label: [],
+   finishes_applies: [],
+   lightingTypes: [],
+   installation_options: [],
+   installations: [],
+   colorTempratureOptions: [],
+   colorTempratures: [],
+   bulbTypeOptions: [],
+   bulbTypes: [],
   };
  }
  places_tags_label = [];
  places_tags = [];
  collections = [];
+ selected_collections = [];
  filterDesigners = (inputValue = "") => {
   return cnst.desingersOptions.filter((i) =>
    i.value.toLowerCase().includes(inputValue.toLowerCase())
@@ -85,9 +103,10 @@ class EditIdentity extends Component {
    () => {
     if (this.state.kind?.value === "Chairs") {
      this.setState({ furniture: productClass.chair });
+     console.log(productClass);
     } else if (this.state.kind?.value === "Beds") {
      this.setState({ furniture: productClass.beds });
-    } else if (this.state.kind?.value == "Sofa") {
+    } else if (this.state.kind?.value === "Sofa") {
      console.log(productClass.sofas);
      this.setState({ furniture: productClass.sofas });
     } else if (this.state.kind?.value === "Benches") {
@@ -105,6 +124,120 @@ class EditIdentity extends Component {
      this.setState({ furniture: productClass.office });
     } else if (this.state.kind?.value === "Furniture components and hardware") {
      this.setState({ furniture: productClass.components_hardware });
+    } else if (this.state.kind?.value === "Pendant lamps") {
+     this.setState({ furniture: productClass.pendant_lamps });
+    } else if (this.state.kind?.value === "Floor lamps") {
+     this.setState({ furniture: productClass.floor_lamps });
+    } else if (this.state.kind?.value === "Street lamps") {
+     this.setState({ furniture: productClass.street_lamps });
+    } else if (this.state.kind?.value === "Table lamps") {
+     this.setState({ furniture: productClass.table_lamps });
+    } else if (this.state.kind?.value === "Lampshades") {
+     this.setState({ furniture: productClass.lampshades });
+    } else if (this.state.kind?.value === "Spotlights") {
+     this.setState({ furniture: productClass.spotlights });
+    } else if (this.state.kind?.value === "Home Decoration") {
+     this.setState({ furniture: productClass.home_decore });
+    } else if (this.state.kind?.value === "Textiles and rugs") {
+     this.setState({ furniture: productClass.textiles_decore });
+    } else if (this.state.kind?.value === "Art and prints") {
+     this.setState({ furniture: productClass.prints_decore });
+    } else if (this.state.kind?.value === "Storage and space organization") {
+     this.setState({ furniture: productClass.storage_decore });
+    } else if (this.state.kind?.value === "Curtains & Blinds") {
+     this.setState({ furniture: productClass.curtains_decore });
+    } else if (this.state.kind?.value === "Plant decorations") {
+     this.setState({ furniture: productClass.plant_decore });
+    } else if (this.state.kind?.value === "Pet supplies") {
+     this.setState({ furniture: productClass.pets_decore });
+    } else if (this.state.kind?.value === "Doors") {
+     this.setState({ furniture: productClass.finishes_doors });
+    } else if (this.state.kind?.value === "Rooflights") {
+     this.setState({ furniture: productClass.finishes_rooflights });
+    } else if (this.state.kind?.value === "Partitions") {
+     this.setState({ furniture: productClass.finishes_partitions });
+    } else if (this.state.kind?.value === "Window profiles") {
+     this.setState({ furniture: productClass.finishes_window_profiles });
+    } else if (this.state.kind?.value === "Spas & Wellness") {
+     this.setState({
+      furniture: productClass.wellness_spas,
+     });
+    } else if (this.state.kind?.value === "Swimming pools and equipment") {
+     this.setState({
+      furniture: productClass.wellness_swimming_pools,
+     });
+    } else if (this.state.kind?.value === "Gym and fitness") {
+     this.setState({
+      furniture: productClass.welness_gym_fintess,
+     });
+
+     //  }
+    } else if (this.state.kind?.value === "Kitchen furniture") {
+     this.setState({ furniture: productClass.kitchen_funiture });
+    } else if (this.state.kind?.value === "Sinks and kitchen taps") {
+     this.setState({ furniture: productClass.kitchen_skin_taps });
+    } else if (this.state.kind?.value === "Kitchen appliances") {
+     this.setState({ furniture: productClass.kitchen_appliances });
+    } else if (this.state.kind?.value === "Cooking accessories") {
+     this.setState({ furniture: productClass.kitchen_cooking_accessories });
+    } else if (this.state.kind?.value === "Dining table accessories") {
+     this.setState({ furniture: productClass.kitchen_dining_accessories });
+    } else if (this.state.kind?.value === "Kitchen Textiles") {
+     this.setState({ furniture: productClass.kitchen_textiles });
+    } else if (this.state.kind?.value === "Cookware and Bakeware") {
+     this.setState({ furniture: productClass.kitchen_cookware });
+    } else if (this.state.kind?.value === "Washbasins and bathroom fixtures") {
+     this.setState({
+      furniture: productClass.bathroom_wshbasins_fixtures,
+     });
+    } else if (this.state.kind?.value === "Showers and bathtubs") {
+     this.setState({
+      furniture: productClass.bathroom_showers_bathtubs,
+     });
+    } else if (this.state.kind?.value === "Bathroom Taps") {
+     this.setState({
+      furniture: productClass.bathroom_taps,
+     });
+    } else if (this.state.kind?.value === "Remote control taps") {
+     this.setState({
+      furniture: productClass.bathroom_remote_control_taps,
+     });
+    } else if (this.state.kind?.value === "Bathroom furniture") {
+     this.setState({
+      furniture: productClass.bathroom_furniture,
+     });
+    } else if (this.state.kind?.value === "Bathroom lighting") {
+     this.setState({
+      furniture: productClass.bathroom_lighting,
+     });
+    } else if (this.state.kind?.value === "Bathroom accessories") {
+     this.setState({
+      furniture: productClass.bathroom_accessories,
+     });
+    } else if (this.state.kind?.value === "Laundry and household cleaning") {
+     this.setState({
+      furniture: productClass.bathroom_laundry,
+     });
+    } else if (this.state.kind?.value === "Disabled bathrooms") {
+     this.setState({
+      furniture: productClass.bathroom_disabled,
+     });
+    } else if (this.state.kind?.value === "Bathroom radiators") {
+     this.setState({
+      furniture: productClass.bathroom_radiators,
+     });
+    } else if (this.state.kind?.value === "Structures") {
+     this.setState({ furniture: productClass.constructions_structure });
+    } else if (this.state.kind?.value === "Roofs") {
+     this.setState({ furniture: productClass.constructions_roofs });
+    } else if (this.state.kind?.value === "External walls and facades") {
+     this.setState({ furniture: productClass.constructions_external_walls });
+    } else if (this.state.kind?.value === "Paints and varnishes") {
+     this.setState({ furniture: productClass.constructions_paints_varnishes });
+    } else if (
+     this.state.kind?.value === "Home automation and electrical systems"
+    ) {
+     this.setState({ furniture: productClass.constructions_home_automation });
     } else {
      this.setState({ furniture: productClass.empty });
     }
@@ -131,6 +264,50 @@ class EditIdentity extends Component {
   });
  };
 
+ onChangeInstallations = (selectedOption) => {
+  this.setState({
+   installation_label: selectedOption,
+   installations: Array.isArray(this.state.installation_label)
+    ? selectedOption.map((x) => x.value)
+    : [],
+  });
+ };
+ onChangeColorTemprature = (selectedOption) => {
+  this.setState({
+   colorTemp_label: selectedOption,
+   colorTempratures: Array.isArray(this.state.colorTemp_label)
+    ? selectedOption.map((x) => x.value)
+    : [],
+  });
+ };
+
+ onChangeBulbTypes = (selectedOption) => {
+  this.setState({
+   bulbType_label: selectedOption,
+   bulbTypes: Array.isArray(this.state.seats_label)
+    ? selectedOption.map((x) => x.value)
+    : [],
+  });
+ };
+
+ onChangeFinishesApplied = (selectedOption) => {
+  this.setState({
+   finishes_applied_label: selectedOption,
+   finishes_applies: Array.isArray(this.state.finishes_applied_label)
+    ? selectedOption.map((x) => x.value)
+    : [],
+  });
+ };
+
+ onChangeLightingTypes = (selectedOption) => {
+  this.setState({
+   lighting_types_label: selectedOption,
+   lightingTypes: Array.isArray(this.state.lighting_types_label)
+    ? selectedOption.map((x) => x.value)
+    : [],
+  });
+ };
+
  onChangeShape = (selectedOption) => {
   this.setState({
    shapes_label: selectedOption,
@@ -150,7 +327,9 @@ class EditIdentity extends Component {
  };
 
  onChangeForKids = (value) => {
-  this.setState({ kids: value });
+  this.setState({ for_kids: value.target.checked });
+  this.setState({ is_for_kids: value.target.checked ? "yes" : "no" });
+  console.log(this.state.for_kids);
  };
 
  onChangeFileType = (value) => {
@@ -165,7 +344,11 @@ class EditIdentity extends Component {
     : [],
   });
  };
-
+ onChangeCollections = (selectedCollection) => {
+  this.setState({
+   selected_collections: selectedCollection,
+  });
+ };
  onChangeProductTypes = (selectedOption) => {
   this.setState({
    types_label: selectedOption,
@@ -184,21 +367,6 @@ class EditIdentity extends Component {
   });
  };
 
- //  antd select
- //  handleChange = (value) => {
- //   console.log(`selected ${value}`);
- //  };
-
- //  handleChange = () =>
- //   newValue: OnChangeValue(colorOptions, true),
- //   actionMeta: ActionMeta(colorOptions)
- //   {
- //    console.group("Value Changed");
- //    console.log(newValue);
- //    console.log(`action: ${actionMeta.action}`);
- //    console.groupEnd();
- //   };
-
  promiseOptions = (inputValue) =>
   new Promise((resolve) => {
    setTimeout(() => {
@@ -206,19 +374,80 @@ class EditIdentity extends Component {
    }, 1000);
   });
 
+ createStoreCollectionAttach = (name) => {
+  const fd = new FormData();
+  fd.append("collection_name", name);
+  fd.append("product_id", this.props.id);
+  fd.append("store_id", this.props.store.id);
+  //   console.log(this.props.store.id);
+  axios.post(`${API}brandcollection`, fd).then((response) => {
+   console.log(response);
+  });
+ };
+ attachExistStoreCollection = (id) => {
+  //   console.log(id);
+  const fd = new FormData();
+  fd.append("product_id", this.props.id);
+  fd.append("collection_id", id);
+  axios.post(`${API}brandcollect`, fd).then((response) => {
+   console.log(response);
+  });
+ };
+
+ handleIdentitySubmit = (e) => {
+  this.props.dispatchAddIdentity(
+   this.state.name,
+   this.state.category,
+   JSON.stringify(this.state.types_label),
+   JSON.stringify(this.state.materials_label),
+   this.state.country,
+   JSON.stringify(this.state.seats_label),
+   JSON.stringify(this.state.bases_label),
+   JSON.stringify(this.state.shapes_label),
+   this.state.kind.value,
+   JSON.stringify(this.state.styles_label),
+
+   JSON.stringify(this.state.lighting_types_label),
+   JSON.stringify(this.state.installation_label),
+
+   JSON.stringify(this.state.colorTemp_label),
+   JSON.stringify(this.state.bulbType_label),
+   JSON.stringify(this.state.finishes_applied_label),
+
+   this.state.places_tags,
+   this.state.is_outdoor,
+   this.state.is_for_kids,
+   this.state.product_file_kind,
+   this.state.product_id
+  );
+  console.log(this.state);
+ };
  componentDidMount() {
+  console.log(this.props);
+  // console.log(this.props.selected_collections);
+  console.log(this.state.for_kids);
+  console.log(this.state.is_for_kids);
   this.props?.data?.places_tags?.map((m) => {
    this.places_tags_label.push({ label: m, value: m });
    return this.places_tags.push(m);
   });
+
+  // console.log(this.props.collections);
+
   this.props?.collections?.map((collection, index) => {
    this.collections.push({
-    label: collection.collection_name,
     value: collection.collection_name,
+    label: (
+     <>
+      <p onClick={() => this.attachExistStoreCollection(collection.id)}>
+       {collection.collection_name}
+      </p>
+     </>
+    ),
    });
   });
-
   this.setState({
+   kindsOptions: productClass.kind_options,
    places_tags_label: this.places_tags_label,
    materials_label: this.props.data.material,
    materials: this.props.data.material,
@@ -226,6 +455,11 @@ class EditIdentity extends Component {
    types: this.props.data.type,
    seats_label: this.props.data.seats,
    seats: this.props.data.seats,
+   lighting_types_label: this.props.data.lighting_types,
+   installation_label: this.props.data.installations,
+   colorTemp_label: this.props.data.colorTempratures,
+   bulbType_label: this.props.data.bulbTypes,
+   finishes_applied_label: this.props.data.applied_on,
    shapes_label: this.props.data.shape,
    shapes: this.props.data.shape,
    bases_label: this.props.data.base,
@@ -233,13 +467,186 @@ class EditIdentity extends Component {
    styles_label: this.props.data.style,
    styles: this.props.data.style,
    places_tags: this.props.data.places_tags,
+   collections: this.collections,
+   selected_collections: this.selected_collections,
+   is_for_kids: this.props.data?.is_for_kids ?? "no",
+   for_kids: this.props.data.is_for_kids === "yes" ? true : false,
+   furniture_styles:
+    this.state.category == "Lighting"
+     ? productClass.lighting_styles
+     : productClass.furniture_styles,
   });
+
   console.log(this.state.selectedMaterials);
-  if (this.state.kind?.value === "Chairs") {
+  if (this.state.category === "Lighting") {
+   this.setState({
+    kindsOptions: productClass.lighting_kinds,
+    furniture: productClass.empty,
+    lighting_types: productClass.lighting_types,
+    furniture_styles: productClass.lighting_styles,
+    installation_options: productClass.lighting_installation,
+    colorTempratureOptions: productClass.lighitng_colorTemprature,
+    bulbTypeOptions: productClass.lighting_bulbTypes,
+   });
+
+   if (this.state.kind?.value === "Pendant lamps") {
+    this.setState({ furniture: productClass.pendant_lamps });
+   } else if (this.state.kind?.value === "Pendant lamps") {
+    this.setState({ furniture: productClass.pendant_lamps });
+   } else if (this.state.kind?.value === "Floor lamps") {
+    this.setState({ furniture: productClass.floor_lamps });
+   } else if (this.state.kind?.value === "Street lamps") {
+    this.setState({ furniture: productClass.street_lamps });
+   } else if (this.state.kind?.value === "Table lamps") {
+    this.setState({ furniture: productClass.table_lamps });
+   } else if (this.state.kind?.value === "Lampshades") {
+    this.setState({ furniture: productClass.lampshades });
+   } else if (this.state.kind?.value === "Spotlights") {
+    this.setState({ furniture: productClass.spotlights });
+   }
+  } else if (this.state.kind?.value === "Home Decoration") {
+   this.setState({ furniture: productClass.home_decore });
+  } else if (this.state.kind?.value === "Textiles and rugs") {
+   this.setState({ furniture: productClass.textiles_decore });
+  } else if (this.state.kind?.value === "Art and prints") {
+   this.setState({ furniture: productClass.prints_decore });
+  } else if (this.state.kind?.value === "Storage and space organization") {
+   this.setState({ furniture: productClass.storage_decore });
+  } else if (this.state.kind?.value === "Curtains & Blinds") {
+   this.setState({ furniture: productClass.curtains_decore });
+  } else if (this.state.kind?.value === "Plant decorations") {
+   this.setState({ furniture: productClass.plant_decore });
+  } else if (this.state.kind?.value === "Pet supplies") {
+   this.setState({ furniture: productClass.pets_decore });
+  } else if (this.state.category === "Decore") {
+   this.setState({
+    furniture: productClass.empty,
+    kindsOptions: productClass.decore_kind_options,
+   });
+  } else if (this.state.category === "Finishes") {
+   this.setState({
+    furniture: productClass.empty,
+    kindsOptions: productClass.finishes_kind_options,
+    finishes_applied_on: productClass.finishes_applied_on,
+   });
+   if (this.state.kind?.value === "Doors") {
+    this.setState({ furniture: productClass.finishes_doors });
+   } else if (this.state.kind?.value === "Rooflights") {
+    this.setState({ furniture: productClass.finishes_rooflights });
+   } else if (this.state.kind?.value === "Partitions") {
+    this.setState({ furniture: productClass.finishes_partitions });
+   } else if (this.state.kind?.value === "Window profiles") {
+    this.setState({ furniture: productClass.finishes_window_profiles });
+   }
+  } else if (this.state.category === "Kitchen") {
+   this.setState({
+    furniture: productClass.empty,
+    kindsOptions: productClass.kitchen_kind_options,
+   });
+
+   if (this.state.kind?.value === "Kitchen furniture") {
+    this.setState({ furniture: productClass.kitchen_funiture });
+   } else if (this.state.kind?.value === "Sinks and kitchen taps") {
+    this.setState({ furniture: productClass.kitchen_skin_taps });
+   } else if (this.state.kind?.value === "Kitchen appliances") {
+    this.setState({ furniture: productClass.kitchen_appliances });
+   } else if (this.state.kind?.value === "Cooking accessories") {
+    this.setState({ furniture: productClass.kitchen_cooking_accessories });
+   } else if (this.state.kind?.value === "Dining table accessories") {
+    this.setState({ furniture: productClass.kitchen_dining_accessories });
+   } else if (this.state.kind?.value === "Kitchen Textiles") {
+    this.setState({ furniture: productClass.kitchen_textiles });
+   } else if (this.state.kind?.value === "Cookware and Bakeware") {
+    this.setState({ furniture: productClass.kitchen_cookware });
+   }
+   //  Spas & Wellness
+  } else if (this.state.category === "Wellness") {
+   this.setState({
+    furniture: productClass.empty,
+    kindsOptions: productClass.wellness_kind_options,
+   });
+   if (this.state.kind?.value === "Spas & Wellness") {
+    this.setState({
+     furniture: productClass.wellness_spas,
+    });
+   } else if (this.state.kind?.value === "Swimming pools and equipment") {
+    this.setState({
+     furniture: productClass.wellness_swimming_pools,
+    });
+   } else if (this.state.kind?.value === "Gym and fitness") {
+    this.setState({
+     furniture: productClass.welness_gym_fintess,
+    });
+   }
+  } else if (this.state.category === "Construction") {
+   this.setState({
+    kindsOptions: productClass.constructions_kind_options,
+    furniture: productClass.empty,
+   });
+   if (this.state.kind?.value === "Structures") {
+    this.setState({ furniture: productClass.constructions_structure });
+   } else if (this.state.kind?.value === "Roofs") {
+    this.setState({ furniture: productClass.constructions_roofs });
+   } else if (this.state.kind?.value === "External walls and facades") {
+    this.setState({ furniture: productClass.constructions_external_walls });
+   } else if (this.state.kind?.value === "Paints and varnishes") {
+    this.setState({ furniture: productClass.constructions_paints_varnishes });
+   } else if (
+    this.state.kind?.value === "Home automation and electrical systems"
+   ) {
+    this.setState({ furniture: productClass.constructions_home_automation });
+   }
+  } else if (this.state.category === "Bathroom") {
+   this.setState({
+    kindsOptions: productClass.bathroom_kind_options,
+    furniture: productClass.empty,
+   });
+   if (this.state.kind?.value === "Washbasins and bathroom fixtures") {
+    this.setState({
+     furniture: productClass.bathroom_wshbasins_fixtures,
+    });
+   } else if (this.state.kind?.value === "Showers and bathtubs") {
+    this.setState({
+     furniture: productClass.bathroom_showers_bathtubs,
+    });
+   } else if (this.state.kind?.value === "Bathroom Taps") {
+    this.setState({
+     furniture: productClass.bathroom_taps,
+    });
+   } else if (this.state.kind?.value === "Remote control taps") {
+    this.setState({
+     furniture: productClass.bathroom_remote_control_taps,
+    });
+   } else if (this.state.kind?.value === "Bathroom furniture") {
+    this.setState({
+     furniture: productClass.bathroom_furniture,
+    });
+   } else if (this.state.kind?.value === "Bathroom lighting") {
+    this.setState({
+     furniture: productClass.bathroom_lighting,
+    });
+   } else if (this.state.kind?.value === "Bathroom accessories") {
+    this.setState({
+     furniture: productClass.bathroom_accessories,
+    });
+   } else if (this.state.kind?.value === "Laundry and household cleaning") {
+    this.setState({
+     furniture: productClass.bathroom_laundry,
+    });
+   } else if (this.state.kind?.value === "Disabled bathrooms") {
+    this.setState({
+     furniture: productClass.bathroom_disabled,
+    });
+   } else if (this.state.kind?.value === "Bathroom radiators") {
+    this.setState({
+     furniture: productClass.bathroom_radiators,
+    });
+   }
+  } else if (this.state.kind?.value === "Chairs") {
    this.setState({ furniture: productClass.chair });
   } else if (this.state.kind?.value === "Beds") {
    this.setState({ furniture: productClass.beds });
-  } else if (this.state.kind?.value == "Sofa") {
+  } else if (this.state.kind?.value === "Sofa") {
    console.log(productClass.sofas);
    this.setState({ furniture: productClass.sofas });
   } else if (this.state.kind?.value === "Benches") {
@@ -261,28 +668,7 @@ class EditIdentity extends Component {
    this.setState({ furniture: productClass.empty });
   }
  }
- handleIdentitySubmit = (e) => {
-  this.props.dispatchAddIdentity(
-   this.state.name,
-   this.state.category,
-   JSON.stringify(this.state.types_label),
-   JSON.stringify(this.state.materials_label),
-   this.state.country,
-   JSON.stringify(this.state.seats_label),
-   JSON.stringify(this.state.bases_label),
-   JSON.stringify(this.state.shapes_label),
-   this.state.kind.value,
-   JSON.stringify(this.state.styles_label),
-   this.state.places_tags,
-   this.state.is_outdoor,
-   this.state.is_for_kids,
-   this.state.product_file_kind,
-   this.state.product_id
-  );
- };
-
  render() {
-  const collections = this.props.collections;
   return (
    <>
     <div className="step-form identity">
@@ -334,8 +720,10 @@ class EditIdentity extends Component {
         </Form.Label>
         <Col md={4}>
          <ReactSelect
-          value="Furniture"
-          placeholder="Furniture"
+          // value="Furniture"
+          value={this.state.category}
+          // placeholder="Furniture"
+          placeholder={this.state.category}
           isDisabled
           onChange={this.onChangeCategory}
           theme={(theme) => ({
@@ -355,7 +743,12 @@ class EditIdentity extends Component {
         <Col md={4}>
          {/* <Select */}
          <ReactSelect
-          options={productClass.kind_options}
+          options={
+           //  this.state.category === "Furniture"
+           //   ? productClass.kind_options
+           //   : productClass.lighting_kinds
+           this.state.kindsOptions
+          }
           value={this.state.kind}
           onChange={this.onChangeKind}
           theme={(theme) => ({
@@ -409,7 +802,8 @@ class EditIdentity extends Component {
         ) : (
          <></>
         )}
-        {this.state.furniture?.shapes?.length > 0 ? (
+        {this.state.furniture?.shapes?.length > 0 ||
+        this.state.lighting_shapes?.length > 0 ? (
          <>
           <Form.Label column md={2} className="sub-label">
            Shape
@@ -419,7 +813,13 @@ class EditIdentity extends Component {
            <ReactSelect
             isMulti
             // options={rightShape}
-            options={this.state.furniture.shapes}
+            options={
+             this.state.furniture.shapes
+
+             //  this.state.category === "Furniture"
+             //   ? this.state.furniture.shapes
+             //   : this.state.lighting_shapes
+            }
             value={this.state.shapes_label}
             onChange={this.onChangeShape}
             theme={(theme) => ({
@@ -444,7 +844,14 @@ class EditIdentity extends Component {
          {/* <Select */}
          <ReactSelect
           isMulti
-          options={productClass.furniture_styles}
+          // options={productClass.furniture_styles}
+          options={
+           this.state.furniture_styles
+           //  productClass.furniture_styles
+           //  this.state.category === "Furniture"
+           //   ? productClass.furniture_styles
+           //   : productClass.lighting_styles
+          }
           value={this.state.styles_label}
           onChange={this.onChangeStyle}
           theme={(theme) => ({
@@ -534,6 +941,146 @@ class EditIdentity extends Component {
         ) : (
          <></>
         )}
+        {this.state.lighting_types?.length > 0 ? (
+         <>
+          <Form.Label column md={2} className="sub-label">
+           Lighting Types
+          </Form.Label>
+          <Col md={4}>
+           {/* <Select */}
+           <ReactSelect
+            isMulti
+            options={this.state.lighting_types}
+            value={this.state.lighting_types_label}
+            onChange={this.onChangeLightingTypes}
+            theme={(theme) => ({
+             ...theme,
+             colors: {
+              ...theme.colors,
+              primary25: "#f5f0f0",
+              primary: "#e41e15",
+              primary50: "#f5f0f0",
+             },
+            })}
+           />
+          </Col>
+         </>
+        ) : (
+         <></>
+        )}
+        {this.state.installation_options?.length > 0 ? (
+         <>
+          <Form.Label column md={2} className="sub-label">
+           Installations
+          </Form.Label>
+          <Col md={4}>
+           {/* <Select */}
+           <ReactSelect
+            isMulti
+            options={this.state.installation_options}
+            value={this.state.installation_label}
+            onChange={this.onChangeInstallations}
+            theme={(theme) => ({
+             ...theme,
+             colors: {
+              ...theme.colors,
+              primary25: "#f5f0f0",
+              primary: "#e41e15",
+              primary50: "#f5f0f0",
+             },
+            })}
+           />
+          </Col>
+         </>
+        ) : (
+         <></>
+        )}
+        {this.state.colorTempratureOptions?.length > 0 ? (
+         <>
+          <Form.Label
+           column
+           md={2}
+           className="sub-label"
+           style={{ fontSize: ".75rem" }}
+          >
+           Color Temprature
+          </Form.Label>
+          <Col md={4}>
+           {/* <Select */}
+           <ReactSelect
+            isMulti
+            options={this.state.colorTempratureOptions}
+            value={this.state.colorTemp_label}
+            onChange={this.onChangeColorTemprature}
+            theme={(theme) => ({
+             ...theme,
+             colors: {
+              ...theme.colors,
+              primary25: "#f5f0f0",
+              primary: "#e41e15",
+              primary50: "#f5f0f0",
+             },
+            })}
+           />
+          </Col>
+         </>
+        ) : (
+         <></>
+        )}
+        {this.state.bulbTypeOptions?.length > 0 ? (
+         <>
+          <Form.Label column md={2} className="sub-label">
+           Bulb Types
+          </Form.Label>
+          <Col md={4}>
+           {/* <Select */}
+           <ReactSelect
+            isMulti
+            options={this.state.bulbTypeOptions}
+            value={this.state.bulbType_label}
+            onChange={this.onChangeBulbTypes}
+            theme={(theme) => ({
+             ...theme,
+             colors: {
+              ...theme.colors,
+              primary25: "#f5f0f0",
+              primary: "#e41e15",
+              primary50: "#f5f0f0",
+             },
+            })}
+           />
+          </Col>
+         </>
+        ) : (
+         <></>
+        )}
+        {this.state.finishes_applied_on?.length > 0 ? (
+         <>
+          <Form.Label column md={2} className="sub-label">
+           Applied On
+          </Form.Label>
+          <Col md={4}>
+           {/* <Select */}
+           <ReactSelect
+            isMulti
+            options={this.state.finishes_applied_on}
+            value={this.state.finishes_applied_label}
+            onChange={this.onChangeFinishesApplied}
+            theme={(theme) => ({
+             ...theme,
+             colors: {
+              ...theme.colors,
+              primary25: "#f5f0f0",
+              primary: "#e41e15",
+              primary50: "#f5f0f0",
+             },
+            })}
+           />
+          </Col>
+         </>
+        ) : (
+         <></>
+        )}
        </Form.Group>
       </div>
       <div className="form-blc">
@@ -542,27 +1089,16 @@ class EditIdentity extends Component {
          <Form.Label>Is this Product made for kids ? (Required)</Form.Label>
         </Col>
         <Col md={1}>
-         <Form.Check
-          type="radio"
-          label="yes"
-          value="yes"
-          checked={this.state.is_for_kids === "yes" ? true : false}
-          name="formHorizontalRadios1"
-          id="formHorizontalRadios1"
-          onChange={(e) => this.onChangeForKids(e.target.value)}
-         />
+         <Checkbox
+          onChange={(e) => this.onChangeForKids(e)}
+          value={this.state.for_kids}
+          checked={this.state.for_kids ? true : false}
+         >
+          Yes
+         </Checkbox>
         </Col>
-        <Col md={1}>
-         <Form.Check
-          type="radio"
-          label="No"
-          value="no"
-          checked={this.state.is_for_kids === "no" ? true : false}
-          onChange={(e) => this.onChangeForKids(e.target.value)}
-          name="formHorizontalRadios1"
-          id="formHorizontalRadios2"
-         />
-        </Col>
+        {/* <Col md={1}></Col> */}
+
         <Col md={12}>
          <p className="light">
           Please check on yes if this products made spicily for kids.
@@ -576,44 +1112,55 @@ class EditIdentity extends Component {
         <div>
          <CreatableSelect
           isMulti
+          closeMenuOnSelect={false}
+          // defaultValue={this.selected_collections}
+          defaultValue={this.state.default_collections}
+          // defaultValue={[{ label: "SSS", value: "EEE" }]}
+          // value={this.selected_collections}
           styles={collectionSelectStyles}
-          // onChange={this.handleChange}
+          // defaultOptions={this.selected_collections}
+          // defaultInputValue={this.selected_collections}
           createOptionPosition={"first"}
           formatCreateLabel={(input) => {
            return (
             <>
-             <div
+             <AntRow
+              justify="space-between"
               style={{
-               position: "relative",
-               paddingTop: "4px",
-               marginBottom: "30px",
-               paddingBottom: "10px",
-               borderBottom: "1px solid #666",
+               borderBottom: "1px solid #f5f5f5",
+               minHeight: "38px",
               }}
              >
-              Create:
-              <span
-               style={{
-                display: "inline",
-                fontWeight: "900",
-                position: "relative",
-               }}
-              >
-               {` ${input}`}
-              </span>
-              <button className="collect-new">
-               <PlusOutlined />
-              </button>
-             </div>
-
-             <Divider />
+              <AntCol span={12} className="mb-4">
+               <p className="crt">
+                Create:
+                <span
+                 style={{
+                  fontWeight: "900",
+                 }}
+                >
+                 {` ${input}`}
+                </span>
+               </p>
+              </AntCol>
+              <AntCol span={4} className="mb-4">
+               <button
+                className="collect-new"
+                onClick={() => {
+                 console.log(input);
+                 this.createStoreCollectionAttach(input);
+                }}
+               >
+                <PlusOutlined />
+               </button>
+              </AntCol>
+             </AntRow>
             </>
            );
           }}
           options={this.collections}
          />
         </div>
-        {/* ,mountNode */}
         <p className="light">
          Collect each series’s products in one collection.
         </p>
@@ -632,36 +1179,6 @@ class EditIdentity extends Component {
         <p className="light">
          Search and tag the product’s designer, If you can’t in find the
          designer click here to invite.
-        </p>
-       </Col>
-      </Form.Group>
-      <Form.Group as={Row}>
-       <Col md={12}>
-        <Form.Label>Product Files</Form.Label>
-       </Col>
-       <Col md={1}>
-        <Form.Check
-         type="radio"
-         label="CAD"
-         value="cad"
-         name="formHorizontalRadios3"
-         id="formHorizontalRadios3"
-         onChange={(e) => this.onChangeFileType(e.target.value)}
-        />
-       </Col>
-       <Col md={1}>
-        <Form.Check
-         type="radio"
-         label="3D"
-         value="3d"
-         name="formHorizontalRadios3"
-         id="formHorizontalRadios4"
-         onChange={(e) => this.onChangeFileType(e.target.value)}
-        />
-       </Col>
-       <Col md={12}>
-        <p className="light">
-         Lorem ipsum, dolor sit amet consectetur adipisicing elit. Corrupti!
         </p>
        </Col>
       </Form.Group>
@@ -704,7 +1221,6 @@ class EditIdentity extends Component {
  }
 }
 
-// export default EditIdentity;
 const mapDispatchToProps = (dispatch) => ({
  dispatchAddIdentity: (
   name,
@@ -717,6 +1233,12 @@ const mapDispatchToProps = (dispatch) => ({
   shape,
   kind,
   style,
+  lighting_types,
+  installations,
+  colorTempratures,
+  bulbTypes,
+  applied_on,
+
   places_tags,
   is_outdoor,
   is_for_kids,
@@ -735,6 +1257,11 @@ const mapDispatchToProps = (dispatch) => ({
     shape,
     kind,
     style,
+    lighting_types,
+    installations,
+    colorTempratures,
+    bulbTypes,
+    applied_on,
     places_tags,
     is_outdoor,
     is_for_kids,

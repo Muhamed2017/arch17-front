@@ -19,22 +19,23 @@
     overflow: hidden;
 }
 .project-name h4{
-    font-family: 'Times New Roman', Times, serif  !important;
+  font-family: "Roboto";
+    /* font-family: 'Times New Roman', Times, serif !important; */
     font-size: 15px !important;
-    color: #2e2e2e;
+    color: #000000e0;
     margin-top: 5px;
     margin-bottom: 5px;
-    font-weight: normal;
+    font-weight: 600;
     line-height: 25px;
     padding-left: 12px;
     cursor: pointer;
 }
 .project-name:hover{
-    text-decoration: underline;
+    /* text-decoration: underline; */
 }
 .project-category{
     font-size: 12px;
-    color: #d1d1d1 !important;
+    color: #8f8f8f !important;
     font-family: "Arial" !important;
     padding-left: 12px;
     cursor: pointer;
@@ -43,11 +44,14 @@
     color: #7f7f7f !important
 }
 .project-type{
-    font-size: 12px;
+    font-size: 11px;
     color: #d1d1d1 !important;
     font-family: "Arial" !important;
     padding-left: 12px;
     cursor: pointer;
+    align-items: center;
+    grid-gap: 8px;
+    height: 32px;
 }
 .project-type p:hover{
     color: #7f7f7f !important

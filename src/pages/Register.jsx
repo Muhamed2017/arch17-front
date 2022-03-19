@@ -152,7 +152,8 @@ const Register = (props) => {
    });
  };
  const handleRegularSignup = () => {
-  props.dispatchRegularSignup(fname, lname, email, password, "regular");
+  props.dispatchRegularSignup(fname, lname, email, password, "firebase");
+  // props.dispatchRegularSignup(fname, lname, email, password, "regular");
   console.log(props.isLoggedIn);
  };
  const handleSuccess = (data) => {

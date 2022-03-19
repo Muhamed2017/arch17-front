@@ -12,13 +12,16 @@ import { IoWarning } from "react-icons/io5";
 import { IoMdCloudUpload } from "react-icons/io";
 import "cropperjs/dist/cropper.css";
 import { compressImage } from "../addProduct/OptionsPrice";
-import { VerificationPin } from "react-verification-pin";
-
+import { LoadingOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { Redirect } from "react-router";
 import { logginOut } from "./../../redux/actions/authActions";
 import { API } from "./../../utitlties";
+import { Spin, Select } from "antd";
+import ReactFlagsSelect from "react-flags-select";
+import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
+import en from "world_countries_lists/data/en/world.json";
 
 import {
  signinEmailPassword,
@@ -26,6 +29,12 @@ import {
  updateInfo,
  presistInfo,
 } from "../../redux/actions/authActions";
+const Proffessions = [
+ "Engineer",
+ "Designer",
+ "Archetict",
+ "Interiour Designer",
+];
 class Settings extends Component {
  constructor(props) {
   super(props);
@@ -34,7 +43,7 @@ class Settings extends Component {
   this.state = {
    fname: "",
    lname: "",
-   email: "",
+   //  email: "",
    phone: "",
    password: "",
    new_password: "",
@@ -54,8 +63,24 @@ class Settings extends Component {
    phoneModal: false,
    status: "process",
    changing: false,
+   selectedProfessions: this.props.location?.state?.user?.professions ?? [],
+   user: this.props.location?.state?.user ?? null,
+   is_designer: this.props.location?.state?.user
+    ? this.props.location?.state?.user?.is_designer
+    : 0,
+   fetched: this.props.location?.state?.user ? true : false,
+   country: this.props.location?.state?.user?.country,
+   city: this.props.location?.state?.user?.city,
+   providerId: this.props.location?.state?.user?.providerId,
+   code: this.props.location?.state?.user?.phoneCode,
+   phoneNumber: this.props.location?.state?.user?.phoneNumber,
+   email: this.props.location?.state?.user?.email,
+   isChanged: false,
   };
  }
+ handleProfessionChange = (selectedProfessions) => {
+  this.setState({ selectedProfessions, isChanged: true });
+ };
  profile_close = () => {
   this.setState({ profile_modal: false });
  };
@@ -65,74 +90,67 @@ class Settings extends Component {
  onChangeProfile = (e) => {
   const file = e.target.files[0];
   const src = URL.createObjectURL(file);
-  // this.setState({ profile_img: file });
   this.setState({ profile_src: src });
   console.log(file);
   console.log(src);
  };
  componentDidMount() {
+  console.log(this.props.location?.state?.user?.is_designer);
+  console.log(`is designer is ${this.state.is_designer}`);
+  if (!this.state.fetched) {
+   axios.get(`${API}user/folders/${this.state.uid}`).then((response) => {
+    console.log(response);
+    const { user } = response.data;
+    this.setState({
+     user,
+     is_designer: user?.is_designer,
+     fetched: true,
+     country: user?.country,
+     city: user?.city,
+     selectedProfessions: user?.professions,
+     phoneNumber: user?.phoneNumber,
+     code: user?.phoneCode,
+     providerId: user?.providerId,
+     email: user?.email,
+    });
+   });
+  }
   this.setState({
    fname: this.props.displayName?.split(" ")[0],
    lname: this.props.displayName?.split(" ")[1],
    photoURL: this.props.photoURL,
-   phone: this.props.userInfo?.info?.phoneNumber ?? "",
-   email: this.props.userInfo.info?.email?.includes("+")
-    ? "No Email"
-    : this.props.userInfo?.info?.email,
+   email: this.props.email,
+   //  phone: this.props.userInfo?.info?.phoneNumber ?? "",
+   //  email: this.props.userInfo.info?.email?.includes("+")
+   //   ? "No Email"
+   //   : this.props.userInfo?.info?.email,
   });
  }
 
- handlePhoneFinish = (code) => {
-  const fd = new FormData();
-  this.state.confResult
-   .confirm(code)
-   .then((userCredentials) => {
-    fd.append("uid", userCredentials.user.uid);
-    fd.append("phone", this.state.phone);
-    axios.post(`${API}update-phone`, fd).then((response) => {
-     console.log(response.data);
-     this.props.updateInfo(response.data.user);
-     presistInfo(response.data.user, true);
-    });
-    this.setState({ phoneModal: false });
-   })
-   .catch((err) => {
-    console.log(err);
-    this.setState({ status: "error" });
-    auth.signOut().then(() => {
-     this.props.dispatchLogOut();
-    });
-   });
- };
- setUpRecaptch = () => {
-  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(
-   "recaptch-setting-container",
-   {
-    size: "invisible",
-    callback: (response) => {
-     console.log(response);
-    },
-   }
-  );
- };
-
- phoneModal_close = () => {
-  this.setState({ phoneModal: false });
- };
-
  handleDeleteSubmit = () => {
   this.setState({ deletingAcc: true });
-  auth
-   .signInWithEmailAndPassword(
-    auth.currentUser.email,
-    this.state.deletePassword
-   )
-   .then((userCreds) => {
-    console.log(userCreds.user);
-    auth.currentUser.delete().then(() => {
-     this.props.dispatchLogOut();
+  if (this.state.providerId === "password") {
+   auth
+    .signInWithEmailAndPassword(
+     this.props.userInfo?.email,
+     this.state.deletePassword
+    )
+    .then((userCreds) => {
+     console.log(userCreds.user);
+     axios
+      .post(`${API}deleteuser/${this.props.userInfo?.info?.uid}`)
+      .then(() => {
+       this.setState({ deletingAcc: false });
+       this.props.dispatchLogOut();
+      });
     });
+  } else {
+   axios.post(`${API}deleteuser/${this.props.userInfo?.info?.uid}`).then(() => {
+    this.setState({ deletingAcc: false });
+
+    this.props.dispatchLogOut();
    });
+  }
  };
  changePassword = () => {
   this.setState({ pswrd_loading: true });
@@ -166,46 +184,37 @@ class Settings extends Component {
  deleteAccClose = () => {
   this.setState({ delete_acc_modal: false });
  };
+
  handleUpdateProfile = () => {
   this.setState({ prfl_loading: true });
+  const fd = new FormData();
+  fd.append("displayName", `${this.state.fname} ${this.state.lname}`);
+  fd.append("email", this.state.email);
+  if (this.state.city.length > 0) fd.append("city", this.state.city);
+  if (this.state.country.length > 0) fd.append("country", this.state.country);
+  if (this.state.phoneNumber > 0)
+   fd.append("phoneNumber", Number(this.state.phoneNumber));
+  if (this.state.code > 0) fd.append("phoneCode", this.state.code);
+  if (this.state.selectedProfessions.length > 0)
+   this.state.selectedProfessions.map((p) => fd.append("professions[]", p));
+
   if (this.props.isLoggedIn) {
-   auth.currentUser
-    .updateProfile({
-     displayName: `${this.state.fname} ${this.state.lname}`,
-    })
-    .then(() => {
-     console.log("profile updated");
-     this.props.updateInfo(auth.currentUser);
-     presistInfo(auth.currentUser, true);
+   axios
+    .post(`${API}updateuser/${this.props.userInfo?.info?.uid}`, fd)
+    .then((response) => {
+     console.log(response.data);
+     this.props.updateInfo(response.data.fb);
+     presistInfo(response.data.fb, true);
      toast.success("Pofile Updated Successfully", {
       position: toast.POSITION.BOTTOM_LEFT,
       theme: "colored",
       transition: Flip,
       hideProgressBar: true,
      });
+     this.setState({
+      prfl_loading: false,
+     });
     });
-
-   setTimeout(() => {
-    this.setState({ prfl_loading: false });
-   }, 500);
-  }
-  if (
-   this.state.provider === "google.com" ||
-   this.state.provider === "facebook.com"
-  ) {
-   auth.currentUser
-    .updateProfile({
-     displayName: `${this.state.fname} ${this.state.lname}`,
-    })
-    .then(() => {
-     console.log("profile face or google updated updated");
-     console.log(auth.currentUser);
-     this.props.updateInfo(auth.currentUser);
-     presistInfo(auth.currentUser, true);
-     this.setState({ prfl_loading: false });
-    });
-   console.log(auth.currentUser);
-   //  this.props.setNav(auth.currentUser);
   } else {
    console.log("not signed in, please sign in and try again");
   }
@@ -232,9 +241,7 @@ class Settings extends Component {
    console.log(this.state.cropped_profile);
   });
  }
- updateEmail = () => {
-  // auth.currentUser.verify);
- };
+
  onProfilePicSubmit = async (e) => {
   e.preventDefault();
   this.setState({ addProfileLoad: true });
@@ -242,47 +249,48 @@ class Settings extends Component {
   const fd = new FormData();
   if (this.state.cropped_profile) {
    fd.append(
-    "img[]",
+    "img",
     await compressImage(this.dataURLtoFile(this.state.cropped_profile, "file"))
    );
    axios
-    .post(`${API}upload/5`, fd)
+    .post(`${API}useravatar/${this.props.userInfo?.info?.uid}`, fd)
     .then((response) => {
-     console.log(response.data.img[response.data.lastIndex].file_url);
-     auth.currentUser
-      .updateProfile({
-       photoURL: response.data.img[response.data.lastIndex].file_url,
-      })
-      .then(() => {
-       //  this.props.setNav(auth.currentUser);
-       this.props.updateInfo(auth.currentUser);
-       presistInfo(auth.currentUser, true);
-       console.log("updated");
-       this.setState({ addProfileLoad: false });
-       this.setState({ profile_modal: false });
-       toast.success("Your Picture Updated Successfully", {
-        position: toast.POSITION.BOTTOM_LEFT,
-        theme: "colored",
-        transition: Flip,
-       });
-      });
+     this.props.updateInfo(response.data.fb);
+     console.log(response.data.fb);
+     console.log(this.props);
+     presistInfo(response.data.fb, true);
+     this.setState({ addProfileLoad: false });
+     this.setState({ profile_modal: false });
+     toast.success("Your Picture Updated Successfully", {
+      position: toast.POSITION.BOTTOM_LEFT,
+      theme: "colored",
+      transition: Flip,
+     });
     })
     .catch((error) => console.log(error));
-   // };
   }
   console.log(fd);
  };
  handleFnameChange = (e) => {
-  this.setState({ fname: e.target.value });
+  this.setState({
+   fname: e.target.value,
+   isChanged:
+    `${e.target.value} ${this.state.lname}` !== this.state.user?.displayName,
+  });
  };
  handleLnameChange = (e) => {
-  this.setState({ lname: e.target.value });
+  this.setState({
+   lname: e.target.value,
+   isChanged:
+    `${this.state.fname} ${e.target.value}` !== this.state.user?.displayName,
+  });
  };
- handlePhoneChange = (e) => {
-  this.setState({ phone: e.target.value });
- };
+
  handleEmailChange = (e) => {
-  this.setState({ email: e.target.value });
+  this.setState({
+   email: e.target.value,
+   isChanged: e.target.value !== this.state.user?.email,
+  });
  };
 
  handlePasswordChange = (e) => {
@@ -296,25 +304,27 @@ class Settings extends Component {
  handleNewPasswordChange = (e) => {
   this.setState({ new_password: e.target.value });
  };
- changePhoneNumber = () => {
-  this.setState({ changing: true });
-  this.setUpRecaptch();
-  const appVerifier = window.recaptchaVerifier;
-  auth
-   .signInWithPhoneNumber(this.props.userInfo.info?.phoneNumber, appVerifier)
-   .then((confirmationResult) => {
-    window.confirmationResult = confirmationResult;
-    this.setState({ confResult: confirmationResult, phoneModal: true });
-    console.log(confirmationResult);
-    this.setState({ changing: false });
-   })
-   .catch((err) => console.log(err));
-  this.setState({ changing: false });
- };
+
  render() {
-  // if (!this.props.isLoggedIn || !auth.currentUser) return <Redirect to="/" />;
+  const { selectedProfessions, isChanged } = this.state;
+
+  const filteredOptions = Proffessions.filter(
+   (o) => !selectedProfessions.includes(o)
+  );
   if (!this.props.isLoggedIn || !this.props.userInfo?.info)
    return <Redirect to="/" />;
+  if (!this.state.fetched)
+   return (
+    <>
+     <Spin
+      size="large"
+      indicator={
+       <LoadingOutlined style={{ fontSize: "36px", color: "#000" }} spin />
+      }
+      style={{ position: "absolute", top: "40%", right: "50%" }}
+     />
+    </>
+   );
   return (
    <>
     <div id="user-settings">
@@ -350,11 +360,11 @@ class Settings extends Component {
         </h6>
         <div className="profile-container">
          {/* {this.props.info?.photoURL ? ( */}
-         {this.props.photoURL ? (
+         {/* {this.props.photoURL || this.state.user?.avatar ? (
           <>
            <img
             // src={this.props.info?.photoURL}
-            src={this.props.photoURL}
+            src={this.props.photoURL ?? this.state.user?.avatar}
             alt={this.props.displayName}
            />
           </>
@@ -362,7 +372,16 @@ class Settings extends Component {
           <>
            <img src={blank} alt={this.props.info?.displayName} />
           </>
-         )}
+         )} */}
+         <img
+          src={
+           this.props?.photoURL ??
+           this.props.info?.photoUrl ??
+           this.state.user?.avatar ??
+           blank
+          }
+          alt=""
+         />
         </div>
         <h2
          onClick={() => {
@@ -400,45 +419,95 @@ class Settings extends Component {
            />
           </Col>
          </Form.Group>
-         {/* <Form.Group as={Row} className=""></Form.Group> */}
-         <Form.Group as={Row} className="">
-          <Col md={12}>
-           <Form.Label>Phone</Form.Label>
-           <Form.Control
-            placeholder="Phone"
-            onChange={this.handlePhoneChange}
-            value={this.state.phone}
-           />
-          </Col>
-          {/* <p>Change</p> */}
-          {!this.props.userInfo.info?.phoneNumber ? (
-           <>
-            <p className="change-label">Add Phone</p>
-           </>
-          ) : (
-           <>
-            {this.state.phone != this.props.userInfo.info?.phoneNumber && (
-             <>
-              <p className="change-label" onClick={this.changePhoneNumber}>
-               Change{" "}
-               {this.state.changing ? (
-                <>
-                 <ClipLoader
-                  style={{ height: "20px" }}
-                  color="#ffffff"
-                  size={15}
-                 />
-                </>
-               ) : (
-                ""
-               )}
-              </p>
-              <div id="recaptch-setting-container"></div>
-             </>
-            )}
-           </>
-          )}
-         </Form.Group>
+         {this.state.is_designer && (
+          <>
+           <Form.Group as={Row}>
+            <Form.Label>Profession</Form.Label>
+            <Col md={12}>
+             <Select
+              size="large"
+              mode="multiple"
+              placeholder="Profession *"
+              showArrow
+              allowClear
+              value={selectedProfessions}
+              onChange={this.handleProfessionChange}
+              style={{ width: "100%" }}
+             >
+              {filteredOptions.map((item) => (
+               <Select.Option key={item} value={item}>
+                {item}
+               </Select.Option>
+              ))}
+             </Select>
+            </Col>
+           </Form.Group>
+           <Form.Group as={Row}>
+            <Col md={6}>
+             <Form.Label>Country</Form.Label>
+             <ReactFlagsSelect
+              selected={this.state.country}
+              selectedSize={17}
+              optionsSize={16}
+              searchable
+              placeholder="Select Country *"
+              onSelect={(code) => {
+               this.setState({
+                country: code,
+                isChanged: code !== this.state.user?.country,
+               });
+              }}
+             />
+            </Col>
+            <Col md={6}>
+             <Form.Label>City</Form.Label>
+             <Form.Control
+              placeholder="City"
+              onChange={(e) =>
+               this.setState({
+                city: e.target.value,
+                isChanged: e.target.value !== this.state.user?.city,
+               })
+              }
+              value={this.state.city}
+             />
+            </Col>
+           </Form.Group>
+           <Form.Group as={Row}>
+            <Col md={12}>
+             <Form.Label>Phone Number</Form.Label>
+             <ConfigProvider
+              locale={en}
+              areaMapper={(area) => {
+               return {
+                ...area,
+                emoji: <span className={`fp ${area.short.toLowerCase()}`} />,
+               };
+              }}
+             >
+              <CountryPhoneInput
+               size="large"
+               placeholder="Phone *"
+               value={{
+                code: this.state.code,
+                phone: this.state.phoneNumber,
+               }}
+               onChange={(e) => {
+                this.setState({
+                 phoneNumber: e.phone,
+                 code: e.code,
+                 isChanged:
+                  e.phone != this.state.user?.phoneNumber ||
+                  e.code != this.state.user?.phoneCode,
+                });
+               }}
+              />
+             </ConfigProvider>
+            </Col>
+           </Form.Group>
+          </>
+         )}
+
          {!this.props.userInfo.info?.email?.includes("+") ? (
           <>
            <Form.Group as={Row}>
@@ -458,29 +527,29 @@ class Settings extends Component {
 
          <Row md={{ span: 12 }}>
           {!this.props.userInfo.info?.email?.includes("+") ? (
-           // this.props.userInfo.info?.providerData[0].providerId !=
-           //  "google.com" ||
-           // this.props.userInfo.info?.providerData[0].providerId !=
-           //  "facebook.com" ?
            <>
-            <Col md={6}>
-             <button
-              href="#"
-              style={{
-               textAlign: "right",
-               textDecoration: "underline",
-               fontWeight: "600",
-               color: "#000",
-               background: "transparent",
-               outline: "none",
-               border: "none",
-              }}
-              // onClick={this.changePasswordOpen}
-              onClick={this.changePasswordOpen}
-             >
-              Change Password
-             </button>
-            </Col>
+            {this.state.providerId === "password" && (
+             <>
+              <Col md={6}>
+               <button
+                href="#"
+                style={{
+                 textAlign: "right",
+                 textDecoration: "underline",
+                 fontWeight: "600",
+                 color: "#000",
+                 background: "transparent",
+                 outline: "none",
+                 border: "none",
+                }}
+                // onClick={this.changePasswordOpen}
+                onClick={this.changePasswordOpen}
+               >
+                Change Password
+               </button>
+              </Col>
+             </>
+            )}
            </>
           ) : (
            <></>
@@ -506,7 +575,7 @@ class Settings extends Component {
           <Col md={3}></Col>
           <Col md={3}></Col>
           <Col md={3} style={{ padding: "0" }}>
-           <Link to="/user">
+           <Link to="/profile">
             <Button
              style={{
               display: "block",
@@ -524,8 +593,7 @@ class Settings extends Component {
            </Link>
           </Col>
           <Col md={3}>
-           {this.state.fname == this.props.displayName?.split(" ")[0] &&
-           this.state.lname == this.props.displayName?.split(" ")[1] ? (
+           {!isChanged ? (
             <>
              <Button
               disabled
@@ -691,17 +759,19 @@ class Settings extends Component {
             </div>
            </Col>
           </Row>
-          <Form.Group as={Row} className="mb-2 px-3">
-           <Col>
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-             placeholder="Type your password"
-             onChange={this.handleDeletePasswordChange}
-             type="password"
-             value={this.state.deletePassword}
-            />
-           </Col>
-          </Form.Group>
+          {this.state.providerId === "password" && (
+           <Form.Group as={Row} className="mb-2 px-3">
+            <Col>
+             <Form.Label>Password</Form.Label>
+             <Form.Control
+              placeholder="Type your password"
+              onChange={this.handleDeletePasswordChange}
+              type="password"
+              value={this.state.deletePassword}
+             />
+            </Col>
+           </Form.Group>
+          )}
           <Button
            variant="danger"
            onClick={this.handleDeleteSubmit}
@@ -812,29 +882,6 @@ class Settings extends Component {
        </Modal>
       </>
      </Container>
-     <Modal
-      id="price-request-modal"
-      className="arch-wide-modal product-modal pics-modal"
-      size="lg"
-      show={this.state.phoneModal}
-      onHide={this.phoneModal_close}
-      aria-labelledby="example-modal-sizes-title-lg"
-     >
-      <Modal.Header closeButton></Modal.Header>
-      <Modal.Body>
-       <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
-        <h6>Enter Code</h6>
-        <VerificationPin
-         type="number"
-         inputsNumber={6}
-         status={this.state.status}
-         title="Your title here"
-         subTitle="Your subtitle here"
-         onFinish={this.handlePhoneFinish}
-        />
-       </div>
-      </Modal.Body>
-     </Modal>
     </div>
    </>
   );
@@ -856,8 +903,8 @@ const mapStateToProps = (state) => {
   userInfo: state.regularUser,
   info: state.regularUser.user,
   displayName: state.regularUser.displayName,
-  photoURL: state.regularUser.photoURL,
+  photoURL: state.regularUser?.photoURL,
+  email: state.regularUser?.email,
  };
 };
-// export default Settings;
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);

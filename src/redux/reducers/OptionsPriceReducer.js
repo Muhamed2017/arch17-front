@@ -1,5 +1,6 @@
 import {
   SET_OPTIONS,
+  SET_PRICES,
   ADD_ROW,
   SET_ROWS,
   ADD_MATERIAL,
@@ -17,7 +18,8 @@ import {
 const defaultState = {
   covers:[],
   rows:[],
-  optionsStored:false
+  optionsStored:false,
+
 };
 
 export default function userReducer(state = defaultState, action) {
@@ -52,20 +54,23 @@ export default function userReducer(state = defaultState, action) {
     case SET_ROWS:
         return {
           rows:action.payload
-        }
+      }
+
     case SET_OPTIONS:
           return {
             covers:[...state.covers, 
             action.payload
             ]
-          }
+      }
+
     case ADD_MATERIAL:
       state.rows[action.row_index]["material"] = action.data;
       state.rows[action.row_index]["ver"] += 1;
       return {
         rows: state.rows,
       };
-    case ADD_SIZE:
+    
+      case ADD_SIZE:
       state.rows[action.row_index]["size"] = action.data;
       state.rows[action.row_index]["ver"] += 1;
       return {
@@ -102,23 +107,23 @@ export default function userReducer(state = defaultState, action) {
         rows: state.rows,
       };
     case ADD_PRODUCT_PICTURES:
-      console.log(action.data)
       state.rows[action.row_index]["productPictures"] = action.data;
       state.rows[action.row_index]["ver"] += 1;
       return {
         rows: state.rows,
       };
-      case OPTIONS_STORED:
+    case OPTIONS_STORED:
         return {
           ...state,
           optionsStored:true
-        }
+    }
     case ADD_OPTION_ID:
       state.rows[action.row_index]["option_id"] = action.data.option_id;
       state.rows[action.row_index]["ver"] += 1;
       return {
         rows: state.rows,
-      };
+      }
+
     default:
       return state;
   }

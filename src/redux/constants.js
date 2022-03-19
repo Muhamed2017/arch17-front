@@ -50,10 +50,13 @@ export const GO_TO_TAB_STEP= 'GO_TO_TAB_STEP'
 // product page 
 export const OPEN_PRODUCT_REQUEST_MODAL = 'OPEN_PRODUCT_REQUEST_MODAL'
 export const CLOSE_PRODUCT_REQUEST_MODAL = 'CLOSE_PRODUCT_REQUEST_MODAL'
-
 // sharl
 export const ADD_ROW = "ADD_ROW"
 export const SET_OPTIONS = "SET_OPTIONS"
+export const SET_PRICES = "SET_PRICES"
+export const RESET_PRICES = "RESET_PRICES"
+export const SET_MODAL_CODES = "SET_MODAL_CODES"
+export const RESET_MODAL_CODES = "RESET_MODAL_CODES"
 export const SET_ROWS = "SET_ROW"
 export const ADD_MATERIAL = "ADD_MATERIAL"
 export const ADD_SIZE = "ADD_SIZE"
@@ -66,10 +69,10 @@ export const DELETE_ROW = "DELETE_ROW"
 export const ADD_PRODUCT_PICTURES = "ADD_PRODUCT_PICTURES"
 export const OPTIONS_STORED ="OPTIONS_STORED"
 
-
+// search
+export const SET_SEARCH_TERM = 'SET_SEARCH_TERM'
 
 
 
 // entities and pages loaded data
-
 export const GET_BRAND_DATA = 'GET_BRAND_DATA'

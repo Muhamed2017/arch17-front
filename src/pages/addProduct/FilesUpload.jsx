@@ -12,90 +12,191 @@ import {
 } from "../../redux/actions/addProductActions";
 import axios from "axios";
 import ClipLoader from "react-spinners/ClipLoader";
-import { Row, Col, Input, Button as AntButton } from "antd";
+import { Row, Col, Form, Input, Button as AntButton } from "antd";
 import { API } from "./../../utitlties";
 import { SiGoogledrive, SiBaidu } from "react-icons/si";
 import { GrOnedrive } from "react-icons/gr";
 import { AiOutlineDropbox } from "react-icons/ai";
-import { Select } from "antd";
+import { Select, Space, Typography, Divider } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
+let index = 0;
 
 class FilesUpload extends Component {
- _2dcadFiles = [];
- _3dFiles = [];
  _pdfFiles = [];
- _2d_files_submit = [];
- _pdf_files_submit = [];
- _3d_files_submit = [];
 
  constructor(props) {
   super(props);
   this.state = {
    loaded: 0,
-   _2dcadFiles: [],
-   _3dFiles: [],
    _pdfFiles: [],
-   _2d_files_submit: [],
-   _pdf_files_submit: [],
-   _3d_files_submit: [],
    published: false,
    loading: false,
    skip_modal: false,
    files_modal: false,
    edit_file_modal: false,
-   file_name: "",
-   file_type: "",
-   file_software: "",
-   ggldrive: null,
-   onedrive: null,
-   drpbox: null,
-   baidu: null,
+   pdfModal: false,
+   file_name: null,
+   file_type: null,
+   file_software: null,
+   ggldrive: "",
+   onedrive: "",
+   drpbox: "",
+   baidu: "",
    file_links: [],
    file_adding: false,
-   files: this.props.files ?? [],
+   pdf_files:
+    this.props?.files?.filter((file) => {
+     return file.file_type === "PDF";
+    }) ?? [],
+   files:
+    this.props?.files?.filter((file) => {
+     return file.file_type !== "PDF";
+    }) ?? [],
    file: {},
    file_id: null,
+   name: "",
+   //  items: ["Item 1", "Item 2"],
+   modal_codes: this.props.modal_codes,
   };
  }
+ onNameChange = (e) => {
+  this.setState({
+   name: e.target.value,
+  });
+ };
+ addItem = (e) => {
+  e.preventDefault();
+  this.setState({
+   modal_codes: [
+    ...this.state.modal_codes,
+    this.state.name || `New item ${index++}`,
+   ],
+   name: "",
+  });
+ };
  handleEditFile = () => {
   this.setState({
    edit_file_modal: false,
   });
  };
- handleAddFile = () => {
-  this.setState({ file_adding: true });
-  const { ggldrive, onedrive, drpbox, baidu } = this.state;
-  this.setState({ file_links: [ggldrive, onedrive, drpbox, baidu] }, () => {
+ openPdfModal = () => {
+  this.setState(
+   {
+    ggldrive: "",
+    onedrive: "",
+    baidu: "",
+    drpbox: "",
+   },
+   () => {
+    this.setState({
+     pdfModal: true,
+    });
+   }
+  );
+ };
+ //  dataSource: dataSource.filter((item) => item.key !== key),
+
+ handleAddFile = (kind) => {
+  if (kind === "PDF") {
+   console.log(this.state);
    const fd = new FormData();
    fd.append("file_name", this.state.file_name);
-   fd.append("file_type", this.state.file_type);
-   fd.append("software", this.state.file_software);
+   fd.append("file_type", "PDF");
+   fd.append("software", "PDF VIEWR");
    fd.append("ggldrive", this.state.ggldrive);
-   fd.append("dropbox", this.state.dropbox);
+   fd.append("dropbox", this.state.drpbox);
    fd.append("onedrive", this.state.onedrive);
    fd.append("baidu", this.state.baidu);
    axios
     .post(`${API}addfile/${this.props.id}`, fd)
     .then((response) => {
-     this.setState({ files: [...this.state.files, response.data.file] }, () => {
-      console.log(this.state.files);
-      this.setState({ file_adding: false, files_modal: false });
-     });
+     this.setState(
+      {
+       pdf_files: [...this.state.pdf_files, response.data.file],
+       ggldrive: "",
+       drpbox: "",
+       baidu: "",
+       onedrive: "",
+      },
+      () => {
+       this.setState({ file_adding: false, pdfModal: false });
+      }
+     );
     })
     .catch((err) => {
      console.log(err);
      this.setState({ file_adding: false });
     });
-  });
-  console.log(this.state.files);
+  } else {
+   this.setState({ file_adding: true });
+   console.log(this.state);
+   const fd = new FormData();
+   fd.append("file_name", this.state.file_name);
+   fd.append("file_type", this.state.file_type);
+   fd.append("software", this.state.file_software);
+   fd.append("ggldrive", this.state.ggldrive);
+   fd.append("dropbox", this.state.drpbox);
+   fd.append("onedrive", this.state.onedrive);
+   fd.append("baidu", this.state.baidu);
+   axios
+    .post(`${API}addfile/${this.props.id}`, fd)
+    .then((response) => {
+     console.log(response);
+
+     this.setState(
+      {
+       files: [...this.state.files, response.data.file],
+       ggldrive: "",
+       drpbox: "",
+       baidu: "",
+       onedrive: "",
+      },
+      () => {
+       console.log(this.state.files);
+       this.setState({ file_adding: false, files_modal: false });
+      }
+     );
+    })
+    .catch((err) => {
+     console.log(err);
+     this.setState({ file_adding: false });
+    });
+   //  });
+  }
+
+  console.log(this.state);
+ };
+ deleteFile = (id, type) => {
+  const { files, pdf_files } = this.state;
+  axios
+   .post(`${API}product/delete/file/${id}`)
+   .then((response) => {
+    console.log(response);
+    if (type === "PDF") {
+     this.setState({
+      pdf_files: pdf_files.filter((file) => {
+       return file.id !== id;
+      }),
+     });
+    } else {
+     this.setState({
+      files: files.filter((file) => {
+       return file.id !== id;
+      }),
+     });
+    }
+   })
+   .catch((error) => {
+    console.log(error);
+   });
  };
  handleChange = (value) => {
   console.log(`selected ${value}`);
  };
  skip = () => {
   this.props.dispatchNextStep();
-  // this.setState({ published: true });
  };
 
  fd = new FormData();
@@ -104,23 +205,16 @@ class FilesUpload extends Component {
   this.setState({ skip_modal: false });
  };
  handleNextStep = (e) => {
-  if (this.state?._pdfFiles?.length < 1) {
+  if (
+   this.state.files.length + this.state.pdf_files?.length < 1 &&
+   !this.props.edit
+  ) {
    this.setState({ skip_modal: true });
    return;
   } else {
    this.setState({ loading: true });
-
    setTimeout(() => {
-    //  axios
-    //   .post(`${API}files/${this.props.id}`, this.fd, {
-    //    headers: {
-    //     "Content-Type": "multipart/form-data",
-    //    },
-    //   })
-    //   .then((response) => {
     this.props.dispatchNextStep();
-    // console.log(response);
-    //   });
    }, 2000);
   }
  };
@@ -176,23 +270,27 @@ class FilesUpload extends Component {
              onClick={() =>
               this.setState(
                {
-                file_name: file.file_name,
-                file_type: file.file_type,
-                file_software: file.software,
-                onedrive: file.onedrive,
-                ggldrive: file.ggldrive,
-                drpbox: file.dropbox,
-                baidu: file.baidu,
+                file_name: file?.file_name,
+                file_type: file?.file_type,
+                file_software: file?.software,
+                onedrive: file?.onedrive,
+                ggldrive: file?.ggldrive,
+                drpbox: file?.dropbox,
+                baidu: file?.baidu,
                },
                () => {
                 this.setState({ edit_file_modal: true });
+                console.log(this.state);
                }
               )
              }
             >
-             {file.file_type}
+             {file?.file_type}
             </div>
-            <p>{file.file_name}</p>
+            <p>{file?.file_name}</p>
+            <button onClick={() => this.deleteFile(file.id, "CAD|3D")}>
+             Delete
+            </button>
            </div>
           </>
          );
@@ -200,7 +298,19 @@ class FilesUpload extends Component {
         <div className="upload-action">
          <div
           className="upload-icon"
-          onClick={() => this.setState({ files_modal: true })}
+          onClick={() =>
+           this.setState(
+            {
+             ggldrive: "",
+             onedrive: "",
+             baidu: "",
+             drpbox: "",
+            },
+            () => {
+             this.setState({ files_modal: true });
+            }
+           )
+          }
          >
           <FaCloudUploadAlt />
          </div>
@@ -213,17 +323,49 @@ class FilesUpload extends Component {
         <h6>Upload PDF and Catalogue files</h6>
        </div>
        <div id="" className="upload-btns">
-        <div className="uploaded-files">
-         {this.state._pdfFiles?.map((file, index) => {
-          return (
-           <div style={{ background: "#fff" }}>
-            <FaFilePdf style={{ color: "red", fontSize: "4.5rem" }} />
+        {this.state.pdf_files.map((file, indx) => {
+         return (
+          <>
+           <div className="upload-action">
+            <div
+             className="upload-icon"
+             style={{
+              borderRadius: "0",
+              border: "1px dashed #b7b7b7",
+              fontWeight: "900",
+              color: "#000",
+             }}
+             onClick={() =>
+              this.setState(
+               {
+                file_name: file?.file_name,
+                file_type: file?.file_type,
+                file_software: file?.software,
+                onedrive: file?.onedrive,
+                ggldrive: file?.ggldrive,
+                drpbox: file?.dropbox,
+                baidu: file?.baidu,
+               },
+               () => {
+                this.setState({ edit_file_modal: true });
+                console.log(this.state);
+               }
+              )
+             }
+            >
+             {file?.file_type}
+            </div>
+            <p>{file?.file_name}</p>
+            <button onClick={() => this.deleteFile(file?.id, "PDF")}>
+             Delete
+            </button>
            </div>
-          );
-         })}
-        </div>
+          </>
+         );
+        })}
+
         <div className="upload-action">
-         <div className="upload-icon">
+         <div className="upload-icon" onClick={this.openPdfModal}>
           <FaCloudUploadAlt />
          </div>
          <p>Upload Files</p>
@@ -231,6 +373,7 @@ class FilesUpload extends Component {
        </div>
       </div>
      </div>
+     {/* add 3d | cad file modal */}
      <Modal
       id="price-request-modal"
       className="upload-file-modal"
@@ -242,7 +385,6 @@ class FilesUpload extends Component {
       }}
       aria-labelledby="example-modal-sizes-title-lg"
      >
-      {/* <Modal.Header closeButton></Modal.Header> */}
       <Modal.Body>
        <div className="modal-wrapper" style={{ padding: "10px", margin: "" }}>
         <p style={{ width: "100%", fontWeight: "600", fontFamily: "Roboto" }}>
@@ -251,11 +393,39 @@ class FilesUpload extends Component {
 
         <Row gutter={16} className="my-4">
          <Col className="gutter-row" span={12}>
-          <Input
-           placeholder="Input Modal Code"
-           onChange={(e) => this.setState({ file_name: e.target.value })}
+          <Select
+           style={{ width: 300 }}
            size="large"
-          />
+           onSelect={(e) => this.setState({ file_name: e })}
+           placeholder="Select or Add Modal Code"
+           getPopupContainer={(triggerNode) => {
+            return triggerNode.parentNode;
+           }}
+           dropdownRender={(menu) => (
+            <>
+             {menu}
+             <Divider style={{ margin: "8px 0" }} />
+             <Space align="center" style={{ padding: "0 8px 4px" }}>
+              <Input
+               placeholder="Please enter item"
+               value={this.state.name}
+               size="large"
+               onChange={this.onNameChange}
+              />
+              <Typography.Link
+               onClick={this.addItem}
+               style={{ whiteSpace: "nowrap" }}
+              >
+               <PlusOutlined /> Add New
+              </Typography.Link>
+             </Space>
+            </>
+           )}
+          >
+           {this.state.modal_codes?.map((item) => (
+            <Option key={item}>{item}</Option>
+           ))}
+          </Select>
          </Col>
          <Col className="gutter-row" span={6}>
           <Select
@@ -312,7 +482,11 @@ class FilesUpload extends Component {
           <Input
            placeholder=""
            size="large"
-           onChange={(e) => this.setState({ onedrive: e.target.value })}
+           value={this.state.onedrive}
+           onChange={(e) => {
+            this.setState({ onedrive: e.target.value });
+            console.log(e.target.value);
+           }}
           />
          </Col>
         </Row>
@@ -333,7 +507,11 @@ class FilesUpload extends Component {
           <Input
            placeholder=""
            size="large"
-           onChange={(e) => this.setState({ ggldrive: e.target.value })}
+           value={this.state.ggldrive}
+           onChange={(e) => {
+            this.setState({ ggldrive: e.target.value });
+            console.log(e.target.value);
+           }}
           />
          </Col>
         </Row>
@@ -353,6 +531,7 @@ class FilesUpload extends Component {
           <Input
            placeholder=""
            size="large"
+           value={this.state.drpbox}
            onChange={(e) => this.setState({ drpbox: e.target.value })}
           />
          </Col>
@@ -373,6 +552,7 @@ class FilesUpload extends Component {
           <Input
            placeholder=""
            size="large"
+           value={this.state.baidu}
            onChange={(e) => this.setState({ baidu: e.target.value })}
           />
          </Col>
@@ -382,7 +562,21 @@ class FilesUpload extends Component {
          style={{ width: "100%", textAlign: "right" }}
         >
          <Button
-          onClick={this.handleAddFile}
+          onClick={() => this.handleAddFile("CAD|3D")}
+          // onClick={() =>
+          //  this.setState(
+          //   {
+          //    file_adding: true,
+          //    ggldrive: "",
+          //    drpbox: "",
+          //    baidu: "",
+          //    onedrive: "",
+          //   },
+          //   () => {
+          //    this.handleAddFile("CAD|3D");
+          //   }
+          //  )
+          // }
           style={{ width: "60px", padding: "8px 5px", textAlign: "center" }}
          >
           Add
@@ -409,10 +603,17 @@ class FilesUpload extends Component {
       onHide={this.skip_modal_close}
       aria-labelledby="example-modal-sizes-title-lg"
      >
-      <Modal.Header closeButton></Modal.Header>
+      {/* <Modal.Header closeButton></Modal.Header> */}
       <Modal.Body>
        <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
-        <h6>Skip Modal</h6>
+        <h6
+         style={{
+          padding: "15px 5px 35px",
+          fontSize: "1.2rem",
+         }}
+        >
+         Skip without adding product description?
+        </h6>
         <Button
          variant="danger"
          type="submit"
@@ -434,6 +635,7 @@ class FilesUpload extends Component {
        </div>
       </Modal.Body>
      </Modal>
+     {/* edit 3d or cad file modal  */}
      <Modal
       id="price-request-modal"
       className="upload-file-modal"
@@ -445,7 +647,6 @@ class FilesUpload extends Component {
       }}
       aria-labelledby="example-modal-sizes-title-lg"
      >
-      {/* <Modal.Header closeButton></Modal.Header> */}
       <Modal.Body>
        <div className="modal-wrapper" style={{ padding: "10px", margin: "" }}>
         <p style={{ width: "100%", fontWeight: "600", fontFamily: "Roboto" }}>
@@ -454,12 +655,46 @@ class FilesUpload extends Component {
 
         <Row gutter={16} className="my-4">
          <Col className="gutter-row" span={12}>
-          <Input
+          {/* <Input
            placeholder="Input Modal Code"
            onChange={(e) => this.setState({ file_name: e.target.value })}
            size="large"
            value={this.state.file_name}
-          />
+          /> */}
+          <Select
+           style={{ width: 300 }}
+           size="large"
+           onSelect={(e) => this.setState({ file_name: e })}
+           placeholder="Select or Add Modal Code"
+           value={this.state.file_type}
+           getPopupContainer={(triggerNode) => {
+            return triggerNode.parentNode;
+           }}
+           dropdownRender={(menu) => (
+            <>
+             {menu}
+             <Divider style={{ margin: "8px 0" }} />
+             <Space align="center" style={{ padding: "0 8px 4px" }}>
+              <Input
+               placeholder="Please enter item"
+               value={this.state.name}
+               size="large"
+               onChange={this.onNameChange}
+              />
+              <Typography.Link
+               onClick={this.addItem}
+               style={{ whiteSpace: "nowrap" }}
+              >
+               <PlusOutlined /> Add New
+              </Typography.Link>
+             </Space>
+            </>
+           )}
+          >
+           {this.state.modal_codes?.map((item) => (
+            <Option key={item}>{item}</Option>
+           ))}
+          </Select>
          </Col>
          <Col className="gutter-row" span={6}>
           <Select
@@ -496,6 +731,182 @@ class FilesUpload extends Component {
            <Option value="3DS">3DS</Option>
           </Select>
          </Col>
+        </Row>
+        <p style={{ width: "100%", fontWeight: "500", fontFamily: "Roboto" }}>
+         Add File Download Link
+        </p>
+
+        <Row gutter={16} className="mb-3 mt-3">
+         <Col className="gutter-row" span={7}>
+          <AntButton
+           type="primary"
+           className="drivebtn"
+           icon={<SiGoogledrive />}
+           style={{ width: "100%" }}
+           size="large"
+          >
+           OneDrive
+          </AntButton>
+         </Col>
+         <Col className="gutter-row" span={17} style={{ background: "" }}>
+          <Input
+           value={this.state.onedrive}
+           placeholder=""
+           size="large"
+           onChange={(e) => this.setState({ onedrive: e.target.value })}
+          />
+         </Col>
+        </Row>
+
+        <Row gutter={16} className="mb-3">
+         <Col className="gutter-row" span={7}>
+          <AntButton
+           type="primary"
+           style={{ width: "100%" }}
+           size="large"
+           className="drivebtn"
+           icon={<SiGoogledrive />}
+          >
+           Google Drive
+          </AntButton>
+         </Col>
+         <Col className="gutter-row" span={17} style={{ background: "" }}>
+          <Input
+           value={this.state.ggldrive}
+           size="large"
+           onChange={(e) => this.setState({ ggldrive: e.target.value })}
+          />
+         </Col>
+        </Row>
+        <Row gutter={16} className="mb-3">
+         <Col className="gutter-row" span={7}>
+          <AntButton
+           type="primary"
+           style={{ width: "100%" }}
+           icon={<AiOutlineDropbox />}
+           size="large"
+           className="drivebtn"
+          >
+           Dropbox
+          </AntButton>
+         </Col>
+         <Col className="gutter-row" span={17}>
+          <Input
+           placeholder=""
+           value={this.state.drpbox}
+           size="large"
+           onChange={(e) => this.setState({ drpbox: e.target.value })}
+          />
+         </Col>
+        </Row>
+        <Row gutter={16} className="mb-3">
+         <Col className="gutter-row" span={7}>
+          <AntButton
+           type="primary"
+           style={{ width: "100%" }}
+           icon={<SiBaidu />}
+           size="large"
+           className="drivebtn"
+          >
+           Baidu Drive
+          </AntButton>
+         </Col>
+         <Col className="gutter-row" span={17} style={{ background: "" }}>
+          <Input
+           placeholder=""
+           value={this.state.baidu}
+           size="large"
+           onChange={(e) => this.setState({ baidu: e.target.value })}
+          />
+         </Col>
+        </Row>
+        <div
+         className="add-file-btn"
+         style={{ width: "100%", textAlign: "right" }}
+        >
+         <Button
+          onClick={this.handleEditFile}
+          style={{ width: "60px", padding: "8px 5px", textAlign: "center" }}
+         >
+          Edit
+         </Button>
+        </div>
+       </div>
+      </Modal.Body>
+     </Modal>
+
+     {/* add pdf file modal */}
+     <Modal
+      id="price-request-modal"
+      className="upload-file-modal"
+      size="lg"
+      centered
+      show={this.state.pdfModal}
+      onHide={() => {
+       this.setState({ pdfModal: false });
+      }}
+      aria-labelledby="example-modal-sizes-title-lg"
+     >
+      {/* <Modal.Header closeButton></Modal.Header> */}
+      <Modal.Body>
+       <div className="modal-wrapper" style={{ padding: "10px", margin: "" }}>
+        <p style={{ width: "100%", fontWeight: "600", fontFamily: "Roboto" }}>
+         Add Product Files
+        </p>
+
+        <Row gutter={16} className="my-4">
+         <Col className="gutter-row" span={12}>
+          <Select
+           style={{ width: 300 }}
+           size="large"
+           onSelect={(e) => this.setState({ file_name: e })}
+           placeholder="Select or Add Modal Code"
+           getPopupContainer={(triggerNode) => {
+            return triggerNode.parentNode;
+           }}
+           dropdownRender={(menu) => (
+            <>
+             {menu}
+             <Divider style={{ margin: "8px 0" }} />
+             <Space align="center" style={{ padding: "0 8px 4px" }}>
+              <Input
+               placeholder="Please enter item"
+               value={this.state.name}
+               size="large"
+               onChange={this.onNameChange}
+              />
+              <Typography.Link
+               onClick={this.addItem}
+               style={{ whiteSpace: "nowrap" }}
+              >
+               <PlusOutlined /> Add New
+              </Typography.Link>
+             </Space>
+            </>
+           )}
+          >
+           {this.state.modal_codes?.map((item) => (
+            <Option key={item}>{item}</Option>
+           ))}
+          </Select>
+         </Col>
+         <Col className="gutter-row" span={12}>
+          <Select
+           getPopupContainer={(triggerNode) => {
+            return triggerNode.parentNode;
+           }}
+           dropdownClassName="antd-select-dropdown"
+           size="large"
+           placeholder="File Type"
+           style={{ width: "100%" }}
+           onSelect={(e) => this.setState({ file_type: e })}
+           value="PDF"
+           disabled
+          >
+           <Option value="PDF">PDF</Option>
+          </Select>
+         </Col>
+         {/* <Col className="gutter-row" span={6}></Col> */}
         </Row>
         <p style={{ width: "100%", fontWeight: "500", fontFamily: "Roboto" }}>
          Add File Download Link
@@ -591,10 +1002,21 @@ class FilesUpload extends Component {
          style={{ width: "100%", textAlign: "right" }}
         >
          <Button
-          onClick={this.handleEditFile}
+          // onClick={this.handleEditFile}
+          onClick={() => this.handleAddFile("PDF")}
           style={{ width: "60px", padding: "8px 5px", textAlign: "center" }}
          >
-          Edit
+          Add
+          {this.state.file_adding && (
+           <>
+            <ClipLoader
+             style={{ height: "20px", padding: "2px 5px" }}
+             color="#ffffff"
+             loading={this.state.file_adding}
+             size={18}
+            />
+           </>
+          )}
          </Button>
         </div>
        </div>
@@ -605,10 +1027,12 @@ class FilesUpload extends Component {
   );
  }
 }
-// }
 const mapDispatchToProps = (dispatch) => ({
  dispatchDescriptionStep: (data, id) => dispatch(productDescription(data, id)),
  dispatchNextStep: () => dispatch(nextTab()),
 });
-const mapStateToProps = (state) => ({ OptionsPrice: state.optionsPrice });
+const mapStateToProps = (state) => ({
+ OptionsPrice: state.optionsPrice,
+ modal_codes: state.addProduct.modal_codes,
+});
 export default connect(mapStateToProps, mapDispatchToProps)(FilesUpload);

@@ -2,16 +2,14 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { updateInfo } from "../redux/actions/authActions";
 import { Container, Form, Row, Col } from "react-bootstrap";
-import { Form as FormAnt, Input, Select, Divider } from "antd";
+import { Form as FormAnt, Input, Select } from "antd";
 import HashLoader from "react-spinners/HashLoader";
 import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
 import en from "world_countries_lists/data/en/world.json";
 import axios from "axios";
 import * as utility from "../utitlties";
 import ReactFlagsSelect from "react-flags-select";
-// import Redirect
 import { Redirect } from "react-router-dom";
-import { PlusOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
@@ -23,6 +21,7 @@ class CreateBrandFinish extends Component {
    email: "",
    phone: "",
    country: "",
+   phone_code: "",
    product_types: [],
    type: "",
    brand_created: false,
@@ -41,13 +40,22 @@ class CreateBrandFinish extends Component {
  createBrand = () => {
   const fd = new FormData();
   console.log(this.state.product_types);
-  const { name, email, phone, country, type, product_types } = this.state;
+  const {
+   name,
+   email,
+   phone,
+   country,
+   type,
+   product_types,
+   phone_code,
+  } = this.state;
   fd.append("uid", this.props.userInfo.uid);
   fd.append("name", name);
   fd.append("email", email);
   fd.append("phone", phone);
   fd.append("country", country);
   fd.append("type", type);
+  fd.append("phone_code", phone_code);
   fd.append("product_types[]", product_types);
   axios
    .post(`${utility.API}brand`, fd)
@@ -136,7 +144,7 @@ class CreateBrandFinish extends Component {
             </Select>
            </Col>
           </Row>
-          <Row>
+          {/* <Row>
            <Col>
             <Select
              listHeight={350}
@@ -163,7 +171,7 @@ class CreateBrandFinish extends Component {
              })}
             </Select>
            </Col>
-          </Row>
+          </Row> */}
          </Form.Group>
          <Form.Group>
           <Row>
@@ -196,7 +204,11 @@ class CreateBrandFinish extends Component {
          <Form.Group>
           <ConfigProvider locale={en}>
            <CountryPhoneInput
-            onChange={(e) => this.setState({ phone: `+${e.code}${e.phone}` })}
+            onChange={(e) =>
+             this.setState({ phone: e.phone, phone_code: e.code }, () =>
+              console.log(this.state)
+             )
+            }
            />
           </ConfigProvider>
          </Form.Group>

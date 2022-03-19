@@ -3,7 +3,10 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 
 import { connect, useDispatch } from "react-redux";
-import { productIdentity } from "../../redux/actions/addProductActions";
+import {
+ productIdentity,
+ gotoTap,
+} from "../../redux/actions/addProductActions";
 import { useParams } from "react-router-dom";
 import ReactNotification, { store } from "react-notifications-component";
 import "react-notifications-component/dist/theme.css";
@@ -68,7 +71,7 @@ const EditProductWrapper = (props) => {
   axios
    .get(`${API}product/${params.id}`)
    .then((response) => {
-    setRows(response.data.product.options);
+    setRows(response.data?.product?.options);
     console.log(response.data.product);
     setLoaded(true);
    })
@@ -85,44 +88,92 @@ const EditProductWrapper = (props) => {
   <React.Fragment>
    <ReactNotification />
    <div id="add-product-wrapper">
-    <Tabs
-     OnSelect={(index) => setTabIndex(index)}
-     // forceRenderTabPanel={true}
-    >
+    <Tabs OnSelect={(index) => setTabIndex(index)}>
      <div id="tabs-wrapper">
       <TabList>
-       <Tab>1. Product Idntity </Tab>
-       <Tab>2. Options & Price</Tab>
-       <Tab>3. Product Description</Tab>
-       <Tab>4. Files Uploads</Tab>
-       <Tab>5. Product Cover</Tab>
+       <Tab
+        onClick={() => {
+         props.dispatchMoveToTab(0);
+        }}
+       >
+        1. Product Idntity{" "}
+       </Tab>
+       <Tab
+        onClick={() => {
+         props.dispatchMoveToTab(1);
+        }}
+       >
+        2. Options & Price
+       </Tab>
+       <Tab
+        onClick={() => {
+         props.dispatchMoveToTab(2);
+        }}
+       >
+        3. Product Description
+       </Tab>
+       <Tab
+        onClick={() => {
+         props.dispatchMoveToTab(3);
+        }}
+       >
+        4. Files Uploads
+       </Tab>
+       <Tab
+        onClick={() => {
+         //  props.dispatchMoveToTab(4);
+        }}
+       >
+        5. Product Cover
+       </Tab>
       </TabList>
      </div>
      <TabPanel forceRender>
       <EditIdentity
        id={params.id}
-       data={props.location.state.product.identity[0]}
+       data={props?.location?.state?.product?.identity[0]}
+       collections={props?.location?.state?.product?.store?.collections}
+       store={props?.location?.state?.product?.store}
+       category={props?.location?.state?.category}
+       //  selected_collections={props.location.state?.product?.collections}
+       selected_collections={props.location.state?.selected_collections ?? []}
       />
      </TabPanel>
      <TabPanel forceRender>
       <TableStep
-       id={props.location.state.product.id}
-       rows={props.location.state.product.options}
+       id={props?.location?.state?.product?.id}
+       rows={props?.location?.state?.product?.options}
        edit={true}
       />
      </TabPanel>
      <TabPanel forceRender>
       <ProductFiles
-       id={props.location.state.product?.id}
+       //  id={props?.location?.state?.product?.id}
+       id={params.id}
        edit={true}
-       description={props.location.state.product?.description[0]}
+       galleries={props?.location?.state?.product?.gallery}
+       description={props?.location?.state?.product?.description[0]}
       />
      </TabPanel>
      <TabPanel forceRender={false}>
-      <FilesUpload id={params.id} files={props.location.state.product?.files} />
+      <FilesUpload
+       id={params.id}
+       files={props?.location?.state?.product?.files}
+      />
      </TabPanel>
      <TabPanel forceRender={false}>
-      <Preview id={params.id} covers={props.location.state.product?.options} />
+      <Preview
+       id={params.id}
+       initialDisplayName={props?.location?.state?.product?.identity[0].name}
+       initialPreviewCover={
+        props?.location.state?.product?.identity[0].preview_cover
+       }
+       initialDisplayPrice={
+        props?.location.state?.product?.identity[0].preview_price
+       }
+       covers={props?.location?.state?.product?.options}
+       edit={true}
+      />
      </TabPanel>
     </Tabs>
    </div>
@@ -163,12 +214,13 @@ const mapDispatchToProps = (dispatch) => ({
    )
   ),
 
- //  dispatchGotoStep: s() => dispatch(gotoTap(step)),
+ dispatchMoveToTab: (step) => dispatch(gotoTap(step)),
 });
 
 const mapStateToProps = (state) => {
  return {
   tabIndex: state.addProduct.tabIndex,
+  identity: state.addProduct.identity,
   // tabIndex: 1,
  };
 };

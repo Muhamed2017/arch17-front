@@ -161,6 +161,7 @@ class IdentityStep extends Component {
   });
 
  componentDidMount() {
+  console.log("Step");
   if (this.state.kind?.value === "Chairs") {
    this.setState({ furniture: productClass.chair });
   } else if (this.state.kind?.value === "Beds") {

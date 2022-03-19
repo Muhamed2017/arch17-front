@@ -12,6 +12,8 @@ class EditKind extends Component {
    product: null,
    product_id: this.props.match.params.id,
    kind_edited: false,
+   selected_collections: [],
+   category: "",
   };
  }
  componentDidMount() {
@@ -19,6 +21,19 @@ class EditKind extends Component {
    .get(`${API}product/${this.state.product_id}`)
    .then((res) => {
     console.log(res);
+    this.setState({
+     product: res.data.product,
+     category: res.data.product.kind,
+    });
+    const { collections } = res.data.product;
+    collections.map((col) => {
+     return this.setState({
+      selected_collections: [
+       ...this.state.selected_collections,
+       { label: col.collection_name, value: col.collection_name },
+      ],
+     });
+    });
     this.setState({ product: res.data.product });
    })
    .catch((err) => {
@@ -38,9 +53,7 @@ class EditKind extends Component {
        <div className="product-kinds">
         <a
          href="/identity"
-         // onClick={this.addProduct}
          style={{
-          //   backgroundColor: this.state.loading ? "#898989" : "",
           backgroundColor: this.state.product.kind === "Furniture" ? "red" : "",
           color: this.state.product.kind === "Furniture" ? "#fff" : "",
           position: "relative",
@@ -62,49 +75,113 @@ class EditKind extends Component {
           </>
          ) : (
           <>
-           Furniture <span>✓</span>
+           Furniture
+           {this.state.product.kind === "Furniture" ? <span>✓</span> : ""}
           </>
          )}
-         {/* <BiChevronRight /> */}
         </a>
-        <a href="#" onClick={(e) => e.preventDefault}>
-         Lighting
+        <a
+         href="#1"
+         onClick={(e) => e.preventDefault}
+         style={{
+          backgroundColor: this.state.product.kind === "Lighting" ? "red" : "",
+          color: this.state.product.kind === "Lighting" ? "#fff" : "",
+          position: "relative",
+         }}
+        >
+         Lighting {this.state.product.kind === "Lighting" ? <span>✓</span> : ""}
          <span>
           <BiChevronRight />
          </span>
         </a>
-        <a href="#">
-         Decore
+
+        <a
+         href="#1"
+         onClick={(e) => e.preventDefault}
+         style={{
+          backgroundColor: this.state.product.kind === "Decore" ? "red" : "",
+          color: this.state.product.kind === "Decore" ? "#fff" : "",
+          position: "relative",
+         }}
+        >
+         Decore {this.state.product.kind === "Decore" ? <span>✓</span> : ""}
          <span>
           <BiChevronRight />
          </span>
         </a>
-        <a href="#">
-         Bathroom
+
+        <a
+         href="#1"
+         onClick={(e) => e.preventDefault}
+         style={{
+          backgroundColor: this.state.product.kind === "Bathroom" ? "red" : "",
+          color: this.state.product.kind === "Bathroom" ? "#fff" : "",
+          position: "relative",
+         }}
+        >
+         Bathroom {this.state.product.kind === "Bathroom" ? <span>✓</span> : ""}
          <span>
           <BiChevronRight />
          </span>
         </a>
-        <a href="#">
-         Wellness
+
+        <a
+         href="#1"
+         onClick={(e) => e.preventDefault}
+         style={{
+          backgroundColor: this.state.product.kind === "Wellness" ? "red" : "",
+          color: this.state.product.kind === "Wellness" ? "#fff" : "",
+          position: "relative",
+         }}
+        >
+         Wellness {this.state.product.kind === "Wellness" ? <span>✓</span> : ""}
          <span>
           <BiChevronRight />
          </span>
         </a>
-        <a href="#">
-         Kitchen
+
+        <a
+         href="#1"
+         onClick={(e) => e.preventDefault}
+         style={{
+          backgroundColor: this.state.product.kind === "Kitchen" ? "red" : "",
+          color: this.state.product.kind === "Kitchen" ? "#fff" : "",
+          position: "relative",
+         }}
+        >
+         Kitchen {this.state.product.kind === "Kitchen" ? <span>✓</span> : ""}
          <span>
           <BiChevronRight />
          </span>
         </a>
-        <a href="#">
-         Finishes Materials
+
+        <a
+         href="#1"
+         onClick={(e) => e.preventDefault}
+         style={{
+          backgroundColor: this.state.product.kind === "Finishes" ? "red" : "",
+          color: this.state.product.kind === "Finishes" ? "#fff" : "",
+          position: "relative",
+         }}
+        >
+         Finishes {this.state.product.kind === "Finishes" ? <span>✓</span> : ""}
          <span>
           <BiChevronRight />
          </span>
         </a>
-        <a href="#">
-         Construction Products
+
+        <a
+         href="#1"
+         onClick={(e) => e.preventDefault}
+         style={{
+          backgroundColor:
+           this.state.product.kind === "Construction" ? "red" : "",
+          color: this.state.product.kind === "Construction" ? "#fff" : "",
+          position: "relative",
+         }}
+        >
+         Construction
+         {this.state.product.kind === "Construction" ? <span>✓</span> : ""}
          <span>
           <BiChevronRight />
          </span>
@@ -115,6 +192,8 @@ class EditKind extends Component {
          pathname: `/edit/${this.state.product.id}`,
          state: {
           product: this.state.product,
+          selected_collections: this.state.selected_collections ?? [],
+          category: this.state.category,
          },
         }}
         style={{

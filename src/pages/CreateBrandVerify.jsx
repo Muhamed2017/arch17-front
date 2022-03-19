@@ -5,6 +5,8 @@ import { connect } from "react-redux";
 import HashLoader from "react-spinners/HashLoader";
 import axios from "axios";
 import { API } from "./../utitlties";
+// import { auth } from "./../firebase";
+
 import {
  createBrandBrandNext,
  presistInfo,
@@ -41,6 +43,7 @@ class CreateBrandVerify extends Component {
     this.setState({ validated: true });
     this.props.brandNext();
     console.log(response);
+    // auth.
     // this.props.updateInfo(response.data.user);
     presistInfo(response.data.user, true);
    })

@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 
-import Identity from "./Identity";
+// import Identity from "./Identity";
 import EditIdentity from "../editProduct/EditIdentity";
-import OptionsPrice from "./OptionsPrice";
+// import OptionsPrice from "./OptionsPrice";
 import ProductFiles from "./ProductFiles";
 import { connect } from "react-redux";
-import { productIdentity } from "../../redux/actions/addProductActions";
+import {
+ productIdentity,
+ gotoTap,
+} from "../../redux/actions/addProductActions";
 import FilesUpload from "./FilesUpload";
 import { useParams } from "react-router-dom";
 import ReactNotification, { store } from "react-notifications-component";
@@ -22,6 +25,8 @@ const AddProductWrapper = (props) => {
  //  const [tabIndex, setTabIndex] = useState(0);
  const [rows, setRows] = useState([]);
  const [loaded, setLoaded] = useState(false);
+ const [collections, setCollections] = useState([]);
+ const [store, setStore] = useState([]);
  const params = useParams();
 
  useEffect(() => {
@@ -34,6 +39,8 @@ const AddProductWrapper = (props) => {
    .then((response) => {
     setRows(response.data.product.options);
     console.log(response.data.product);
+    setCollections(response.data.product.store.collections);
+    setStore(response.data.product.store);
     setLoaded(true);
     // return;
    })
@@ -45,55 +52,50 @@ const AddProductWrapper = (props) => {
  });
 
  Tabs.defaultProps = {
-  selectedIndex: tabIndex,
+  selectedIndex: props.tabIndex,
  };
  return (
   <React.Fragment>
    <ReactNotification />
    <div id="add-product-wrapper">
-    <Tabs
-     OnSelect={(index) => setTabIndex(index)}
-     // forceRenderTabPanel={true}
-    >
+    <Tabs>
      <div id="tabs-wrapper">
       <TabList>
-       <Tab onClick={() => setTabIndex(0)}>1. Product Idntity </Tab>
+       <Tab onClick={() => props.dispatchMoveToTab(0)}>1. Product Idntity </Tab>
        <Tab
         onClick={() => {
-         setTabIndex(1);
+         if (props.identity) {
+          props.dispatchMoveToTab(1);
+         }
         }}
        >
         2. Options & Price
        </Tab>
-       <Tab onClick={() => setTabIndex(2)}>3. Product Description</Tab>
-       <Tab onClick={() => setTabIndex(3)}>4. Files Uploads</Tab>
-       <Tab onClick={() => setTabIndex(4)}>5. Product Cover</Tab>
+       <Tab
+        onClick={() => {
+         props.dispatchMoveToTab(2);
+        }}
+       >
+        3. Product Description
+       </Tab>
+       <Tab
+        onClick={() => {
+         props.dispatchMoveToTab(3);
+        }}
+       >
+        4. Files Uploads
+       </Tab>
+       <Tab onClick={() => props.dispatchMoveToTab(4)}>5. Product Cover</Tab>
       </TabList>
      </div>
      <TabPanel forceRender>
       <EditIdentity
        id={params.id}
        data={{ params }}
-       //  collections={props.location.state.collections}
-       collections={[
-        {
-         collection_name: "Collection One",
-         id: 5,
-        },
-
-        {
-         collection_name: "Collection Two",
-         id: 15,
-        },
-        {
-         collection_name: "Collection Three",
-         id: 25,
-        },
-        {
-         collection_name: "Collection Four",
-         id: 35,
-        },
-       ]}
+       store={store}
+       collections={props.location.state?.collections}
+       selected_collections={props.location.state?.selected_collections}
+       category={props.location.state?.category}
       />
      </TabPanel>
      <TabPanel forceRender id="options-step">
@@ -146,12 +148,13 @@ const mapDispatchToProps = (dispatch) => ({
     id
    )
   ),
- //  dispatchGotoStep: s() => dispatch(gotoTap(step)),
+ dispatchMoveToTab: (tab) => dispatch(gotoTap(tab)),
 });
 
 const mapStateToProps = (state) => {
  return {
   tabIndex: state.addProduct.tabIndex,
+  identity: state.addProduct.identity,
   // tabIndex: 1,
  };
 };

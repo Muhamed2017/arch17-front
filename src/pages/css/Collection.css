@@ -1,0 +1,157 @@
+a:hover{
+    color: #000 !important;
+}
+a{
+    color: #000 !important;
+}
+#collection-page{
+    background-color: #fff;
+}
+.head-container{
+    background-color: #f8f8f8;
+    min-height: 180px;
+}
+.head-container p{
+    display: block;
+    max-width: 1350px;
+    margin: auto;
+    padding: 28px  0 0 30px;
+    font-size: 1.7rem;
+    font-weight: 600;
+    font-family: "Roboto";
+}
+.head-container p.creator, p.col-name{
+    font-size: 1.2rem;
+    padding: 12px  0 0 30px;
+    font-weight: 100;
+    color: #000;
+}
+.col-name span{
+    font-weight: 600;
+    cursor: pointer;
+}
+.store-card * {
+         color: #fff !important;
+}
+.store-card {
+    padding: 10px;
+}
+
+.store-card h2{
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+.store-card img{
+    width:100%;
+    border-radius: 50%;
+}
+.store-card svg {
+display: inline-block;
+margin-right: 10px;
+fill: #7c7c7c;
+
+}
+.store-card button, .store-card a.btn{
+    display: block;
+    width: 100%;
+    background: #3e4042;
+    height: 35px;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: .75rem;
+    font-family: "Roboto";
+}
+.store-card button {
+    color:#fff;
+}
+
+.store-card p {
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+.store-card p > *{
+    font-size: 1rem;
+}
+.store-card p svg{
+    font-size: 1.3rem;
+}
+
+.head-container p.creator span{
+    font-weight: 600;
+    position: relative;
+    font-size: 1.3rem;
+
+}
+.head-container p.creator span:hover{
+text-decoration: underline;
+cursor: pointer;
+    font-size: 1.3rem;
+    color: #000;
+
+}
+.products{
+     max-width: 1350px;
+    margin: auto;
+    padding: 30px;
+
+}
+.nflow{
+    background: red !important;
+    font-weight: 500 !important;
+}
+
+.nlogo{
+    border-radius: 50%;
+    border: 3px solid #ffff;
+    color: #fff;
+    padding-top: 6px;
+    font-size: 5rem;
+    width: 100%;
+    font-weight: 600;
+    height: 100%;
+    text-align: center;
+}
+
+.indicator{
+    width: 100%;
+    font-size: 1.5rem;
+    font-weight: 500;
+    text-align: center;
+}
+.collection-text{
+    font-size: .9rem;
+    color: #3f3f3f;
+}
+.delete-p{
+    color: red;
+    font-size: .85rem !important;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-left: 0 !important;
+    width: 150px;
+}
+.share-row{
+    width: 100%;
+    display: flex;
+    min-height: 50px;
+    align-items:center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 5px 0;
+    font-size: 1rem;
+    border-bottom: 1px solid #dddddd;
+}
+.share-row * {
+    display: inline-block;
+    margin-right: 10px;
+}
+.share-row .ant-btn .anticon{
+    margin: auto;
+}
+.share-btn{
+    width: 50px;
+    cursor: pointer;
+    font-size: 1.2rem !important;
+    margin-left: 0 !important;
+    width: 100px;
+}

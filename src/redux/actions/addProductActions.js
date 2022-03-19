@@ -53,7 +53,12 @@ const closeProductRequest=()=>{
         type:actions.CLOSE_PRODUCT_REQUEST_MODAL
     }
 }
-
+const gotoTabStep=(step)=>{
+    return {
+        type:actions.GO_TO_TAB_STEP,
+        payload:step
+    }
+}
 const addOptions = (options)=>{
 
     return {
@@ -61,6 +66,37 @@ const addOptions = (options)=>{
         payload:options
     }
 }
+
+const addPrices = (prices)=>{
+
+    return {
+        type:actions.SET_PRICES,
+        payload:prices
+    }
+}
+const resetPrices = ()=>{
+
+    return {
+        type:actions.RESET_PRICES,
+    }
+}
+
+
+const addModalCodes = (codes)=>{
+
+    return {
+        type:actions.SET_MODAL_CODES,
+        payload:codes
+    }
+}
+const resetModalCodes = ()=>{
+
+    return {
+        type:actions.RESET_MODAL_CODES,
+    }
+}
+
+
 export const productIdentity = (name,
     category,
     type,
@@ -71,6 +107,11 @@ export const productIdentity = (name,
     shape,
     kind,
     style,
+      lighting_types,
+  installations,
+  colorTempratures,
+  bulbTypes,
+  applied_on,
     places_tags,
     is_outdoor,
     is_for_kids,
@@ -88,6 +129,11 @@ export const productIdentity = (name,
             shape,
             kind,
             style,
+              lighting_types,
+  installations,
+  colorTempratures,
+  bulbTypes,
+  applied_on,
             places_tags,
             is_outdoor,
             is_for_kids,
@@ -96,6 +142,7 @@ export const productIdentity = (name,
         .then(response=>{
             dispatch(addProductIdentitySuccess(response.data.identity))
             console.log(response.data.identity);
+            dispatch(gotoTap(1))
         })
         .catch(error=>{
             console.log(error)
@@ -132,6 +179,28 @@ export const productOptions = (options) => {
 
   
 }
+export const addProductPrices = (price)=>{
+      return (dispatch)=>{
+        dispatch(addPrices(price))
+    }
+}
+export const resetProductPrices =()=>{
+     return (dispatch)=>{
+        dispatch(resetPrices())
+    }
+}
+export const addProductModalCodes = (code)=>{
+      return (dispatch)=>{
+        dispatch(addModalCodes(code))
+    }
+}
+export const resetProductModalCodes =()=>{
+     return (dispatch)=>{
+        dispatch(resetModalCodes())
+    }
+}
+
+
 
 export const nextTab = () => {
     return (dispatch)=>{
@@ -155,8 +224,21 @@ export const closeProductRequestAction=()=>{
  }   
 }
 
-// export const gotoTap = (step) => {
-//     return (dispatch) => {
-//         dispatch(gotoTabStep(step))
-//     }
-// }
+export const gotoTap = (step) => {
+    return (dispatch) => {
+        dispatch(gotoTabStep(step))
+    }
+}
+
+const setSearchTermActionCreator = (term) => {
+    return {
+        type: actions.SET_SEARCH_TERM,
+        payload:term
+    }
+}
+
+export const setSearchTerm= (term)=>{
+  return (dispatch) => {
+        dispatch(setSearchTermActionCreator(term))
+    }   
+}

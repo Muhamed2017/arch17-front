@@ -11,12 +11,12 @@ import {
  Collapse,
  Menu,
  Dropdown,
- //  Form,
- //  Space,
  Modal as AntModal,
 } from "antd";
-
+// import { FilePdfFilled, FilePptFilled } from "@ant-design/icons";
 import pptxgen from "pptxgenjs";
+import { FaFilePdf } from "react-icons/fa";
+import { RiFilePpt2Fill } from "react-icons/ri";
 
 import {
  FacebookShareButton,
@@ -32,17 +32,15 @@ import {
  TumblrIcon,
  EmailIcon,
 } from "react-share";
-import MetaTags from "react-meta-tags";
+// import MetaTags from "react-meta-tags";
 
 import { SiGoogledrive, SiBaidu } from "react-icons/si";
-import { GrOnedrive } from "react-icons/gr";
 import { BiLinkExternal } from "react-icons/bi";
 import { AiOutlineDropbox } from "react-icons/ai";
 import Modal from "react-bootstrap/Modal";
+import { FiPhoneCall } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebookF } from "react-icons/fa";
-import Accordion from "react-bootstrap/Accordion";
-import Card from "react-bootstrap/Card";
 import "flag-icon-css/css/flag-icon.min.css";
 import { BsPlus, BsDownload, BsFillCaretDownFill } from "react-icons/bs";
 import { IoLayersSharp, IoPricetags } from "react-icons/io5";
@@ -52,17 +50,7 @@ import { AiOutlineShoppingCart, AiOutlineWhatsApp } from "react-icons/ai";
 import Carousel from "react-elastic-carousel";
 import Item from "../components/SliderComponents/slider";
 import { Flex, Square } from "../components/SliderComponents/slider";
-import collection3 from "../../src/collection-3.jpg";
-import collection1 from "../../src/collection-1.png";
-import collection4 from "../../src/h-1.png";
-import collection5 from "../../src/h-2.png";
-import slide1 from "../../src/slide1.jpg";
-import slide3 from "../../src/slide3.jpg";
-import sm1 from "../../src/sm1.jpg";
-import sm2 from "../../src/sm2.jpg";
-import sm4 from "../../src/sm4.jpg";
-import collection2 from "../../src/collection-2.jpg";
-// import wechaticon from "../../src/wechaticon.png";
+
 import axios from "axios";
 import { GiCube } from "react-icons/gi";
 import { convertFromRaw, EditorState } from "draft-js";
@@ -70,13 +58,9 @@ import { Editor } from "react-draft-wysiwyg";
 import HashLoader from "react-spinners/HashLoader";
 import "photoswipe/dist/photoswipe.css";
 import "photoswipe/dist/default-skin/default-skin.css";
-
 import { Gallery, Item as SwipItem } from "react-photoswipe-gallery";
-
-// import { Image, Transformation } from "cloudinary-react";
 import ImageGallery from "react-image-gallery";
 import "antd/dist/antd.css";
-
 import "react-image-gallery/styles/css/image-gallery.css";
 import {
  vanillaSigninEmailPassword,
@@ -88,6 +72,8 @@ import { API } from "./../utitlties";
 import { connect } from "react-redux";
 import qrcode from "../../src/qrcode.jpeg";
 import PriceRequestModal from "./../components/Modals/PriceRequestModal";
+import SaveToCollection from "./../components/Modals/SaveToCollection";
+
 import {
  closeProductRequestAction,
  openProductRequestAction,
@@ -103,15 +89,17 @@ const text = `
 class Product extends Component {
  constructor(props) {
   super(props);
-  // let shareUrl = `https://www.arch17test.live/product/${this.props.match.params.id}`;
   this.state = {
    modals: {
     price_request: false,
    },
    signinPassword: "",
    signingEmail: "",
+   acive_index: 0,
+   collections: [],
    signupEmail: "",
    signupPassword: "",
+   ppt_downloaing: false,
    signupFname: "",
    signupLname: "",
    authFace: "",
@@ -123,7 +111,6 @@ class Product extends Component {
    product_desc_overview: null,
    product_desc_mat: null,
    product_desc_size_: null,
-   //  shareUrl: `https://www.arch17test.live/product/${this.props.match.params.id}`,
    loading: true,
    signingIn: false,
    product_id: this.props.match.params.id,
@@ -131,22 +118,8 @@ class Product extends Component {
    plainOverview: false,
    plainSize: false,
    slider: false,
-
    request_modal_type: "",
-   slides: [
-    {
-     original: "https://picsum.photos/id/1018/1000/600/",
-     thumbnail: "https://picsum.photos/id/1018/250/150/",
-    },
-    {
-     original: "https://picsum.photos/id/1015/1000/600/",
-     thumbnail: "https://picsum.photos/id/1015/250/150/",
-    },
-    {
-     original: "https://picsum.photos/id/1019/1000/600/",
-     thumbnail: "https://picsum.photos/id/1019/250/150/",
-    },
-   ],
+   pdf_files: [],
    sliderImgs: [],
    files_modal: false,
    wechatqr_modal: false,
@@ -156,13 +129,12 @@ class Product extends Component {
    mainHeight: 0,
    mainWidth: 0,
    thumbsDims: [],
+   overviewDescExist: false,
+   materialDescExist: false,
+   sizeDescExist: false,
   };
  }
- success = () => {
-  AntModal.success({
-   content: "some messages...some messages...",
-  });
- };
+
  loadThumbsForPpt = (imgs) => {
   imgs.map((img) => {
    img.src = img.original;
@@ -182,14 +154,30 @@ class Product extends Component {
   };
  };
  shareUrl = `https://www.arch17test.live/product/155`;
+ product_id = this.props.match.params.id;
  shareMedia = this.state?.sliderImgs[0].original;
  shareQoute = this.state?.product.identity[0].name;
+ downloadMenu = (
+  <Menu style={{ padding: "0" }}>
+   <Menu.Item className="mb-1" key="0" onClick={() => this.generatePPT()}>
+    <RiFilePpt2Fill style={{ fontSize: "1.5rem", color: "rgb(250,15,0)" }} />
+   </Menu.Item>
+   <Menu.Item key="1">
+    <a
+     href={`${API}test-pdf/${this.product_id}`}
+     target="_blank"
+     rel="noreferrer"
+    >
+     <FaFilePdf style={{ fontSize: "1.5rem", color: "rgb(202,67,37)" }} />
+    </a>
+   </Menu.Item>
+  </Menu>
+ );
  menu = (
   <Menu>
    <Menu.Item key="1">
     <FacebookShareButton
      url="https://www.arch17test.live/product/155"
-     //  url="https://www.archiproducts.com/en/products/molteni-c/paul-corner-sofa_246892"
      hashtag={"#Arch17"}
     >
      <FacebookIcon size={25} />
@@ -236,6 +224,7 @@ class Product extends Component {
    </Menu.Item>
   </Menu>
  );
+
  flipToRegiseterFace = () => {
   this.setState({ authFace: "register-face" });
   console.log(this.state.authFace);
@@ -261,7 +250,6 @@ class Product extends Component {
  };
  handleRegularSignup = (fname, lname, email, password) => {
   this.props.dispatchRegularSignup(fname, lname, email, password, "regular");
-  // console.log(props.isLoggedIn);
  };
 
  callback = (key) => {
@@ -340,7 +328,6 @@ class Product extends Component {
      },
     },
     {
-     //  text: "01",
      text: "",
      options: { valign: "center", align: "left", fontFace: "Arial" },
     },
@@ -354,7 +341,6 @@ class Product extends Component {
      },
     },
     {
-     //  text: "Reseption Desk",
      text: this.state.product?.identity[0]?.kind,
      options: { valign: "center", align: "left", fontFace: "Arial" },
     },
@@ -378,7 +364,6 @@ class Product extends Component {
      options: { valign: "middle", align: "left", bold: true },
     },
     {
-     //  text: "LUNA SOFA (2 Seats)",
      text: this.state?.product?.identity[0].name,
      options: { valign: "middle", align: "left" },
     },
@@ -532,9 +517,7 @@ class Product extends Component {
   this.state.sliderImgs.map((item, index) => {
    slide.addImage({
     path: item.original,
-    x: 0.2 + index * 0.9,
-    // y: 2.7 + (5.2 * this.state.mainHeight) / this.state.mainWidth,
-    // h: 2.5,
+    x: 0.25 + index * 0.9,
     w: 0.8,
     y: 6.5,
     h: 0.5,
@@ -556,7 +539,7 @@ class Product extends Component {
    h: 0.254,
   });
   slide.addText("Email 制 作: sales@arch17.co", {
-   x: "2.5%",
+   x: 0.23,
    y: "95.2%",
    w: 2.7,
    h: 0.3,
@@ -568,7 +551,7 @@ class Product extends Component {
    bold: true,
   });
   slide.addText("Phone 制 作: 008618575999560", {
-   x: 3,
+   x: 2.7,
    y: "95.2%",
    w: 3.5,
    h: 0.3,
@@ -583,51 +566,54 @@ class Product extends Component {
    x: "95%",
    y: "95.2%",
    fontSize: 10.5,
-   //  color: "000",
    bold: true,
   };
 
-  // slide.addTable(rows, { x: 0.5, y: 1.0, w: 9.0, color: "363636" });
-
-  pptx.writeFile({ fileName: "Arch17_Cat.pptx" }).then((fileName) => {
-   console.log(`created file: ${fileName}`);
-  });
+  pptx
+   .writeFile({ fileName: "Arch17_Cat.pptx" })
+   .then((fileName) => {
+    console.log(`created file: ${fileName}`);
+   })
+   .catch((err) => {
+    console.log(`Error: ${err} happened`);
+   });
  };
 
  async componentDidMount() {
-  console.log(this.state.activeOption);
-  console.log(this.state.plainOverview);
-  console.log(this.state.product_desc_overview);
   this.loadThumbsForPpt(this.state.sliderImgs);
-  console.log(this.props.isLoggedIn);
   await axios
    .get(`${API}product/${this.state.product_id}`)
    .then((products) => {
     this.setState({ product: products.data.product });
     this.setState({ options: products.data.product.options });
-    this.setState({ files: products.data.product.files });
+    this.setState({
+     //  files: products.data.product.files,
+     files: products.data.product.files.filter((f) => {
+      return f.file_type !== "PDF";
+     }),
+     pdf_files: products.data.product.files.filter((f) => {
+      return f.file_type === "PDF";
+     }),
+    });
+    this.setState({ collections: products.data.collections });
     this.setState({ galleries: products.data.product.gallery });
     this.setState({ activeOption: products.data.product.options[0] });
     console.log(products.data.product.options[0].covers);
+
     products.data.product.options[0].covers?.map((cover, index) => {
      if (cover.src) {
-      this.setState(
-       {
-        sliderImgs: [
-         ...this.state.sliderImgs,
-         {
-          original: cover.src,
-          thumbnail: cover.src,
-          thumbnailClass: "custom-thumb",
-          thumbnailWidth: "50",
-          thumbnailHeight: "50",
-         },
-        ],
-       },
-       () => {
-        console.log(this.state.sliderImgs);
-       }
-      );
+      this.setState({
+       sliderImgs: [
+        ...this.state.sliderImgs,
+        {
+         original: cover.src,
+         thumbnail: cover.src,
+         thumbnailClass: "custom-thumb",
+         thumbnailWidth: "50",
+         thumbnailHeight: "50",
+        },
+       ],
+      });
      }
     });
     this.loadImage(products.data.product.options[0].covers[0].src);
@@ -652,7 +638,9 @@ class Product extends Component {
       ),
       plainOverview:
        JSON.parse(products.data.product.description[0].overview_content)
-        .blocks[0].text.length > 0 ||
+        .blocks[0].text?.length > 0 ||
+       JSON.parse(products.data.product.description[0].overview_content).blocks
+        ?.length > 1 ||
        JSON.parse(products.data.product.description[0].overview_content)
         .entityMap,
       product_desc_mat: EditorState.createWithContent(
@@ -663,27 +651,61 @@ class Product extends Component {
       plain_desc_content:
        JSON.parse(products.data.product.description[0].mat_desc_content)
         .blocks[0].text.length > 0 ||
+       JSON.parse(products.data.product.description[0].mat_desc_content).blocks
+        ?.length > 1 ||
        JSON.parse(products.data.product.description[0].mat_desc_content)
         .entityMap,
       plainSize:
        JSON.parse(products.data.product.description[0].size_content).blocks[0]
         .text.length > 0 ||
+       JSON.parse(products.data.product.description[0].size_content).blocks
+        ?.length > 1 ||
        JSON.parse(products.data.product.description[0].size_content).entityMap,
      });
     }
 
     console.log(products);
     this.setState({ loading: false });
+    if (this.props.location.state?.request_price) {
+     this.request_open("Price Info");
+    }
    })
    .catch((error) => console.log(error));
  }
 
  updateOption = (index) => {
-  console.log(this.state.activeOption);
-  this.setState({ activeOption: this.state.options[index] });
+  console.log(this.state);
+  this.setState({
+   activeOption: this.state.options[index],
+   acive_index: index,
+  });
+  let acviteCovers = [];
+  this.state.options[index].covers.map((cover) => {
+   if (cover.src) {
+    acviteCovers.push({
+     original: cover.src,
+     thumbnail: cover.src,
+     thumbnailClass: "custom-thumb",
+     thumbnailWidth: "50",
+     thumbnailHeight: "50",
+    });
+   }
+  });
+  this.setState({
+   sliderImgs: acviteCovers,
+  });
   console.log(this.state.activeOption.cover);
  };
 
+ saveToCollection = () => {
+  if (!this.props.isLoggedIn) {
+   this.setState({ authModal: true });
+  } else {
+   this.setState({
+    save_to_collection_modal: true,
+   });
+  }
+ };
  request_open = (type) => {
   this.setState(
    {
@@ -703,19 +725,9 @@ class Product extends Component {
   if (!loading) {
    return (
     <React.Fragment>
-     <MetaTags>
-      <title>Arch17 | {this.state.product.identity[0].name}</title>
-      {/* <meta name="description" content={this.state.product.identity[0].name} /> */}
-      <meta name="description" content="Arch17 Furniture Platform" />
-      <meta property="og:title" content={this.state.product.identity[0].name} />
-      <meta
-       property="og:image"
-       content="https://res.cloudinary.com/azharuniversity/image/upload/v1639859531/ewhbtrqgav8xxoobzbyo.jpg"
-      />
-     </MetaTags>
-     <div id="product-page" className="bg-white">
+     <div id="product-page" className="bg-white py-2">
       <Container fluid>
-       <Row className="justify-content-md-center p-md-5">
+       <Row className="justify-content-md-center">
         <Col md={{ span: 8 }} className="p-0">
          <div id="swiper" style={{ position: "relative" }}>
           {this.state.slider && (
@@ -761,25 +773,12 @@ class Product extends Component {
              {this.state.activeOption?.covers?.map((item, index) => {
               return (
                item.src !== "" &&
-               item.src != null && (
+               item.src !== null && (
                 <Item key={index}>
-                 {/* <img
-               className="product-slider-img"
-               src={item}
-               alt="option cover"
-               draggable="false"
-              /> */}
                  <div
                   className="item-background"
                   style={{ backgroundImage: `url(${item.src})` }}
-                 >
-                  {/* <img
-                className="product-slider-img"
-                src={item}
-                alt="option cover"
-                draggable="false"
-               /> */}
-                 </div>
+                 ></div>
                 </Item>
                )
               );
@@ -791,691 +790,534 @@ class Product extends Component {
            <>
             <ImageGallery
              showPlayButton={false}
+             full
              items={this.state.sliderImgs}
             />
            </>
           )}
          </div>
-         {false && (
-          <>
-           <Accordion className="p-4 product-page-accordian">
-            {this.state.plainOverview ? (
-             <>
-              <Card>
-               <Accordion.Toggle as={Card.Header} eventKey="0">
-                Overview
-                <span className="accordion-icon">
-                 <BsPlus />
-                </span>
-               </Accordion.Toggle>
-               <Accordion.Collapse eventKey="0">
-                <Card.Body>
-                 <div className="overview-text">
-                  {this.state.product_desc_overview && (
-                   <>
-                    <p>
-                     <Editor
-                      editorState={this.state.product_desc_overview}
-                      wrapperClassName="rich-editor demo-wrapper"
-                      editorClassName="demo-editor"
-                      readOnly
-                      toolbar={{
-                       options: [],
-                      }}
-                     />
-                    </p>
-                   </>
-                  )}
-                 </div>
-                </Card.Body>
-               </Accordion.Collapse>
-              </Card>
-             </>
-            ) : (
-             ""
-            )}
-            <Card>
-             {this.state.plain_desc_content ? (
-              <>
-               <Accordion.Toggle as={Card.Header} eventKey="1">
-                Description
-                <span className="accordion-icon">
-                 <BsPlus />
-                </span>
-               </Accordion.Toggle>
-               <Accordion.Collapse eventKey="1">
-                <Card.Body>
-                 {this.state.product_desc_mat && (
-                  <>
-                   <p>
-                    <Editor
-                     editorState={this.state.product_desc_mat}
-                     wrapperClassName="rich-editor demo-wrapper"
-                     editorClassName="demo-editor"
-                     readOnly
-                     toolbar={{
-                      options: [],
-                     }}
-                    />
-                   </p>
-                  </>
-                 )}
-                </Card.Body>
-               </Accordion.Collapse>
-              </>
-             ) : (
-              ""
-             )}
-            </Card>
-            {this.state.plainSize ? (
-             <>
-              <Card>
-               <Accordion.Toggle as={Card.Header} eventKey="5">
-                Dimensions
-                <span className="accordion-icon">
-                 <BsPlus />
-                </span>
-               </Accordion.Toggle>
-               <Accordion.Collapse eventKey="5">
-                <Card.Body>
-                 size descriopin html
-                 {this.state.product_desc_size && (
-                  <>
-                   <p>
-                    <Editor
-                     editorState={this.state.product_desc_size}
-                     wrapperClassName="rich-editor demo-wrapper"
-                     editorClassName="demo-editor"
-                     readOnly
-                     toolbar={{
-                      options: [],
-                     }}
-                    />
-                   </p>
-                  </>
-                 )}
-                </Card.Body>
-               </Accordion.Collapse>
-              </Card>
-             </>
-            ) : (
-             ""
-            )}
-            {this.state.galleries?.length > 0 ? (
-             <>
-              <Card>
-               <Accordion.Toggle as={Card.Header} eventKey="12">
-                Galleries
-                <span className="accordion-icon">
-                 <BsPlus />
-                </span>
-               </Accordion.Toggle>
-               <Accordion.Collapse eventKey="12">
-                <Card.Body>
-                 <div className="product-tags-boxs galleries-box">
-                  {this.state.product.gallery?.map((g, index) => {
-                   return (
-                    <div
-                     key={index}
-                     style={{
-                      background: "#fff",
-                      backgroundImage: `url(${g.desc_gallery_files})`,
-                      backgroundPosition: "center",
-                      backgroundSize: "contain",
-                      backgroundRepeat: "no-repeat",
-                     }}
-                    >
-                     {/* <img src={g.desc_gallery_files} alt="" /> */}
-                    </div>
-                   );
-                  })}
-                 </div>
-                </Card.Body>
-               </Accordion.Collapse>
-              </Card>
-             </>
-            ) : (
-             ""
-            )}
-            <Card>
-             <Accordion.Toggle as={Card.Header} eventKey="2">
-              Product Can be used at
-              <span className="accordion-icon">
-               <BsPlus />
-              </span>
-             </Accordion.Toggle>
-             <Accordion.Collapse eventKey="2">
-              <Card.Body>
-               <div className="product-tags-boxs">
-                {this.state.product.identity[0].places_tags?.map(
-                 (tag, index) => {
-                  return <div key={index}>{tag}</div>;
-                 }
-                )}
-               </div>
-              </Card.Body>
-             </Accordion.Collapse>
-            </Card>
-            <Card>
-             <Accordion.Toggle as={Card.Header} eventKey="3">
-              Product Downloadable Files
-              <span className="accordion-icon">
-               <BsPlus />
-              </span>
-             </Accordion.Toggle>
-             <Accordion.Collapse eventKey="3">
-              <Card.Body>
-               {this.props.isLoggedIn && (
-                <>
-                 {this.state.files.map((file, index) => {
-                  return (
-                   <>
-                    <button
-                     className="product-boxs"
-                     onClick={() => this.openFileModal(file)}
-                    >
-                     <div className="file-box">{file.file_type}</div>
-                     <p>{file.file_name}</p>
-                     <span
-                      className="link-bold"
-                      style={{
-                       fontSize: ".75rem",
-                       marginLeft: "-13px",
-                      }}
-                     >
-                      {file.software}
-                     </span>
-                    </button>
-                   </>
-                  );
-                 })}
-                </>
-               )}
-               {!this.props.isLoggedIn && (
-                <>
-                 {this.state.files.map((file, index) => {
-                  return (
-                   <>
-                    <button
-                     className="product-boxs"
-                     onClick={this.openAuthenticationModal}
-                    >
-                     <div className="file-box">{file.file_type}</div>
-                     <p>{file.file_name}</p>
-                     <span
-                      className="link-bold"
-                      style={{
-                       fontSize: ".75rem",
-                       marginLeft: "-13px",
-                      }}
-                     >
-                      {file.software}
-                     </span>
-                    </button>
-                   </>
-                  );
-                 })}
-                </>
-               )}
-              </Card.Body>
-             </Accordion.Collapse>
-            </Card>
-            <Card>
-             <Accordion.Toggle as={Card.Header} eventKey="9">
-              Similar Products by grado
-              <span className="accordion-icon">
-               <BsPlus />
-              </span>
-             </Accordion.Toggle>
-             <Accordion.Collapse eventKey="9">
-              <Card.Body>
-               <div className="similar-products">
-                <div className="inner-body">
-                 <div className="product-box">
-                  <div className="product-img">
-                   <img src={sm1} alt="" />
-                  </div>
-                  <h5 className="product-store">Kelly Wearstler</h5>
-                  <p className="product-name">ENZO Meeting Room Table</p>
-                  <div className="product-price">
-                   <span>¥ 1395.00</span>
-                  </div>
-                 </div>
-                 <div className="product-box">
-                  <div className="product-img">
-                   <img src={sm2} alt="" />
-                  </div>
-                  <h5 className="product-store">Kelly Wearstler</h5>
-                  <p className="product-name">ENZO Meeting Room Table</p>
-                  <div className="product-price">
-                   {/* <span>¥ 1395.00</span> */}
-                  </div>
-                 </div>
-                 <div className="product-box">
-                  <div className="product-img">
-                   <img src={slide3} alt="" />
-                  </div>
-                  <h5 className="product-store">Kelly Wearstler</h5>
-                  <p className="product-name">ENZO Meeting Room Table</p>
-                  <div className="product-price">
-                   <span>¥ 1395.00</span>
-                  </div>
-                 </div>
-                 <div className="product-box">
-                  <div className="product-img">
-                   <img src={sm4} alt="" />
-                  </div>
-                  <h5 className="product-store">Kelly Wearstler</h5>
-                  <p className="product-name">ENZO Meeting Room Table</p>
-                  <div className="product-price">
-                   <span>¥ 1395.00</span>
-                  </div>
-                 </div>
-                </div>
-               </div>
-              </Card.Body>
-             </Accordion.Collapse>
-            </Card>
-            <Card>
-             <Accordion.Toggle as={Card.Header} eventKey="6">
-              Collection{" "}
-              <span className="accordion-icon">
-               <BsPlus />
-              </span>
-             </Accordion.Toggle>
-             <Accordion.Collapse eventKey="6">
-              <Card.Body>
-               <div className="store-collection product-tabs">
-                <Container fluid>
-                 <Row md={{ span: 12 }}>
-                  <Col lg={4} sm={6} xs={12} className="collection-col">
-                   <div className="collection-box">
-                    <div
-                     className="rect rect-0"
-                     style={{ backgroundImage: `url(${collection1})` }}
-                    ></div>
-                    <div
-                     className="rect rect-1"
-                     style={{ backgroundImage: `url(${collection2})` }}
-                    ></div>
-                    <div
-                     className="rect rect-2"
-                     style={{ backgroundImage: `url(${collection3})` }}
-                    ></div>
-                   </div>
-                   <div className="collection-text">
-                    <h5>Modern</h5>
-                    <p>NO Products</p>
-                   </div>
-                  </Col>
-                  <Col lg={4} sm={6} xs={12} className="collection-col">
-                   <div className="collection-box">
-                    <div
-                     className="rect rect-0"
-                     style={{ backgroundImage: `url(${collection5})` }}
-                    ></div>
-                    <div
-                     className="rect rect-1"
-                     style={{ backgroundImage: `url(${collection4})` }}
-                    ></div>
-                    <div
-                     className="rect rect-2"
-                     style={{ backgroundImage: `url(${collection2})` }}
-                    ></div>
-                   </div>
-                   <div className="collection-text">
-                    <h5>Classic</h5>
-                    <p>NO Topics . Created By Grado</p>
-                   </div>
-                  </Col>
-                  <Col lg={4} sm={6} xs={12} className="collection-col">
-                   <div className="collection-box">
-                    <div className="rect rect-0"></div>
-                    <div className="rect rect-1"></div>
-                    <div className="rect rect-2"></div>
-                   </div>
-                   <div className="collection-text">
-                    <h5>Oriental</h5>
-                    <p>5 Products</p>
-                   </div>
-                  </Col>
-                 </Row>
-                </Container>
-               </div>
-              </Card.Body>
-             </Accordion.Collapse>
-            </Card>
-            <Card>
-             <Accordion.Toggle as={Card.Header} eventKey="7">
-              Projects & inspirations by grado{" "}
-              <span className="accordion-icon">
-               <BsPlus />
-              </span>
-             </Accordion.Toggle>
-             <Accordion.Collapse eventKey="7">
-              <Card.Body>Hello! I'm another body</Card.Body>
-             </Accordion.Collapse>
-            </Card>
-           </Accordion>
-          </>
-         )}
          <Collapse
           expandIconPosition="right"
-          // ghost
-          defaultActiveKey={["1"]}
+          defaultActiveKey={[
+           "overview",
+           //  "collections",
+           //  "material",
+           //  "dimensions",
+           //  "gallery",
+           //  "files",
+           //  "tags",
+           //  "similars",
+          ]}
           onChange={this.callback}
           bordered
          >
-          <Panel header="Overview" key="1">
-           <div className="overview-text">
-            {this.state.product_desc_overview && (
+          {Object.keys(this.state.plainOverview).length > 0 ? (
+           <>
+            <Panel header="Overview" key="overview">
+             <div className="overview-text">
+              {this.state.product_desc_overview && (
+               <>
+                <p>
+                 <Editor
+                  editorState={this.state.product_desc_overview}
+                  wrapperClassName="rich-editor demo-wrapper"
+                  editorClassName="demo-editor cs-editor"
+                  readOnly
+                  toolbar={{
+                   options: [],
+                  }}
+                 />
+                </p>
+               </>
+              )}
+             </div>
+            </Panel>
+           </>
+          ) : (
+           <>
+            {this.state.plainOverview === true && (
              <>
-              <p>
-               <Editor
-                editorState={this.state.product_desc_overview}
-                wrapperClassName="rich-editor demo-wrapper"
-                editorClassName="demo-editor"
-                readOnly
-                toolbar={{
-                 options: [],
-                }}
-               />
-              </p>
+              <Panel header="Overview" key="overview">
+               <div className="overview-text">
+                {this.state.product_desc_overview && (
+                 <>
+                  <p>
+                   <Editor
+                    editorState={this.state.product_desc_overview}
+                    wrapperClassName="rich-editor demo-wrapper"
+                    editorClassName="demo-editor cs-editor"
+                    readOnly
+                    toolbar={{
+                     options: [],
+                    }}
+                   />
+                  </p>
+                 </>
+                )}
+               </div>
+              </Panel>
              </>
             )}
-           </div>
-          </Panel>
-          <Panel key="10" header="Materials">
-           {this.state.product_desc_mat && (
-            <>
-             <p>
-              <Editor
-               editorState={this.state.product_desc_mat}
-               wrapperClassName="rich-editor demo-wrapper"
-               editorClassName="demo-editor"
-               readOnly
-               toolbar={{
-                options: [],
+           </>
+          )}
+
+          {Object.keys(this.state.plain_desc_content).length > 0 ? (
+           <>
+            <Panel key="material" header="Materials">
+             {this.state.product_desc_mat && (
+              <>
+               <p>
+                <Editor
+                 editorState={this.state.product_desc_mat}
+                 wrapperClassName="rich-editor demo-wrapper"
+                 editorClassName="demo-editor cs-editor"
+                 readOnly
+                 toolbar={{
+                  options: [],
+                 }}
+                />
+               </p>
+              </>
+             )}
+            </Panel>
+           </>
+          ) : (
+           <>
+            {this.state.plain_desc_content === true && (
+             <>
+              <Panel key="material" header="Materials">
+               {this.state.product_desc_mat && (
+                <>
+                 <p>
+                  <Editor
+                   editorState={this.state.product_desc_mat}
+                   wrapperClassName="rich-editor demo-wrapper"
+                   editorClassName="demo-editor cs-editor"
+                   readOnly
+                   toolbar={{
+                    options: [],
+                   }}
+                  />
+                 </p>
+                </>
+               )}
+              </Panel>
+             </>
+            )}
+           </>
+          )}
+
+          {Object.keys(this.state.plainSize).length > 0 ? (
+           <>
+            <Panel key="dimensions" header="Dimensions">
+             {this.state.product_desc_size && (
+              <>
+               <p>
+                <Editor
+                 editorState={this.state.product_desc_size}
+                 wrapperClassName="rich-editor demo-wrapper"
+                 editorClassName="demo-editor cs-editor"
+                 readOnly
+                 toolbar={{
+                  options: [],
+                 }}
+                />
+               </p>
+              </>
+             )}
+            </Panel>
+           </>
+          ) : (
+           <>
+            {this.state.plainSize === true && (
+             <>
+              <Panel key="dimensions" header="Dimensions">
+               {this.state.product_desc_size && (
+                <>
+                 <p>
+                  <Editor
+                   editorState={this.state.product_desc_size}
+                   wrapperClassName="rich-editor demo-wrapper"
+                   editorClassName="demo-editor cs-editor"
+                   readOnly
+                   toolbar={{
+                    options: [],
+                   }}
+                  />
+                 </p>
+                </>
+               )}
+              </Panel>
+             </>
+            )}
+           </>
+          )}
+
+          {this.state.files.length > 0 && (
+           <>
+            <Panel header="Cad & 3D Files" key="files">
+             {this.props.isLoggedIn && (
+              <>
+               {this.state.files.map((file, index) => {
+                return (
+                 <>
+                  <button
+                   className="product-boxs"
+                   onClick={() => this.openFileModal(file)}
+                  >
+                   <div className="file-box">{file.file_type}</div>
+                   <p>{file.file_name}</p>
+                   <span
+                    className="link-bold"
+                    style={{
+                     fontSize: ".75rem",
+                     marginLeft: "-13px",
+                    }}
+                   >
+                    {file.software}
+                   </span>
+                  </button>
+                 </>
+                );
+               })}
+              </>
+             )}
+             {!this.props.isLoggedIn && (
+              <>
+               {this.state.files.map((file, index) => {
+                return (
+                 <>
+                  <button
+                   className="product-boxs"
+                   onClick={this.openAuthenticationModal}
+                  >
+                   <div className="file-box">{file.file_type}</div>
+                   <p>{file.file_name}</p>
+                  </button>
+                 </>
+                );
+               })}
+              </>
+             )}
+            </Panel>
+           </>
+          )}
+          {this.state.pdf_files.length > 0 && (
+           <>
+            <Panel header="PDF Catalogues" key="pdf">
+             {this.props.isLoggedIn && (
+              <>
+               {this.state.pdf_files.map((file, index) => {
+                return (
+                 <>
+                  <button
+                   className="product-boxs"
+                   onClick={() => this.openFileModal(file)}
+                  >
+                   <div className="pdf-box">
+                    <hr className="w-50 m-auto mt-3" />
+                    <p className="pdf-title">{file.file_name}</p>
+                   </div>
+                   {/* <p>{file.file_name}</p> */}
+                   <span
+                    className="link-bold"
+                    style={{
+                     fontSize: ".75rem",
+                     marginLeft: "-13px",
+                    }}
+                   >
+                    {file.software}
+                   </span>
+                  </button>
+                 </>
+                );
+               })}
+              </>
+             )}
+             {!this.props.isLoggedIn && (
+              <>
+               {this.state.pdf_files.map((file, index) => {
+                return (
+                 <>
+                  <button
+                   className="product-boxs"
+                   onClick={this.openAuthenticationModal}
+                  >
+                   <div className="pdf-box">{/* {file.file_type} */}</div>
+                   <p>{file.file_name}</p>
+                  </button>
+                 </>
+                );
+               })}
+              </>
+             )}
+            </Panel>
+           </>
+          )}
+          {this.state.galleries.length > 0 && (
+           <>
+            <Panel header="Gallery" key="gallery" forceRender>
+             <AntRow gutter={10}>
+              <Gallery
+               shareButton={false}
+               options={{
+                bgOpacity: 1,
+                counterEl: false,
+                zoomEl: false,
+                fullscreenEl: false,
+                captionEl: true,
+                barsSize: { top: 50, bottom: "auto" },
+
+                addCaptionHTMLFn: function (item, captionEl, isFake) {
+                 if (!item.title) {
+                  captionEl.children[0].innerHTML = "";
+                  return false;
+                 }
+                 captionEl.children[0].innerHTML = item.title;
+                 return item;
+                },
                }}
-              />
-             </p>
-            </>
-           )}
-          </Panel>
-          <Panel key="9" header="Dimensions">
-           {this.state.product_desc_size && (
-            <>
-             <p>
-              <Editor
-               editorState={this.state.product_desc_size}
-               wrapperClassName="rich-editor demo-wrapper"
-               editorClassName="demo-editor"
-               readOnly
-               toolbar={{
-                options: [],
-               }}
-              />
-             </p>
-            </>
-           )}
-          </Panel>
-          <Panel header="Product Can be used at" key="2">
+              >
+               {this.state.product.gallery?.map((g, index) => {
+                const length = this.state.product.gallery.length;
+                const { innerHeight } = window;
+                return (
+                 <AntCol
+                  className="gallery-cover mb-4"
+                  span={6}
+                  style={{
+                   display: "grid",
+                   alignItems: "center",
+                  }}
+                 >
+                  <SwipItem
+                   original={g.desc_gallery_files}
+                   thumbnail={g.desc_gallery_files}
+                   title={`${index + 1} Of ${length}`}
+                   height={innerHeight}
+                  >
+                   {({ ref, open }) => (
+                    <div
+                     onClick={open}
+                     ref={ref}
+                     className="product-gallery"
+                     style={{
+                      backgroundImage: `url(${g.desc_gallery_files})`,
+                     }}
+                    ></div>
+                   )}
+                  </SwipItem>
+                 </AntCol>
+                );
+               })}
+              </Gallery>
+             </AntRow>
+            </Panel>
+           </>
+          )}
+          <Panel header="Product Tags" key="tags">
            <div className="product-tags-boxs">
             {this.state.product.identity[0].places_tags?.map((tag, index) => {
              return <div key={index}>{tag}</div>;
             })}
            </div>
           </Panel>
-          <Panel header="Cad & 3D Files" key="3">
-           {this.props.isLoggedIn && (
-            <>
-             {this.state.files.map((file, index) => {
-              return (
-               <>
-                <button
-                 className="product-boxs"
-                 onClick={() => this.openFileModal(file)}
-                >
-                 <div className="file-box">{file.file_type}</div>
-                 <p>{file.file_name}</p>
-                 <span
-                  className="link-bold"
-                  style={{
-                   fontSize: ".75rem",
-                   marginLeft: "-13px",
-                  }}
-                 >
-                  {file.software}
-                 </span>
-                </button>
-               </>
-              );
-             })}
-            </>
-           )}
-           {!this.props.isLoggedIn && (
-            <>
-             {this.state.files.map((file, index) => {
-              return (
-               <>
-                <button
-                 className="product-boxs"
-                 onClick={this.openAuthenticationModal}
-                >
-                 <div className="file-box">{file.file_type}</div>
-                 <p>{file.file_name}</p>
-                </button>
-               </>
-              );
-             })}
-            </>
-           )}
-          </Panel>
-          <Panel header="Gallery" key="4">
-           {/* <div className="product-tags-boxs galleries-box"> */}
-           <AntRow gutter={10}>
-            {/* {this.state.product.gallery?.map((g, index) => {
-             return (
-              <AntCol span={6}>
-              
-               <Image
-                preview={{ visible: false }}
-                // width={180}
-                height={115}
-                src={g.desc_gallery_files}
-                onClick={() => this.setState({ visible: true })}
-               />
-              </AntCol>
-             );
-            })} */}
-            <Gallery>
-             {this.state.product.gallery?.map((g, index) => {
-              return (
-               <AntCol
-                className="gallery-cover"
-                span={6}
-                style={{
-                 display: "grid",
-                 alignItems: "center",
-                }}
-               >
-                <SwipItem
-                 original={g.desc_gallery_files}
-                 thumbnail={g.desc_gallery_files}
-                 width={1180}
-                 height={730}
-                 style={{}}
-                >
-                 {({ ref, open }) => (
-                  <img
-                   ref={ref}
-                   onClick={open}
-                   src={g.desc_gallery_files}
-                   alt=""
-                   //  width={100}
-                   //  height={100}
-                  />
-                 )}
-                </SwipItem>
+          {Object.values(this.state.product?.similar).length > 0 && (
+           <>
+            <Panel
+             header={`Similar Prodycts by ${this.state?.product?.stores?.name}`}
+             key="similars"
+             forceRender
+            >
+             <div className="similar-products">
+              {/* <div className="inner-body"> */}
+              <AntRow gutter={24} className="my-3">
+               {Object.values(this.state.product?.similar)?.map(
+                (product, index) => {
+                 if (product.preview_cover && index < 3) {
+                  return (
+                   <>
+                    <AntCol
+                     className="gutter-row mb-4"
+                     lg={8}
+                     md={8}
+                     sm={12}
+                     xs={24}
+                    >
+                     <a href={`/product/${product.id}`}>
+                      <div className="product">
+                       <div
+                        className="p-img"
+                        style={{
+                         background: `url(${product.preview_cover})`,
+                        }}
+                       >
+                        <div className="prlayer"></div>
+
+                        <button
+                         className="actns-btn svbtn"
+                         onClick={(e) => {
+                          e.preventDefault();
+                          this.setState(
+                           {
+                            to_save_cover: product.preview_cover,
+                            to_save_productId: product,
+                           },
+                           () => {
+                            this.saveToCollection();
+                           }
+                          );
+                         }}
+                        >
+                         Save
+                        </button>
+                        {product.file.length > 0 ? (
+                         <>
+                          <div className="actns-btn file-btn cad">CAD</div>
+                          <div className="actns-btn file-btn threeD">3D</div>
+                         </>
+                        ) : (
+                         ""
+                        )}
+                       </div>
+                       <a href={`/brand/${product.store_name.store_id}`}>
+                        <h5 className="product-store">
+                         {product.store_name.store_name}
+                        </h5>
+                       </a>
+                       <p className="product-name">{product.name}</p>
+                       <div className="product-price">
+                        {product.preview_price && product.preview_price > 0 ? (
+                         <>
+                          <span>¥ {product.preview_price}</span>
+                         </>
+                        ) : (
+                         ""
+                        )}
+                       </div>
+                      </div>
+                     </a>
+                    </AntCol>
+                   </>
+                  );
+                 }
+                }
+               )}
+               <AntCol md={24}>
+                {Object.values(this.state.product?.similar).length > 3 && (
+                 <>
+                  <a
+                   className="underline"
+                   href={`/types/${
+                    Object.values(this.state.product?.similar)[0].store_id
+                   }/${Object.values(this.state.product?.similar)[0].kind}`}
+                   style={{
+                    maxWidth: "350px",
+                    padding: "15px 5px",
+                    fontSize: ".85rem",
+                    display: "block",
+                    margin: "auto",
+                    textAlign: "center",
+                    minWidth: "auto",
+                    width: "auto",
+                   }}
+                  >
+                   {`
+                  SEE ${
+                   Object.values(this.state.product?.similar)[0].kind
+                  } MORE 
+                  ${
+                   Object.values(this.state.product?.similar)[0].store_name
+                    .store_name
+                  }
+                `}
+                  </a>
+                 </>
+                )}
                </AntCol>
-              );
-             })}
-             {/* <SwipItem
-              original="https://placekitten.com/1024/768?image=1"
-              thumbnail="https://placekitten.com/80/60?image=1"
-              width="1024"
-              height="768"
-             >
-              {({ ref, open }) => (
-               <img
-                ref={ref}
-                onClick={open}
-                src="https://placekitten.com/80/60?image=1"
-               />
-              )}
-             </SwipItem>
-             <SwipItem
-              original="https://placekitten.com/1024/768?image=2"
-              thumbnail="https://placekitten.com/80/60?image=2"
-              width="1024"
-              height="768"
-             >
-              {({ ref, open }) => (
-               <img
-                ref={ref}
-                onClick={open}
-                src="https://placekitten.com/80/60?image=2"
-               />
-              )}
-             </SwipItem> */}
-            </Gallery>
-           </AntRow>
-           {/* </div> */}
-          </Panel>
-          <Panel header="Similar Products by Grado" key="5">
-           <div className="similar-products">
-            <div className="inner-body">
-             <div className="product-box">
-              <div className="product-img">
-               <img src={sm1} alt="" />
-              </div>
-              <h5 className="product-store">Kelly Wearstler</h5>
-              <p className="product-name">ENZO Meeting Room Table</p>
-              <div className="product-price">
-               <span>¥ 1395.00</span>
-              </div>
+              </AntRow>
              </div>
-             <div className="product-box">
-              <div className="product-img">
-               <img src={sm2} alt="" />
-              </div>
-              <h5 className="product-store">Kelly Wearstler</h5>
-              <p className="product-name">ENZO Meeting Room Table</p>
-              <div className="product-price">
-               {/* <span>¥ 1395.00</span> */}
-              </div>
+            </Panel>
+           </>
+          )}
+          {this.state.collections.length > 0 && (
+           <>
+            <Panel key="collections" header="Collections" forceRender>
+             <div className="store-collection product-tabs">
+              <Container fluid>
+               <Row md={{ span: 12 }}>
+                {this.state.collections.map((collection, index) => {
+                 return (
+                  <>
+                   <Col lg={4} sm={6} xs={12} className="collection-col">
+                    <div className="collection-box">
+                     <div
+                      className="rect rect-0"
+                      style={{
+                       backgroundImage: `url(${collection.products.products_info.pics[0]})`,
+                      }}
+                     ></div>
+                     <div
+                      className="rect rect-1"
+                      style={{
+                       backgroundImage: `url(${collection.products.products_info.pics[1]})`,
+                      }}
+                     ></div>
+                     <div
+                      className="rect rect-2"
+                      style={{
+                       backgroundImage: `url(${collection.products.products_info.pics[2]})`,
+                      }}
+                     ></div>
+                    </div>
+                    <div className="collection-text">
+                     <h5>{collection.collection_name}</h5>
+                     <p>{collection.products.count} Products</p>
+                    </div>
+                   </Col>
+                  </>
+                 );
+                })}
+               </Row>
+              </Container>
              </div>
-             <div className="product-box">
-              <div className="product-img">
-               <img src={slide3} alt="" />
-              </div>
-              <h5 className="product-store">Kelly Wearstler</h5>
-              <p className="product-name">ENZO Meeting Room Table</p>
-              <div className="product-price">
-               <span>¥ 1395.00</span>
-              </div>
-             </div>
-             <div className="product-box">
-              <div className="product-img">
-               <img src={sm4} alt="" />
-              </div>
-              <h5 className="product-store">Kelly Wearstler</h5>
-              <p className="product-name">ENZO Meeting Room Table</p>
-              <div className="product-price">
-               <span>¥ 1395.00</span>
-              </div>
-             </div>
-            </div>
-           </div>
-          </Panel>
-          <Panel key="6" header="Collections">
-           <div className="store-collection product-tabs">
-            <Container fluid>
-             <Row md={{ span: 12 }}>
-              <Col lg={4} sm={6} xs={12} className="collection-col">
-               <div className="collection-box">
-                <div
-                 className="rect rect-0"
-                 style={{ backgroundImage: `url(${collection1})` }}
-                ></div>
-                <div
-                 className="rect rect-1"
-                 style={{ backgroundImage: `url(${collection2})` }}
-                ></div>
-                <div
-                 className="rect rect-2"
-                 style={{ backgroundImage: `url(${collection3})` }}
-                ></div>
-               </div>
-               <div className="collection-text">
-                <h5>Modern</h5>
-                <p>NO Products</p>
-               </div>
-              </Col>
-              <Col lg={4} sm={6} xs={12} className="collection-col">
-               <div className="collection-box">
-                <div
-                 className="rect rect-0"
-                 style={{ backgroundImage: `url(${collection5})` }}
-                ></div>
-                <div
-                 className="rect rect-1"
-                 style={{ backgroundImage: `url(${collection4})` }}
-                ></div>
-                <div
-                 className="rect rect-2"
-                 style={{ backgroundImage: `url(${collection2})` }}
-                ></div>
-               </div>
-               <div className="collection-text">
-                <h5>Classic</h5>
-                <p>NO Topics . Created By Grado</p>
-               </div>
-              </Col>
-              <Col lg={4} sm={6} xs={12} className="collection-col">
-               <div className="collection-box">
-                <div className="rect rect-0"></div>
-                <div className="rect rect-1"></div>
-                <div className="rect rect-2"></div>
-               </div>
-               <div className="collection-text">
-                <h5>Oriental</h5>
-                <p>5 Products</p>
-               </div>
-              </Col>
-             </Row>
-            </Container>
-           </div>
-          </Panel>
+            </Panel>
+           </>
+          )}
          </Collapse>
-         ,
         </Col>
         <Col md={{ span: 4 }} className="p-3">
          <div className="right-side p-3">
-          {this.props.isLoggedIn && (
-           <>
-            <a href={`/edit-product/${this.state.product_id}`}>
-             <p>Edit</p>
-            </a>
-           </>
-          )}
+          {this.props.isLoggedIn &&
+           this.state.product?.stores?.user_id === this.props?.uid && (
+            <>
+             <a
+              href={`/edit-product/${this.state.product_id}`}
+              className="cs-link"
+             >
+              <p>Edit</p>
+             </a>
+            </>
+           )}
+
           <div className="right-row get-icons">
-           <BsPlus onClick={this.generatePPT} />
-           <div style={{ verticalAlign: "middle" }}>
-            <a href={`${API}test-pdf/${this.state.product_id}`}>
-             <BsDownload />
-            </a>
-           </div>
+           <BsPlus onClick={() => this.saveToCollection()} />
+           <Dropdown overlay={this.downloadMenu} placement="topLeft">
+            <AntButton
+             style={{
+              border: "none",
+              background: "transparent",
+              verticalAlign: "middle",
+              padding: "4px 5px",
+             }}
+            >
+             <BsDownload
+              className="cs-link"
+              style={{ fontSize: "1.1rem", fontWeight: "700" }}
+             />
+            </AntButton>
+           </Dropdown>
+
            <Dropdown overlay={this.menu}>
             <AntButton
              style={{
@@ -1486,13 +1328,20 @@ class Product extends Component {
               padding: "4px 5px",
              }}
             >
-             <BiShareAlt />
+             {/* 100,000 */}
+             <BiShareAlt className="cs-link" />
             </AntButton>
            </Dropdown>
           </div>
           <div className="right-row product-info ">
-           <div className="store-name">{this.state?.product?.stores?.name}</div>
-           {/* <div className="product-name">I3 Office System & Work Station</div> */}
+           <div className="store-name">
+            <a
+             href={`/brand/${this.state.product.stores.id}`}
+             className="cs-link"
+            >
+             {this.state?.product?.stores?.name}
+            </a>
+           </div>
            <div className="product-name">
             {this.state.product.identity[0].name}
            </div>
@@ -1500,8 +1349,18 @@ class Product extends Component {
            <div className="design-by">
             Design By. <span style={{ fontWeight: "600" }}>Muhamed Mahdy</span>
            </div>
-           <div className="product-country">
-            Made in{" "}
+           <div
+            className="product-country"
+            onClick={() => {
+             console.log(this.state);
+             console.log(
+              convertFromRaw(
+               JSON.parse(this.state.product.description[0].overview_content)
+              )
+             );
+            }}
+           >
+            Made in
             <span style={{ fontWeight: "600" }}>
              {/* { this.state.product.identity[0].country} */} China
             </span>
@@ -1526,15 +1385,22 @@ class Product extends Component {
           ) : (
            ""
           )}
-          {this.state.activeOption.code ? (
+          {this.state.activeOption.code &&
+          this.state.activeOption.code !== "null" &&
+          this.state.activeOption.code.length > 0 ? (
            <>
             <div className="right-row">
              <span>Code</span>
              <div className="options" id="codes">
               {this.state.options?.map((option, index) => {
-               if (option.material_name && option.code != "n") {
+               if (option.code && option.code !== "null") {
                 return (
-                 <button onClick={() => this.updateOption(index)}>
+                 <button
+                  onClick={() => this.updateOption(index)}
+                  className={
+                   this.state.acive_index === index ? "active-option-btn" : ""
+                  }
+                 >
                   {option.code}
                  </button>
                 );
@@ -1546,16 +1412,23 @@ class Product extends Component {
           ) : (
            ""
           )}
-          {this.state.activeOption.size ? (
+          {this.state.activeOption.size.l > 0 &&
+          this.state.activeOption.size.h > 0 &&
+          this.state.activeOption.size.w > 0 ? (
            <>
             <div className="right-row ">
              <span>Size</span>
 
              <div id="sizes" className="options">
               {this.state.options?.map((option, index) => {
-               if (option.material_name && option.size?.w != null) {
+               if (option.size?.l + option.size?.w + option.size.h > 0) {
                 return (
-                 <button onClick={() => this.updateOption(index)}>
+                 <button
+                  onClick={() => this.updateOption(index)}
+                  className={
+                   this.state.acive_index === index ? "active-option-btn" : ""
+                  }
+                 >
                   {`${option.size.l} X ${option.size.w} X ${option.size.h}`}
                  </button>
                 );
@@ -1567,65 +1440,93 @@ class Product extends Component {
           ) : (
            ""
           )}
+          {this.state.activeOption.quantity.length > 0 ? (
+           <>
+            <div className="right-row ">
+             <span>CBM</span>
 
-          <div className="right-row ">
-           <span>Material</span>
-           <div id="materials" className="options">
-            {this.state.options?.map((option, index) => {
-             if (option.material_name) {
-              return (
-               <>
-                <button>
+             <div id="sizes" className="options">
+              {this.state.options?.map((option, index) => {
+               if (option.quantity.length > 0) {
+                return (
                  <button
                   onClick={() => this.updateOption(index)}
-                  style={{
-                   backgroundImage: `url(${option.material_image})`,
-                   backgroundSize: "cover",
-                   backgroundRepeat: "no-repeat",
-                   backgroundPosition: "center",
-                   width: "100%",
-                   height: "100%",
-                  }}
+                  className={
+                   this.state.acive_index === index
+                    ? "active-option-btn cpm"
+                    : "cpm"
+                  }
                  >
-                  {/* {option.material_name} */}
+                  {`${option.quantity}`}
                  </button>
-                 <div>{option.material_name}</div>
-                </button>
-               </>
-              );
-             }
-             // return <button key={index}>{option.material_name}</button>;
-            })}
-           </div>
-          </div>
+                );
+               }
+              })}
+             </div>
+            </div>
+           </>
+          ) : (
+           ""
+          )}
+          {this.state.activeOption.material.name &&
+           this.state.activeOption.material.image &&
+           this.state.activeOption.material.name !== "null" && (
+            <>
+             <div className="right-row ">
+              <span>Material</span>
+              <div id="materials" className="options">
+               {this.state.options?.map((option, index) => {
+                if (option.material.name && option.material.name !== "null") {
+                 return (
+                  <>
+                   <button>
+                    <button
+                     onClick={() => this.updateOption(index)}
+                     className={
+                      this.state.acive_index === index
+                       ? "active-option-btn"
+                       : ""
+                     }
+                     style={{
+                      backgroundImage: `url(${option.material_image})`,
+                      backgroundSize: "cover",
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "center",
+                      width: "100%",
+                      height: "100%",
+                     }}
+                    >
+                     {/* {option.material_name} */}
+                    </button>
+                    <div>{option.material_name}</div>
+                   </button>
+                  </>
+                 );
+                }
+               })}
+              </div>
+             </div>
+            </>
+           )}
           <div className="right-row ">
            <button
             id="shop-now"
             className="action-btn"
-            onClick={() => this.updateOption(1)}
+            onClick={() => this.request_open("Purchase")}
            >
             <span className="btn-icons">
              <AiOutlineShoppingCart />
             </span>
-            Shop Now
+            Shop Now / Request Price Info
            </button>
           </div>
           <div className="right-row ">
            <ul id="shop-upps">
             <li>
-             - <span>Available.</span>
-            </li>
-            <li>
              - <span>Customizable / Made-to-order</span>
             </li>
             <li>
              - <span>Estimated delivery in 4 to 8 weeks</span>
-            </li>
-            <li>
-             -{" "}
-             <span>
-              Delivery fee is free to certain countries, Learn More..
-             </span>
             </li>
            </ul>
           </div>
@@ -1670,7 +1571,10 @@ class Product extends Component {
            </div>
           </div>
           <div className="right-row">
-           <button className="save-btn action-btn bg-white">
+           <button
+            className="save-btn action-btn bg-white"
+            onClick={() => this.saveToCollection()}
+           >
             <span className="btn-icons">
              <BsPlus />
             </span>{" "}
@@ -1704,9 +1608,18 @@ class Product extends Component {
             </span>
             Message us Via WeChat
            </button>
-           <div className="reach-us">
+           <button className="bg-white action-btn">
+            <span className="btn-icons">
+             <FiPhoneCall />
+            </span>
+            {/* Message us Via Phone */}
+            <span style={{ color: "#000", fontSize: ".9rem" }}>
+             +86 185 7599 9560
+            </span>
+           </button>
+           {/* <div className="reach-us">
             <span>Reach Us by phone, Phone Number</span> +86 185 7599 9560
-           </div>
+           </div> */}
           </div>
          </div>
         </Col>
@@ -1950,7 +1863,6 @@ class Product extends Component {
        title={this.state.request_modal_type}
        width={650}
        className="request-modal"
-       type={this.state.request_tyoe}
        visible={this.props.requesting}
        destroyOnClose
        footer={false}
@@ -1968,6 +1880,36 @@ class Product extends Component {
         cover={this.state.sliderImgs[0].original}
         name={this.state.product.identity[0].name}
         store={this.state.product.stores.name}
+        type={this.state.request_modal_type}
+       />
+      </AntModal>
+
+      <AntModal
+       title={this.state.save_to_collection_modal}
+       width={700}
+       className="request-modal"
+       visible={this.state.save_to_collection_modal}
+       //  destroyOnClose
+       footer={false}
+       closeIcon={
+        <>
+         <div
+          onClick={() => this.setState({ save_to_collection_modal: false })}
+         >
+          X
+         </div>
+        </>
+       }
+       okButtonProps={{ hidden: true }}
+       cancelButtonProps={{ hidden: true }}
+       requestType={this.state.request_modal_type}
+      >
+       <SaveToCollection
+        product={this.state.product}
+        cover={this.state.sliderImgs[0].original}
+        name={this.state.product.identity[0].name}
+        store={this.state.product.stores.name}
+        type={this.state.request_modal_type}
        />
       </AntModal>
      </>
@@ -2150,6 +2092,7 @@ const mapDispatchToProps = (dispatch) => ({
 const mapStateToProps = (state) => {
  return {
   isLoggedIn: state.regularUser.isLoggedIn,
+  uid: state.regularUser?.info?.uid,
   requesting: state.addProduct.requesting,
  };
 };

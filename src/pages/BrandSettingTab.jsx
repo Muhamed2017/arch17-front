@@ -167,18 +167,7 @@ class BrandSettingsTab extends Component {
      <Container fluid>
       <Row md={{ span: 12 }} style={{ marginBottom: "70px" }}>
        <Col sm={4}>
-        <h2
-         style={{
-          fontSize: "2rem",
-          fontWeight: "600",
-          color: "#000",
-          fontFamily: "Roboto",
-          textDecoration: "underline",
-          //   textAlign: "center",
-         }}
-        >
-         Edit Profile
-        </h2>
+        <h2 className="edit-head">Edit Profile</h2>
        </Col>
       </Row>
       <Row md={{ span: 12 }}>
@@ -332,6 +321,11 @@ class BrandSettingsTab extends Component {
           </Button>
          </>
         )}
+       </Col>
+      </Row>
+      <Row span={{ span: 12 }}>
+       <Col sm={4}>
+        <h2 className="edit-head">Edit Profile</h2>
        </Col>
       </Row>
       <>

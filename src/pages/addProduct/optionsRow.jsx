@@ -105,7 +105,6 @@ class OptionRow extends Component {
   }
   const reader = new FileReader();
   reader.onload = () => {
-   //   this.setState({ src: reader.result });
    this.setState({ src: slide4 });
   };
   reader.readAsDataURL(files[0]);

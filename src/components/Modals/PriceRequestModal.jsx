@@ -14,6 +14,7 @@ import {
  openProductRequestAction,
  closeProductRequestAction,
 } from "../../redux/actions/addProductActions";
+import { API } from "../../utitlties";
 const PriceRequestModal = (props) => {
  const [form] = Form.useForm();
  const [phone, setPhone] = useState("");
@@ -24,8 +25,15 @@ const PriceRequestModal = (props) => {
  const onFinish = (values) => {
   setRequesting(true);
   console.log(values);
-  axios.get("https://jsonplaceholder.typicode.com/posts").then((res) => {
-   console.log(res);
+  const fd = new FormData();
+  fd.append("type", props.type);
+  fd.append("product_name", props.name);
+  fd.append("brand_name", props.store);
+  fd.append("message", values.message);
+  fd.append("phone", phone);
+  fd.append("email", values.email);
+  fd.append("product_image", props.cover);
+  axios.post(`${API}request/${props.product.id}`, fd).then((res) => {
    setRequesting(false);
    props.dispatchRequestClose();
    SuccessModal(
@@ -38,9 +46,7 @@ const PriceRequestModal = (props) => {
     </>
    );
   });
-  console.log(phone);
  };
-
  const onFinishFailed = () => {
   console.log("Failed");
  };
@@ -71,7 +77,7 @@ const PriceRequestModal = (props) => {
       <Form.Item
        name="email"
        label="Email"
-       initialValue={props.user.email ?? ""}
+       initialValue={props.user?.email ?? ""}
        rules={[{ required: true }, { type: "email", warningOnly: true }]}
       >
        <Input placeholder="Enter Email" size="large" />
@@ -131,7 +137,6 @@ const PriceRequestModal = (props) => {
  );
 };
 
-// export default PriceRequestModal;
 const mapDispatchToProps = (dispatch) => ({
  dispatchRequestOpen: () => dispatch(openProductRequestAction()),
  dispatchRequestClose: () => dispatch(closeProductRequestAction()),

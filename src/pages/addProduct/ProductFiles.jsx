@@ -1,18 +1,16 @@
 import React, { Component } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { FaCloudUploadAlt } from "react-icons/fa";
-import { MdTitle } from "react-icons/md";
 import { RiCodeSSlashFill } from "react-icons/ri";
 import ProgressBar from "react-bootstrap/ProgressBar";
-// import { PulseLoader } from "react-spinners/PulseLoader";
-// import { ADD_PRODUCT_NEXT_TAB } from "../../redux/constants";
 import { Form, Col, Row, Modal, Button } from "react-bootstrap";
 import { convertToRaw, EditorState, convertFromRaw } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Editor } from "react-draft-wysiwyg";
+import { DeleteOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
 import axios from "axios";
-
+import { Progress } from "antd";
 import {
  nextTab,
  productDescription,
@@ -20,9 +18,8 @@ import {
 import ClipLoader from "react-spinners/ClipLoader";
 import { API } from "./../../utitlties";
 class ProductFiles extends Component {
- galleriyFiles = [];
+ //  galleriyFiles = [];
  embed_urls = [];
- //  loaded = [];
 
  constructor(props) {
   super(props);
@@ -43,34 +40,39 @@ class ProductFiles extends Component {
    size_image_url: "",
    loaded: 0,
    gallery: null,
-   galleries: [],
+   gelleries: this.props.edit ? this.props.galleries : [],
    overviews: [],
    descriptions: [],
    dimensions: [],
    overviews_files: [],
    loading: false,
    product_id: null,
-   overViewEditorState: this.props.edit
-    ? EditorState.createWithContent(
-       convertFromRaw(JSON.parse(this.props?.description?.overview_content))
-      )
-    : EditorState.createEmpty(),
-   materialDesceditorState: this.props.edit
-    ? EditorState.createWithContent(
-       convertFromRaw(JSON.parse(this.props?.description?.mat_desc_content))
-      )
-    : EditorState.createEmpty(),
-   sizeDescEditorState: this.props.edit
-    ? EditorState.createWithContent(
-       convertFromRaw(JSON.parse(this.props?.description?.size_content))
-      )
-    : EditorState.createEmpty(),
+   stateChanged: false,
+   overViewEditorState:
+    this.props?.edit && this.props.description
+     ? EditorState?.createWithContent(
+        convertFromRaw(JSON.parse(this.props?.description?.overview_content))
+       )
+     : EditorState?.createEmpty(),
+   materialDesceditorState:
+    this.props?.edit && this.props.description
+     ? EditorState?.createWithContent(
+        convertFromRaw(JSON.parse(this.props?.description?.mat_desc_content))
+       )
+     : EditorState?.createEmpty(),
+   sizeDescEditorState:
+    this.props.edit && this.props.description
+     ? EditorState?.createWithContent(
+        convertFromRaw(JSON.parse(this.props?.description?.size_content))
+       )
+     : EditorState?.createEmpty(),
    overviewLength: 0,
    sizeLength: 0,
    materialLength: 0,
    skip_modal: false,
    desc_id: "",
    embed_url: "",
+   startLoading: false,
   };
  }
 
@@ -91,23 +93,15 @@ class ProductFiles extends Component {
   this.setState({ overview_ex_modal: false });
  };
  componentDidMount() {
+  // console.log(this.state.galleries);
+  this.setState({
+   gelleries: this.props.edit ? this.props.galleries : [],
+  });
   Tabs.defaultProps = {
    selectedIndex: this.state.index,
   };
-  // const overViewEditorState = EditorState.createWithContent(
-  //  convertFromRaw(JSON.parse(this.props?.description?.overview_content))
-  // );
-  // const materialDesceditorState = EditorState.createWithContent(
-  //  convertFromRaw(JSON.parse(this.props?.description?.mat_desc_content))
-  // );
-  // const sizeDescEditorState = EditorState.createWithContent(
-  //  convertFromRaw(JSON.parse(this.props?.description?.size_content))
-  // );
   this.setState({
    product_id: this.props.id,
-   //  overViewEditorState,
-   //  sizeDescEditorState,
-   //  materialDesceditorState,
   });
   console.log(this.state.index);
  }
@@ -119,13 +113,32 @@ class ProductFiles extends Component {
   this.embed_urls.push(this.state.embed_url);
  };
 
+ handleDeleteGllery = (id, index) => {
+  const gelleries = this.state.gelleries;
+
+  axios.post(`${API}product/delete/gallery/${id}`).then((response) => {
+   console.log(response);
+   this.setState({
+    gelleries: gelleries.filter((file, ind) => {
+     return file.id !== id;
+    }),
+
+    stateChanged: true,
+   });
+  });
+ };
+
  onChangeGallery = ({ target: { files } }) => {
   if (files && files.length > 0) {
+   let galleriyFiles = this.state.gelleries;
    const src = URL.createObjectURL(files[0]);
-   this.galleriyFiles.push(src);
-   this.setState({ gallery_url: src });
-   this.setState({ galleries: this.galleriyFiles });
-   console.log(this.galleriyFiles);
+   galleriyFiles.push({
+    id: null,
+    desc_gallery_files: [src],
+   });
+   this.setState({ gallery_url: src, startLoading: true });
+   this.setState({ gelleries: galleriyFiles });
+   console.log(galleriyFiles);
    const reader = new FileReader();
    reader.addEventListener("load", () => {
     this.setState({ gallery_video: files[0] });
@@ -145,6 +158,10 @@ class ProductFiles extends Component {
     console.log(`${loaded} kb of ${total} | ${percent}%`);
     if (percent < 100) {
      this.setState({ loading_gallery_pecent: percent });
+    } else {
+     this.setState({
+      startLoading: false,
+     });
     }
    },
   };
@@ -152,8 +169,18 @@ class ProductFiles extends Component {
    .post(`${API}desc/${this.state.product_id}`, formData, options)
    .then((response) => {
     console.log(response);
+    this.setState({
+     gelleries: response.data.product_desc.gallery,
+     startLoading: false,
+     stateChanged: true,
+    });
    })
-   .catch((err) => console.log(err));
+   .catch((err) => {
+    this.setState({
+     startLoading: false,
+    });
+    console.log(err);
+   });
  };
 
  skip = () => {
@@ -172,7 +199,11 @@ class ProductFiles extends Component {
       data: { link: response.data.img[response.data.lastIndex].file_url },
      });
      console.log(response.data);
-     this.setState({ desc_id: response.data.product_desc.description[0].id });
+
+     this.setState({
+      desc_id: response.data.product_desc.description[0].id,
+      stateChanged: true,
+     });
     })
     .catch((err) => {
      console.log(err);
@@ -180,15 +211,16 @@ class ProductFiles extends Component {
     });
   });
  };
+
  handleNextStep = (e) => {
-  if (
-   this.state.sizeLength +
-    this.state.materialLength +
-    this.state.overviewLength <
-   1
-  ) {
-   this.setState({ skip_modal: true });
-   return;
+  if (!this.state.stateChanged) {
+   if (this.props.edit) {
+    this.props.dispatchNextStep();
+   } else {
+    this.setState({ skip_modal: true });
+    console.log(this.state);
+    return;
+   }
   } else {
    this.setState({ loading: true });
    const formDataOverview = new FormData();
@@ -221,32 +253,31 @@ class ProductFiles extends Component {
   }
  };
 
- handleGotoStep = (step) => {
-  console.log(this.props);
- };
-
  onEditorStateOverviewChange = (overViewEditorState) => {
   this.setState({
    overViewEditorState,
+   stateChanged: true,
    overviewLength: convertToRaw(
     this.state.overViewEditorState.getCurrentContent()
    ).blocks[0].text.length,
   });
+  console.log(overViewEditorState);
  };
 
  onEditorStateMaterialChange = (materialDesceditorState) => {
   this.setState({
    materialDesceditorState,
+   stateChanged: true,
    materialLength: convertToRaw(
     this.state.materialDesceditorState.getCurrentContent()
    ).blocks[0].text.length,
   });
-  // console.log( convertToRaw(this.state.materialDesceditorState.getCurrentContent()));
  };
 
  onEditorStateSizeChange = (sizeDescEditorState) => {
   this.setState({
    sizeDescEditorState,
+   stateChanged: true,
    sizeLength: convertToRaw(this.state.sizeDescEditorState.getCurrentContent())
     .blocks[0].text.length,
   });
@@ -269,7 +300,6 @@ class ProductFiles extends Component {
     >
      {this.state.loading ? (
       <>
-       {" "}
        <ClipLoader
         style={{ height: "20px" }}
         color="#ffffff"
@@ -302,44 +332,38 @@ class ProductFiles extends Component {
        <div className="text-editor">
         <Editor
          editorState={this.state.overViewEditorState}
+         onChange={() => {
+          console.log("Changed");
+         }}
          wrapperClassName="rich-editor demo-wrapper"
-         editorClassName="demo-editor"
+         editorClassName="demo-editor cs-editor"
+         //  style={{ lineHeight: "75%" }}
          onEditorStateChange={this.onEditorStateOverviewChange}
+         onContentStateChange={() => {
+          console.log("SSSS");
+         }}
          placeholder="Add Your Product Description Overview "
+         stripPastedStyles={true}
          toolbar={{
-          image: {
-           uploadEnabled: true,
-           urlEnabled: true,
-           uploadCallback: this.uploadSizeCallback,
-           previewImage: true,
-           alignmentEnabled: "LEFT",
-           inputAccept: "image/gif,image/jpeg,image/jpg,image/png,image/svg",
-           alt: { present: false, mandatory: false },
-           defaultSize: {
-            height: "auto",
-            width: "400",
-           },
+          options: [
+           "inline",
+           "fontSize",
+           "fontFamily",
+           "list",
+           "textAlign",
+           "history",
+          ],
+          fontSize: {
+           options: [8, 9, 10, 11, 12, 14, 16, 18, 24, 30, 36, 48, 60, 72, 96],
           },
          }}
         />
        </div>
-       {/* <button
-        className="save-product-step-btn"
-        style={{ position: "relative", top: "10px" }}
-        onClick={this.submitOverviewContent}
-       >
-        Save
-       </button> */}
       </>
-
-      {/* <Overview id={this.state.product_id} /> */}
-
-      {/* overview modal */}
       <>
        <Modal
         show={this.state.overview_ex_modal}
         onHide={this.overviewExample_close}
-        // backdrop="static"
         className="example-modals"
         keyboard={false}
        >
@@ -351,37 +375,7 @@ class ProductFiles extends Component {
           </span>
          </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-         {/* <Carousel>
-          <Item>
-           <div className="slide-content">
-            Home projects the true character of its owner.‎ However one looks
-            like outside, he expects himself to be surrounded by the realest and
-            most comfortable environment when he comes back home.‎ Just like
-            everyone has his or her own personality, home space also has its
-            characteristics in line with its owner.‎ The unique shape of Cloud
-            Sofa, though used in any space, is a bright spot that should not be
-            ignored, yet its soft and perceptual curve and natural and poetic
-            form, on the other hand, help avoid incompatibility, allowing it to
-            perfectly blend itself into the overall home environment.‎
-           </div>
-           <div className="slide-content">
-            大的座椅靠背和柔软的枕头立即传达出此款扶手椅的两个主要特征：欢迎和隐密。凹形，慷慨环抱的形状营造出一个独一无二的私人空间。它的垫子线条简洁又柔软，正如邀请您体验在它内所带来的放松氛围。Big
-            Data
-            （意为：大数据）显示了风格、输入和形状的多种影响，它们之间相互沟通，而结果正是一个出色产品的诞生
-           </div>
-           <div className="slide-image">
-            <img src={slide4} alt="" />
-           </div>
-          </Item>
-          <Item>
-           <h2>Slide one </h2>
-          </Item>
-          <Item>
-           <h2>Slide one </h2>
-          </Item>
-         </Carousel> */}
-        </Modal.Body>
+        <Modal.Body></Modal.Body>
        </Modal>
       </>
 
@@ -394,37 +388,33 @@ class ProductFiles extends Component {
         <Editor
          editorState={this.state.materialDesceditorState}
          wrapperClassName="rich-editor demo-wrapper"
+         on={(e) => {
+          console.log("Changed");
+          console.log(e);
+         }}
          editorClassName="demo-editor"
          onEditorStateChange={this.onEditorStateMaterialChange}
          placeholder="Add Your Product Mateial Description "
          toolbar={{
           image: {
            uploadEnabled: true,
-           urlEnabled: true,
+           urlEnabled: false,
            uploadCallback: this.uploadSizeCallback,
            previewImage: true,
-           alignmentEnabled: "LEFT",
+           alignmentEnabled: "Left",
            inputAccept: "image/gif,image/jpeg,image/jpg,image/png,image/svg",
            alt: { present: false, mandatory: false },
            defaultSize: {
             height: "auto",
-            width: "400",
+            width: "80%",
            },
           },
          }}
         />
        </div>
-       {/* <button
-     className="save-product-step-btn"
-     style={{ position: "relative", top: "10px" }}
-     onClick={this.submitDescriptionContent}
-    >
-     Save
-    </button> */}
       </>
      </TabPanel>
      <TabPanel forceRender>
-      {/* <SizeDescription id={this.state.product_id} /> */}
       <>
        <div className="text-editor">
         <Editor
@@ -434,7 +424,6 @@ class ProductFiles extends Component {
          onEditorStateChange={this.onEditorStateSizeChange}
          placeholder="Add Your Product Size Description"
          toolbar={{
-          //   options: ["image", "colorPicker"],
           image: {
            uploadEnabled: true,
            urlEnabled: true,
@@ -445,7 +434,7 @@ class ProductFiles extends Component {
            alt: { present: false, mandatory: false },
            defaultSize: {
             height: "auto",
-            width: "400",
+            width: "80%",
            },
           },
          }}
@@ -460,28 +449,57 @@ class ProductFiles extends Component {
        id="gallery"
       >
        <div className="files-previews">
-        {this.state.galleries?.map((file, index) => {
+        {this.state.gelleries?.map((file, index) => {
          return (
-          <div style={{ position: "relative" }} key={index}>
-           <img src={file} alt="" />
-          </div>
+          <>
+           <div style={{ position: "relative" }} key={index}>
+            <img
+             src={file?.desc_gallery_files[0]}
+             alt=""
+             style={{
+              filter:
+               !file.id && this.state.startLoading ? "blur(5px)" : "none",
+             }}
+            />
+            {file.id && (
+             <>
+              <p
+               onClick={() => this.handleDeleteGllery(file.id, index)}
+               style={{ cursor: "pointer" }}
+              >
+               <DeleteOutlined />
+              </p>
+             </>
+            )}
+            {this.state.startLoading && !file?.id && (
+             <>
+              <Progress
+               style={{
+                position: "absolute",
+                top: "24%",
+                bottom: 0,
+                maxWidth: "130px",
+                left: "31%",
+                display: this.state.loaded >= 100 ? "none" : "",
+               }}
+               type="circle"
+               width={38}
+               percent={this.state.loaded}
+               strokeWidth={12}
+               trailColor="#fff"
+               strokeColor="#000"
+               success={{
+                percent: 0,
+                strokeColor: "transparent",
+               }}
+              />
+             </>
+            )}
+           </div>
+          </>
          );
         })}
-        <ProgressBar
-         now={this.state.loaded}
-         style={{
-          background: "#000",
-          position: "absolute",
-          right: 0,
-          top: 0,
-          bottom: 0,
-          maxWidth: "130px",
-          height: "100%",
-          opacity: this.state.loaded < 100 ? ".3" : "0",
-          left: `${155 * this.state.galleries.length - 155}px`,
-          display: this.state.loaded >= 100 ? "none" : "",
-         }}
-        />
+
         {this.embed_urls?.map((url, index) => {
          return (
           <div style={{ position: "relative" }} key={index}>
@@ -509,7 +527,13 @@ class ProductFiles extends Component {
          You can skip if informations not available
         </div>
         <div className="file-icons-tabs" style={{ position: "relative" }}>
-         <span className="red-bg" style={{ position: "relative" }}>
+         <span
+          className="red-bg"
+          style={{
+           position: "relative",
+           visibility: this.state.startLoading ? "hidden" : "visible",
+          }}
+         >
           <FaCloudUploadAlt className="m-auto" />
           <input
            type="file"
@@ -544,11 +568,17 @@ class ProductFiles extends Component {
      onHide={this.skip_modal_close}
      aria-labelledby="example-modal-sizes-title-lg"
     >
-     <Modal.Header closeButton></Modal.Header>
+     {/* <Modal.Header closeButton></Modal.Header> */}
      <Modal.Body>
       <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
-       <h6>Skip Modal</h6>
-
+       <h6
+        style={{
+         padding: "15px 5px 35px",
+         fontSize: "1.2rem",
+        }}
+       >
+        Skip without adding product description?
+       </h6>
        <Button
         variant="danger"
         type="submit"

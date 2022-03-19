@@ -2,11 +2,14 @@ import * as actions from '../../constants.js'
 
 const initialState = {
     loading:false,
-    identity:{},
+    identity: null,
     options:{},
     tabIndex:0,
     optionsAdded:false,
-    requesting:false
+    requesting:false,
+    searchTerm:null,
+    prices:[],
+    modal_codes:[]
 }
 
 export const AddProductReducer = (state= initialState, action)=>{
@@ -43,6 +46,12 @@ export const AddProductReducer = (state= initialState, action)=>{
                 ...state,
                 tabIndex:state.tabIndex + 1
             }
+
+              case actions.GO_TO_TAB_STEP:
+            return {
+                ...state,
+                tabIndex:action.payload
+            }
             case actions.OPEN_PRODUCT_REQUEST_MODAL:
             return {
                 ...state,
@@ -53,6 +62,34 @@ export const AddProductReducer = (state= initialState, action)=>{
                 ...state,
                 requesting:false
             }
+            case actions.SET_SEARCH_TERM:
+            return {
+                ...state,
+                searchTerm:action.payload
+            }
+
+        case actions.SET_PRICES:
+           return {
+             ...state, 
+             prices:action.payload >0 ?[...state.prices, action.payload]:[...state.prices],
+
+          } 
+          case actions.RESET_PRICES:
+           return {
+             ...state, 
+             prices:[],
+          } 
+          case actions.SET_MODAL_CODES:
+           return {
+             ...state, 
+             modal_codes:action.payload?[...state.modal_codes, action.payload]:[...state.modal_codes],
+
+          } 
+          case actions.RESET_MODAL_CODES:
+           return {
+             ...state, 
+             modal_codes:[],
+          } 
         default:
             return state;
     }

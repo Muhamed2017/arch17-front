@@ -13,19 +13,73 @@ img {
  font-family: "Roboto";
  background-color: #fff;
  margin: auto;
- border: 2px solid #dedede;
  min-height: 100vh;
- padding: 0 60px;
+ /* padding: 0 60px; */
  border-top: 0;
- min-height: 1300px;
+ /* min-height: 1300px; */
+}
+#brand-container .ant-tabs-tabpane{
+    min-height: 1000px;
 }
 .brand-cover {
- min-height: 400px;
+ min-height: 450px;
  border: 1px solid rgb(142 141 141 / 53%);
-
+max-height:450px;
+overflow: hidden;
  /* border-top: 0; */
 }
-
+#brandcovercropper .cropper-drag-box.cropper-move.cropper-modal{
+    background-color: rgba(0, 0, 0, 0.507) !important;
+    z-index:500 !important;
+}
+#brandcovercropper .cropper-modal{
+    z-index: 500 !important;
+}
+#brandcovercropper .cropper-crop-box{
+    width:100% !important;
+    height:450px !important;
+}
+.brand-cover .cropper-crop-box{
+    width: 99.9% !important;
+    height:450px !important;
+}
+.uplpoadbrandcover, .changebrandcover{
+      height: 53px;
+    background: #eeeeee5c;
+    width: 207px;
+    margin-top: 0px;
+    margin-left: auto;
+}
+.uplpoadbrandcover button, .changebrandcover button{
+    position: relative;
+    width: 100%;
+    display: block;
+    height: 100%;
+    border: 1px dashed #0000000d;
+}
+.uplpoadbrandcover input, .changebrandcover input{
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    top: 0;
+}
+.setbrandcover, .changebrandcover{
+        background: red;
+    color: #fff;
+    /* padding: 9px; */
+    position: absolute;
+    /* top: 0; */
+    right: 10px;
+    bottom: 7px;
+    /* left: 28px; */
+    width: 136px;
+    height: 39px;
+    font-weight: 600;
+    z-index: 600;
+}
 .brand-profile {
  width: 180px;
  height: 180px;
@@ -39,6 +93,7 @@ img {
  background-color: #e8e8e8;
  color: #8d8d8d;
  font-weight: 600;
+ border:3px solid #dddddd82
 }
 .brand-profile img {
  background: black;
@@ -80,8 +135,15 @@ img {
 
 .actions-btns .follow {
  background-color: #e41e15;
+ width:100px;
  color: #fff;
  border: none;
+ padding:6.5px 0;
+ height:32px;
+ font-weight: 600;
+}
+.followed{
+    background-color: #999898 !important; 
 }
 .actions-btns span {
  display: inline-block;
@@ -103,24 +165,34 @@ img {
 .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
  color: #000 !important;
 }
+#brand-container .ant-tabs-tab:hover{
+    color:#000 !important;
+}
 .overview-tab h6 {
  font-size: 2rem;
  color: #000;
- margin-bottom: 25px;
+ margin-bottom: 10px;
 }
 .overview-tab p {
  font-size: 1rem;
  color: #000000;
  font-weight: 500;
 }
-.box {
+
+.product-types .box{
  background: #eaeaea;
- width: 205px;
- height: 205px;
+ width: 175px;
+ height: 175px;
  border-radius: 10px;
+ background-position: center;
+ background-size: contain;
+ background-repeat: no-repeat;   
 }
-.overview-tab .ant-row {
- justify-content: space-between;
+.product-types span{
+    font-size: 1rem;
+    font-weight: 600;
+    display: block;
+    text-align: center;
 }
 .types-row .ant-col-md-4 {
  text-align: center;
@@ -132,12 +204,31 @@ img {
 .p-img {
  width: 100%;
  padding-bottom: 100%;
- background-color: rgb(0, 26, 113, 0.02) !important;
  background-repeat: no-repeat !important;
  background-position: center !important;
  background-size: contain !important;
  margin-bottom: 10px;
 }
+
+.p-img:hover .prlayer{
+    /* background-color: #000000a8; */
+
+}
+.prlayer{
+  background: #001A71;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    opacity: .02;
+    transition: all 350ms ease-in-out !important;
+
+}
+.prlayer{
+}
+
 .product {
  transition: all 0.3s ease-in;
  padding-bottom: 10px;
@@ -152,7 +243,7 @@ img {
  color: #000;
  font-weight: 500;
  font-family: "Roboto";
- font-size: 16px;
+ font-size: 18px;
  padding-left: 8px;
 }
 .product .product-name {
@@ -186,4 +277,49 @@ img {
 }
 #user-settings .profile-form {
  max-width: 100%;
+}
+.count{
+    text-align: right;
+    font-weight: 300;
+}
+.count span{
+    font-weight: 900;
+    padding: 0 7px;
+}
+
+.type-item {
+    width: 175px;
+    height: 175px;
+    cursor:grab;
+ background: #eaeaea;
+     border-radius: 10px;
+ background-position: center;
+ background-size: contain;
+ background-repeat: no-repeat;   
+}
+.section {
+    padding:0 60px
+}
+
+.arrow-btn {
+    min-width: 25px
+}
+.arrow-btn svg{
+    width: 23px;
+    height: 23px;
+    font-size: 1rem;
+    color: rgb(0, 0, 0);
+    border-radius: 50%;
+    padding: 2px;
+}
+#brand-container .ant-tabs-nav{
+    width: 100% !important;
+}
+#brand-container .ant-tabs-nav-wrap{
+    justify-content: center !important;
+}
+
+
+#user-settings .profile-container{
+    margin: 0 auto;
 }

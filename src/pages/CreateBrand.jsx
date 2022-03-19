@@ -1,17 +1,15 @@
 import React, { Component } from "react";
-import { Container, Form, Row, Col } from "react-bootstrap";
-import { Form as FormAnt, Input, Button, message, Steps } from "antd";
+import { Row, Col } from "react-bootstrap";
+import { Steps } from "antd";
 import { connect } from "react-redux";
-import axios from "axios";
-import * as utility from "../utitlties";
 import {
- presistInfo,
  updateInfo,
  emailPasswordSignupSuccess,
 } from "../redux/actions/authActions";
 import CreateBrandRegister from "./CreateBrandRegister";
 import CreateBrandVerify from "./CreateBrandVerify";
 import CreateBrandFinish from "./CreateBrandFinish";
+import { auth } from "../firebase";
 const { Step } = Steps;
 
 class CreateBrand extends Component {
@@ -24,7 +22,6 @@ class CreateBrand extends Component {
  }
 
  componentDidMount() {
-  //   console.log(this.props.userInfo);
   if (this.props.isLoggedIn) {
    if (this.props.userInfo?.emailVerified) {
     this.setState({ steps: this.authenticated_verified_steps });
@@ -34,7 +31,32 @@ class CreateBrand extends Component {
   } else {
    this.setState({ steps: this.unauthenticated_steps });
   }
+  auth.onAuthStateChanged((userAuth) => {
+   if (userAuth) {
+    if (this.props.isLoggedIn) {
+     if (this.props.userInfo?.emailVerified) {
+      this.setState({ steps: this.authenticated_verified_steps });
+     } else {
+      this.setState({ steps: this.authenticated_unverified_steps });
+     }
+    } else {
+     this.setState({ steps: this.unauthenticated_steps });
+    }
+   } else {
+    this.setState({ isOwner: false, is_A_Follower: false, isLoggedIn: false });
+    if (this.props.isLoggedIn) {
+     if (this.props.userInfo?.emailVerified) {
+      this.setState({ steps: this.authenticated_verified_steps });
+     } else {
+      this.setState({ steps: this.authenticated_unverified_steps });
+     }
+    } else {
+     this.setState({ steps: this.unauthenticated_steps });
+    }
+   }
+  });
  }
+
  steps = [
   {
    title: "Create Account",

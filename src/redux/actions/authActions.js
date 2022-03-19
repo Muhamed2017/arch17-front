@@ -99,8 +99,12 @@ const displayName=`${fname} ${lname}`
             userCredential.user.updateProfile({
                 displayName: displayName,
             }).then(()=>{
+                const providerId = userCredential.user.providerData[0].providerId
+                const {displayName, email, uid, photoURL} = userCredential.user
+                registerUser(displayName, email, uid, providerId, photoURL ).then(()=>{
                 dispatch(emailPasswordSignupSuccess(userCredential.user))
-                presistInfo(userCredential.user, true)
+                presistInfo(userCredential.user, true)     
+                })               
             })
         })
        }
@@ -120,8 +124,7 @@ const displayName=`${fname} ${lname}`
                     .catch((error) => {
                     console.log(error);
                     });
-        }
-       
+        }  
     }
 }
 
@@ -212,6 +215,7 @@ export const presistInfo = (info, loggingState)=>{
         info: info,
         isLoggedIn: loggingState,
         displayName:info.displayName,
+        // photoURL:info.photoURL,
         photoURL:info.photoURL,
         email:info.email
     }
@@ -232,15 +236,37 @@ export const signupGoogle = () => {
     return (dispatch) => {
         dispatch(googleSignup());
         auth.signInWithPopup(googleProvider).then((userCredential) => {
-            console.log(userCredential.user)
-            dispatch(googleSignuoSuccess(userCredential.user))
-            dispatch(updateInfo(userCredential.user))
-            presistInfo(userCredential.user, true)
+            if(userCredential.additionalUserInfo.isNewUser){
+                const providerId = userCredential.user.providerData[0].providerId
+                const {displayName, email, uid, photoURL} = userCredential.user
+                registerUser(displayName, email, uid, providerId, photoURL ).then(()=>{
+                dispatch(googleSignuoSuccess(userCredential.user))
+                dispatch(updateInfo(userCredential.user))
+                presistInfo(userCredential.user, true)  
+                })
+            }else{
+                dispatch(googleSignuoSuccess(userCredential.user))
+                dispatch(updateInfo(userCredential.user))
+                presistInfo(userCredential.user, true)
+            }
         }).catch((error) => {
             console.log(error.message)
         })
     }
 }
+
+const registerUser= async (displayName, email, uid, providerId, avatar)=>{
+    const fd = new FormData()
+    fd.append('displayName', displayName);
+    fd.append('email', email);
+    fd.append('uid', uid);
+    fd.append('providerId', providerId);
+    fd.append('avatar', avatar);
+    await axios.post(`${actions.ENDPOINT}registeruser`, fd).then((repsonse)=>{
+        console.log("Designer account created")
+        console.log(repsonse)
+    })
+} 
 export const phoneSigninRequest = ()=>{
 return (dispatch)=>{
     dispatch(phoneSignupRequestCreator())
