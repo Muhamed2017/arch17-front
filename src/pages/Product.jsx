@@ -1445,7 +1445,7 @@ class Product extends Component {
             <div className="right-row ">
              <span>CBM</span>
 
-             <div id="sizes" className="options">
+             <div id="cpm" className="options">
               {this.state.options?.map((option, index) => {
                if (option.quantity.length > 0) {
                 return (
