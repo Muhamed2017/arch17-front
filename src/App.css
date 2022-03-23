@@ -4243,3 +4243,6 @@ p.designer-name-select {
 .fr-box.fr-basic .fr-element{
   min-height:400px !important;
 }
+a[href="https://www.froala.com/wysiwyg-editor?k=u"]{
+display: none !important;
+}
