@@ -4224,3 +4224,22 @@ p.designer-name-select {
 .step-container .ant-steps-item-process .ant-steps-item-title {
  color: #000 !important;
 }
+.fr-second-toolbar{
+  display: none;
+}
+
+.fr-view img.fr-dib{
+  margin-bottom: 20px !important;
+
+}
+
+.file-item-thumbnail-hover{
+  width:50px !important;
+}
+.fr-quick-insert a.fr-floating-btn svg {
+  height: 38px !important;
+}
+
+.fr-box.fr-basic .fr-element{
+  min-height:400px !important;
+}

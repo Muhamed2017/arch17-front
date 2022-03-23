@@ -16,7 +16,7 @@ import { connect } from 'react-redux';
 import NavigationBar from './components/NavigationBar';
 import { ChakraProvider } from "@chakra-ui/react"
 import AddProductWrapper from './pages/addProduct/AddProductWrapper';
-import NewWrapper from './pages/addProduct/NewWrapper';
+import AddProjectWrapper from './pages/addProject/AddProjectWrapper';
 import TestUpload from './pages/TestUpload';
 import TestCrop from './pages/TestCrop';
 import Dropzones from './components/Dropzone'
@@ -24,7 +24,6 @@ import { LinkedInPopUp } from 'react-linkedin-login-oauth2';
 import CreateBrand from './pages/CreateBrand'
 import Kind from './pages/addProduct/Kind'
 import Product from './pages/Product'
-import CoverTab from './pages/addProduct/CoverTab';
 import TextEditor from './pages/TextEditor';
 import "react-notifications-component/dist/theme.css";
 import UserProfile from './pages/UserProfile';
@@ -34,7 +33,6 @@ import Settings from './pages/user_profile_tabs/Settings';
 import { Home } from './pages/Home';
 import { ConfigProvider } from 'antd-country-phone-input';
 import en from 'world_countries_lists/data/en/world.json';
-import Preview from './pages/addProduct/Preview'
 import 'antd/dist/antd.css';
 import 'antd-country-phone-input/dist/index.css'
 import Search from './pages/Search';
@@ -61,9 +59,6 @@ class App extends Component {
           <Router>
           <NavigationBar />
 
-             {/* <NavigationBar />
-          <ConfigProvider locale={en}>
-          </ConfigProvider> */}
             <Switch>
               <Route path="/signup" exact>
                 {this.props.isLoggedIn ? <Redirect to="/" /> : <Register />}
@@ -96,16 +91,16 @@ class App extends Component {
               render={(state)=><AddProductWrapper {...state}/>}
               exact />
 
+              
                <Route path='/edit/:id' 
               render={(state)=><EditProductWrapper {...state}/>}
               exact />
               <Route path="/add" exact>
                 <MultiStepForm/>
               </Route>
-              
-              {/* <Route path='/profile/settings' exact>
-                <Settings/>
-              </Route> */}
+           <Route path='/addproject' 
+              render={(state)=><AddProjectWrapper {...state}/>}
+              exact />
               <Route path="/profile/settings" exact component= {Settings} />
                 <Route path="/user/:uid" exact component={UserProfile } />
                

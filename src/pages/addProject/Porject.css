@@ -1,0 +1,31 @@
+
+.addprojectwrapper{
+    /* max-width: 1250px; */
+    margin:auto;
+}
+.wrapper-inner{
+    max-width: 1250px;
+    margin:auto;
+}
+.addprojectwrapper .custom-content{
+    min-height: 100vh;
+    background-color: #fff;
+    margin: 35px auto;
+    font-family: "Roboto";
+    position: relative;
+}
+.addprojectwrapper .ant-steps {
+    justify-content: start !important;
+    grid-gap: 15px;
+}
+.addprojectwrapper .ant-steps-item-title{
+    font-size: 16px;
+    font-weight: 600;
+    font-family: "Roboto";
+
+}
+.addprojectwrapper .steps-action{
+    position: absolute;
+    top: -92px;
+    right: 0;
+}

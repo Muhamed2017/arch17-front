@@ -4182,6 +4182,11 @@ attr-accept@^2.0.0:
   resolved "https://registry.yarnpkg.com/attr-accept/-/attr-accept-2.2.2.tgz#646613809660110749e92f2c10833b70968d929b"
   integrity sha512-7prDjvt9HmqiZ0cl5CRjtS84sEyhsHP2coDkaZKRKVfCDo9s7iw7ChVmar78Gu9pC4SoR/28wFu/G5JJhTnqEg==
 
+autobind-decorator@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/autobind-decorator/-/autobind-decorator-2.4.0.tgz#ea9e1c98708cf3b5b356f7cf9f10f265ff18239c"
+  integrity sha512-OGYhWUO72V6DafbF8PM8rm3EPbfuyMZcJhtm5/n26IDwO18pohE4eNazLoCGhPiXOCD0gEGmrbU3849QvM8bbw==
+
 autoprefixer@^9.6.1:
   version "9.8.6"
   resolved "https://registry.yarnpkg.com/autoprefixer/-/autoprefixer-9.8.6.tgz#3b73594ca1bf9266320c5acf1588d74dea74210f"
@@ -5335,6 +5340,11 @@ core-js@^3.16.1, core-js@^3.6.4:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.16.1.tgz#f4485ce5c9f3c6a7cb18fa80488e08d362097249"
   integrity sha512-AAkP8i35EbefU+JddyWi12AWE9f2N/qr/pwnDtWz4nyUIBGMJPX99ANFFRSw6FefM374lDujdtLDyhN2A/btHw==
 
+core-js@^3.21.1:
+  version "3.21.1"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.21.1.tgz#f2e0ddc1fc43da6f904706e8e955bc19d06a0d94"
+  integrity sha512-FRq5b/VMrWlrmCzwRrpDYNxyHP9BcAZC+xHJaqTgIE5091ZV1NTmyh0sGOg5XqpnHvR0svdy0sv1gWA1zmhxig==
+
 core-js@^3.6.5:
   version "3.9.0"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.9.0.tgz#790b1bb11553a2272b36e2625c7179db345492f8"
@@ -5407,6 +5417,14 @@ create-hmac@^1.1.0, create-hmac@^1.1.4, create-hmac@^1.1.7:
     ripemd160 "^2.0.0"
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
+
+create-react-class@^15.5.2:
+  version "15.7.0"
+  resolved "https://registry.yarnpkg.com/create-react-class/-/create-react-class-15.7.0.tgz#7499d7ca2e69bb51d13faf59bd04f0c65a1d6c1e"
+  integrity sha512-QZv4sFWG9S5RUvkTYWbflxeZX+JG7Cz0Tn33rQBJ+WFQTqTfUTjMjiv9tnfXazjsO5r0KhPs+AqCjyrQX6h2ng==
+  dependencies:
+    loose-envify "^1.3.1"
+    object-assign "^4.1.1"
 
 cropperjs@^1.5.12:
   version "1.5.12"
@@ -7190,6 +7208,11 @@ fresh@0.5.2:
   resolved "https://registry.yarnpkg.com/fresh/-/fresh-0.5.2.tgz#3d8cadd90d976569fa835ab1f8e4b23a105605a7"
   integrity sha1-PYyt2Q2XZWn6g1qx+OSyOhBWBac=
 
+froala-editor@4.0.10:
+  version "4.0.10"
+  resolved "https://registry.yarnpkg.com/froala-editor/-/froala-editor-4.0.10.tgz#4539d71d73b2671d9b29b4ba4b151e1f37324b86"
+  integrity sha512-q7KglNOyo7tsK8sdO548qBfuKi+RdAFuC1Zt1E1l7LTzmkCXjGXR5clJJg9zb4V3D06KuPnNeNCGcfVEaalLww==
+
 from2@^2.1.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/from2/-/from2-2.3.0.tgz#8bfb5502bde4a4d36cfdeea007fcca21d7e382af"
@@ -8925,6 +8948,21 @@ jest@26.6.0:
     "@jest/core" "^26.6.0"
     import-local "^3.0.2"
     jest-cli "^26.6.0"
+
+jodit-react@^1.0.64:
+  version "1.2.18"
+  resolved "https://registry.yarnpkg.com/jodit-react/-/jodit-react-1.2.18.tgz#9a605107c1370565e7085b6e2d381b57ebd4318f"
+  integrity sha512-gyx+7NoHk8+hPvW3oHmbg+JpdGJ5JPYsNqgnZwwvteC5sY0OaOt6GqU0/KGWnORKkm6K0bEjQ2hTAre0amfdRQ==
+  dependencies:
+    jodit "^3.9.4"
+
+jodit@^3.4.27, jodit@^3.9.4:
+  version "3.16.3"
+  resolved "https://registry.yarnpkg.com/jodit/-/jodit-3.16.3.tgz#cc3c3ac819d6280d0101c0c43dd7f39aff1ff40b"
+  integrity sha512-EG/2YpWb3FDmbKKnHyM+1J2nTPOebAC5dDjAhpT7CZ1kb5MQnIirz/cW6M8V7jvcGdk3e4O75HWDpTFeJNUqWg==
+  dependencies:
+    autobind-decorator "^2.4.0"
+    core-js "^3.21.1"
 
 jose@^2.0.5:
   version "2.0.5"
@@ -12118,6 +12156,11 @@ react-clientside-effect@^1.2.2:
   dependencies:
     "@babel/runtime" "^7.12.13"
 
+react-country-region-selector@^3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/react-country-region-selector/-/react-country-region-selector-3.4.0.tgz#e7df48c3e3e8c01d6c135fbe692679604b616ab3"
+  integrity sha512-3zUC0Uhsr6gV8Wxj/BBVJxdTl7pETHPnpDU72OT1n6WrhKVlSYcITEjV0iSyqyk+EmTPM1Fca9JmHRJ+efA2UA==
+
 react-cropper@^2.1.8:
   version "2.1.8"
   resolved "https://registry.yarnpkg.com/react-cropper/-/react-cropper-2.1.8.tgz#bf35a7de65769f8ad357e8ae884e791fe3fe9212"
@@ -12154,6 +12197,16 @@ react-dev-utils@^11.0.3:
     shell-quote "1.7.2"
     strip-ansi "6.0.0"
     text-table "0.2.0"
+
+react-dom@^16.13.1:
+  version "16.14.0"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.14.0.tgz#7ad838ec29a777fb3c75c3a190f661cf92ab8b89"
+  integrity sha512-1gCeQXDLoIqMgqD3IO2Ah9bnf0w9kzhwN5q4FGnHZ67hBm9yePzB5JJAIQCc8x3pFnNlwFq4RidZggNAAkzWWw==
+  dependencies:
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+    prop-types "^15.6.2"
+    scheduler "^0.19.1"
 
 react-dom@^17.0.2:
   version "17.0.2"
@@ -12246,6 +12299,14 @@ react-focus-lock@2.5.0:
     use-callback-ref "^1.2.1"
     use-sidecar "^1.0.1"
 
+react-froala-wysiwyg@^4.0.10:
+  version "4.0.10"
+  resolved "https://registry.yarnpkg.com/react-froala-wysiwyg/-/react-froala-wysiwyg-4.0.10.tgz#d0a92ef5a949382a1ae07d55fc88f353794d6b80"
+  integrity sha512-y/h+TV6R818ZIvz177b8+eCDnJpvkUqbRlUaaLRR6CKw+CzxvD/qyzpZlX9tUIGYhYn3AQJgge6PZ4RfTD38PQ==
+  dependencies:
+    create-react-class "^15.5.2"
+    froala-editor "4.0.10"
+
 react-hooks-helper@^1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/react-hooks-helper/-/react-hooks-helper-1.6.0.tgz#d4105f8745471600b38dc450260d513553c883b1"
@@ -12302,6 +12363,16 @@ react-is@^17.0.1:
   version "17.0.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.1.tgz#5b3531bd76a645a4c9fb6e693ed36419e3301339"
   integrity sha512-NAnt2iGDXohE5LI7uBnLnqvLQMtzhkiAOLXTmv+qnF9Ky7xAPcX8Up/xWIhxvLVGJvuLiNc4xQLtuqDRzb4fSA==
+
+react-jodit-editor@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/react-jodit-editor/-/react-jodit-editor-1.1.0.tgz#77f686e1c3f837e4179d3a76823118ef9a67b088"
+  integrity sha512-38zYuRYfRaDqHoXqH5qrtpjcCLP0cIqQ+gJp8UnoxzQBY+SJyi+NC4HEjqmjeJQdY4g6zCr/UD14XtXN0HLONw==
+  dependencies:
+    jodit "^3.4.27"
+    jodit-react "^1.0.64"
+    react "^16.13.1"
+    react-dom "^16.13.1"
 
 react-lifecycles-compat@^3.0.4:
   version "3.0.4"
@@ -12599,6 +12670,15 @@ react-wechat-login@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/react-wechat-login/-/react-wechat-login-1.1.1.tgz#94f7d85215698e78501e98e0fc9e965063fc3088"
   integrity sha512-wRZkgOVw5PwGczuF2tCCG4Uu9+x7rCUkLDxt5Zs2Yfp6yW09IFhmrsm9LQoU0sNpK+y15cWV3XRhr0tpEXTEJg==
+
+react@^16.13.1:
+  version "16.14.0"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.14.0.tgz#94d776ddd0aaa37da3eda8fc5b6b18a4c9a3114d"
+  integrity sha512-0X2CImDkJGApiAlcf0ODKIneSwBPhqJawOa5wCtKbu7ZECrmS26NvtSILynQ66cgkT/RJ4LidJOc3bUESwmU8g==
+  dependencies:
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+    prop-types "^15.6.2"
 
 react@^17.0.2:
   version "17.0.2"
@@ -13160,6 +13240,14 @@ saxes@^5.0.0:
   integrity sha512-5LBh1Tls8c9xgGjw3QrMwETmTMVk0oFgvrFSvWx62llR2hcEInrKNZ2GZCCuuy2lvWrdl5jhbpeqc5hRYKFOcw==
   dependencies:
     xmlchars "^2.2.0"
+
+scheduler@^0.19.1:
+  version "0.19.1"
+  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.19.1.tgz#4f3e2ed2c1a7d65681f4c854fa8c5a1ccb40f196"
+  integrity sha512-n/zwRWRYSUj0/3g/otKDRPMh6qv2SYMWNq85IEa8iZyAv8od9zDYpGSnpBEjNgcMNq6Scbu5KfIPxNF72R/2EA==
+  dependencies:
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
 
 scheduler@^0.20.2:
   version "0.20.2"
