@@ -73,6 +73,16 @@ export const OPTIONS_STORED ="OPTIONS_STORED"
 export const SET_SEARCH_TERM = 'SET_SEARCH_TERM'
 
 
+// add project cycle
+export const ADD_PROJECT_INFO ="ADD_PROJECT_INFO"
+export const ADD_PROJECT_CONTENT ="ADD_PROJECT_CONTENT"
+export const ADD_PROJECT_ROLE ="ADD_PROJECT_ROLE"
+export const ADD_PROJECT_TAGS ="ADD_PROJECT_TAGS"
+export const ADD_PROJECT_COVERS ="ADD_PROJECT_COVER"
+export const NEXT_STEP ="NEXT_STEP"
+export const PREV_STEP ="PREV_STEP"
+// end of project cycle
+
 
 // entities and pages loaded data
 export const GET_BRAND_DATA = 'GET_BRAND_DATA'

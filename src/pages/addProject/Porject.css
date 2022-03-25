@@ -2,11 +2,13 @@
 .addprojectwrapper{
     /* max-width: 1250px; */
     margin:auto;
+    overflow-x: hidden;
 }
 .wrapper-inner{
     max-width: 1250px;
     margin:auto;
 }
+
 .addprojectwrapper .custom-content{
     min-height: 100vh;
     background-color: #fff;
@@ -27,5 +29,270 @@
 .addprojectwrapper .steps-action{
     position: absolute;
     top: -92px;
-    right: 0;
+    right: 100px;
+    width: 0;
+    /* width: 100; */
 }
+#rolestep .editable-cell-value-wrap{
+height: 40px !important;
+padding-top: 6px !important;
+font-size: 17px !important;
+font-weight:500 !important;
+}
+#rolestep .editable-row:hover{
+    height: 40px !important;
+}
+#rolestep .ant-select{
+    font-size: 17px !important;
+    font-weight:500 !important;
+}
+.d-img{
+    width: 45px;
+    height: 45px;
+    background: #ddd;
+    margin: 5px 5px 5px 0;
+    font-size: 1.8rem;
+    text-align: center;
+    font-weight: 900;
+    font-family: "Roboto";
+    
+}
+.designers-row{
+    cursor: pointer;
+}
+.designers-row span{
+    margin: 10px;
+    font-size: 1.1rem;
+    font-family: "Roboto";
+    color: #242424;
+    font-weight: 900;
+}
+.designers-modal .ant-modal-body{
+    max-height: 450px;
+    overflow-y: scroll;
+}
+.wraprow{
+    padding-left: 70px;
+    text-align: left;
+}
+.wraprow .d-img{
+    width: 40px;
+    height: 40px;
+    font-size: 1.7rem;
+}
+.wraprow span{
+    font-size: 16px;
+    font-weight: 600;
+    font-family: "Roboto";
+    padding: 0 15px;
+    vertical-align:super;
+}
+.designers-section{
+    min-height: 500px;
+}
+.checkbox-tag{
+    position: absolute;
+}
+.checkbox-tag input[type="checkbox"]{
+    width: 290px;
+    height: 450px;
+
+}
+.checkbox-tag .ant-checkbox-inner {
+width: 24px;
+height: 24px;
+font-size: 1rem;
+}
+
+.cropper-side{
+height: 400px;
+width: 100%;
+}
+.cover-thumbs {
+    margin-top: 10px;
+display: grid;
+grid-template-columns: repeat(5, 80px);
+height: auto;
+min-height: 80px;
+grid-gap: 10px;
+
+}
+.cover-thumbs > div{
+background-position: center;
+background-size: contain;
+background-repeat: no-repeat;
+background-color: #ddd;
+cursor: pointer;
+}
+
+.prev{
+    overflow: hidden;
+    height: 300px;
+}
+.preview-wrapper-project{
+    display: grid;
+    grid-template-columns: 300px;
+    min-height: 350px !important;
+    align-content: center;
+
+}
+.next-btn{
+    position: absolute;
+    right:0;
+    top:-92px;
+    background:red;
+    border: none;
+    outline: none;
+    padding: 2px 4px;
+}
+
+/* project page stylse */
+
+#project-page{
+    max-width: 1300px;
+    margin: 15px auto;
+}
+
+.project-cover img{
+    display: block;
+    width: 100%;
+}
+.project-cover {
+    width: 100%;
+}
+.project-content h6{
+    font-size: 1.7rem;
+    font-weight: 600;
+    font-family: "Roboto";
+    padding: 10px 0;
+}
+.shifted-top{
+    position: relative;
+    top:-80px
+}
+.project-content{
+    background-color: #fff;
+       padding: 1.5rem;
+}
+.project-content .location{
+    color: #a0a0a0;
+}
+.editor-state p{
+    font-weight: 500;
+    font-size: .85rem;
+    font-family: "Roboto";
+}
+
+.project-right-side .designers{
+    background-color: #fff;
+    height: 370px;
+    margin: 20px 0;
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid #dedede;
+}
+.project-right-side .brands{
+    margin: 20px 0;
+    background-color: #fff;
+    min-height: 450px;
+    border-radius: 10px;
+    border: 1px solid #dedede;
+
+}
+.des-btns{
+    margin: 12px 0;
+}
+.des-btns button{
+margin-left: 10px;
+    padding: 5px;
+
+}
+ .name, .title{
+padding-left: 10px;
+}
+.des-btns button:first-child{
+border: 1px solid #707070;
+border-radius: 5px;
+padding:4px 0;
+font-size: 16px;
+width: 45px;
+}
+.designers .name{
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+.designers .title{
+    color: #747474;
+    font-weight: 500;
+}
+.des-btns button:last-child{
+    background-color: #a3a3a3;
+    width: 118px;
+    color: #fff;
+    border-radius: 4px;
+
+}
+.des-btns button > *{
+    display: inline-block;
+    vertical-align: text-bottom;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+.p-box{
+    width: 110px;
+    height: 110px;
+    position: relative;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+.sky{
+    position: absolute;
+    right: 0;
+    left: 0;
+    top:0;
+    width: 100%;
+    bottom: 0;
+    background-color: rgba(214, 214, 214, 0.151);
+}
+.socials >div{
+    background-color: #fff;
+    width: 50px;
+    height: 50px;
+    margin: 8px auto;
+    padding-top: 10px;
+}
+.socials {
+    font-size: 1.8rem;
+    color: #242424;
+
+}
+.socials svg{
+    margin: auto;
+}
+#product-tags{
+background-color: #ebebeb;
+min-height: 400px;
+}
+#product-tags .products{
+    max-width: 1300px ;
+    margin: auto;
+}
+#product-tags .p-img{
+    margin-bottom: 0;
+}
+#product-tags .product{
+margin-bottom: 0;
+}
+.lower-info{
+    background-color: #fff;
+    padding: 10px 0 5px 0 ;
+}
+#product-tags p.head{
+    font-size: 22px;
+    font-weight: 600;
+}
+.red {
+    color: red;
+}
+/* end of project page styles */

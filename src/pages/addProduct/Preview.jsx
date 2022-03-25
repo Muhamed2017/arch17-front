@@ -206,7 +206,7 @@ class Preview extends Component {
       <Row>
        <Col span={10} className="pt-4">
         <>
-         <div id="preview-wrapper">
+         <div className="preview-wrapper">
           <div className={"preview image-preview"}></div>
          </div>
          <div className="preview-store">Kelly Wearstler</div>

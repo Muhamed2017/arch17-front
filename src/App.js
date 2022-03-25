@@ -24,6 +24,7 @@ import { LinkedInPopUp } from 'react-linkedin-login-oauth2';
 import CreateBrand from './pages/CreateBrand'
 import Kind from './pages/addProduct/Kind'
 import Product from './pages/Product'
+import Project from './pages/Project'
 import TextEditor from './pages/TextEditor';
 import "react-notifications-component/dist/theme.css";
 import UserProfile from './pages/UserProfile';
@@ -77,6 +78,7 @@ class App extends Component {
                 <Dropzones/>
               </Route>
               <Route path='/product/:id' component={Product} exact/>
+              <Route path='/project/:id' component={Project} exact/>
               {/* <Route path="/search" component={Search} exact /> */}
               <Route path='/products' 
               render={(state)=> <Search {...state}/>}

@@ -4,7 +4,6 @@ import {
  Col as AntCol,
  Row as AntRow,
  Spin,
- Dropdown,
  Button as AntButton,
  Input,
  Checkbox,
@@ -22,14 +21,9 @@ import {
 } from "react-icons/fa";
 import HashLoader from "react-spinners/HashLoader";
 
-import SaveToFolderMenu from "./../components/SaveToFolderMenu";
 import { Img } from "react-image";
 import "./HomePage.css";
 import { FcGoogle } from "react-icons/fc";
-import slide1 from "./../images/HomePage/HomePageSlides/slider-1.jpg";
-import slide2 from "./../images/HomePage/HomePageSlides/slider-2.jpg";
-import slide3 from "./../images/HomePage/HomePageSlides/slider-3.jpg";
-import slide4 from "./../images/HomePage/HomePageSlides/slider-4.jpg";
 import s1 from "./../images/HomePage/HomePageSlides/s1.jpg";
 import s2 from "./../images/HomePage/HomePageSlides/s2.jpg";
 import s3 from "./../images/HomePage/HomePageSlides/s3.jpg";
