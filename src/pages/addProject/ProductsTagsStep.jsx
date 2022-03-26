@@ -106,16 +106,14 @@ class ProductsTagsStep extends Component {
       })}
      </Row>
     </div>
-    <Button
-     type="primary"
+    <button
      className="next-btn"
      onClick={() => {
-      console.log(this.state);
       this.props.dispatchProjectTags(this.state.ids);
      }}
     >
      Save & Continue
-    </Button>
+    </button>
    </>
   );
  }

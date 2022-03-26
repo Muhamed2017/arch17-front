@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import Cropper from "react-cropper";
 import slide from "../../../src/slide1.jpg";
 import "cropperjs/dist/cropper.css";
+import { ImLocation } from "react-icons/im";
 
 class CoverStep extends Component {
  constructor(props) {
@@ -14,6 +15,7 @@ class CoverStep extends Component {
    slides: this.props.covers,
    cropped_cover: "",
    active: slide,
+   displayName: this.props.info?.name,
   };
  }
 
@@ -28,13 +30,14 @@ class CoverStep extends Component {
   const imageElement = this.cropperRef?.current;
   let cropper = imageElement?.cropper;
 
-  cropper.replace(this.state.slides[index]);
+  cropper.replace(this.state.slides[index], true);
  };
  onChange = (a, b, c) => {
   console.log(a, b, c);
  };
  componentDidMount() {
   console.log(this.props.covers);
+  console.log(this.props.info?.year?._d.getFullYear());
  }
  render() {
   return (
@@ -42,7 +45,37 @@ class CoverStep extends Component {
     <div id="project-cover-step" className="p-3 py-5">
      <Row span={24} gutter={25}>
       <Col md={8}>
-       <div className="prev"></div>
+       <div className="border">
+        <div className="prev"></div>
+        <div className="project-desc text-left" style={{ textAlign: "left" }}>
+         <div className="project-name mb-2 mt-2">
+          <h4>{this.state.displayName}</h4>
+         </div>
+         <div className="project-category">
+          <p className="mb-1">
+           <ImLocation
+            style={{
+             display: "inline-block",
+             verticalAlign: "center",
+             margin: "2px 3px 3px -2px ",
+            }}
+           />
+           {`${this.props.info?.country}, ${
+            this.props.info?.city
+           } | ${this.props.info?.year?._d.getFullYear()}`}
+          </p>
+         </div>
+         <div className="pl-3" style={{ width: "95%", margin: "auto" }}>
+          <hr className="m-0 p-0 " />
+         </div>
+         <div className="project-type d-flex justify-content-start align-items-center">
+          <p className="mr-1"> Interior design </p>
+          <p className="mr-1 ml-1"> Architecture </p>
+          <p className="mr-1 ml-1"> Restaurant </p>
+         </div>
+        </div>
+       </div>
+       {/* <div className="prev"></div> */}
       </Col>
       <Col md={16}>
        <div className="cropper-side">
@@ -78,11 +111,21 @@ class CoverStep extends Component {
          );
         })}
        </div>
-      </Col>
-     </Row>
-     <Row justify="end" className="my-5">
-      <Col md={8}>
-       <Input size="large" placeholder="Display Name" />
+       <div className="my-5 py-3">
+        <Row justify="center" gutter={25}>
+         <Col md={4}>
+          <span className="form-label">Project Name</span>
+         </Col>
+         <Col md={12}>
+          <Input
+           size="large"
+           value={this.state.displayName}
+           placeholder="Display Name"
+           onChange={(e) => this.setState({ displayName: e.target.value })}
+          />
+         </Col>
+        </Row>
+       </div>
       </Col>
      </Row>
     </div>
@@ -94,6 +137,7 @@ class CoverStep extends Component {
 const mapStateToProps = (state) => {
  return {
   covers: state.project.project_covers,
+  info: state.project.project_info,
  };
 };
 export default connect(mapStateToProps)(CoverStep);
