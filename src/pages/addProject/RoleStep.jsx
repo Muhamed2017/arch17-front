@@ -4,7 +4,14 @@ import Draggable from "react-draggable";
 import { DeleteOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
 
-import { addProjectRoles } from "./../../redux/actions/addProjectActions";
+import {
+ addProjectRoles,
+ addProjectRoleDesigner,
+ addProjectRoleBrand,
+ deleteProjectRoleBrand,
+ deleteProjectRoleDesigner,
+ goToProjectStep,
+} from "./../../redux/actions/addProjectActions";
 class RoleStep extends Component {
  constructor(props) {
   super(props);
@@ -35,10 +42,14 @@ class RoleStep extends Component {
     { id: 9, name: "Layla Brand", img: null },
     { id: 10, name: "Hassan Brand", img: null },
    ],
-   addedDesigners: this.props.roles?.addedDesigners ?? [],
-   addedDesIDs: this.props.roles?.addedDesIDs ?? [],
-   addedBraIDs: this.props.roles?.addedBraIDs ?? [],
-   addedBrands: this.props.roles?.addedBrands ?? [],
+   addedDesigners: this.props.designers ?? [],
+   addedBrands: this.props.brands ?? [],
+   addedDesIDs: this.props.designers.map((des) => {
+    return des.id;
+   }),
+   addedBraIDs: this.props.brands.map((b) => {
+    return b.id;
+   }),
 
    disabled: true,
    bounds: { left: 0, top: 0, bottom: 0, right: 0 },
@@ -99,18 +110,28 @@ class RoleStep extends Component {
   });
  };
  handleAddDesigner = (d) => {
-  this.setState({
-   designesModal: false,
-   addedDesIDs: [...this.state.addedDesIDs, d.id],
-   addedDesigners: [...this.state.addedDesigners, d],
-  });
+  this.setState(
+   {
+    designesModal: false,
+    addedDesIDs: [...this.state.addedDesIDs, d.id],
+    addedDesigners: [...this.state.addedDesigners, d],
+   },
+   () => {
+    this.props.dispatchAddDesigner(d);
+   }
+  );
  };
  handleAddBrand = (d) => {
-  this.setState({
-   brandsModal: false,
-   addedBraIDs: [...this.state.addedBraIDs, d.id],
-   addedBrands: [...this.state.addedBrands, d],
-  });
+  this.setState(
+   {
+    brandsModal: false,
+    addedBraIDs: [...this.state.addedBraIDs, d.id],
+    addedBrands: [...this.state.addedBrands, d],
+   },
+   () => {
+    this.props.dispatchAddBrand(d);
+   }
+  );
  };
  render() {
   const { designesModal, disabled, bounds, brandsModal } = this.state;
@@ -149,14 +170,19 @@ class RoleStep extends Component {
            <p
             className="pointer"
             onClick={() => {
-             this.setState({
-              addedDesigners: this.state.addedDesigners.filter((des) => {
-               return des.id !== d.id;
-              }),
-              addedDesIDs: this.state.addedDesIDs.filter((id) => {
-               return id !== d.id;
-              }),
-             });
+             this.setState(
+              {
+               addedDesigners: this.state.addedDesigners.filter((des) => {
+                return des.id !== d.id;
+               }),
+               addedDesIDs: this.state.addedDesIDs.filter((id) => {
+                return id !== d.id;
+               }),
+              },
+              () => {
+               this.props.dispatchDeleteDesigner(d);
+              }
+             );
             }}
            >
             <DeleteOutlined />
@@ -215,14 +241,19 @@ class RoleStep extends Component {
            <p
             className="pointer"
             onClick={() => {
-             this.setState({
-              addedBrands: this.state.addedBrands.filter((brand) => {
-               return brand.id !== b.id;
-              }),
-              addedBraIDs: this.state.addedBraIDs.filter((id) => {
-               return id !== b.id;
-              }),
-             });
+             this.setState(
+              {
+               addedBrands: this.state.addedBrands.filter((brand) => {
+                return brand.id !== b.id;
+               }),
+               addedBraIDs: this.state.addedBraIDs.filter((id) => {
+                return id !== b.id;
+               }),
+              },
+              () => {
+               this.props.dispatchDeleteBrand(b);
+              }
+             );
             }}
            >
             <DeleteOutlined />
@@ -249,21 +280,14 @@ class RoleStep extends Component {
        </Col>
       </Row>
      </div>
-     <Button
-      type="primary"
+     <button
       className="next-btn"
       onClick={() => {
-       console.log(this.state);
-       this.props.dispatchProjectRole({
-        addedDesigners: this.state.addedDesigners,
-        addedBrands: this.state.addedBrands,
-        addedBraIDs: this.state.addedBraIDs,
-        addedDesIDs: this.state.addedDesIDs,
-       });
+       this.props.dispatchGoStep(3);
       }}
      >
       Save & Continue
-     </Button>
+     </button>
     </div>
 
     <Modal
@@ -413,10 +437,19 @@ class RoleStep extends Component {
 
 const mapDispatchToProps = (dispatch) => ({
  dispatchProjectRole: (roles) => dispatch(addProjectRoles(roles)),
+ dispatchAddDesigner: (designer) => dispatch(addProjectRoleDesigner(designer)),
+ dispatchAddBrand: (brand) => dispatch(addProjectRoleBrand(brand)),
+ dispatchDeleteBrand: (brand) => dispatch(deleteProjectRoleBrand(brand)),
+ dispatchGoStep: (step) => dispatch(goToProjectStep(step)),
+
+ dispatchDeleteDesigner: (designer) =>
+  dispatch(deleteProjectRoleDesigner(designer)),
 });
 const mapStateToProps = (state) => {
  return {
   roles: state.project.project_roles,
+  designers: state.project.role_designers,
+  brands: state.project.role_brands,
  };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(RoleStep);

@@ -38,7 +38,7 @@ class InfoStep extends Component {
  render() {
   return (
    <>
-    <div className="project-step-content p-5">
+    <div className="project-step-info p-5">
      <Form
       name="basic"
       size="large"
@@ -49,6 +49,7 @@ class InfoStep extends Component {
       autoComplete="off"
      >
       <Form.Item
+       className="form-label mb-5"
        label="Project Name"
        initialValue={this.props.info?.name ?? ""}
        name="name"
@@ -59,20 +60,21 @@ class InfoStep extends Component {
       <Form.Item
        name="blogType"
        initialValue={this.props.info?.blogType ?? ""}
-       label="Project Kind"
+       label="Article Type"
+       className="form-label mb-5"
        rules={[{ required: true, message: "Kind is required" }]}
        wrapperCol={{ offset: 0, span: 24 }}
       >
        <Checkbox.Group>
-        <Row span={24}>
-         <Col md={16}>
+        <Row span={24} gutter={12}>
+         <Col md={10}>
           <Checkbox value="project" style={{ lineHeight: "32px" }}>
            Project
           </Checkbox>
          </Col>
-         <Col md={8}>
+         <Col md={14}>
           <Checkbox value="blog" style={{ lineHeight: "32px" }}>
-           Blog
+           Design Blog
           </Checkbox>
          </Col>
         </Row>
@@ -80,11 +82,21 @@ class InfoStep extends Component {
       </Form.Item>
       <Form.Item
        name="category"
-       label="Project Category"
+       label="Type"
+       className="form-label mb-4"
+       labelCol={{ span: 3, offset: 0 }}
+       wrapperCol={{ span: 8, offset: 0 }}
        initialValue={this.props.info?.category ?? ""}
        rules={[{ required: true, message: "Please select your country!" }]}
       >
-       <Select placeholder="Please select ">
+       <Select
+        placeholder="Please select "
+        size="large"
+        showArrow
+        style={{
+         fontSize: "13px",
+        }}
+       >
         <Option value="type1">Type1</Option>
         <Option value="type2">Type2</Option>
        </Select>
@@ -92,37 +104,67 @@ class InfoStep extends Component {
       <Form.Item
        name="type"
        initialValue={this.props.info?.type ?? ""}
-       label="Project Type"
+       label="Project"
+       labelCol={{ span: 3 }}
+       wrapperCol={{
+        span: 8,
+       }}
+       className="form-label mb-5"
        rules={[{ required: true, message: "Please select your country!" }]}
       >
-       <Select placeholder="Please select a country">
+       <Select
+        placeholder="Please select a country"
+        style={{
+         fontSize: "13px",
+        }}
+       >
         <Option value="china">China</Option>
         <Option value="usa">U.S.A</Option>
        </Select>
       </Form.Item>
-      <Form.Item>
-       <ReactFlagsSelect
-        selected={this.state.country}
-        selectedSize={14}
-        optionsSize={18}
-        searchable
-        placeholder="Select Country *"
-        onSelect={(code) => {
-         this.setState({ country: code });
+      <Row span={24} gutter={15} justify="start">
+       <Col md={24} className="my-3">
+        <p className="form-label">Project Country & City </p>
+       </Col>
+       <Col md={6}>
+        <ReactFlagsSelect
+         selected={this.state.country}
+         selectedSize={14}
+         optionsSize={18}
+         searchable
+         placeholder="Select Country *"
+         onSelect={(code) => {
+          this.setState({ country: code });
+         }}
+        />
+       </Col>
+       <Col md={12}>
+        <Form.Item
+         initialValue={this.props.info?.city ?? ""}
+         name="city"
+         rules={[{ required: true, message: "City" }]}
+        >
+         <Input placeholder="City" />
+        </Form.Item>
+       </Col>
+      </Row>
+      <Form.Item
+       wrapperCol={{ span: 6 }}
+       name="year"
+       label="Year"
+       className="form-label mt-4"
+       {...config}
+       initialValue={this.props.info?.year}
+      >
+       <DatePicker
+        picker="year"
+        style={{
+         width: "100%",
         }}
        />
       </Form.Item>
-      <Form.Item
-       name="monthPicker"
-       label="MonthPicker"
-       {...config}
-       initialValue={this.props.info?.monthPicker}
-      >
-       <DatePicker picker="month" />
-      </Form.Item>
 
-      <Button
-       type="primary"
+      <button
        className="next-btn"
        htmlType="submit"
        onClick={() => {
@@ -130,7 +172,7 @@ class InfoStep extends Component {
        }}
       >
        Save & Continue
-      </Button>
+      </button>
      </Form>
     </div>
    </>

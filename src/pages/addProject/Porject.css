@@ -1,4 +1,18 @@
 
+.sticky{
+    position: fixed;
+    top: 65px !important;
+    box-shadow:0 3px 6px -2px rgb(0 0 0 / 7%);
+    width: 1250px;
+    transition: all ease-in 200ms;
+
+}
+.rdw-editor-toolbar{
+    z-index: 100;
+    padding: 20px;
+    border-bottom: 1px solid #F1F1F1;
+
+}
 .addprojectwrapper{
     /* max-width: 1250px; */
     margin:auto;
@@ -136,14 +150,43 @@ cursor: pointer;
     align-content: center;
 
 }
-.next-btn{
-    position: absolute;
-    right:0;
-    top:-92px;
-    background:red;
-    border: none;
+.prev-btn{
+    margin: 0px 8px;
+    position: relative;
+    left: -157px;
+    padding: 5px 15px;
+    height: 33.5px;
+    background: #afadad;
+    color: #fff;
     outline: none;
-    padding: 2px 4px;
+    border: none;
+    border-radius: 2px;
+}
+.next-btn{
+  position: absolute;
+    right: 0;
+    top: -92px;
+    background: #e41e15;
+    border: none;
+    color: #fff;
+    outline: none;
+    padding: 5px 20px;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 400
+}
+.project-step-info .ant-form-item-label{
+    text-align: left;
+}
+.project-step-info .form-label{
+    font-weight: 600;
+    font-size: 17px;
+}
+.form-label label{
+    font-size: 17px;
+}
+.project-step-info .ant-checkbox-group{
+    font-weight: normal;
 }
 
 /* project page stylse */

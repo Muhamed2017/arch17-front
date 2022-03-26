@@ -86,12 +86,13 @@ class AddProjectWrapper extends Component {
 
         <div className="steps-action">
          {current > 0 && (
-          <Button
-           style={{ margin: "0 8px", position: "relative", left: "-114px" }}
+          <button
+           className="prev-btn"
+           style={{ margin: "0 0px", position: "relative" }}
            onClick={() => this.prev()}
           >
            Previous
-          </Button>
+          </button>
          )}
          {current === steps.length - 1 && (
           <Button

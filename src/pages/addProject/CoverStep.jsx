@@ -11,7 +11,6 @@ class CoverStep extends Component {
   this.cropperRef = React.createRef();
 
   this.state = {
-   //    slides: [slide, slide2, slide3],
    slides: this.props.covers,
    cropped_cover: "",
    active: slide,

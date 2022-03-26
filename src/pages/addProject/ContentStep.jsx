@@ -7,25 +7,31 @@ import { API } from "./../../utitlties";
 import {
  addProjectContent,
  addProjectCover,
+ goToProjectStep,
 } from "./../../redux/actions/addProjectActions";
 import { connect } from "react-redux";
 class ContentStep extends Component {
  constructor(props) {
   super(props);
+
   this.state = {
+   nav: false,
    //  editorState: EditorState.createEmpty(),
    editorState: this.props?.content ?? EditorState.createEmpty(),
    files: [],
    covers: [],
   };
  }
+ listener = null;
+
  onEditorStateChange = (editorState) => {
   this.setState({
    editorState,
   });
+  this.props.dispatchProjectContent(editorState);
  };
  submitDescriptionContent = () => {
-  console.log(convertToRaw(this.state.editorState.getCurrentContent()));
+  // console.log(convertToRaw(this.state.editorState.getCurrentContent()));
  };
 
  uploadCallback = (file) => {
@@ -35,16 +41,20 @@ class ContentStep extends Component {
    formData.append("img[]", file);
    axios
     .post(`${API}upload/${5}`, formData)
+
     .then((response) => {
+     const url = response.data.img[response.data.lastIndex].file_url;
      resolve({
-      data: { link: response.data.img[response.data.lastIndex].file_url },
+      data: { link: url },
      });
-     this.setState({
-      covers: [
-       ...this.state.covers,
-       response.data.img[response.data.lastIndex].file_url,
-      ],
-     });
+     this.setState(
+      {
+       covers: [...this.state.covers, url],
+      },
+      () => {
+       this.props.dispatchProjectCover(url);
+      }
+     );
     })
     .catch((err) => {
      console.log(err);
@@ -53,11 +63,18 @@ class ContentStep extends Component {
   });
  };
 
- handleUploadImage = async (e) => {
-  console.log(this.state.editorState.getBlockTree());
-  console.log(convertToRaw(this.state.editorState.getCurrentContent()));
- };
+ componentDidMount() {
+  window.addEventListener("scroll", this.handleScroll);
+ }
 
+ handleScroll = () => {
+  const el = document.getElementsByClassName("rdw-editor-toolbar");
+  if (window.pageYOffset > 108) {
+   el[0]?.classList?.add("sticky");
+  } else {
+   el[0]?.classList?.remove("sticky");
+  }
+ };
  render() {
   const { editorState } = this.state;
 
@@ -92,8 +109,8 @@ class ContentStep extends Component {
     <button
      className="next-btn"
      onClick={() => {
-      this.props.dispatchProjectContent(this.state.editorState);
-      this.props.dispatchProjectCover(this.state.covers);
+      this.props.dispatchGoStep(2);
+      // this.props.dispatchProjectCover(this.state.covers);
      }}
     >
      Save & Continue
@@ -106,6 +123,7 @@ class ContentStep extends Component {
 const mapDispatchToProps = (dispatch) => ({
  dispatchProjectContent: (content) => dispatch(addProjectContent(content)),
  dispatchProjectCover: (cover) => dispatch(addProjectCover(cover)),
+ dispatchGoStep: (step) => dispatch(goToProjectStep(step)),
 });
 const mapStateToProps = (state) => {
  return {
