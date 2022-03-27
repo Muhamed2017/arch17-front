@@ -10,9 +10,11 @@ import {
   DELETE_ROLE_BRAND,
   NEXT_STEP,
   PREV_STEP,
-  GO_TO_PROJECT_STEP
+  GO_TO_PROJECT_STEP,
+  SET_PROJECT_PARAMS
 } from "../../constants.js";
 const defaultState ={
+   params:null,
    project_info:{},
    project_content:null,
    project_roles:{},
@@ -30,7 +32,6 @@ export default function projectReducer(state = defaultState, action) {
       return {...state, 
         step:state.step +=1
       };
-      
        case PREV_STEP:
       return {
         ...state, 
@@ -42,7 +43,11 @@ export default function projectReducer(state = defaultState, action) {
         ...state, 
         step:action.payload
       };
-
+  case SET_PROJECT_PARAMS:
+      return {
+        ...state, 
+        params:action.payload
+      };
 
     case ADD_PROJECT_INFO:
       return {...state,

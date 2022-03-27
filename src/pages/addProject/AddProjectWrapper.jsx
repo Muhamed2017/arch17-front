@@ -6,8 +6,16 @@ import ContentStep from "./ContentStep";
 import RoleStep from "./RoleStep";
 import ProductsTagsStep from "./ProductsTagsStep";
 import { connect } from "react-redux";
-import { NEXT_STEP, PREV_STEP } from "./../../redux/constants";
+import {
+ NEXT_STEP,
+ PREV_STEP,
+ SET_PROJECT_PARAMS,
+} from "./../../redux/constants";
 import CoverStep from "./CoverStep";
+import axios from "axios";
+import { convertToRaw } from "draft-js";
+
+import { API } from "../../utitlties";
 const { Step } = Steps;
 
 const steps = [
@@ -39,13 +47,62 @@ class AddProjectWrapper extends Component {
   super(props);
   this.state = {
    current: this.props.step,
+   creatorType: this.props.match.params.type,
+   creatorId: this.props.match.params.id,
   };
  }
  componentDidMount() {
+  this.props.dispatch({
+   type: SET_PROJECT_PARAMS,
+   payload: {
+    creatorType: this.props.match.params.type,
+    creatorId: this.props.match.params.id,
+   },
+  });
+  console.log("MMMMM");
   this.setState({
    current: this.props.step,
   });
  }
+ handleSubmitAddPrject = () => {
+  const {
+   name,
+   blogType,
+   category,
+   type,
+   country,
+   city,
+   year,
+  } = this.props?.project.project_info;
+  const fd = new FormData();
+  fd.append("name", name);
+  fd.append("article_type", blogType[0]);
+  fd.append("kind", category);
+  fd.append("type", type);
+  fd.append("country", country);
+  fd.append("city", city);
+  fd.append("title", "TITLE");
+  fd.append("year", year);
+  fd.append("cover", year);
+  fd.append(
+   "content",
+   JSON.stringify(
+    convertToRaw(this.project?.project_content?.getCurrentContent())
+   )
+  );
+
+  this.props.project.role_designers?.map((p) => {
+   fd.append("users[]", p.id);
+  });
+  this.props.project.role_brands?.map((s) => {
+   fd.append("stores[]", s.id);
+  });
+  this.props.project.project_tags?.map((p) => {
+   fd.append("products[]", p);
+  });
+
+  axios.post();
+ };
  next = () => {
   this.props.dispatch({
    type: NEXT_STEP,
@@ -68,7 +125,6 @@ class AddProjectWrapper extends Component {
         <Steps forceRender current={current} icon="">
          {steps.map((item) => (
           <Step
-           forceRender
            key={item.title}
            title={item.title}
            icon={() => {
@@ -94,14 +150,7 @@ class AddProjectWrapper extends Component {
            Previous
           </button>
          )}
-         {current === steps.length - 1 && (
-          <Button
-           type="primary"
-           onClick={() => message.success("Processing complete!")}
-          >
-           Done
-          </Button>
-         )}
+
          {current < steps.length - 1 && (
           <Button
            type="primary"
@@ -126,6 +175,7 @@ class AddProjectWrapper extends Component {
 const mapStateToProps = (state) => {
  return {
   step: state.project.step,
+  project: state.project,
  };
 };
 export default connect(mapStateToProps)(AddProjectWrapper);

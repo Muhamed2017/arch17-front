@@ -1,29 +1,35 @@
 import React, { Component } from "react";
-import { Row, Col, Input } from "antd";
+import { Row, Col, Input, Spin } from "antd";
 import { connect } from "react-redux";
 import Cropper from "react-cropper";
 import slide from "../../../src/slide1.jpg";
 import "cropperjs/dist/cropper.css";
 import { ImLocation } from "react-icons/im";
-
+import axios from "axios";
+import { convertToRaw } from "draft-js";
+import { LoadingOutlined } from "@ant-design/icons";
+import { API } from "../../utitlties";
+import { compressImage } from "../addProduct/OptionsPrice";
+import { Redirect } from "react-router-dom";
 class CoverStep extends Component {
  constructor(props) {
   super(props);
   this.cropperRef = React.createRef();
-
   this.state = {
    slides: this.props.covers,
    cropped_cover: "",
    active: slide,
    displayName: this.props.info?.name,
+   created: false,
+   creating: false,
+   cropper: false,
   };
  }
 
  _crop() {
   const imageElement = this.cropperRef?.current;
-  let cropper = imageElement?.cropper;
-
-  let cropped = cropper.getCroppedCanvas().toDataURL();
+  const cropper = imageElement?.cropper;
+  const cropped = cropper.getCroppedCanvas().toDataURL();
   this.setState({ cropped_cover: cropped });
  }
  changeImg = (index) => {
@@ -33,13 +39,86 @@ class CoverStep extends Component {
   cropper.replace(this.state.slides[index], true);
  };
  onChange = (a, b, c) => {
-  console.log(a, b, c);
+  // console.log(a, b, c);
  };
- componentDidMount() {
-  console.log(this.props.covers);
-  console.log(this.props.info?.year?._d.getFullYear());
- }
+
+ dataURLtoFile = (dataurl, filename) => {
+  var arr = dataurl.split(","),
+   mime = arr[0].match(/:(.*?);/)[1],
+   bstr = atob(arr[1]),
+   n = bstr.length,
+   u8arr = new Uint8Array(n);
+
+  while (n--) {
+   u8arr[n] = bstr.charCodeAt(n);
+  }
+
+  return new File([u8arr], filename, { type: mime });
+ };
+ handleSubmitAddPrject = async () => {
+  this.setState({ creating: true });
+
+  const {
+   blogType,
+   category,
+   type,
+   country,
+   city,
+   year,
+  } = this.props?.project.project_info;
+  const fd = new FormData();
+  fd.append("name", this.state.displayName);
+  fd.append("article_type", blogType[0]);
+  fd.append("kind", category);
+  fd.append("type", type);
+  fd.append("country", country);
+  fd.append("city", city);
+  fd.append("title", "TITLE");
+  fd.append("year", year?._d.getFullYear());
+  fd.append(
+   "cover",
+   await compressImage(this.dataURLtoFile(this.state.cropped_cover, "file"))
+  );
+  fd.append(
+   "content",
+   JSON.stringify(
+    convertToRaw(this.props.project?.project_content?.getCurrentContent())
+   )
+  );
+
+  this.props.project.role_designers?.map((p) => {
+   fd.append("users[]", p.id);
+  });
+  this.props.project.role_brands?.map((s) => {
+   fd.append("stores[]", s.id);
+  });
+  this.props.project.project_tags?.map((p) => {
+   fd.append("products[]", p);
+  });
+
+  axios
+   .post(
+    `${API}addproject/${this.props.params.creatorType}/${this.props.params.creatorId}`,
+    fd
+   )
+   .then((response) => {
+    console.log(response);
+
+    this.setState({
+     created: true,
+     creating: false,
+     project_id: response.data.project.id,
+    });
+   })
+   .catch((error) => {
+    console.log(error);
+   });
+ };
+ componentDidMount() {}
  render() {
+  if (this.state.created)
+   return <Redirect to={`/project/${this.state.project_id}`} />;
+
   return (
    <>
     <div id="project-cover-step" className="p-3 py-5">
@@ -75,17 +154,17 @@ class CoverStep extends Component {
          </div>
         </div>
        </div>
-       {/* <div className="prev"></div> */}
       </Col>
       <Col md={16}>
        <div className="cropper-side">
         <Cropper
          aspectRatio={1.5}
-         //   src={this.state.preview_src ?? ""}
-         src={this.state.slides[0]}
+         src={this.props.covers[0]}
          viewMode={1}
          style={{ height: "100%", width: "94%" }}
          // Cropper.js options
+         //  onLoad={() => console.log("loaded")}
+         //  start={() => console.log("MMM")}
          ref={this.cropperRef}
          cropend={this._crop.bind(this)}
          ready={this._crop.bind(this)}
@@ -93,6 +172,7 @@ class CoverStep extends Component {
          preview=".prev"
          autoCropArea={1}
          dragMode="move"
+         //  ready
          cropBoxMovable={false}
          cropBoxResizable={true}
         />
@@ -129,6 +209,27 @@ class CoverStep extends Component {
       </Col>
      </Row>
     </div>
+    <button
+     className="next-btn"
+     onClick={this.handleSubmitAddPrject}
+     style={{
+      background: this.state.creating ? "#ddd" : "",
+     }}
+    >
+     {this.state.creating ? (
+      <Spin
+       style={{
+        minWidth: "120px",
+       }}
+       size="large"
+       indicator={
+        <LoadingOutlined style={{ fontSize: "25px", color: "#fff" }} spin />
+       }
+      />
+     ) : (
+      "Save & Continue"
+     )}
+    </button>
    </>
   );
  }
@@ -138,6 +239,8 @@ const mapStateToProps = (state) => {
  return {
   covers: state.project.project_covers,
   info: state.project.project_info,
+  project: state.project,
+  params: state.project?.params,
  };
 };
 export default connect(mapStateToProps)(CoverStep);

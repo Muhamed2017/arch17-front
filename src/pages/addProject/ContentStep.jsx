@@ -100,7 +100,7 @@ class ContentStep extends Component {
         alt: { present: false, mandatory: false },
         defaultSize: {
          height: "auto",
-         width: "80%",
+         width: "100%",
         },
        },
       }}

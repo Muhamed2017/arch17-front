@@ -100,7 +100,7 @@ class App extends Component {
               <Route path="/add" exact>
                 <MultiStepForm/>
               </Route>
-           <Route path='/addproject' 
+           <Route path='/addproject/:type/:id' 
               render={(state)=><AddProjectWrapper {...state}/>}
               exact />
               <Route path="/profile/settings" exact component= {Settings} />

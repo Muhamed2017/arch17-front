@@ -39,7 +39,7 @@ class UserProfile extends Component {
   };
  }
  componentDidMount() {
-  console.log();
+  // console.log(this.state.user);
   console.log(`visitor is ${this.state.visitor}`);
   console.log(auth.currentUser);
   console.log(this.state.uid);
@@ -237,7 +237,11 @@ class UserProfile extends Component {
           </TabList>
           {this.state.is_designer === 1 && (
            <TabPanel forceRender>
-            {!this.state.visitor && <p>Add Project</p>}
+            {!this.state.visitor && (
+             <a href={`/addproject/designer/${this.state.user?.id}`}>
+              Add Project
+             </a>
+            )}
            </TabPanel>
           )}
           <TabPanel forceRender>

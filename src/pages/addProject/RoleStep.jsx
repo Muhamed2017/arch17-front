@@ -3,7 +3,7 @@ import { Row, Col, Button, Modal, Input } from "antd";
 import Draggable from "react-draggable";
 import { DeleteOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
-
+import axios from "axios";
 import {
  addProjectRoles,
  addProjectRoleDesigner,
@@ -12,6 +12,7 @@ import {
  deleteProjectRoleDesigner,
  goToProjectStep,
 } from "./../../redux/actions/addProjectActions";
+import { API } from "../../utitlties";
 class RoleStep extends Component {
  constructor(props) {
   super(props);
@@ -19,16 +20,16 @@ class RoleStep extends Component {
    designesModal: false,
    brandsModal: false,
    designers: [
-    { id: 1, name: "Muhamed Gomaa", img: null },
-    { id: 2, name: "Kareem Salah", img: null },
-    { id: 3, name: "Sayed Fathy", img: null },
-    { id: 4, name: "Islam Ussef", img: null },
-    { id: 5, name: "Alaa Seleem", img: null },
-    { id: 6, name: "Rania Ra'afat", img: null },
-    { id: 7, name: "Dalia Ussef", img: null },
-    { id: 8, name: "Ola Fahmy", img: null },
-    { id: 9, name: "Layla Taher", img: null },
-    { id: 10, name: "Hassan Akram", img: null },
+    // { id: 1, name: "Muhamed Gomaa", img: null },
+    // { id: 2, name: "Kareem Salah", img: null },
+    // { id: 3, name: "Sayed Fathy", img: null },
+    // { id: 4, name: "Islam Ussef", img: null },
+    // { id: 5, name: "Alaa Seleem", img: null },
+    // { id: 6, name: "Rania Ra'afat", img: null },
+    // { id: 7, name: "Dalia Ussef", img: null },
+    // { id: 8, name: "Ola Fahmy", img: null },
+    // { id: 9, name: "Layla Taher", img: null },
+    // { id: 10, name: "Hassan Akram", img: null },
    ],
    brands: [
     { id: 1, name: "Muhamed Brand", img: null },
@@ -133,6 +134,20 @@ class RoleStep extends Component {
    }
   );
  };
+ componentDidMount() {
+  axios
+   .get(`${API}rolestepdata`)
+   .then((response) => {
+    this.setState({
+     brands: response.data.brands,
+     designers: response.data.users,
+    });
+    console.log(response);
+   })
+   .catch((e) => {
+    console.log(e);
+   });
+ }
  render() {
   const { designesModal, disabled, bounds, brandsModal } = this.state;
 
@@ -162,8 +177,8 @@ class RoleStep extends Component {
          <>
           <Col md={12} className="my-3">
            <div className="wraprow">
-            <div className="d-img inline-block">{d?.name[0]}</div>
-            <span className="inline-block">{d?.name}</span>
+            <div className="d-img inline-block">{d?.displayName[0]}</div>
+            <span className="inline-block">{d?.displayName}</span>
            </div>
           </Col>
           <Col md={12} className="my-3 text-right pr-70">
@@ -336,7 +351,9 @@ class RoleStep extends Component {
        console.log(e);
        this.setState({
         filteredDesigners: this.state.designers.filter((d) => {
-         return d.name.toLowerCase()?.includes(e.target.value.toLowerCase());
+         return d.displayName
+          .toLowerCase()
+          ?.includes(e.target.value.toLowerCase());
         }),
        });
       }}
@@ -351,9 +368,9 @@ class RoleStep extends Component {
           onClick={() => this.handleAddDesigner(d)}
          >
           <div className="d-img inline-block middle">
-           {d?.name?.slice(0, 1)}
+           {d?.displayName?.slice(0, 1)}
           </div>
-          <span className="inline-block middle">{d?.name}</span>
+          <span className="inline-block middle">{d?.displayName}</span>
          </Col>
         </Row>
        );

@@ -31,7 +31,7 @@ class ProductsTagsStep extends Component {
   return (
    <>
     <div id="product-tags-step" className="p-5">
-     <Row>
+     <Row span={24} gutter={24}>
       {this.state.products?.map((product, index) => {
        return (
         <>
