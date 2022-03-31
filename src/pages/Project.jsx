@@ -43,8 +43,11 @@ class Project extends Component {
    brands: [],
    similars: [],
    page: 0,
+   productsPage: 1,
+   productFetched: false,
    fetched: false,
    nextMorePage: true,
+   nextMoreProductsPage: true,
    currentSlide: 1,
   };
  }
@@ -57,7 +60,9 @@ class Project extends Component {
    fetching_more: true,
   });
   axios
-   .get(`${API}moresimilars/china/type1?page=${page}`)
+   .get(
+    `${API}moresimilars/${this.state.project.kind}/${this.state.project.type}?page=${page}`
+   )
    .then((response) => {
     console.log(response);
     this.setState({
@@ -65,6 +70,27 @@ class Project extends Component {
      fetching_more: false,
      page: this.state.page + 1,
      nextMorePage: response.data.next_page_url,
+    });
+   })
+   .catch((error) => {
+    console.log(error);
+   });
+ };
+ fetchMoreProducts = () => {
+  const { productsPage } = this.state;
+  this.setState({
+   fetching_products: true,
+  });
+  axios
+   .get(`${API}moreprojects/${this.state.project_id}?page=${productsPage}`)
+   .then((response) => {
+    console.log(response);
+    this.setState({
+     products: response.data.projects.data,
+     fetching_products: false,
+     productsPage: this.state.productsPage + 1,
+     nextMoreProductsPage: response.data.next_page_url,
+     productFetched: true,
     });
    })
    .catch((error) => {
@@ -388,9 +414,32 @@ class Project extends Component {
         })}
        </Row>
 
-       {this.state.products?.length > 4 && (
-        <p className="text-right block w-100 bold text-underline roboto pointer">
-         SEE MORE
+       {this.state.products?.length > 1 && (
+        <p
+         className="text-right block w-100 bold text-underline roboto pointer"
+         onClick={this.fetchMoreProducts}
+        >
+         {this.state.fetching_products ? (
+          <>
+           <Spin
+            style={{
+             width: "100%",
+             margin: "auto",
+             position: "relative",
+             //  top: "-50px",
+            }}
+            size="large"
+            indicator={
+             <LoadingOutlined
+              style={{ fontSize: "40px", color: "#000" }}
+              spin
+             />
+            }
+           />
+          </>
+         ) : (
+          <>{!this.state.productFetched && <>SEE MORE</>}</>
+         )}
         </p>
        )}
       </div>
@@ -429,7 +478,7 @@ class Project extends Component {
            className="block text-center bold text-underline roboto pointer"
            onClick={this.fetchMoreSimilar}
           >
-           SEE MORE PROJECTS
+           {this.state.similars.length > 4 && <>SEE MORE PROJECTS</>}
           </p>
          </Col>
         )}
