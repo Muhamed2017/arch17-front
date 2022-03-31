@@ -1,11 +1,29 @@
-
-.sticky{
+.sticky-editor{
     position: fixed;
     top: 65px !important;
     box-shadow:0 3px 6px -2px rgb(0 0 0 / 7%);
     width: 1250px;
     transition: all ease-in 200ms;
     border-left-color: none;
+}
+.stopped{
+    position: fixed;
+    top:0;
+    max-width: 420px;
+    top: 65px !important;
+
+}
+figure{
+    margin: 1rem 0 !important;
+}
+.roboto{
+    font-family: "Roboto";
+}
+.bolder{
+    font-weight: bold;
+}
+.text-underline{
+    text-decoration: underline;
 }
 .rdw-editor-toolbar{
     z-index: 100;
@@ -14,6 +32,10 @@
     border-top-color: transparent;
     border-right-color: transparent;
     border-bottom: 1px solid #F1F1F1;
+
+}
+.text-editor .rdw-option-wrapper {
+    min-width: 16px !important;
 
 }
 .addprojectwrapper{
@@ -71,7 +93,11 @@ font-weight:500 !important;
     text-align: center;
     font-weight: 900;
     font-family: "Roboto";
+    padding-top: 10px;
     
+}
+.ant-modal-body .d-img{
+    padding-top: 0;
 }
 .designers-row{
     cursor: pointer;
@@ -82,6 +108,9 @@ font-weight:500 !important;
     font-family: "Roboto";
     color: #242424;
     font-weight: 900;
+}
+.scrollable{
+    min-width: 50px;
 }
 .designers-modal .ant-modal-body{
     max-height: 450px;
@@ -195,10 +224,15 @@ cursor: pointer;
 
 #project-page{
     max-width: 1300px;
-    margin: 15px auto;
-    overflow-x: hidden;
-}
+    margin: 0 auto 15px;
+    /* overflow-x: hidden; */
 
+}
+#project-main{
+    position: relative;
+    /* overflow: hidden; */
+    z-index: 10;
+}
 .project-cover img{
     display: block;
     width: 100%;
@@ -206,7 +240,8 @@ cursor: pointer;
 .project-cover {
     width: 100%;
 }
-.project-content h6{
+
+#project-content h6{
     font-size: 1.7rem;
     font-weight: 600;
     font-family: "Roboto";
@@ -216,11 +251,15 @@ cursor: pointer;
     position: relative;
     top:-80px
 }
-.project-content{
+#project-content{
     background-color: #fff;
        padding: 1.5rem;
 }
-.project-content .location{
+.right-sticky {
+    position: relative;
+    top:0;
+}
+#project-content .location{
     color: #a0a0a0;
 }
 .editor-state p{
@@ -228,11 +267,13 @@ cursor: pointer;
     font-size: .85rem;
     font-family: "Roboto";
 }
-
+.project-right-side{
+    font-family: "Roboto";
+}
 .project-right-side .designers{
     background-color: #fff;
-    height: 370px;
-    margin: 20px 0;
+    height: 320px;
+    margin: 12px 0 20px 0;
     width: 100%;
     border-radius: 10px;
     border: 1px solid #dedede;
@@ -243,21 +284,41 @@ cursor: pointer;
     min-height: 450px;
     border-radius: 10px;
     border: 1px solid #dedede;
-
+}
+.brand{
+    position: relative;
+    min-height: 400px;
+}
+.slide-footer span{
+    vertical-align: middle;
+    width: 60px;
+    cursor: pointer;
+}
+.brands .slide-footer{
+    position: absolute;
+    bottom: 0px;
+    right: 15px;
+    font-size: 1.4rem;
 }
 .des-btns{
-    margin: 12px 0;
+    margin: 10px 0;
 }
 .des-btns button{
-margin-left: 10px;
-    padding: 5px;
-
+margin-right: 10px;
+    padding: 5px 0;
+font-size: .70rem;
+border: none;
+font-family: "Roboto";
+}
+.des-btns svg{
+    font-size: .9rem !important;
+    vertical-align: middle;
 }
 .via{
     font-weight: 600;
 }
  .name, .title{
-padding-left: 10px;
+text-transform: capitalize;
 }
 .brand .name{
     font-size: 18px;
@@ -265,41 +326,42 @@ padding-left: 10px;
     text-transform: capitalize;
 }
 .brand .title {
-    font-size: .75rem;
+    font-size: .70rem;
     color: #707070;
     text-transform: capitalize;
 }
 .des-btns button:first-child{
-border: 1px solid #707070;
+border: 1px solid #b1b1b1;
 border-radius: 5px;
-padding:4px 0;
+padding:1px 0;
 font-size: 16px;
 width: 45px;
+color: #777777;
 }
 .designers .name{
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 700;
 }
 .designers .title{
     color: #747474;
     font-weight: 500;
+    font-size: .7rem;
+    font-family: "Roboto";
 }
 .des-btns button:last-child{
-    background-color: #a3a3a3;
-    width: 118px;
+    background-color: #e41e15;
+    width: 90px;
     color: #fff;
     border-radius: 4px;
 
 }
-.des-btns button > *{
-    display: inline-block;
-    vertical-align: text-bottom;
-    font-size: 1.2rem;
-    font-weight: 600;
+.des-btns button{
+height: 29px;
+vertical-align: middle;
 }
 .p-box{
-    width: 110px;
-    height: 110px;
+    width:100%;
+    padding-top: 100%;
     position: relative;
     background-position: center;
     background-size: cover;
@@ -316,15 +378,23 @@ width: 45px;
     background-color: rgba(214, 214, 214, 0.151);
 }
 .socials >div{
-    background-color: #fff;
     width: 50px;
     height: 50px;
-    margin: 8px auto;
-    padding-top: 10px;
+    margin: 0px auto;
+    text-align:center;
+    font-size:1.6rem;
+    border-bottom: 1px solid rgb(238, 238, 238);
+    margin-bottom: 5px;
+    padding-top: 12px;
+    background-color: #fff;
+}
+.socials > div:last-child{
+    border-bottom: none;
 }
 .socials {
-    font-size: 1.8rem;
     color: #242424;
+    z-index: 5;
+    padding: 12px;
 
 }
 .socials svg{
@@ -337,6 +407,7 @@ min-height: 400px;
 #product-tags .products{
     max-width: 1300px ;
     margin: auto;
+    padding: 30px 0;
 }
 #product-tags .p-img{
     margin-bottom: 0;
@@ -348,7 +419,7 @@ margin-bottom: 0;
     background-color: #fff;
     padding: 10px 0 5px 0 ;
 }
-#product-tags p.head{
+ p.head{
     font-size: 22px;
     font-weight: 600;
 }
@@ -356,20 +427,19 @@ margin-bottom: 0;
     color: red;
 }
 .brand-slide-logo{
-    width: 130px;
-    height: 130px;
+    width: 95px;
+    height: 95px;
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
     box-sizing: border-box;
-    margin: auto;
     border: 1px solid #ddd;
     border-radius: 50%;
-    padding-top: 10px;
+    padding-top: 8px;
 }
 .brand-slide-logo p{
     font-family: "Roboto";
-    font-size: 4.5rem;
+    font-size: 4rem;
     font-weight: 600;
     text-align: center
 
@@ -381,5 +451,38 @@ padding: 5px;
     padding-top: .7rem ;
     padding-left: 0;
     padding-right: 0;
+}
+#project-layout .lightgray-footer{
+    /* display: none; */
+    min-height: 150px !important;
+}
+.cover-container > div {
+background-position: top  !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+
+}
+#similar-projects{
+    max-width: 1300px;
+    margin: 50px auto;
+    min-height: 600px;
+}
+
+.project-image{
+    width:100%;
+    padding-top: 66.6%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+.project-name{
+    color: #2e2e2e;
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-family: "georgia";
+}
+.project-cover-footer{
+    color: #d1d1d1;
+    font-size: .8rem;
 }
 /* end of project page styles */

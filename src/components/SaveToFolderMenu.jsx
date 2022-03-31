@@ -1,9 +1,9 @@
-import React, { Component, useState } from "react";
+import React, { Component } from "react";
 import { Menu, Modal, Spin, Row, Col } from "antd";
 import NewCollectionModal from "./Modals/NewCollectionModal";
 import axios from "axios";
 import { AiFillPlusCircle, AiFillHeart } from "react-icons/ai";
-import { VscFolder, VscFolderActive } from "react-icons/vsc";
+import { VscFolderActive } from "react-icons/vsc";
 import { API } from "./../utitlties";
 
 class SaveToFolderMenu extends Component {

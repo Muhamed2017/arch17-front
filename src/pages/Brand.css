@@ -210,10 +210,6 @@ overflow: hidden;
  margin-bottom: 10px;
 }
 
-.p-img:hover .prlayer{
-    /* background-color: #000000a8; */
-
-}
 .prlayer{
   background: #001A71;
     position: absolute;
@@ -226,8 +222,7 @@ overflow: hidden;
     transition: all 350ms ease-in-out !important;
 
 }
-.prlayer{
-}
+
 
 .product {
  transition: all 0.3s ease-in;
@@ -237,13 +232,12 @@ overflow: hidden;
 .product .product-price {
  color: #ff0000;
  padding-left: 8px;
- /* margin-bottom: 100px; */
 }
 .product .product-store {
  color: #000;
  font-weight: 500;
  font-family: "Roboto";
- font-size: 18px;
+ font-size: 15px;
  padding-left: 8px;
 }
 .product .product-name {

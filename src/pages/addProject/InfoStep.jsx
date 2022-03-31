@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import {
  Form,
  Input,
- Button,
+ //  Button,
  Checkbox,
  Row,
  Col,
@@ -13,6 +13,7 @@ import { connect } from "react-redux";
 
 import ReactFlagsSelect from "react-flags-select";
 import { addProjectInfo } from "./../../redux/actions/addProjectActions";
+import { project_cats } from "../addProduct/ProductClassifications";
 
 const { Option } = Select;
 const config = {
@@ -97,8 +98,11 @@ class InfoStep extends Component {
          fontSize: "13px",
         }}
        >
-        <Option value="type1">Type1</Option>
-        <Option value="type2">Type2</Option>
+        <Option value="Architecture">Architecture</Option>
+        <Option value="Interior Design">Interior Design</Option>
+        <Option value="Landscape">Landscape</Option>
+        <Option value="Product Design">Product Design</Option>
+        <Option value="Blog">Blog</Option>
        </Select>
       </Form.Item>
       <Form.Item
@@ -118,8 +122,13 @@ class InfoStep extends Component {
          fontSize: "13px",
         }}
        >
-        <Option value="china">China</Option>
-        <Option value="usa">U.S.A</Option>
+        {project_cats.map((p) => {
+         return (
+          <>
+           <Option value={p}>{p}</Option>
+          </>
+         );
+        })}
        </Select>
       </Form.Item>
       <Row span={24} gutter={15} justify="start">

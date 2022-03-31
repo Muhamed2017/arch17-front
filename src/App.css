@@ -2940,7 +2940,7 @@ button.follow-btn {
 }
 .product-name {
  margin-top: 12px;
- font-size: 17px;
+ font-size: 14px;
 }
 .product-desc,
 .product-price {
@@ -3481,7 +3481,7 @@ button.follow-btn {
 }
 
 .rich-editor .DraftEditor-editorContainer {
- padding: 1rem;
+ padding: 1.3rem;
 }
 
 .draft-editor-wrapper {

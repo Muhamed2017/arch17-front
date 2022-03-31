@@ -10,6 +10,8 @@ import { Provider } from 'react-redux';
 import 'antd-country-phone-input/dist/index.css';
 import '@fortawesome/fontawesome-free/css/all.css'
 import '@fortawesome/fontawesome-free/js/all.js'
+import 'semantic-ui-css/semantic.min.css'
+
 const store = configureStore();
 ReactDOM.render(
   <Provider store={store}>

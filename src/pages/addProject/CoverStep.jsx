@@ -36,7 +36,7 @@ class CoverStep extends Component {
   const imageElement = this.cropperRef?.current;
   let cropper = imageElement?.cropper;
 
-  cropper.replace(this.state.slides[index], true);
+  cropper.replace(this.state.slides[index]);
  };
  onChange = (a, b, c) => {
   // console.log(a, b, c);

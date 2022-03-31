@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Container, Col, Row } from "react-bootstrap";
 import "photoswipe/dist/photoswipe.css";
 import "photoswipe/dist/default-skin/default-skin.css";
+
 import {
  Row as AntRow,
  Col as AntCol,
@@ -13,7 +14,6 @@ import {
  Dropdown,
  Modal as AntModal,
 } from "antd";
-// import { FilePdfFilled, FilePptFilled } from "@ant-design/icons";
 import pptxgen from "pptxgenjs";
 import { FaFilePdf } from "react-icons/fa";
 import { RiFilePpt2Fill } from "react-icons/ri";
@@ -32,7 +32,6 @@ import {
  TumblrIcon,
  EmailIcon,
 } from "react-share";
-// import MetaTags from "react-meta-tags";
 
 import { SiGoogledrive, SiBaidu } from "react-icons/si";
 import { BiLinkExternal } from "react-icons/bi";

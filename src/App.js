@@ -9,17 +9,14 @@ import DesignerAccount from './pages/DesignerAccount'
 import Collection from './pages/Collection'
 import UserCollection from './pages/UserCollection'
 import Type from './pages/Type'
-import TestOptionPrice from './pages/TestOptionPrice'
 import HomePage from './HomePage/HomePage'
 import AuthProvider from './contexts/AuthContext';
 import { connect } from 'react-redux';
 import NavigationBar from './components/NavigationBar';
-import { ChakraProvider } from "@chakra-ui/react"
+// import { ChakraProvider } from "@chakra-ui/react"
 import AddProductWrapper from './pages/addProduct/AddProductWrapper';
 import AddProjectWrapper from './pages/addProject/AddProjectWrapper';
-import TestUpload from './pages/TestUpload';
-import TestCrop from './pages/TestCrop';
-import Dropzones from './components/Dropzone'
+
 import { LinkedInPopUp } from 'react-linkedin-login-oauth2';
 import CreateBrand from './pages/CreateBrand'
 import Kind from './pages/addProduct/Kind'
@@ -39,8 +36,8 @@ import 'antd-country-phone-input/dist/index.css'
 import Search from './pages/Search';
 import TableStep from './pages/TableStep';
 import EditKind from './pages/editProduct/EditKind';
-import MultiStepForm from './pages/Form-Wrpper/MultiStepForm'
 import EditProductWrapper from './pages/editProduct/EditProductWrapper';
+import { ParallaxProvider } from "react-scroll-parallax";
 
 
 class App extends Component {
@@ -51,9 +48,12 @@ class App extends Component {
    }
   render(){
   return (
-    <ChakraProvider>
+    // <ChakraProvider>
+
     <AuthProvider>
     <React.Fragment>
+    <ParallaxProvider>
+
           {/* <NavigationBar /> */}
           <ConfigProvider locale={en}>
           </ConfigProvider>
@@ -68,15 +68,8 @@ class App extends Component {
                 {this.props.isLoggedIn ? <Redirect to="/" /> : <Login />}
               </Route>
               <Route exact path="/callback" component={LinkedInPopUp} />
-              <Route path='/cropper' exact>
-                <TestUpload />
-              </Route>
-              <Route path='/cropper2' exact>
-                <TestCrop />
-              </Route>
-              <Route path="/dropzone" exact>
-                <Dropzones/>
-              </Route>
+              
+              
               <Route path='/product/:id' component={Product} exact/>
               <Route path='/project/:id' component={Project} exact/>
               {/* <Route path="/search" component={Search} exact /> */}
@@ -97,9 +90,7 @@ class App extends Component {
                <Route path='/edit/:id' 
               render={(state)=><EditProductWrapper {...state}/>}
               exact />
-              <Route path="/add" exact>
-                <MultiStepForm/>
-              </Route>
+            
            <Route path='/addproject/:type/:id' 
               render={(state)=><AddProjectWrapper {...state}/>}
               exact />
@@ -129,49 +120,18 @@ class App extends Component {
                <Route path='/product/edit/122' exact>
                 <TableStep/>
               </Route>
-               <Route path='/prices' 
-              render={(state)=><TestOptionPrice {...state}/>}
-              exact />
+              
               
             </Switch>
           </Router>
           
-        {/* <Router>
-          <Switch>
-            <Route path="/signup" exact>
-              {props.isLoggedIn ? <Redirect to="/" /> : <Register />}
-            </Route>
-            <Route path="/signin" exact>
-              {props.isLoggedIn ? <Redirect to="/" /> : <Login />}
-            </Route>
-            {/* <Route path="/add-product" exact>
-       <Kind />
-      </Route> */}
-            {/* <Route path="/identity">
-       <AddProductWrapper />
-      </Route> */}
-            {/* 
-      <Route path="/form">
-       <MultiStepForm />
-      </Route> */}
-
-            {/* <Route path='/file'>
-                <TestUpload />
-              </Route> */}
-            {/* <Route path='/stepper'>
-                  <Steper />
-                </Route>
-                <Route path='/cropper'>
-                  <TestUpload />
-                </Route> */}
-          {/* </Switch> */}
-
-        {/* </Router> */} 
+        
           <ToastContainer  />
+    </ParallaxProvider>
 
     </React.Fragment>
     </AuthProvider>
-    </ChakraProvider>
+
   );
               }
 }

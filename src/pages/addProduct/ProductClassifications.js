@@ -1861,3 +1861,13 @@ export const bathroom_radiators= {
 }
 // Remote control taps
 // end of bathroom
+
+export const project_cats=[
+    "Airport", "Animal & Hospital and Clinic", "Apartmant", "Bus Station", "Café", "Cathedral", "Chapal", "Churches", "Cinema", "City Planning",
+    "Clinic", "Club", "Coffee shop", "Dorms", "Exhibit Design", "Football Stadium", "Furniture Design", "Garden & Plaza", "Grocery Store", 
+    "Gym & Fitness Design", "Home Design", "Hospital", "Hostel", "Hotel", "Restaurant", "House", "Housing", "Kid Garden", 
+    "Loft Appartment", "Lighting Design", "Material Design", "Master Plan", "Monastery", "Mosque", "Motel",
+    "Mueseum", "Night Club", "Office", "Opera House", "Pavilion", "Penthouse","Parmacy", "Port", "Praying Room", "Residence", "Sales Center",
+    "Schoole", "Shopping Mall", "Show Room","Spa & Sauna", "Store", "Super Market", "Swimming Pool", "Synagogue",
+    "Tea House", "Tea Shop", "Temple", "Temporary Store", "Theater", "University & Institute"
+]

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { convertToRaw, EditorState } from "draft-js";
+import { EditorState } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Editor } from "react-draft-wysiwyg";
 import axios from "axios";
@@ -16,7 +16,6 @@ class ContentStep extends Component {
 
   this.state = {
    nav: false,
-   //  editorState: EditorState.createEmpty(),
    editorState: this.props?.content ?? EditorState.createEmpty(),
    files: [],
    covers: [],
@@ -29,9 +28,6 @@ class ContentStep extends Component {
    editorState,
   });
   this.props.dispatchProjectContent(editorState);
- };
- submitDescriptionContent = () => {
-  // console.log(convertToRaw(this.state.editorState.getCurrentContent()));
  };
 
  uploadCallback = (file) => {
@@ -70,9 +66,9 @@ class ContentStep extends Component {
  handleScroll = () => {
   const el = document.getElementsByClassName("rdw-editor-toolbar");
   if (window.pageYOffset > 108) {
-   el[0]?.classList?.add("sticky");
+   el[0]?.classList?.add("sticky-editor");
   } else {
-   el[0]?.classList?.remove("sticky");
+   el[0]?.classList?.remove("sticky-editor");
   }
  };
  render() {
