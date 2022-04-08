@@ -1005,6 +1005,7 @@ class TableStep extends React.Component {
                      padding: "17px 10px",
                      color: "#CCCCCC",
                      border: "1px dashed #ccc",
+                     textAlign: "center",
                     }}
                    >
                     <UplpadIcon

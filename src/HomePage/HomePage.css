@@ -725,8 +725,22 @@ background-color: #fff !important;
     opacity: 1 !important;
     transition: opacity .15s ease;
 }
-
-
+.ant-tabs-tab:hover{
+color: unset;
+}
+.home-page .ant-tabs-top>.ant-tabs-nav::before{
+  border-bottom: none;
+}
+.home-page .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  font-weight: 400 !important;
+}
+.home-page .ant-tabs-tab{
+      padding: 0px 0;
+      font-size: 17px;
+      background: transparent;
+      border: 0;
+      font-family: "Roboto"
+}
 
 
 /* body {

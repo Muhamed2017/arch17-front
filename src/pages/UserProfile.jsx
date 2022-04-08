@@ -5,7 +5,6 @@ import { IoMdSettings } from "react-icons/io";
 import CollectionsTab from "./user_profile_tabs/CollectionsTab";
 import FollwingTab from "./user_profile_tabs/FollwingTab";
 import BocList from "./user_profile_tabs/BoqList";
-import blank from "../../src/blank.jpg";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
 import { auth } from "./../firebase";
@@ -19,7 +18,7 @@ import {
  EnvironmentFilled,
  ShareAltOutlined,
 } from "@ant-design/icons";
-import { Spin, Tooltip, Button } from "antd";
+import { Spin, Tooltip, Button, Col as AntCol, Row as AntRow } from "antd";
 
 class UserProfile extends Component {
  constructor(props) {
@@ -27,6 +26,7 @@ class UserProfile extends Component {
   this.state = {
    user_uid: auth.currentUser?.uid,
    collections: [],
+   projects: [],
    copied: false,
    followed_stores: [],
    is_designer: false,
@@ -39,7 +39,6 @@ class UserProfile extends Component {
   };
  }
  componentDidMount() {
-  // console.log(this.state.user);
   console.log(`visitor is ${this.state.visitor}`);
   console.log(auth.currentUser);
   console.log(this.state.uid);
@@ -48,13 +47,14 @@ class UserProfile extends Component {
     .get(`${API}user/folders/${this.state.uid}`)
     .then((response) => {
      console.log(response);
-     const { followed_stores, collections, user } = response.data;
+     const { followed_stores, collections, user, projects } = response.data;
      this.setState({
       collections,
       followed_stores,
       user,
       is_designer: user?.is_designer,
       fetched: true,
+      projects,
      });
     })
     .catch((err) => {
@@ -102,7 +102,7 @@ class UserProfile extends Component {
            <>
             <Tooltip placement="top" title="Verified Designer">
              <svg
-              class="VZmsM"
+              className="VZmsM"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 32 32"
               width="32"
@@ -185,7 +185,7 @@ class UserProfile extends Component {
              <button
               type="button"
               title="Follow"
-              class="profile-follow-btn profile-action-btn"
+              className="profile-follow-btn profile-action-btn"
              >
               <svg
                width="18"
@@ -237,11 +237,59 @@ class UserProfile extends Component {
           </TabList>
           {this.state.is_designer === 1 && (
            <TabPanel forceRender>
-            {!this.state.visitor && (
-             <a href={`/addproject/designer/${this.state.user?.id}`}>
-              Add Project
-             </a>
-            )}
+            <AntRow span={24} gutter={24} justify="">
+             <AntCol xs={24} sm={12} md={8}>
+              {!this.state.visitor && (
+               <a href={`/addproject/designer/${this.state.user?.id}`}>
+                Add Project
+               </a>
+              )}
+             </AntCol>
+             {this.state.projects?.length > 0 && (
+              <>
+               {this.state.projects?.map((p, index) => {
+                return (
+                 <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+                  <a href={`/project/${p.id}`} className="box-link">
+                   <div className="project-col bg-white">
+                    <a
+                     href={`/editproject/${p.id}`}
+                     className="box-link project-edit-btn project-btn"
+                    >
+                     Edit
+                    </a>
+                    <button
+                     className="project-btn project-delete-btn"
+                     onClick={(e) => {
+                      e.preventDefault();
+                     }}
+                    >
+                     Delete
+                    </button>
+                    <div
+                     className="project-image"
+                     style={{
+                      backgroundImage: `url(${p.cover})`,
+                     }}
+                    ></div>
+                    <div className="info p-3">
+                     <p className="project-name">{p.name}</p>
+
+                     <div className="project-cover-footer">
+                      <p className="m-0">{p.kind}</p>
+                      <hr className="my-1 w-20" />
+                      <p className="m-0">{p.type}</p>
+                     </div>
+                    </div>
+                   </div>
+                  </a>
+                 </AntCol>
+                );
+               })}
+         
+              </>
+             )}
+            </AntRow>
            </TabPanel>
           )}
           <TabPanel forceRender>

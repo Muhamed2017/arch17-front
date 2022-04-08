@@ -29,17 +29,18 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer} from 'react-toastify'
 import Settings from './pages/user_profile_tabs/Settings';
 import { Home } from './pages/Home';
-import { ConfigProvider } from 'antd-country-phone-input';
-import en from 'world_countries_lists/data/en/world.json';
-import 'antd/dist/antd.css';
+// import { ConfigProvider } from 'antd-country-phone-input';
+// import en from 'world_countries_lists/data/en/world.json';
+// import en from "world_countries_lists/data/countries/en/world.json";
+
 import 'antd-country-phone-input/dist/index.css'
 import Search from './pages/Search';
 import TableStep from './pages/TableStep';
 import EditKind from './pages/editProduct/EditKind';
 import EditProductWrapper from './pages/editProduct/EditProductWrapper';
 import { ParallaxProvider } from "react-scroll-parallax";
-
-
+import "semantic-ui-css/semantic.min.css";
+import EditProjectWrapper from './pages/addProject/EditProjectWrapper';
 class App extends Component {
    constructor(props){
      super(props)
@@ -55,8 +56,8 @@ class App extends Component {
     <ParallaxProvider>
 
           {/* <NavigationBar /> */}
-          <ConfigProvider locale={en}>
-          </ConfigProvider>
+          {/* <ConfigProvider locale={en}>
+          </ConfigProvider> */}
           <Router>
           <NavigationBar />
 
@@ -94,6 +95,11 @@ class App extends Component {
            <Route path='/addproject/:type/:id' 
               render={(state)=><AddProjectWrapper {...state}/>}
               exact />
+
+              <Route path='/editproject/:id' 
+              render={(state)=><EditProjectWrapper {...state}/>}
+              exact />
+              
               <Route path="/profile/settings" exact component= {Settings} />
                 <Route path="/user/:uid" exact component={UserProfile } />
                

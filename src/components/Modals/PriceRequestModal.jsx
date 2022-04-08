@@ -2,13 +2,14 @@ import { Form, Space, Col, Row, Button, Input, Divider, Spin } from "antd";
 import React, { useState } from "react";
 import { LoadingOutlined } from "@ant-design/icons";
 import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
-import en from "world_countries_lists/data/en/world.json";
+// import en from "world_countries_lists/data/en/world.json";
 import "antd/dist/antd.css";
 import "antd-country-phone-input/dist/index.css";
 import "flagpack/dist/flagpack.css";
 import axios from "axios";
 import { connect } from "react-redux";
 import SuccessModal from "./SuccessModal";
+import en from "world_countries_lists/data/countries/en/world.json";
 
 import {
  openProductRequestAction,

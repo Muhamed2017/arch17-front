@@ -260,6 +260,7 @@ overflow: hidden;
 .plus-icon svg {
  width: 80px;
  height: 80px;
+ display: inherit;
 }
 .profile-container {
  width: 80%;

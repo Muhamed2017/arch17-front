@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import { LoadingOutlined } from "@ant-design/icons";
 import { Row, Col, Tabs, Spin, Input, Select } from "antd";
 import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
-import en from "world_countries_lists/data/en/world.json";
+import en from "world_countries_lists/data/countries/en/world.json";
+
 import "../../src/pages/Brand.css";
 import axios from "axios";
 import * as utility from "../utitlties";
@@ -108,6 +109,7 @@ class Brand extends Component {
    loading_cover: false,
    types: [],
    productLoading: true,
+   projects: [],
    products: [],
    store: {
     name: "",
@@ -225,6 +227,7 @@ class Brand extends Component {
     console.log(response.data);
     this.setState({
      productLoading: false,
+     projects: response.data.projects,
      brand: response.data,
      products: response.data.store?.products,
      brand_name: name[0],
@@ -1038,7 +1041,66 @@ class Brand extends Component {
           </TabPane>
 
           <TabPane tab="Projects" key="3" className="section">
-           Content of Tab Pane 3
+           <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }} className="py-5">
+            {this.state.isOwner && this.props.isLoggedIn && (
+             <>
+              <Col className="gutter-row" span={6}>
+               <a
+                href={`/addproject/store/${this.state.brand_id}`}
+                className="arch-link"
+               >
+                <div className="product">
+                 <div className="p-img" style={{ opacity: "0.03" }}></div>
+                 <div className="plus-icon">
+                  <AiOutlinePlus />
+                  Add Project
+                 </div>
+                </div>
+               </a>
+              </Col>
+
+              {this.state.projects?.map((p, index) => {
+               return (
+                <Col xs={24} sm={12} md={8} className="mb-4" key={index}>
+                 <a href={`/project/${p.id}`} className="box-link">
+                  <div className="project-col bg-white">
+                   <a
+                    href={`/editproject/${p.id}`}
+                    className="box-link project-edit-btn project-btn"
+                   >
+                    Edit
+                   </a>
+                   <button
+                    className="project-btn project-delete-btn"
+                    onClick={(e) => {
+                     e.preventDefault();
+                    }}
+                   >
+                    Delete
+                   </button>
+                   <div
+                    className="project-image"
+                    style={{
+                     backgroundImage: `url(${p.cover})`,
+                    }}
+                   ></div>
+                   <div className="info p-3">
+                    <p className="project-name">{p.name}</p>
+
+                    <div className="project-cover-footer">
+                     <p className="m-0">{p.kind}</p>
+                     <hr className="my-1 w-20" />
+                     <p className="m-0">{p.type}</p>
+                    </div>
+                   </div>
+                  </div>
+                 </a>
+                </Col>
+               );
+              })}
+             </>
+            )}
+           </Row>
           </TabPane>
           <TabPane tab="Blogs" key="4" className="section">
            Content of Tab Pane 3

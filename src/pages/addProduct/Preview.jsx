@@ -277,7 +277,7 @@ class Preview extends Component {
           if (option.src) {
            return (
             <>
-             <div>
+             <div className="preview-box">
               <img
                src={option.src}
                alt="preview"

@@ -4,6 +4,7 @@ import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Editor } from "react-draft-wysiwyg";
 import axios from "axios";
 import { API } from "./../../utitlties";
+import { message } from "antd";
 import {
  addProjectContent,
  addProjectCover,
@@ -34,12 +35,11 @@ class ContentStep extends Component {
   console.log(file);
   return new Promise((resolve, reject) => {
    const formData = new FormData();
-   formData.append("img[]", file);
+   formData.append("cover", file);
    axios
-    .post(`${API}upload/${5}`, formData)
-
+    .post(`${API}uploadimg`, formData)
     .then((response) => {
-     const url = response.data.img[response.data.lastIndex].file_url;
+     const url = response.data.src;
      resolve({
       data: { link: url },
      });
@@ -105,8 +105,11 @@ class ContentStep extends Component {
     <button
      className="next-btn"
      onClick={() => {
-      this.props.dispatchGoStep(2);
-      // this.props.dispatchProjectCover(this.state.covers);
+      if (this.state.covers.length > 0) {
+       this.props.dispatchGoStep(2);
+      } else {
+       message.error("Please Upload at least one image");
+      }
      }}
     >
      Save & Continue
@@ -115,12 +118,14 @@ class ContentStep extends Component {
   );
  }
 }
+
 // export default ContentStep;
 const mapDispatchToProps = (dispatch) => ({
  dispatchProjectContent: (content) => dispatch(addProjectContent(content)),
  dispatchProjectCover: (cover) => dispatch(addProjectCover(cover)),
  dispatchGoStep: (step) => dispatch(goToProjectStep(step)),
 });
+
 const mapStateToProps = (state) => {
  return {
   content: state.project.project_content,

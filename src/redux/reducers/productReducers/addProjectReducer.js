@@ -6,6 +6,7 @@ import {
   ADD_PROJECT_CONTENT,
   ADD_PROJECT_TAGS,
   ADD_PROJECT_COVER,
+  SET_INTITIAL_PROJECT_FOR_EDIT,
   DELETE_ROLE_DESIGNER,
   DELETE_ROLE_BRAND,
   NEXT_STEP,
@@ -15,6 +16,7 @@ import {
 } from "../../constants.js";
 const defaultState ={
    params:null,
+   projectId:null,
    project_info:{},
    project_content:null,
    project_roles:{},
@@ -22,6 +24,7 @@ const defaultState ={
    role_brands:[],
    project_tags:[],
    project_covers:[],
+   cycle_type:"ADD",
    step:0
     
 }
@@ -104,6 +107,19 @@ export default function projectReducer(state = defaultState, action) {
           return {
             ...state, 
             project_covers: [...state.project_covers, action.payload]
+      }
+
+       case SET_INTITIAL_PROJECT_FOR_EDIT:
+          return {
+            ...state, 
+            projectId:action.payload.projectId,
+            project_info: action.payload.info,
+            project_content:action.payload.content,
+            project_tags:action.payload.project_tags,
+            role_brands:action.payload.role_brands,
+            role_designers:action.payload.role_designers,
+            project_covers:action.payload.project_covers,
+            cycle_type:"EDIT"
       }
     default:
       return state;

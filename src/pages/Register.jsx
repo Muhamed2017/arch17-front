@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, Col, Row, Form, Modal, Button } from "react-bootstrap";
+import { Container, Col, Row, Form, Modal } from "react-bootstrap";
 import { FaLinkedinIn, FaFacebookF } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { connect } from "react-redux";
@@ -10,7 +10,6 @@ import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
 import { auth } from "./../firebase";
 import { Form as FormAnt, Input } from "antd";
 import { LinkedIn } from "react-linkedin-login-oauth2";
-import queryString from "query-string";
 import {
  signupEmailPassword,
  signupFacebook,
@@ -27,19 +26,13 @@ import {
  phoneSigninRequest,
  phoneSignupSuccess,
 } from "./../redux/actions/authActions";
-import en from "world_countries_lists/data/en/world.json";
-// const strongRegex = new RegExp(
-//  "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})"
-// );
-// const mediumRegex = new RegExp(
-//  "^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})"
-// );
+import en from "world_countries_lists/data/countries/en/world.json";
+
 const hasCapital = new RegExp("^(?=.*[a-z])");
 const hasLower = new RegExp("^(?=.*[A-Z])");
 const hasNumeric = new RegExp("^(?=.*[0-9])");
 const hasSpecial = new RegExp("^(?=.[!@#$%^&])|(?=.*[!@#$%^&*])");
-// const API = "https://arch17-apis.herokuapp.com/api/";
-// const API = "https://arch17-apis.herokuapp.com/api/";
+
 const Register = (props) => {
  const [fname, setFname] = useState("");
  const [lname, setLname] = useState("");

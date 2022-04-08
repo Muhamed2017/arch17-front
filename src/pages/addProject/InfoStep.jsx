@@ -1,39 +1,40 @@
 import React, { Component } from "react";
-import {
- Form,
- Input,
- //  Button,
- Checkbox,
- Row,
- Col,
- Select,
- DatePicker,
-} from "antd";
+import { Form, Input, Checkbox, Row, Col, Select, DatePicker } from "antd";
 import { connect } from "react-redux";
 
 import ReactFlagsSelect from "react-flags-select";
 import { addProjectInfo } from "./../../redux/actions/addProjectActions";
 import { project_cats } from "../addProduct/ProductClassifications";
+import moment from "moment";
 
 const { Option } = Select;
 const config = {
- rules: [{ type: "object", required: true, message: "Please select time!" }],
+ rules: [{ required: true, message: "Please select time!" }],
 };
 class InfoStep extends Component {
  constructor(props) {
   super(props);
   this.state = {
    country: this.props.info?.country ?? "",
+   missed: false,
   };
  }
 
  onFinish = (values) => {
   values.country = this.state.country;
-  console.log("Success:", values);
-  this.props.dispatchProjectInfo(values);
+  if (!values.country) {
+   this.setState({ missed: true });
+  } else {
+   console.log("Success:", values);
+   this.props.dispatchProjectInfo(values);
+  }
  };
 
  onFinishFailed = (errorInfo) => {
+  //   values.country = this.state.country;
+  if (!this.state.country) {
+   this.setState({ missed: true });
+  }
   console.log("Failed:", errorInfo);
  };
  render() {
@@ -52,7 +53,8 @@ class InfoStep extends Component {
       <Form.Item
        className="form-label mb-5"
        label="Project Name"
-       initialValue={this.props.info?.name ?? ""}
+       initialValue={this.props.info?.name}
+       // in
        name="name"
        rules={[{ required: true, message: "Project Name is required" }]}
       >
@@ -93,6 +95,7 @@ class InfoStep extends Component {
        <Select
         placeholder="Please select "
         size="large"
+        defaultValue={this.props.info?.category}
         showArrow
         style={{
          fontSize: "13px",
@@ -117,6 +120,7 @@ class InfoStep extends Component {
        rules={[{ required: true, message: "Please select your country!" }]}
       >
        <Select
+        showSearch
         placeholder="Please select a country"
         style={{
          fontSize: "13px",
@@ -146,6 +150,11 @@ class InfoStep extends Component {
           this.setState({ country: code });
          }}
         />
+        {!this.state.country && this.state.missed && (
+         <>
+          <p style={{ color: "red" }}>country is required</p>
+         </>
+        )}
        </Col>
        <Col md={12}>
         <Form.Item
@@ -162,10 +171,11 @@ class InfoStep extends Component {
        name="year"
        label="Year"
        className="form-label mt-4"
-       {...config}
        initialValue={this.props.info?.year}
+       {...config}
       >
        <DatePicker
+        size="large"
         picker="year"
         style={{
          width: "100%",

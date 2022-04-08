@@ -128,3 +128,15 @@ export const deleteProjectRoleDesigner= (designer)=>{
         dispatch(deleteProjectRoleDesignerCreator(designer))
     }
 }
+const editProjectCreator = (project)=>{
+    return {
+        type:actions.SET_INTITIAL_PROJECT_FOR_EDIT,
+        payload:project
+    }
+}
+
+export const editProject= (project)=>{
+    return (dispatch)=>{
+        dispatch(editProjectCreator(project))
+    }
+}

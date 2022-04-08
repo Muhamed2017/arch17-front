@@ -1,5 +1,6 @@
 import React, { Component, Suspense } from "react";
 import { Container, Carousel, Row, Col, Modal } from "react-bootstrap";
+
 import {
  Col as AntCol,
  Row as AntRow,
@@ -8,6 +9,7 @@ import {
  Input,
  Checkbox,
  Modal as AntModal,
+ Tabs,
 } from "antd";
 import { Link } from "react-router-dom";
 import { LoadingOutlined } from "@ant-design/icons";
@@ -59,11 +61,14 @@ import {
  signupGoogle,
  vanillaSigninEmailPassword,
 } from "../redux/actions/authActions";
+const { TabPane } = Tabs;
 
 class HomePage extends Component {
  state = {
   products: [],
   fetching: false,
+  projects_types: {},
+  recent_projects: [],
   sliderData: [
    {
     // image: slide1,
@@ -209,12 +214,14 @@ class HomePage extends Component {
  componentDidMount() {
   this.setState({ fetching: true });
   axios
-   .get(`${API}home/products`)
+   .get(`${API}home/data`)
    .then((response) => {
     console.log(response);
     this.setState({
      products: response.data.products,
      fetching: false,
+     recent_projects: response.data.recent_projects,
+     projects_types: response.data.projects_types,
     });
    })
    .catch((error) => {
@@ -307,7 +314,7 @@ class HomePage extends Component {
       </Carousel>
      </section>
      <div className="w-100 m-auto">
-      <Container ClassName="mt-5 px-0">
+      <Container className="mt-5 px-0">
        <section className="w-100 home-heading-2 text-center">
         <h2>
          Hot solutions by brands and designers inspires you to design and build
@@ -574,17 +581,177 @@ class HomePage extends Component {
        <div>
         <section className="project-contaienr text-center bg-white mt-5 pt-4">
          <h2 className="home-center">Magazine</h2>
-         <h3 className="home-center mb-5">
+         <h3 className="home-center mb-4">
           Explore Design Projects, News & trends
          </h3>
-         <div className="project-filters-tab justify-content-center my-4 none-mobile">
+         {/* <div className="project-filters-tab justify-content-center my-4 none-mobile">
           <p className="mx-2 px-2">Recent</p>
           <p className="mx-2 px-2">Architecture</p>
           <p className="mx-2 px-2">Interior Design</p>
           <p className="mx-2 px-2">Product Design</p>
           <p className="mx-2 px-2">Design blogs</p>
-         </div>
-         <Row>
+         </div> */}
+         <Tabs defaultActiveKey="recent" centered onChange={() => {}}>
+          <TabPane tab="Recent" key="recent">
+           <div className="innertab py-5">
+            <AntRow span={24} gutter={24}>
+             {Object.values(this.state.recent_projects)?.map((p, index) => {
+              return (
+               <>
+                <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+                 <a href={`/project/${p.id}`} className="box-link">
+                  <div className="project-col bg-white">
+                   <div
+                    className="project-image"
+                    style={{
+                     backgroundImage: `url(${p.cover})`,
+                    }}
+                   ></div>
+                   <div className="info p-3 left">
+                    <p className="project-name left">{p.name}</p>
+
+                    <div className="project-cover-footer">
+                     <p className="m-0">{p.kind}</p>
+                     <hr className="my-1 w-20" />
+                     <p className="m-0">{p.type}</p>
+                    </div>
+                   </div>
+                  </div>
+                 </a>
+                </AntCol>
+               </>
+              );
+             })}
+            </AntRow>
+           </div>
+          </TabPane>
+          <TabPane tab="Architecture" key="2">
+           <div className="innertab py-5">
+            <AntRow span={24} gutter={24}>
+             {this.state.projects_types?.Architecture?.map((p, index) => {
+              return (
+               <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+                <a href={`/project/${p.id}`} className="box-link">
+                 <div className="project-col bg-white">
+                  <div
+                   className="project-image"
+                   style={{
+                    backgroundImage: `url(${p.cover})`,
+                   }}
+                  ></div>
+                  <div className="info p-3 left">
+                   <p className="project-name">{p.name}</p>
+
+                   <div className="project-cover-footer">
+                    <p className="m-0">{p.kind}</p>
+                    <hr className="my-1 w-20" />
+                    <p className="m-0">{p.type}</p>
+                   </div>
+                  </div>
+                 </div>
+                </a>
+               </AntCol>
+              );
+             })}
+            </AntRow>
+           </div>
+          </TabPane>
+          <TabPane tab="Interior Design" key="3">
+           {/* Content of Tab Pane 3 */}
+           <div className="innertab py-5">
+            <AntRow span={24} gutter={24}>
+             {this.state.projects_types["Interior Design"]?.map((p, index) => {
+              return (
+               <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+                <a href={`/project/${p.id}`} className="box-link">
+                 <div className="project-col bg-white">
+                  <div
+                   className="project-image"
+                   style={{
+                    backgroundImage: `url(${p.cover})`,
+                   }}
+                  ></div>
+                  <div className="info p-3 left">
+                   <p className="project-name">{p.name}</p>
+
+                   <div className="project-cover-footer">
+                    <p className="m-0">{p.kind}</p>
+                    <hr className="my-1 w-20" />
+                    <p className="m-0">{p.type}</p>
+                   </div>
+                  </div>
+                 </div>
+                </a>
+               </AntCol>
+              );
+             })}
+            </AntRow>
+           </div>
+          </TabPane>
+          <TabPane tab="Product Design" key="4">
+           <div className="innertab py-5">
+            <AntRow span={24} gutter={24}>
+             {this.state.projects_types["Product Design"]?.map((p, index) => {
+              return (
+               <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+                <a href={`/project/${p.id}`} className="box-link">
+                 <div className="project-col bg-white">
+                  <div
+                   className="project-image"
+                   style={{
+                    backgroundImage: `url(${p.cover})`,
+                   }}
+                  ></div>
+                  <div className="info p-3 left">
+                   <p className="project-name">{p.name}</p>
+
+                   <div className="project-cover-footer">
+                    <p className="m-0">{p.kind}</p>
+                    <hr className="my-1 w-20" />
+                    <p className="m-0">{p.type}</p>
+                   </div>
+                  </div>
+                 </div>
+                </a>
+               </AntCol>
+              );
+             })}
+            </AntRow>
+           </div>
+          </TabPane>
+          <TabPane tab="Design blogs" key="5">
+           <div className="innertab py-5">
+            <AntRow span={24} gutter={24}>
+             {this.state.projects_types["Blog"]?.map((p, index) => {
+              return (
+               <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+                <a href={`/project/${p.id}`} className="box-link">
+                 <div className="project-col bg-white">
+                  <div
+                   className="project-image"
+                   style={{
+                    backgroundImage: `url(${p.cover})`,
+                   }}
+                  ></div>
+                  <div className="info p-3 left">
+                   <p className="project-name">{p.name}</p>
+
+                   <div className="project-cover-footer">
+                    <p className="m-0">{p.kind}</p>
+                    <hr className="my-1 w-20" />
+                    <p className="m-0">{p.type}</p>
+                   </div>
+                  </div>
+                 </div>
+                </a>
+               </AntCol>
+              );
+             })}
+            </AntRow>
+           </div>
+          </TabPane>
+         </Tabs>
+         {/* <Row>
           <Col
            xs={12}
            sm={12}
@@ -674,8 +841,9 @@ class HomePage extends Component {
             location="Shenzehn, China | 2017"
            />
           </Col>
-         </Row>
-         <button className="btn mt-4">Go to Magazine</button>
+         </Row> */}
+
+         {/* <button className="btn mt-4">Go to Magazine</button> */}
         </section>
        </div>
        <section className="stores-container bg-white text-left pb-5">

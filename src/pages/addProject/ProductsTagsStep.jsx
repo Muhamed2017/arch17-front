@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Row, Col, Checkbox, Button } from "antd";
+import { Row, Col, Checkbox } from "antd";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { API } from "./../../utitlties";
@@ -15,7 +15,7 @@ class ProductsTagsStep extends Component {
  }
  componentDidMount() {
   axios
-   .get(`${API}home/products`)
+   .get(`${API}home/data`)
    .then((response) => {
     console.log(response);
     this.setState({

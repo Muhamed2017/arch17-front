@@ -55,9 +55,9 @@ class CoverStep extends Component {
 
   return new File([u8arr], filename, { type: mime });
  };
+
  handleSubmitAddPrject = async () => {
   this.setState({ creating: true });
-
   const {
    blogType,
    category,
@@ -74,20 +74,24 @@ class CoverStep extends Component {
   fd.append("country", country);
   fd.append("city", city);
   fd.append("title", "TITLE");
-  fd.append("year", year?._d.getFullYear());
+  // fd.append("year", year?._d.getFullYear());
   fd.append(
    "cover",
    await compressImage(this.dataURLtoFile(this.state.cropped_cover, "file"))
   );
   fd.append(
    "content",
-   JSON.stringify(
-    convertToRaw(this.props.project?.project_content?.getCurrentContent())
-   )
-  );
+   this.props.project?.project_content
 
+   //  JSON.stringify(
+   //   convertToRaw(this.props.project?.project_content?.getCurrentContent())
+   //  )
+  );
   this.props.project.role_designers?.map((p) => {
    fd.append("users[]", p.id);
+  });
+  this.props.project.project_covers?.map((c) => {
+   fd.append("images[]", c);
   });
   this.props.project.role_brands?.map((s) => {
    fd.append("stores[]", s.id);
@@ -96,23 +100,46 @@ class CoverStep extends Component {
    fd.append("products[]", p);
   });
 
-  axios
-   .post(
-    `${API}addproject/${this.props.params.creatorType}/${this.props.params.creatorId}`,
-    fd
-   )
-   .then((response) => {
-    console.log(response);
+  if (this.props.cycle_type === "EDIT") {
+   //  fd.append("year", year);
+   fd.append("year", year?._d.getFullYear());
 
-    this.setState({
-     created: true,
-     creating: false,
-     project_id: response.data.project.id,
+   axios
+    .post(`${API}editproject/${this.props.projectId}`, fd)
+
+    .then((response) => {
+     console.log(response);
+     this.setState({
+      created: true,
+      creating: false,
+      project_id: response.data.project.id,
+     });
+    })
+    .catch((error) => {
+     console.log(error);
     });
-   })
-   .catch((error) => {
-    console.log(error);
-   });
+   console.log("EDIT PROCESS");
+  } else {
+   fd.append("year", year?._d.getFullYear());
+
+   axios
+    .post(
+     `${API}addproject/${this.props.params.creatorType}/${this.props.params.creatorId}`,
+     fd
+    )
+    .then((response) => {
+     console.log(response);
+
+     this.setState({
+      created: true,
+      creating: false,
+      project_id: response.data.project.id,
+     });
+    })
+    .catch((error) => {
+     console.log(error);
+    });
+  }
  };
  componentDidMount() {}
  render() {
@@ -141,7 +168,7 @@ class CoverStep extends Component {
            />
            {`${this.props.info?.country}, ${
             this.props.info?.city
-           } | ${this.props.info?.year?._d.getFullYear()}`}
+           } | ${this.props.info?.year?._d?.getFullYear()}`}
           </p>
          </div>
          <div className="pl-3" style={{ width: "95%", margin: "auto" }}>
@@ -241,6 +268,8 @@ const mapStateToProps = (state) => {
   info: state.project.project_info,
   project: state.project,
   params: state.project?.params,
+  cycle_type: state.project?.cycle_type,
+  projectId: state.project?.projectId,
  };
 };
 export default connect(mapStateToProps)(CoverStep);

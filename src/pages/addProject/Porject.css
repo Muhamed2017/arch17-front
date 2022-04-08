@@ -13,8 +13,14 @@
     top: 65px !important;
 
 }
+#project-page .row>*{
+    padding-right: 0 !important;
+}
 figure{
     margin: 1rem 0 !important;
+}
+#project-page .rdw-editor-toolbar{
+ display: none;   
 }
 .roboto{
     font-family: "Roboto";
@@ -37,6 +43,11 @@ figure{
 .text-editor .rdw-option-wrapper {
     min-width: 16px !important;
 
+}
+#project-page .cover-container{
+        margin-top: 3px;
+        border-top-left-radius: 18px;
+        border-top-right-radius: 18px;
 }
 .addprojectwrapper{
     margin:auto;
@@ -273,11 +284,13 @@ height:80px;
 }
 .project-right-side .designers{
     background-color: #fff;
-    height: 320px;
+    min-height:188px;
+    max-height:370px;
     margin: 12px 0 20px 0;
     width: 100%;
     border-radius: 10px;
     border: 1px solid #dedede;
+    cursor: grab;
 }
 .project-right-side .brands{
     margin: 20px 0;
@@ -288,18 +301,30 @@ height:80px;
 }
 .brand{
     position: relative;
-    min-height: 400px;
+    min-height: 420px;
 }
 .slide-footer span{
     vertical-align: middle;
-    width: 60px;
+    width: 50px;
     cursor: pointer;
 }
+#product-tags .product {
+padding-bottom: 0 !important;
+}
+
 .brands .slide-footer{
     position: absolute;
     bottom: 0px;
-    right: 15px;
-    font-size: 1.4rem;
+    right: 0px;
+    font-size: .9rem;
+    text-align: right;
+    color: #a0a0a0;
+    font-weight: 300 !important;
+}
+.slide-footer span{
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #242424;
 }
 .des-btns{
     margin: 10px 0;
@@ -386,7 +411,7 @@ vertical-align: middle;
     font-size:1.6rem;
     border-bottom: 1px solid rgb(238, 238, 238);
     margin-bottom: 5px;
-    padding-top: 12px;
+    padding-top: 5px;
     background-color: #fff;
 }
 .socials > div:last-child{
@@ -395,7 +420,7 @@ vertical-align: middle;
 .socials {
     color: #242424;
     z-index: 5;
-    padding: 12px;
+    padding: 15px;
 
 }
 .socials svg{
@@ -486,4 +511,64 @@ background-position: top  !important;
     color: #d1d1d1;
     font-size: .8rem;
 }
+
 /* end of project page styles */
+.project-col{
+    position: relative;
+}
+.project-btn{
+    position: absolute;
+    display: none;
+
+    border-radius: 2px;
+    color: #fff !important;
+    text-transform: uppercase;
+    font-weight: 500;
+    font-family: "Roboto";
+    transition: background 300ms ease-in-out;
+    background: #e41e15;
+    padding: 5px 15px;
+}
+.project-edit-btn{
+    right: 10px;
+    top: 10px;
+}
+.project-delete-btn{
+right:85px;
+top: 10px;
+}
+.innertab .project-col .info{
+    border:1px solid #dddddd91
+}
+.project-btn:hover{
+    background: #242424;
+    color: #fff !important;
+}
+.project-col:hover .project-btn{
+    display: block;
+
+}
+
+.ck-toolbar {
+    padding:18px 5px !important;
+    background: #fff !important;
+    border-bottom:1px solid #dddddd7d !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+}
+.ck.ck-editor__main>.ck-editor__editable:not(.ck-focused){
+    border-color: transparent !important;
+}
+.ck-content{
+    min-height: 250px;
+    line-height: normal !important;
+}
+.ck.ck-editor__editable:not(.ck-editor__nested-editable).ck-focused{
+    border:none !important;
+    border-left: none !important;
+    box-shadow: none !important;
+}
+.ck-content p {
+    margin-bottom: 0 !important;
+}

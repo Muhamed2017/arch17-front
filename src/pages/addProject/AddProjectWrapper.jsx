@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./Porject.css";
-import { Steps, Button, message, Row, Col } from "antd";
+import { Steps, Button, Row, Col } from "antd";
 import InfoStep from "./InfoStep";
 import ContentStep from "./ContentStep";
 import RoleStep from "./RoleStep";
@@ -12,20 +12,19 @@ import {
  SET_PROJECT_PARAMS,
 } from "./../../redux/constants";
 import CoverStep from "./CoverStep";
-import axios from "axios";
-import { convertToRaw } from "draft-js";
+import TextEditor from "../TextEditor";
 
-import { API } from "../../utitlties";
 const { Step } = Steps;
 
-const steps = [
+export const steps = [
  {
   title: "1.Project Info",
   content: <InfoStep />,
  },
  {
   title: "2.Content",
-  content: <ContentStep />,
+  //   content: <ContentStep />,
+  content: <TextEditor />,
  },
  {
   title: "3.Role",
@@ -64,45 +63,7 @@ class AddProjectWrapper extends Component {
    current: this.props.step,
   });
  }
- handleSubmitAddPrject = () => {
-  const {
-   name,
-   blogType,
-   category,
-   type,
-   country,
-   city,
-   year,
-  } = this.props?.project.project_info;
-  const fd = new FormData();
-  fd.append("name", name);
-  fd.append("article_type", blogType[0]);
-  fd.append("kind", category);
-  fd.append("type", type);
-  fd.append("country", country);
-  fd.append("city", city);
-  fd.append("title", "TITLE");
-  fd.append("year", year);
-  fd.append("cover", year);
-  fd.append(
-   "content",
-   JSON.stringify(
-    convertToRaw(this.project?.project_content?.getCurrentContent())
-   )
-  );
 
-  this.props.project.role_designers?.map((p) => {
-   fd.append("users[]", p.id);
-  });
-  this.props.project.role_brands?.map((s) => {
-   fd.append("stores[]", s.id);
-  });
-  this.props.project.project_tags?.map((p) => {
-   fd.append("products[]", p);
-  });
-
-  axios.post();
- };
  next = () => {
   this.props.dispatch({
    type: NEXT_STEP,
@@ -122,7 +83,7 @@ class AddProjectWrapper extends Component {
      <Row span={24} gutter>
       <Col md={24} className="bg-white mb-2 py-3">
        <div className="wrapper-inner">
-        <Steps forceRender current={current} icon="">
+        <Steps current={current} icon="">
          {steps.map((item) => (
           <Step
            key={item.title}

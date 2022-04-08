@@ -13,6 +13,7 @@ import {
  Menu,
  Dropdown,
  Modal as AntModal,
+ Badge,
 } from "antd";
 import pptxgen from "pptxgenjs";
 import { FaFilePdf } from "react-icons/fa";
@@ -721,6 +722,7 @@ class Product extends Component {
 
  render() {
   const loading = this.state.loading;
+  // const loading = true;
   if (!loading) {
    return (
     <React.Fragment>
@@ -960,22 +962,19 @@ class Product extends Component {
                {this.state.files.map((file, index) => {
                 return (
                  <>
-                  <button
-                   className="product-boxs"
-                   onClick={() => this.openFileModal(file)}
+                  <Badge.Ribbon
+                   size="small"
+                   text={file.software}
+                   placement="start"
                   >
-                   <div className="file-box">{file.file_type}</div>
-                   <p>{file.file_name}</p>
-                   <span
-                    className="link-bold"
-                    style={{
-                     fontSize: ".75rem",
-                     marginLeft: "-13px",
-                    }}
+                   <button
+                    className="product-boxs"
+                    onClick={() => this.openFileModal(file)}
                    >
-                    {file.software}
-                   </span>
-                  </button>
+                    <div className="file-box">{file.file_type}</div>
+                    <p>{file.file_name}</p>
+                   </button>
+                  </Badge.Ribbon>
                  </>
                 );
                })}

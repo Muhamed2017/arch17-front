@@ -5,11 +5,11 @@ import { Container, Form, Row, Col } from "react-bootstrap";
 import { Form as FormAnt, Input, Select } from "antd";
 import HashLoader from "react-spinners/HashLoader";
 import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
-import en from "world_countries_lists/data/en/world.json";
 import axios from "axios";
 import * as utility from "../utitlties";
 import ReactFlagsSelect from "react-flags-select";
 import { Redirect } from "react-router-dom";
+import en from "world_countries_lists/data/countries/en/world.json";
 
 const { Option } = Select;
 

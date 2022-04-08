@@ -21,8 +21,8 @@ import { API } from "./../../utitlties";
 import { Spin, Select } from "antd";
 import ReactFlagsSelect from "react-flags-select";
 import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
-import en from "world_countries_lists/data/en/world.json";
 
+import en from "world_countries_lists/data/countries/en/world.json";
 import {
  signinEmailPassword,
  setUserInfoAction,

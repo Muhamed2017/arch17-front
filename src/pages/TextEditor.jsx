@@ -1,75 +1,118 @@
-import React, { Component } from "react";
-import { convertToRaw, EditorState } from "draft-js";
-import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { Editor } from "react-draft-wysiwyg";
+import React, { useState } from "react";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+
 import axios from "axios";
-import { resolve } from "q";
-import { API } from "./../utitlties";
-class TextEditor extends Component {
- constructor(props) {
-  super(props);
-  this.state = {
-   editorState: EditorState.createEmpty(),
+import { API } from "../utitlties";
+import "../pages/addProject/Porject.css";
+// import Mention from "@ckeditor/ckeditor5-mention/src/mention";
+
+import {
+ goToProjectStep,
+ addProjectCover,
+ addProjectContent,
+} from "../redux/actions/addProjectActions";
+import { connect } from "react-redux";
+import { message } from "antd";
+const TextEditor = (props) => {
+ const [uploading, setUploading] = useState(false);
+ const [images, setImages] = useState([]);
+ const [filesCounter, IncrementFilesCounter] = useState(0);
+ const [loaders, setLoaders] = useState([]);
+ function uploadAdapter(loader) {
+  return {
+   upload: () => {
+    setUploading(true);
+    return new Promise((resolve, reject) => {
+     IncrementFilesCounter(filesCounter + 1);
+
+     const fd = new FormData();
+     loader.file.then((file) => {
+      fd.append("cover", file);
+      axios
+       .post(`${API}uploadimg`, fd)
+       .then((res) => {
+        resolve({
+         default: res.data.src,
+        });
+        props.dispatchProjectCover(res.data.src);
+        setUploading(false);
+        setImages([...images, res.data.src]);
+        // console.log(loader);
+        setLoaders([...loaders, loader]);
+       })
+       .catch((err) => {
+        setUploading(false);
+        reject(err);
+        console.log(err);
+       });
+     });
+    });
+   },
   };
  }
- url;
- uploadCallback = (file) => {
-  return new Promise((resolve, reject) => {
-   const formData = new FormData();
-   formData.append("desc_gallery_files[]", file);
 
-   axios
-    .post(`${API}desc/385`, formData)
-    .then((response) => {
-     //  console.log(response.data.product_desc.desc_gallery_files[0]);
-     //  resolve(res)
-     resolve({
-      data: { link: response.data.product_desc.desc_gallery_files[0] },
-     });
-    })
-    .catch((err) => {
-     console.log(err);
-     reject(err);
-    });
-  });
- };
- onEditorStateChange = (editorState) => {
-  this.setState({
-   editorState,
-  });
-  console.log(convertToRaw(this.state.editorState.getCurrentContent()));
- };
- render() {
-  const { editorState } = this.state;
-
-  return (
-   <div className="text-editor">
-    <Editor
-     editorState={editorState}
-     wrapperClassName="rich-editor demo-wrapper"
-     editorClassName="demo-editor"
-     onEditorStateChange={this.onEditorStateChange}
-     placeholder="The message goes here..."
-     toolbar={{
-      //   options: ["image", "colorPicker"],
-      image: {
-       uploadEnabled: true,
-       urlEnabled: true,
-       uploadCallback: this.uploadCallback,
-       previewImage: true,
-       alignmentEnabled: "LEFT",
-       inputAccept: "image/gif,image/jpeg,image/jpg,image/png,image/svg",
-       alt: { present: false, mandatory: false },
-       defaultSize: {
-        height: "auto",
-        width: "400",
-       },
-      },
+ function uploadPlugin(editor) {
+  editor.plugins.get("FileRepository").createUploadAdapter = (loader) => {
+   return uploadAdapter(loader);
+  };
+ }
+ return (
+  <>
+   <div
+    className=""
+    style={{
+     maxWidth: "1250px",
+     margin: "35px auto",
+    }}
+   >
+    <CKEditor
+     config={{
+      initialData: props?.content?.length > 0 ? props.content : "",
+      extraPlugins: [uploadPlugin],
+     }}
+     editor={ClassicEditor}
+     //  onReady={(editor) => {}}
+     //  onBlur={(event, editor) => {}}
+     //  onFocus={(event, editor) => {}}
+     onChange={(event, editor) => {
+      props.dispatchProjectContent(editor.getData());
+      console.log(editor);
      }}
     />
    </div>
-  );
- }
-}
+   <button
+    className="next-btn"
+    onClick={() => {
+     console.log(loaders);
+     if (images.length > 0) {
+      if (images.length < filesCounter) {
+       images.length < filesCounter && message.error("Stil uploading images");
+      } else {
+       //  props.dispatchGoStep(2);
+      }
+     } else {
+      console.log("Upload at least one image");
+      message.error("Upload at least one image ");
+     }
+    }}
+   >
+    Save & Continue
+   </button>
+  </>
+ );
+};
+//  export default ContentStep;
+const mapDispatchToProps = (dispatch) => ({
+ dispatchProjectContent: (content) => dispatch(addProjectContent(content)),
+ dispatchProjectCover: (cover) => dispatch(addProjectCover(cover)),
+ dispatchGoStep: (step) => dispatch(goToProjectStep(step)),
+});
 
-export default TextEditor;
+const mapStateToProps = (state) => {
+ return {
+  content: state.project.project_content,
+  covers: state.project.project_covers,
+ };
+};
+export default connect(mapStateToProps, mapDispatchToProps)(TextEditor);

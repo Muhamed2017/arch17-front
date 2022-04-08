@@ -19,36 +19,14 @@ class RoleStep extends Component {
   this.state = {
    designesModal: false,
    brandsModal: false,
-   designers: [
-    // { id: 1, name: "Muhamed Gomaa", img: null },
-    // { id: 2, name: "Kareem Salah", img: null },
-    // { id: 3, name: "Sayed Fathy", img: null },
-    // { id: 4, name: "Islam Ussef", img: null },
-    // { id: 5, name: "Alaa Seleem", img: null },
-    // { id: 6, name: "Rania Ra'afat", img: null },
-    // { id: 7, name: "Dalia Ussef", img: null },
-    // { id: 8, name: "Ola Fahmy", img: null },
-    // { id: 9, name: "Layla Taher", img: null },
-    // { id: 10, name: "Hassan Akram", img: null },
-   ],
-   brands: [
-    { id: 1, name: "Muhamed Brand", img: null },
-    { id: 2, name: "Kareem Brand", img: null },
-    { id: 3, name: "Sayed Brand", img: null },
-    { id: 4, name: "Islam Brand", img: null },
-    { id: 5, name: "Alaa Brand", img: null },
-    { id: 6, name: "Rania Brand", img: null },
-    { id: 7, name: "Dalia Brand", img: null },
-    { id: 8, name: "Ola Brand", img: null },
-    { id: 9, name: "Layla Brand", img: null },
-    { id: 10, name: "Hassan Brand", img: null },
-   ],
+   designers: [],
+   brands: [],
    addedDesigners: this.props.designers ?? [],
    addedBrands: this.props.brands ?? [],
-   addedDesIDs: this.props.designers.map((des) => {
+   addedDesIDs: this.props.designers?.map((des) => {
     return des.id;
    }),
-   addedBraIDs: this.props.brands.map((b) => {
+   addedBraIDs: this.props.brands?.map((b) => {
     return b.id;
    }),
 
@@ -140,7 +118,8 @@ class RoleStep extends Component {
    .then((response) => {
     this.setState({
      brands: response.data.brands,
-     designers: response.data.users,
+     //  designers: response.data.users,
+     designers: Object.values(response.data.users),
     });
     console.log(response);
    })
@@ -172,7 +151,7 @@ class RoleStep extends Component {
        </>
       )}
       <Row span={24}>
-       {this.state.addedDesigners.map((d) => {
+       {this.state.addedDesigners?.map((d) => {
         return (
          <>
           <Col md={12} className="my-3">
@@ -187,10 +166,10 @@ class RoleStep extends Component {
             onClick={() => {
              this.setState(
               {
-               addedDesigners: this.state.addedDesigners.filter((des) => {
+               addedDesigners: this.state.addedDesigners?.filter((des) => {
                 return des.id !== d.id;
                }),
-               addedDesIDs: this.state.addedDesIDs.filter((id) => {
+               addedDesIDs: this.state.addedDesIDs?.filter((id) => {
                 return id !== d.id;
                }),
               },
@@ -243,7 +222,7 @@ class RoleStep extends Component {
        </>
       )}
       <Row span={24}>
-       {this.state.addedBrands.map((b) => {
+       {this.state.addedBrands?.map((b) => {
         return (
          <>
           <Col md={12} className="my-3">
@@ -258,10 +237,10 @@ class RoleStep extends Component {
             onClick={() => {
              this.setState(
               {
-               addedBrands: this.state.addedBrands.filter((brand) => {
+               addedBrands: this.state.addedBrands?.filter((brand) => {
                 return brand.id !== b.id;
                }),
-               addedBraIDs: this.state.addedBraIDs.filter((id) => {
+               addedBraIDs: this.state.addedBraIDs?.filter((id) => {
                 return id !== b.id;
                }),
               },
@@ -350,7 +329,7 @@ class RoleStep extends Component {
       onChange={(e) => {
        console.log(e);
        this.setState({
-        filteredDesigners: this.state.designers.filter((d) => {
+        filteredDesigners: this.state.designers?.filter((d) => {
          return d.displayName
           .toLowerCase()
           ?.includes(e.target.value.toLowerCase());
@@ -359,12 +338,12 @@ class RoleStep extends Component {
       }}
      />
      {this.state?.filteredDesigners?.map((d, key) => {
-      if (!this.state.addedDesIDs.includes(d.id)) {
+      if (!this.state.addedDesIDs?.includes(d.id)) {
        return (
         <Row span={24} key={key}>
          <Col
           md={24}
-          className="designers-row "
+          className="designers-row"
           onClick={() => this.handleAddDesigner(d)}
          >
           <div className="d-img inline-block middle">
@@ -422,7 +401,7 @@ class RoleStep extends Component {
       onChange={(e) => {
        console.log(e);
        this.setState({
-        filteredBrands: this.state.brands.filter((d) => {
+        filteredBrands: this.state.brands?.filter((d) => {
          return d.name.toLowerCase()?.includes(e.target.value.toLowerCase());
         }),
        });
