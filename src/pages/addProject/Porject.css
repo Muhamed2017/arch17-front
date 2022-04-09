@@ -572,3 +572,18 @@ top: 10px;
 .ck-content p {
     margin-bottom: 0 !important;
 }
+
+.custom-mention-item{
+        display: grid;
+        grid-template-columns: auto auto auto;
+        grid-gap: 13px;
+        align-items: center
+}
+.custom-mention-item .avatar{
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+}

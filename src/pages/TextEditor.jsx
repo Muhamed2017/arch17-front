@@ -1,12 +1,9 @@
 import React, { useState } from "react";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-
+// import { CKEditor } from "@ckeditor/ckeditor5-react";
+// import * as ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import axios from "axios";
 import { API } from "../utitlties";
 import "../pages/addProject/Porject.css";
-// import Mention from "@ckeditor/ckeditor5-mention/src/mention";
-
 import {
  goToProjectStep,
  addProjectCover,
@@ -14,6 +11,8 @@ import {
 } from "../redux/actions/addProjectActions";
 import { connect } from "react-redux";
 import { message } from "antd";
+// import { Mentions } from "@ckeditor/ckeditor5-mention/src/mention";
+
 const TextEditor = (props) => {
  const [uploading, setUploading] = useState(false);
  const [images, setImages] = useState([]);
@@ -66,7 +65,7 @@ const TextEditor = (props) => {
      margin: "35px auto",
     }}
    >
-    <CKEditor
+    {/* <CKEditor
      config={{
       initialData: props?.content?.length > 0 ? props.content : "",
       extraPlugins: [uploadPlugin],
@@ -79,7 +78,7 @@ const TextEditor = (props) => {
       props.dispatchProjectContent(editor.getData());
       console.log(editor);
      }}
-    />
+    /> */}
    </div>
    <button
     className="next-btn"

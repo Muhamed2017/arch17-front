@@ -23,15 +23,13 @@ import Kind from './pages/addProduct/Kind'
 import Product from './pages/Product'
 import Project from './pages/Project'
 import TextEditor from './pages/TextEditor';
+import TestCrop from './pages/TestCrop';
 import "react-notifications-component/dist/theme.css";
 import UserProfile from './pages/UserProfile';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer} from 'react-toastify'
 import Settings from './pages/user_profile_tabs/Settings';
 import { Home } from './pages/Home';
-// import { ConfigProvider } from 'antd-country-phone-input';
-// import en from 'world_countries_lists/data/en/world.json';
-// import en from "world_countries_lists/data/countries/en/world.json";
 
 import 'antd-country-phone-input/dist/index.css'
 import Search from './pages/Search';
@@ -111,6 +109,9 @@ class App extends Component {
               <Route path='/designeraccount' component={DesignerAccount} exact />
              
               <Route path="/editor" exact><TextEditor />
+              </Route>
+               
+              <Route path="/test" exact><TestCrop />
               </Route>
               <Route path='/' exact>
                 <Home/>
