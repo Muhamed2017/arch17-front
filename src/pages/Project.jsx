@@ -18,7 +18,9 @@ import {
  FaThumbsUp,
 } from "react-icons/fa";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "ckeditor5-custom-build/build/ckeditor";
+// import ClassicEditor from "ckeditor5-custom-build/build/ckeditor";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+
 import { AiOutlinePlus } from "react-icons/ai";
 import { API } from "./../utitlties";
 import { Link } from "react-router-dom";

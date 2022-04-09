@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import axios from "axios";
-import ClassicEditor from "ckeditor5-custom-build/build/ckeditor";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+
+// import ClassicEditor from "ckeditor5-custom-build/build/ckeditor";
 import { API } from "../utitlties";
 // import {Mention}
 import "../pages/addProject/Porject.css";
@@ -63,7 +65,6 @@ const TestCrop = (props) => {
 
   usernameElement.classList.add("custom-item-username");
   usernameElement.textContent = item.id;
- 
 
   itemElement.appendChild(usernameElement);
   return itemElement;
@@ -87,42 +88,42 @@ const TestCrop = (props) => {
      config={{
       initialData: props?.content?.length > 0 ? props.content : "",
       extraPlugins: [uploadPlugin],
-      mention: {
-       feeds: [
-        {
-         marker: "@",
-         feed: [
-          {
-           id: "@MGM's",
+      // mention: {
+      //  feeds: [
+      //   {
+      //    marker: "@",
+      //    feed: [
+      //     {
+      //      id: "@MGM's",
 
-           userId: "1",
-           name: "@MGM's Brand",
-           link: "https://arch17-front.herokuapp.com/brand/25",
-          },
-          {
-           id: "@YURO_NM_Store",
-           userId: "2",
-           name: "YURO NM Store",
-           link: "https://arch17-front.herokuapp.com/brand/5",
-          },
-          {
-           id: "@Grado",
-           userId: "4",
-           name: "Grado",
-           link: "https://arch17-front.herokuapp.com/brand/35",
-          },
-          {
-           id: "@Arch17_Aria",
-           userId: "5",
-           name: "Arch17 Aria",
-           link: "https://arch17-front.herokuapp.com/brand/15",
-          },
-         ],
-         itemRenderer: customItemRenderer,
-         minimumCharacters: 1,
-        },
-       ],
-      },
+      //      userId: "1",
+      //      name: "@MGM's Brand",
+      //      link: "https://arch17-front.herokuapp.com/brand/25",
+      //     },
+      //     {
+      //      id: "@YURO_NM_Store",
+      //      userId: "2",
+      //      name: "YURO NM Store",
+      //      link: "https://arch17-front.herokuapp.com/brand/5",
+      //     },
+      //     {
+      //      id: "@Grado",
+      //      userId: "4",
+      //      name: "Grado",
+      //      link: "https://arch17-front.herokuapp.com/brand/35",
+      //     },
+      //     {
+      //      id: "@Arch17_Aria",
+      //      userId: "5",
+      //      name: "Arch17 Aria",
+      //      link: "https://arch17-front.herokuapp.com/brand/15",
+      //     },
+      //    ],
+      //    itemRenderer: customItemRenderer,
+      //    minimumCharacters: 1,
+      //   },
+      //  ],
+      // },
      }}
      editor={ClassicEditor}
      //  onReady={(editor) => {}}

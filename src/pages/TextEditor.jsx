@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 // import { CKEditor } from "@ckeditor/ckeditor5-react";
-// import * as ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import axios from "axios";
-import ClassicEditor from "ckeditor5-custom-build/build/ckeditor";
+// import ClassicEditor from "ckeditor5-custom-build/build/ckeditor";
 // import axios from "axios";
 import { API } from "../utitlties";
 import "../pages/addProject/Porject.css";
