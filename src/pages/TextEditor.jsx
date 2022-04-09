@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 // import { CKEditor } from "@ckeditor/ckeditor5-react";
 // import * as ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
 import axios from "axios";
+import ClassicEditor from "ckeditor5-custom-build/build/ckeditor";
+// import axios from "axios";
 import { API } from "../utitlties";
 import "../pages/addProject/Porject.css";
 import {
@@ -65,7 +68,7 @@ const TextEditor = (props) => {
      margin: "35px auto",
     }}
    >
-    {/* <CKEditor
+    <CKEditor
      config={{
       initialData: props?.content?.length > 0 ? props.content : "",
       extraPlugins: [uploadPlugin],
@@ -78,7 +81,7 @@ const TextEditor = (props) => {
       props.dispatchProjectContent(editor.getData());
       console.log(editor);
      }}
-    /> */}
+    />
    </div>
    <button
     className="next-btn"
@@ -88,7 +91,7 @@ const TextEditor = (props) => {
       if (images.length < filesCounter) {
        images.length < filesCounter && message.error("Stil uploading images");
       } else {
-       //  props.dispatchGoStep(2);
+       props.dispatchGoStep(2);
       }
      } else {
       console.log("Upload at least one image");
