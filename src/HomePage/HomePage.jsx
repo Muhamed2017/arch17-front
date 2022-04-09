@@ -167,7 +167,8 @@ class HomePage extends Component {
   this.props.dispatchRegularSignin(email, password);
  };
  handleRegularSignup = (fname, lname, email, password) => {
-  this.props.dispatchRegularSignup(fname, lname, email, password, "regular");
+  // this.props.dispatchRegularSignup(fname, lname, email, password, "regular");
+  this.props.dispatchRegularSignup(fname, lname, email, password, "firebase");
  };
  flipToRegiseterFace = () => {
   this.setState({ authFace: "register-face" });

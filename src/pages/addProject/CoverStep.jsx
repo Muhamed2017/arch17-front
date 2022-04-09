@@ -69,8 +69,18 @@ class CoverStep extends Component {
   const fd = new FormData();
   fd.append("name", this.state.displayName);
   fd.append("article_type", blogType[0]);
-  fd.append("kind", category);
-  fd.append("type", type);
+
+  // fd.append("kind", category);
+  // fd.append("type", type);
+
+  category.map((c) => {
+   fd.append("category[]", c);
+  });
+
+  type.map((t) => {
+   fd.append("type[]", t);
+  });
+
   fd.append("country", country);
   fd.append("city", city);
   fd.append("title", "TITLE");

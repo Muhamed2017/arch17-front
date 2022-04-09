@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import ReactFlagsSelect from "react-flags-select";
 import { addProjectInfo } from "./../../redux/actions/addProjectActions";
 import { project_cats } from "../addProduct/ProductClassifications";
-import moment from "moment";
+// import moment from "moment";
 
 const { Option } = Select;
 const config = {
@@ -17,6 +17,8 @@ class InfoStep extends Component {
   this.state = {
    country: this.props.info?.country ?? "",
    missed: false,
+   selectedCats: [],
+   selectedTypes: [],
   };
  }
 
@@ -36,6 +38,16 @@ class InfoStep extends Component {
    this.setState({ missed: true });
   }
   console.log("Failed:", errorInfo);
+ };
+ handleCatsChange = (selectedCats) => {
+  this.setState({ selectedCats }, () => {
+   console.log(this.state.selectedCats);
+  });
+ };
+ handleTypesChange = (selectedTypes) => {
+  this.setState({ selectedTypes }, () => {
+   console.log(this.state.selectedTypes);
+  });
  };
  render() {
   return (
@@ -89,13 +101,16 @@ class InfoStep extends Component {
        className="form-label mb-4"
        labelCol={{ span: 3, offset: 0 }}
        wrapperCol={{ span: 8, offset: 0 }}
-       initialValue={this.props.info?.category ?? ""}
+       //    initialValue={this.props.info?.category ?? ""}
        rules={[{ required: true, message: "Please select your country!" }]}
       >
        <Select
         placeholder="Please select "
         size="large"
-        defaultValue={this.props.info?.category}
+        mode="multiple"
+        value={this.state.selectedCats}
+        onChange={this.handleCatsChange}
+        defaultValue={this.props.info?.category ?? []}
         showArrow
         style={{
          fontSize: "13px",
@@ -110,7 +125,6 @@ class InfoStep extends Component {
       </Form.Item>
       <Form.Item
        name="type"
-       initialValue={this.props.info?.type ?? ""}
        label="Project"
        labelCol={{ span: 3 }}
        wrapperCol={{
@@ -121,6 +135,10 @@ class InfoStep extends Component {
       >
        <Select
         showSearch
+        mode="multiple"
+        onChange={this.handleTypesChange}
+        defaultValue={this.props.info?.type ?? []}
+        value={this.state.selectedTypes}
         placeholder="Please select a country"
         style={{
          fontSize: "13px",

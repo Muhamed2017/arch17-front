@@ -155,7 +155,8 @@ class Brand extends Component {
  };
 
  handleRegularSignup = (fname, lname, email, password) => {
-  this.props.dispatchRegularSignup(fname, lname, email, password, "regular");
+  // this.props.dispatchRegularSignup(fname, lname, email, password, "regular");
+  this.props.dispatchRegularSignup(fname, lname, email, password, "firebase");
  };
 
  handleContact = () => {
