@@ -29,7 +29,6 @@ class Kind extends Component {
     this.setState({ loading: true });
     axios
      .post(`${API}addproduct/${this.state.brand_id}`, {
-      // kind: "Furniture",
       kind: category,
      })
      .then((response) => {
@@ -55,7 +54,6 @@ class Kind extends Component {
        brand_id: this.state.brand_id,
        collections: this.state.collections,
        selected_collections: this.state.selected_collections,
-       //  category: "Furniture",
        category: this.state.category,
       },
      }}

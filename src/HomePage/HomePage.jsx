@@ -612,9 +612,9 @@ class HomePage extends Component {
                     <p className="project-name left">{p.name}</p>
 
                     <div className="project-cover-footer">
-                     <p className="m-0">{p.kind}</p>
+                     {/* <p className="m-0">{p.kind}</p> */}
                      <hr className="my-1 w-20" />
-                     <p className="m-0">{p.type}</p>
+                     {/* <p className="m-0">{p.type}</p> */}
                     </div>
                    </div>
                   </div>

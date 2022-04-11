@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 
-// import Identity from "./Identity";
 import EditIdentity from "../editProduct/EditIdentity";
-// import OptionsPrice from "./OptionsPrice";
 import ProductFiles from "./ProductFiles";
 import { connect } from "react-redux";
 import {
@@ -13,11 +11,10 @@ import {
 } from "../../redux/actions/addProductActions";
 import FilesUpload from "./FilesUpload";
 import { useParams } from "react-router-dom";
-import ReactNotification, { store } from "react-notifications-component";
+// import ReactNotification from "react-notifications-component";
 import "react-notifications-component/dist/theme.css";
 import Preview from "./Preview";
 import TableStep from "../TableStep";
-// import IdentityStep from "./IdentityStep";
 import axios from "axios";
 import { API } from "./../../utitlties";
 const AddProductWrapper = (props) => {
@@ -54,9 +51,10 @@ const AddProductWrapper = (props) => {
  Tabs.defaultProps = {
   selectedIndex: props.tabIndex,
  };
+
  return (
   <React.Fragment>
-   <ReactNotification />
+   {/* <ReactNotification /> */}
    <div id="add-product-wrapper">
     <Tabs>
      <div id="tabs-wrapper">
@@ -155,7 +153,6 @@ const mapStateToProps = (state) => {
  return {
   tabIndex: state.addProduct.tabIndex,
   identity: state.addProduct.identity,
-  // tabIndex: 1,
  };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(AddProductWrapper);
