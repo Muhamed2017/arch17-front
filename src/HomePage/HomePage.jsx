@@ -585,13 +585,7 @@ class HomePage extends Component {
          <h3 className="home-center mb-4">
           Explore Design Projects, News & trends
          </h3>
-         {/* <div className="project-filters-tab justify-content-center my-4 none-mobile">
-          <p className="mx-2 px-2">Recent</p>
-          <p className="mx-2 px-2">Architecture</p>
-          <p className="mx-2 px-2">Interior Design</p>
-          <p className="mx-2 px-2">Product Design</p>
-          <p className="mx-2 px-2">Design blogs</p>
-         </div> */}
+
          <Tabs defaultActiveKey="recent" centered onChange={() => {}}>
           <TabPane tab="Recent" key="recent">
            <div className="innertab py-5">
@@ -613,8 +607,18 @@ class HomePage extends Component {
 
                     <div className="project-cover-footer">
                      {/* <p className="m-0">{p.kind}</p> */}
+                     <p>
+                      {p.kind?.map((k) => {
+                       return <span className="px-1">{k}</span>;
+                      })}
+                     </p>
                      <hr className="my-1 w-20" />
-                     {/* <p className="m-0">{p.type}</p> */}
+                     {/* <p className="m-0">{...p.type}</p> */}
+                     <p>
+                      {p.type?.map((t) => {
+                       return <span className="px-1">{t}</span>;
+                      })}
+                     </p>
                     </div>
                    </div>
                   </div>

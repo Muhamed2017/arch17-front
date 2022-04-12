@@ -242,3 +242,16 @@ export const setSearchTerm= (term)=>{
         dispatch(setSearchTermActionCreator(term))
     }   
 }
+
+const setAllBrandsCreator = (brands) => {
+    return {
+        type: actions.SET_ALL_BRANDS,
+        payload:brands
+    }
+}
+
+export const setAllBrands= (brands)=>{
+  return (dispatch) => {
+        dispatch(setAllBrandsCreator(brands))
+    }   
+}

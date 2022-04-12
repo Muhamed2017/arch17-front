@@ -76,7 +76,8 @@ class AddProjectWrapper extends Component {
   });
  };
  render() {
-  const current = this.props.step;
+    const current = this.props.step;
+//   const current = 3;
   return (
    <>
     <div className="addprojectwrapper">

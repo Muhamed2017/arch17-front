@@ -9,7 +9,8 @@ const initialState = {
     requesting:false,
     searchTerm:null,
     prices:[],
-    modal_codes:[]
+    modal_codes:[],
+    brands:[]
 }
 
 export const AddProductReducer = (state= initialState, action)=>{
@@ -62,12 +63,18 @@ export const AddProductReducer = (state= initialState, action)=>{
                 ...state,
                 requesting:false
             }
+            
             case actions.SET_SEARCH_TERM:
             return {
                 ...state,
                 searchTerm:action.payload
             }
 
+              case actions.SET_ALL_BRANDS:
+            return {
+                ...state,
+                brands:action.payload
+            }
         case actions.SET_PRICES:
            return {
              ...state, 

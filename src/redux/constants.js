@@ -71,6 +71,7 @@ export const OPTIONS_STORED ="OPTIONS_STORED"
 
 // search
 export const SET_SEARCH_TERM = 'SET_SEARCH_TERM'
+export const SET_ALL_BRANDS = 'SET_ALL_BRANDS'
 
 
 // add project cycle

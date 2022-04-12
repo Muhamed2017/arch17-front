@@ -74,7 +74,7 @@ class CoverStep extends Component {
   // fd.append("type", type);
 
   category.map((c) => {
-   fd.append("category[]", c);
+   fd.append("kind[]", c);
   });
 
   type.map((t) => {

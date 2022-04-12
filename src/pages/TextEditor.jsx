@@ -87,16 +87,18 @@ const TextEditor = (props) => {
     className="next-btn"
     onClick={() => {
      console.log(loaders);
-     if (images.length > 0) {
-      if (images.length < filesCounter) {
-       images.length < filesCounter && message.error("Stil uploading images");
-      } else {
-       props.dispatchGoStep(2);
-      }
-     } else {
-      console.log("Upload at least one image");
-      message.error("Upload at least one image ");
-     }
+     //  if (images.length > 0) {
+     //   if (images.length < filesCounter) {
+     //    images.length < filesCounter && message.error("Stil uploading images");
+     //   } else {
+     //    props.dispatchGoStep(2);
+     //   }
+     //  } else {
+     //   console.log("Upload at least one image");
+     //   message.error("Upload at least one image ");
+     //  }
+
+     props.dispatchGoStep(2);
     }}
    >
     Save & Continue

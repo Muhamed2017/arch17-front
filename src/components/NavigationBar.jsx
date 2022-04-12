@@ -38,7 +38,10 @@ import { IoNotifications } from "react-icons/io5";
 import axios from "axios";
 import { presistInfo } from "./../redux/actions/authActions";
 import { API } from "./../utitlties";
-import { setSearchTerm } from "./../redux/actions/addProductActions";
+import {
+ setSearchTerm,
+ setAllBrands,
+} from "./../redux/actions/addProductActions";
 const furniture = [
  "Cabinets",
  "Beds",
@@ -259,8 +262,8 @@ class NavigationBar extends Component {
       });
      }
     );
-
     console.log(response);
+    this.props.setAllBrands(response.data.brands);
    })
    .catch((error) => {
     console.log(error);
@@ -802,6 +805,7 @@ const mapDispatchToProps = (dispatch) => ({
  loggingin: (user) => dispatch(phoneSignupSuccess(user)),
  updateInfo: (information) => dispatch(updateInfo(information)),
  setSearchTerm: (term) => dispatch(setSearchTerm(term)),
+ setAllBrands: (brands) => dispatch(setAllBrands(brands)),
 });
 
 const mapStateToProps = (state) => {
