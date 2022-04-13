@@ -1,0 +1,76 @@
+#magazine-page{
+    font-family: "Roboto";
+    /* min-height: 1000px; */
+}
+.magazine-tabs{
+    display: grid;
+    grid-template-columns: repeat(6, auto);
+    align-items: center;
+    height: 40px;
+    grid-gap:10px;
+  
+}
+.magazine-tabs.first{
+    border-right: 1px solid #ddd;
+    text-align: center;
+    border-left: 1px solid #ddd;
+    justify-items: center;
+    padding: 0 10px;
+}
+.magazine-tabs.sec{
+    justify-content: center;
+    grid-gap: 20px;
+}
+.filter-wrapper{
+    background-color: #fff;
+    padding: 10px 0;
+}
+.magazine-tabs p{
+    cursor: pointer;
+    margin: 0;
+    max-width: 100px;
+    transition: all 50ms ease-in-out;
+    letter-spacing: 0;
+    height: 21px;
+    user-select: none;
+}
+.magazine-tabs p:hover{
+    border-bottom: 2px solid #000;
+}
+.magazine-tabs p.active{
+    font-weight: 600;
+    letter-spacing: -.1px;
+    border-bottom: 2px solid #000;
+}
+
+#magazine-page .wrapper{
+max-width: 1300px;
+margin: auto;
+}
+#magazine-page .ant-form-item{
+    margin: 0 !important;
+}
+#magazine-page .ReactFlagsSelect-module_selectBtn__19wW7{
+border: none;
+justify-content: start !important;
+grid-gap: 10px;
+}
+
+
+.magazine-head{
+    color:#505458;
+    font-size:36px;
+    font-weight: 500;
+    padding: 75px  0 5px;
+    width: 100%;
+}
+
+.magazine-p{
+    color: #000;
+    font-weight: 100;
+    font-size: 21px;
+}
+#magazine-page .lightgray-footer{
+min-height: 100px;
+/* display: none !important; */
+}

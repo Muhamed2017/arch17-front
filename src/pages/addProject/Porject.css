@@ -506,12 +506,15 @@ background-position: top  !important;
     font-size: 1.05rem;
     font-weight: 600;
     font-family: "georgia";
+    height: 40px;
 }
 .project-cover-footer{
     color: #d1d1d1;
     font-size: .8rem;
 }
-
+.project-cover-footer p{
+    margin-bottom: 0;
+}
 /* end of project page styles */
 .project-col{
     position: relative;
@@ -600,4 +603,10 @@ color: #fff !important;
     padding: 2px 6px;
     font-weight: 660;
     border-radius: 2px;
+}
+.large{
+    font-size: 16px;
+}
+.arch-color{
+    color: #e41e15;
 }

@@ -39,6 +39,7 @@ import EditProductWrapper from './pages/editProduct/EditProductWrapper';
 import { ParallaxProvider } from "react-scroll-parallax";
 import "semantic-ui-css/semantic.min.css";
 import EditProjectWrapper from './pages/addProject/EditProjectWrapper';
+import Magazine from './pages/Magazine';
 class App extends Component {
    constructor(props){
      super(props)
@@ -71,6 +72,8 @@ class App extends Component {
               
               <Route path='/product/:id' component={Product} exact/>
               <Route path='/project/:id' component={Project} exact/>
+              <Route path='/projects' component={Magazine} exact/>
+
               {/* <Route path="/search" component={Search} exact /> */}
               <Route path='/products' 
               render={(state)=> <Search {...state}/>}
