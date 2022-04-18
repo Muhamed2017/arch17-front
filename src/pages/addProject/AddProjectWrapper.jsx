@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import "./Porject.css";
 import { Steps, Button, Row, Col } from "antd";
 import InfoStep from "./InfoStep";
-import ContentStep from "./ContentStep";
+// import ContentStep from "./ContentStep";
 import RoleStep from "./RoleStep";
 import ProductsTagsStep from "./ProductsTagsStep";
 import { connect } from "react-redux";
@@ -10,6 +10,7 @@ import {
  NEXT_STEP,
  PREV_STEP,
  SET_PROJECT_PARAMS,
+ //  GO_TO_PROJECT_STEP,
 } from "./../../redux/constants";
 import CoverStep from "./CoverStep";
 import TextEditor from "../TextEditor";
@@ -18,7 +19,16 @@ const { Step } = Steps;
 
 export const steps = [
  {
-  title: "1.Project Info",
+  title: (
+   <div
+    onClick={() => {
+     console.log("info");
+     //  this.props.dispatch({})
+    }}
+   >
+    1.Project Info
+   </div>
+  ),
   content: <InfoStep />,
  },
  {
@@ -76,13 +86,13 @@ class AddProjectWrapper extends Component {
   });
  };
  render() {
-    const current = this.props.step;
-//   const current = 3;
+  const current = this.props.step;
+  //   const current = 1;
   return (
    <>
     <div className="addprojectwrapper">
      <Row span={24} gutter>
-      <Col md={24} className="bg-white mb-2 py-3">
+      <Col md={24} className="bg-white mb-2 py-3 static-bar">
        <div className="wrapper-inner">
         <Steps current={current} icon="">
          {steps.map((item) => (
@@ -99,7 +109,9 @@ class AddProjectWrapper extends Component {
       </Col>
 
       <Col md={24}>
-       <div className="steps-content custom-content wrapper-inner">
+       <div
+        className={`steps-content custom-content wrapper-inner step${current}`}
+       >
         {steps[current].content}
 
         <div className="steps-action">

@@ -28,6 +28,9 @@ button{
 margin-bottom: 0;
 
 }
+a{
+  text-decoration: none !important;
+}
 
 /* react flag select for country */
 .ReactFlagsSelect-module_filterBox__3m8EU input {
@@ -56,6 +59,10 @@ margin-bottom: 0;
 .cs-link:hover {
  color: #000;
  text-decoration: underline;
+}
+
+.bg-white{
+background-color: #fff;
 }
 .Toastify__toast-container--top-center {
  transform: none !important;
@@ -3691,6 +3698,9 @@ p.designer-name-select {
  font-size: 0.9rem;
  margin-bottom: 3px;
  font-weight: 300 !important;
+}
+.inner-list a {
+  text-decoration: none;
 }
 /* check boxes input overwriting */
 .ant-checkbox-checked .ant-checkbox-inner {

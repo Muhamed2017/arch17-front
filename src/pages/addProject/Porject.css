@@ -19,6 +19,9 @@
 figure{
     margin: 1rem 0 !important;
 }
+figure.image{
+    width: 100%;
+}
 #project-page .rdw-editor-toolbar{
  display: none;   
 }
@@ -44,10 +47,20 @@ figure{
     min-width: 16px !important;
 
 }
+.ck-editor__main p {
+    font-weight: 300;
+    font-size: 16px;
+    /* font-size: 1.2rem; */
+}
 #project-page .cover-container{
         margin-top: 3px;
         border-top-left-radius: 18px;
         border-top-right-radius: 18px;
+}
+.static-bar{
+    position: fixed;
+    width: 100%;
+    z-index: 10;
 }
 .addprojectwrapper{
     margin:auto;
@@ -57,14 +70,35 @@ figure{
     max-width: 1250px;
     margin:auto;
 }
+.edit-step-title{
+    cursor: pointer;
+}
 
 .addprojectwrapper .custom-content{
     min-height: 100vh;
     background-color: #fff;
-    margin: 35px auto;
+    margin: 80px auto;
     font-family: "Roboto";
     position: relative;
 }
+.step1{
+/* max-width: 920px; */
+position: relative !important;
+}
+
+.owner_link{
+    text-decoration: underline !important;
+    font-size: .85rem;
+    padding: 0 3px;
+    color: #2e2e2e !important;
+    font-family: "Roboto";
+
+}
+.step1 .ck.ck-toolbar .ck.ck-toolbar__separator{
+    /* transform: none !important; */
+    display: none;
+}
+
 .addprojectwrapper .ant-steps {
     justify-content: start !important;
     grid-gap: 15px;
@@ -76,11 +110,16 @@ figure{
 
 }
 .addprojectwrapper .steps-action{
-    position: absolute;
+    /* position: absolute;
     top: -92px;
     right: 100px;
-    width: 0;
-    /* width: 100; */
+    width: 0; */
+
+        position: fixed;
+        top: 80px;
+        width: 0;
+        z-index: 12;
+        left: 80%;
 }
 #rolestep .editable-cell-value-wrap{
 height: 40px !important;
@@ -104,11 +143,21 @@ font-weight:500 !important;
     text-align: center;
     font-weight: 900;
     font-family: "Roboto";
-    padding-top: 10px;
+    padding-top: 8px;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
     
 }
 .ant-modal-body .d-img{
     padding-top: 0;
+    border-radius: 50%;
+    background-color:#ddd !important;
+    padding-top: 2.5px;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: contain !important;
+    margin-top: 10px;
 }
 .designers-row{
     cursor: pointer;
@@ -131,10 +180,47 @@ font-weight:500 !important;
     padding-left: 70px;
     text-align: left;
 }
+.d-info {
+    vertical-align: -webkit-baseline-middle;
+    display: inline-block;
+}
+.d-info span{
+    font-size: 1.5rem;
+    font-weight: 600;
+}
 .wraprow .d-img{
-    width: 40px;
-    height: 40px;
-    font-size: 1.7rem;
+    width: 84px;
+    height: 84px;
+    font-size: 3.2rem;
+    border: 1px solid #c3c3c3;
+    border-radius: 50%;
+    vertical-align: middle;
+}
+.d-professions {
+    display: grid;
+    grid-gap: 5px;
+    margin-top: 6px;
+    grid-template-columns: repeat(8, auto);
+
+}
+.d-loc {
+    font-size:.7rem;
+    color: #707070;
+}
+.d-loc svg{
+    vertical-align:text-top;
+    font-size: .6rem;
+    margin-right: 3px;
+    margin-top: 1px;
+}
+
+.d-professions p{
+font-size: .7rem ;
+padding: 3px;
+height: 18px;
+font-weight: 500;
+background-color: #ddd;
+margin-bottom: 5px !important;
 }
 .wraprow span{
     font-size: 16px;
@@ -143,8 +229,26 @@ font-weight:500 !important;
     padding: 0 15px;
     vertical-align:super;
 }
+.b-type{
+    font-size: .8rem;
+    color: #707070;
+}
+.b-count{
+    font-size: .65rem;
+    margin: 2px 0;
+}
+.b-count span{
+    counter-reset: #000;
+    font-weight: 600;
+    font-size: .7rem;
+    padding-right: 5px;
+}
 .designers-section{
     min-height: 500px;
+    margin-bottom: 120px;
+}
+.brands-sections{
+    padding-bottom: 25px;
 }
 .checkbox-tag{
     position: absolute;
@@ -204,9 +308,10 @@ height:80px;
     outline: none;
     border: none;
     border-radius: 2px;
+    z-index: 11;
 }
 .next-btn{
-  position: absolute;
+  /* position: absolute;
     right: 0;
     top: -92px;
     background: #e41e15;
@@ -216,8 +321,24 @@ height:80px;
     padding: 5px 20px;
     border-radius: 4px;
     font-size: 1rem;
-    font-weight: 400
+    font-weight: 400;
+    z-index: 11;
+    top: 80px;  */
+
+    position: fixed;
+    right: 13%;
+    top: 80px;
+    background: #e41e15;
+    border: none;
+    color: #fff;
+    outline: none;
+    padding: 5px 20px;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 400;
+    z-index: 11;
 }
+
 .project-step-info .ant-form-item-label{
     text-align: left;
 }
@@ -231,14 +352,29 @@ height:80px;
 .project-step-info .ant-checkbox-group{
     font-weight: normal;
 }
+/* .next-wrapper{
+    width: 100%;
+    position: fixed;
+    top: 131px;
+    text-align: right;
+    left: 49%;
+    z-index: 11;
+    text-align: center;
+    width: 1250px;
+    transform: translate(-54px, -50px)
+} */
 
 /* project page stylse */
 
 #project-page{
     max-width: 1300px;
     margin: 0 auto 15px;
-    /* overflow-x: hidden; */
-
+    font-family: "Roboto";
+}
+#project-page .location svg{
+    vertical-align:auto;
+    font-size: .8rem;
+    padding: 0 1px;
 }
 #project-main{
     position: relative;
@@ -260,19 +396,32 @@ height:80px;
     padding: 10px 0;
 }
 .shifted-top{
-    position: relative;
-    top:-80px
+    margin-top: -80px;
+    background-color: #fff;
 }
 #project-content{
     background-color: #fff;
-       padding: 1.5rem;
+        margin-top: -80px !important;
+        background: #fff;
 }
 .right-sticky {
     position: relative;
     top:0;
 }
+#project-content h6{
+    padding:25px 0 0 25px;
+}
 #project-content .location{
     color: #a0a0a0;
+    padding: 0 20px;
+    font-size: 14px;
+    vertical-align: middle;
+}
+#project-content .location svg{
+        font-size: 14px;
+        padding: 0 1px;
+        margin-bottom: 3px;
+        margin-right: 2px
 }
 .editor-state p{
     font-weight: 500;
@@ -282,18 +431,20 @@ height:80px;
 .project-right-side{
     font-family: "Roboto";
 }
+
 .project-right-side .designers{
     background-color: #fff;
     min-height:188px;
-    max-height:370px;
+    height: auto;
+    /* max-height:370px; */
     margin: 12px 0 20px 0;
     width: 100%;
     border-radius: 10px;
     border: 1px solid #dedede;
-    cursor: grab;
+    margin-bottom: 0;
 }
 .project-right-side .brands{
-    margin: 20px 0;
+    margin: 20px 0 0;
     background-color: #fff;
     min-height: 450px;
     border-radius: 10px;
@@ -347,7 +498,7 @@ font-family: "Roboto";
 text-transform: capitalize;
 }
 .brand .name{
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 700;
     text-transform: capitalize;
 }
@@ -365,13 +516,13 @@ width: 45px;
 color: #777777;
 }
 .designers .name{
-    font-size: 1.1rem;
+    font-size: 17px;
     font-weight: 700;
 }
-.designers .title{
+.designers .title {
     color: #747474;
-    font-weight: 500;
-    font-size: .7rem;
+    font-weight: 300;
+    font-size: 14px;
     font-family: "Roboto";
 }
 .des-btns button:last-child{
@@ -381,6 +532,7 @@ color: #777777;
     border-radius: 4px;
 
 }
+
 .des-btns button{
 height: 29px;
 vertical-align: middle;
@@ -416,18 +568,25 @@ vertical-align: middle;
 }
 .socials > div:last-child{
     border-bottom: none;
+    margin-bottom: 0;
 }
 .socials {
     color: #242424;
     z-index: 5;
-    padding: 15px;
+    padding: 10px;
+    padding-bottom: 0;
 
 }
+
 .socials svg{
     margin: auto;
 }
+.raduis{
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
 #product-tags{
-background-color: #ebebeb;
+background-color: #fff;
 min-height: 400px;
 }
 #product-tags .products{
@@ -481,6 +640,27 @@ padding: 5px;
 #project-layout .lightgray-footer{
     /* display: none; */
     min-height: 150px !important;
+}
+.custom-content .ck.ck-toolbar{
+    border-top: 1px solid #0000000d !important;
+    position: fixed;
+    width: 100%;
+    max-width: 1250px;
+    top: 125px;
+}
+.custom-content .ck-editor__main{
+position: relative !important;
+top: 55px !important;
+}
+#project-page .ck.ck-toolbar.ck-toolbar_grouping{
+display: none;
+}
+#project-page .ck-content p{
+    font-size: 16px;
+    font-weight: 300;
+}
+#project-page .ck-content{
+margin-top: 25px;
 }
 .cover-container > div {
 background-position: top  !important;

@@ -1,15 +1,14 @@
 import React, { Component, createRef } from "react";
 import { Row, Col, Carousel as AntCarousel, Spin, BackTop } from "antd";
 import "./addProject/Porject.css";
-// import { convertFromRaw, EditorState } from "draft-js";
-// import { Editor } from "react-draft-wysiwyg";
 import axios from "axios";
 import { IoIosMail } from "react-icons/io";
+import { connect } from "react-redux";
+
 import { LoadingOutlined } from "@ant-design/icons";
 import { ParallaxBanner } from "react-scroll-parallax";
-import Carousel from "react-elastic-carousel";
 import { IoIosArrowUp } from "react-icons/io";
-
+import { MdLocationOn } from "react-icons/md";
 import {
  FaPinterestP,
  FaFacebookF,
@@ -18,9 +17,7 @@ import {
  FaThumbsUp,
 } from "react-icons/fa";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
-// import ClassicEditor from "ckeditor5-custom-build/build/ckeditor";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-
 import { AiOutlinePlus } from "react-icons/ai";
 import { API } from "./../utitlties";
 import { Link } from "react-router-dom";
@@ -32,9 +29,8 @@ class Project extends Component {
  constructor(props) {
   super(props);
   this.contextRef = createRef();
-  this.carouselRef = createRef();
   this.brandCarousel = createRef();
-  // this.goto = this.goto.bind(this);
+  this.designerCarousel = createRef();
 
   this.state = {
    products: [],
@@ -45,6 +41,7 @@ class Project extends Component {
     country: null,
     city: null,
     year: null,
+    ownerable_type: "",
    },
    designers: [],
    brands: [],
@@ -56,6 +53,8 @@ class Project extends Component {
    nextMorePage: true,
    nextMoreProductsPage: true,
    currentSlide: 1,
+   designersToShow: 2,
+   owner: [],
   };
  }
 
@@ -112,9 +111,7 @@ class Project extends Component {
      project: response.data.project,
      products: response.data.products_tags,
      content_state: response.data.project.content,
-     //  content_state: EditorState.createWithContent(
-     //   convertFromRaw(JSON.parse(response.data.project.content))
-     //  ),
+     owner: response.data.owner,
      brands: response.data.brands,
      designers: response.data.designers,
      similars: response.data.similar,
@@ -127,18 +124,18 @@ class Project extends Component {
   // window.addEventListener("scroll", this.handleScroll);
  }
 
- onChange = (_, next) => {
-  if (_.index >= this.state.designers.length / 2) {
-   setTimeout(() => {
-    this.carouselRef.current.goTo(0);
-   }, 10000);
-  }
- };
  next = () => {
   this.brandCarousel.current.next();
  };
  prev = () => {
   this.brandCarousel.current.prev();
+ };
+
+ designer_next = () => {
+  this.designerCarousel.current.next();
+ };
+ designer_prev = () => {
+  this.designerCarousel.current.prev();
  };
  render() {
   if (!this.state.fetched)
@@ -164,7 +161,7 @@ class Project extends Component {
         <ParallaxBanner
          layers={[{ image: this.state.project?.cover, speed: -30 }]}
          className="cover-container"
-         style={{ aspectRatio: "2.9" }}
+         style={{ aspectRatio: "3.7" }}
         />
        </div>
       </section>
@@ -172,7 +169,7 @@ class Project extends Component {
        <Grid>
         <Grid.Row centered>
          <Column mobile={2} tablet={2} computer={1}>
-          <Sticky context={this.contextRef} offset={50} bottomOffset={0}>
+          <Sticky context={this.contextRef} offset={65} bottomOffset={0}>
            <div className="socials">
             <div>
              <FaFacebookF />
@@ -196,11 +193,44 @@ class Project extends Component {
           </Sticky>
          </Column>
          <Ref innerRef={this.contextRef}>
-          <Column mobile={14} tablet={7} computer={10} className="shifted-top">
+          <Column
+           mobile={14}
+           tablet={7}
+           computer={10}
+           className="bg-white radius"
+          >
            <div id="project-content">
             <h6>{this.state.project?.name}</h6>
-            <p className="location">{`${this.state.project?.country} ${this.state.project?.city} | ${this.state.project?.year} | 455`}</p>
+            <hr className="my-4 w-50 mx-3" />
 
+            {/* <p className="location">{`${this.state.project?.country} ${this.state.project?.city} | ${this.state.project?.year} | 455`}</p> */}
+            <p className="location">
+             <MdLocationOn />
+             {`China , ${this.state.project?.city} | ${this.state.project?.year}`}
+            </p>
+            <p className="location mx-1">
+             By
+             {this.state.project?.ownerable_type?.includes("User") && (
+              <a
+               href={
+                this.props.uid === this.state.owner[0]?.uid
+                 ? "/profile"
+                 : `/user/${this.state.owner[0]?.uid}`
+               }
+               className="bold owner_link"
+              >
+               {this.state.owner[0]?.displayName}
+              </a>
+             )}
+             {this.state.project?.ownerable_type?.includes("Store") && (
+              <a
+               href={`/brand/${this.state.owner[0]?.id}`}
+               className="bold owner_link"
+              >
+               {this.state.owner[0]?.name}
+              </a>
+             )}
+            </p>
             <div className="editor-state my-3">
              {this.state.content_state && (
               <>
@@ -222,22 +252,20 @@ class Project extends Component {
          <Column mobile={14} tablet={7} computer={5}>
           {this.state.designers?.length > 0 && (
            <>
-            <Sticky context={this.contextRef} offset={55}>
+            <Sticky context={this.contextRef} offset={62}>
              <div className="project-right-side">
               <div className="designers p-3">
                <p className="via">Designers</p>
-               <Carousel
-                // ref={(ref) => (this.carouselRef = ref)}
-                ref={this.carouselRef}
-                verticalMode
-                onChange={this.onChange}
-                itemsToShow={2}
-                itemsToScroll={1}
-                showArrows={false}
-                enableAutoPlay
-                autoPlaySpeed={3000}
-                pagination={false}
-                // disableArrowsOnEnd={false}
+
+               <AntCarousel
+                ref={this.designerCarousel}
+                autoplay
+                dots={false}
+                swipe
+                slidesPerRow={this.state.designersToShow}
+                swipeToSlide
+                autoplaySpeed={7000}
+                effect="fade"
                >
                 {this.state.designers?.map((d, index) => {
                  return (
@@ -273,17 +301,21 @@ class Project extends Component {
                   </>
                  );
                 })}
-               </Carousel>
+               </AntCarousel>
+
                {this.state.designers?.length > 2 && (
                 <p
-                 className="text-right bold p-3 "
+                 className="text-right bold p-3 pointer"
                  onClick={() => {
                   this.setState({
-                   designersToShow: 4,
+                   designersToShow:
+                    this.state.designersToShow > 2
+                     ? 2
+                     : this.state.designers.length,
                   });
                  }}
                 >
-                 See More
+                 {this.state.designersToShow > 2 ? "See Less" : "See More"}
                 </p>
                )}
               </div>
@@ -297,7 +329,7 @@ class Project extends Component {
                   dots={false}
                   swipe
                   swipeToSlide
-                  autoplaySpeed={3000}
+                  autoplaySpeed={6000}
                   effect="fade"
                  >
                   {this.state.brands?.map((brand, index) => {
@@ -352,9 +384,6 @@ class Project extends Component {
                          );
                         })}
                        </Row>
-                       {brand?.products?.length > 6 && (
-                        <p className="text-right bold p-3">See More</p>
-                       )}
                       </div>
                       <div className="slide-footer">
                        <p className="text-right bold">
@@ -389,7 +418,7 @@ class Project extends Component {
       <>
        <section id="product-tags">
         <div className="products">
-         <p className="py-2 mb-5 head">Products Used in this project …</p>
+         <p className="py-2 mb-5 head">Featured Products in this project …</p>
          <Row span={24} gutter={30}>
           {this.state.products?.map((product, index) => {
            return (
@@ -503,7 +532,7 @@ class Project extends Component {
        <section id="similar-projects">
         <div className="inner-projects px-2">
          <p className="py-2 mb-5 head">Similar Projects</p>
-         <Row span={24} gutter={24} justify="center">
+         <Row span={24} gutter={24} justify="">
           {this.state.similars?.map((p) => {
            return (
             <Col xs={24} sm={12} md={8} className="mb-4">
@@ -590,4 +619,12 @@ class Project extends Component {
  }
 }
 
-export default Project;
+const mapStateToProps = (state) => {
+ return {
+  isLoggedIn: state?.regularUser?.isLoggedIn,
+  uid: state?.regularUser?.info?.uid,
+  user: state?.regularUser?.user,
+ };
+};
+export default connect(mapStateToProps, null)(Project);
+// export default Project;

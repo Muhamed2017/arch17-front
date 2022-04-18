@@ -316,7 +316,7 @@ class HomePage extends Component {
      </section>
      <div className="w-100 m-auto">
       <Container className="mt-5 px-0">
-       <section className="w-100 home-heading-2 text-center">
+       <section className="w-100 home-heading-2 text-center home-head">
         <h2>
          Hot solutions by brands and designers inspires you to design and build
         </h2>
@@ -579,12 +579,502 @@ class HomePage extends Component {
     <div className="bg-white">
      <div className="w-100 home-page m-auto ">
       <Container className="mt-5 px-0">
+       <section className="products-container home-head">
+        <h2>Products</h2>
+        <p>Explore products, get CAD / 3D files</p>
+        <Tabs defaultActiveKey="recent_products" centered onChange={() => {}}>
+         <TabPane tab="Recent" key="recent_products">
+          <div className="innertab py-5">
+           <section id="home-products">
+            <AntRow gutter={24} className="mt-3">
+             {this.state.fetching && (
+              <>
+               <Spin
+                size="large"
+                style={{ position: "absolute", top: "50%", right: "50%" }}
+               />
+              </>
+             )}
+             {this.state.products?.map((product, index) => {
+              return (
+               <>
+                <AntCol className="gutter-row mb-3" md={6}>
+                 <div className="product">
+                  <a href={`/product/${product.id}`}>
+                   <div
+                    className="p-img"
+                    style={{
+                     background: `url(${product.preview_cover})`,
+                    }}
+                   >
+                    <div className="prlayer"></div>
+
+                    <div
+                     className="actns-btn svbtn"
+                     onClick={(e) => {
+                      e.preventDefault();
+                      this.setState(
+                       {
+                        to_save_cover: product.preview_cover,
+                        to_save_productId: product,
+                       },
+                       () => {
+                        this.saveToCollection();
+                       }
+                      );
+                     }}
+                    >
+                     Save +
+                    </div>
+                    {product.file.length > 0 ? (
+                     <>
+                      <div className="actns-btn file-btn cad">CAD</div>
+                      <div className="actns-btn file-btn threeD">3D</div>
+                     </>
+                    ) : (
+                     ""
+                    )}
+                   </div>
+                  </a>
+
+                  <h5 className="product-store">
+                   {product.store_name.store_name}
+                  </h5>
+
+                  <p className="product-name">{product.name}</p>
+                  <div className="product-price">
+                   {product.preview_price && product.preview_price > 0 ? (
+                    <>
+                     <span>¥ {product.preview_price}</span>
+                    </>
+                   ) : (
+                    <>
+                     <Link
+                      to={{
+                       pathname: `/product/${product.product_id}`,
+                       state: {
+                        request_price: true,
+                       },
+                      }}
+                     >
+                      REQUEST PRICE INFO
+                     </Link>
+                    </>
+                   )}
+                  </div>
+                 </div>
+                </AntCol>
+               </>
+              );
+             })}
+            </AntRow>
+            <AntRow>
+             <a
+              href="/products "
+              className="btn mt-4 seemore mb-5"
+              style={{ paddingTop: "17px !important" }}
+             >
+              See More Products
+             </a>
+            </AntRow>
+           </section>
+          </div>
+         </TabPane>
+         <TabPane tab="Furniture" key="furniture">
+          <div className="innertab py-5">
+           <section id="home-products">
+            <AntRow gutter={24} className="mt-3">
+             {this.state.fetching && (
+              <>
+               <Spin
+                size="large"
+                style={{ position: "absolute", top: "50%", right: "50%" }}
+               />
+              </>
+             )}
+             {this.state.products?.map((product, index) => {
+              return (
+               <>
+                <AntCol className="gutter-row mb-3" md={6}>
+                 <div className="product">
+                  <a href={`/product/${product.id}`}>
+                   <div
+                    className="p-img"
+                    style={{
+                     background: `url(${product.preview_cover})`,
+                    }}
+                   >
+                    <div className="prlayer"></div>
+
+                    <div
+                     className="actns-btn svbtn"
+                     onClick={(e) => {
+                      e.preventDefault();
+                      this.setState(
+                       {
+                        to_save_cover: product.preview_cover,
+                        to_save_productId: product,
+                       },
+                       () => {
+                        this.saveToCollection();
+                       }
+                      );
+                     }}
+                    >
+                     Save +
+                    </div>
+                    {product.file.length > 0 ? (
+                     <>
+                      <div className="actns-btn file-btn cad">CAD</div>
+                      <div className="actns-btn file-btn threeD">3D</div>
+                     </>
+                    ) : (
+                     ""
+                    )}
+                   </div>
+                  </a>
+
+                  <h5 className="product-store">
+                   {product.store_name.store_name}
+                  </h5>
+
+                  <p className="product-name">{product.name}</p>
+                  <div className="product-price">
+                   {product.preview_price && product.preview_price > 0 ? (
+                    <>
+                     <span>¥ {product.preview_price}</span>
+                    </>
+                   ) : (
+                    <>
+                     <Link
+                      to={{
+                       pathname: `/product/${product.product_id}`,
+                       state: {
+                        request_price: true,
+                       },
+                      }}
+                     >
+                      REQUEST PRICE INFO
+                     </Link>
+                    </>
+                   )}
+                  </div>
+                 </div>
+                </AntCol>
+               </>
+              );
+             })}
+            </AntRow>
+            <AntRow>
+             <a
+              href="/products "
+              className="btn mt-4 seemore mb-5"
+              style={{ paddingTop: "17px !important" }}
+             >
+              See More Products
+             </a>
+            </AntRow>
+           </section>
+          </div>
+         </TabPane>
+         <TabPane tab="Lighting" key="lighting">
+          <div className="innertab py-5">
+           <section id="home-products">
+            <AntRow gutter={24} className="mt-3">
+             {this.state.fetching && (
+              <>
+               <Spin
+                size="large"
+                style={{ position: "absolute", top: "50%", right: "50%" }}
+               />
+              </>
+             )}
+             {this.state.products?.map((product, index) => {
+              return (
+               <>
+                <AntCol className="gutter-row mb-3" md={6}>
+                 <div className="product">
+                  <a href={`/product/${product.id}`}>
+                   <div
+                    className="p-img"
+                    style={{
+                     background: `url(${product.preview_cover})`,
+                    }}
+                   >
+                    <div className="prlayer"></div>
+
+                    <div
+                     className="actns-btn svbtn"
+                     onClick={(e) => {
+                      e.preventDefault();
+                      this.setState(
+                       {
+                        to_save_cover: product.preview_cover,
+                        to_save_productId: product,
+                       },
+                       () => {
+                        this.saveToCollection();
+                       }
+                      );
+                     }}
+                    >
+                     Save +
+                    </div>
+                    {product.file.length > 0 ? (
+                     <>
+                      <div className="actns-btn file-btn cad">CAD</div>
+                      <div className="actns-btn file-btn threeD">3D</div>
+                     </>
+                    ) : (
+                     ""
+                    )}
+                   </div>
+                  </a>
+
+                  <h5 className="product-store">
+                   {product.store_name.store_name}
+                  </h5>
+
+                  <p className="product-name">{product.name}</p>
+                  <div className="product-price">
+                   {product.preview_price && product.preview_price > 0 ? (
+                    <>
+                     <span>¥ {product.preview_price}</span>
+                    </>
+                   ) : (
+                    <>
+                     <Link
+                      to={{
+                       pathname: `/product/${product.product_id}`,
+                       state: {
+                        request_price: true,
+                       },
+                      }}
+                     >
+                      REQUEST PRICE INFO
+                     </Link>
+                    </>
+                   )}
+                  </div>
+                 </div>
+                </AntCol>
+               </>
+              );
+             })}
+            </AntRow>
+            <AntRow>
+             <a
+              href="/products "
+              className="btn mt-4 seemore mb-5"
+              style={{ paddingTop: "17px !important" }}
+             >
+              See More Products
+             </a>
+            </AntRow>
+           </section>
+          </div>
+         </TabPane>
+         <TabPane tab="Decore" key="decore">
+          <div className="innertab py-5">
+           <section id="home-products">
+            <AntRow gutter={24} className="mt-3">
+             {this.state.fetching && (
+              <>
+               <Spin
+                size="large"
+                style={{ position: "absolute", top: "50%", right: "50%" }}
+               />
+              </>
+             )}
+             {this.state.products?.map((product, index) => {
+              return (
+               <>
+                <AntCol className="gutter-row mb-3" md={6}>
+                 <div className="product">
+                  <a href={`/product/${product.id}`}>
+                   <div
+                    className="p-img"
+                    style={{
+                     background: `url(${product.preview_cover})`,
+                    }}
+                   >
+                    <div className="prlayer"></div>
+
+                    <div
+                     className="actns-btn svbtn"
+                     onClick={(e) => {
+                      e.preventDefault();
+                      this.setState(
+                       {
+                        to_save_cover: product.preview_cover,
+                        to_save_productId: product,
+                       },
+                       () => {
+                        this.saveToCollection();
+                       }
+                      );
+                     }}
+                    >
+                     Save +
+                    </div>
+                    {product.file.length > 0 ? (
+                     <>
+                      <div className="actns-btn file-btn cad">CAD</div>
+                      <div className="actns-btn file-btn threeD">3D</div>
+                     </>
+                    ) : (
+                     ""
+                    )}
+                   </div>
+                  </a>
+
+                  <h5 className="product-store">
+                   {product.store_name.store_name}
+                  </h5>
+
+                  <p className="product-name">{product.name}</p>
+                  <div className="product-price">
+                   {product.preview_price && product.preview_price > 0 ? (
+                    <>
+                     <span>¥ {product.preview_price}</span>
+                    </>
+                   ) : (
+                    <>
+                     <Link
+                      to={{
+                       pathname: `/product/${product.product_id}`,
+                       state: {
+                        request_price: true,
+                       },
+                      }}
+                     >
+                      REQUEST PRICE INFO
+                     </Link>
+                    </>
+                   )}
+                  </div>
+                 </div>
+                </AntCol>
+               </>
+              );
+             })}
+            </AntRow>
+            <AntRow>
+             <a
+              href="/products "
+              className="btn mt-4 seemore mb-5"
+              style={{ paddingTop: "17px !important" }}
+             >
+              See More Products
+             </a>
+            </AntRow>
+           </section>
+          </div>
+         </TabPane>
+         <TabPane tab="Finishes" key="finishes">
+          <div className="innertab py-5">
+           <section id="home-products">
+            <AntRow gutter={24} className="mt-3">
+             {this.state.fetching && (
+              <>
+               <Spin
+                size="large"
+                style={{ position: "absolute", top: "50%", right: "50%" }}
+               />
+              </>
+             )}
+             {this.state.products?.map((product, index) => {
+              return (
+               <>
+                <AntCol className="gutter-row mb-3" md={6}>
+                 <div className="product">
+                  <a href={`/product/${product.id}`}>
+                   <div
+                    className="p-img"
+                    style={{
+                     background: `url(${product.preview_cover})`,
+                    }}
+                   >
+                    <div className="prlayer"></div>
+
+                    <div
+                     className="actns-btn svbtn"
+                     onClick={(e) => {
+                      e.preventDefault();
+                      this.setState(
+                       {
+                        to_save_cover: product.preview_cover,
+                        to_save_productId: product,
+                       },
+                       () => {
+                        this.saveToCollection();
+                       }
+                      );
+                     }}
+                    >
+                     Save +
+                    </div>
+                    {product.file.length > 0 ? (
+                     <>
+                      <div className="actns-btn file-btn cad">CAD</div>
+                      <div className="actns-btn file-btn threeD">3D</div>
+                     </>
+                    ) : (
+                     ""
+                    )}
+                   </div>
+                  </a>
+
+                  <h5 className="product-store">
+                   {product.store_name.store_name}
+                  </h5>
+
+                  <p className="product-name">{product.name}</p>
+                  <div className="product-price">
+                   {product.preview_price && product.preview_price > 0 ? (
+                    <>
+                     <span>¥ {product.preview_price}</span>
+                    </>
+                   ) : (
+                    <>
+                     <Link
+                      to={{
+                       pathname: `/product/${product.product_id}`,
+                       state: {
+                        request_price: true,
+                       },
+                      }}
+                     >
+                      REQUEST PRICE INFO
+                     </Link>
+                    </>
+                   )}
+                  </div>
+                 </div>
+                </AntCol>
+               </>
+              );
+             })}
+            </AntRow>
+            <AntRow>
+             <a
+              href="/products "
+              className="btn mt-4 seemore mb-5"
+              style={{ paddingTop: "17px !important" }}
+             >
+              See More Products
+             </a>
+            </AntRow>
+           </section>
+          </div>
+         </TabPane>
+        </Tabs>
+       </section>
+
        <div>
-        <section className="project-contaienr text-center bg-white mt-5 pt-4">
+        <section className="project-contaienr text-center bg-white mt-5 pt-4 home-head">
          <h2 className="home-center">Magazine</h2>
-         <h3 className="home-center mb-4">
-          Explore Design Projects, News & trends
-         </h3>
+         <p className="mb-4">Explore Design Projects, News & trends</p>
 
          <Tabs defaultActiveKey="recent" centered onChange={() => {}}>
           <TabPane tab="Recent" key="recent">
@@ -606,18 +1096,14 @@ class HomePage extends Component {
                     <p className="project-name left">{p.name}</p>
 
                     <div className="project-cover-footer">
-                     {/* <p className="m-0">{p.kind}</p> */}
                      <p>
                       {p.kind?.map((k) => {
                        return <span className="px-1">{k}</span>;
                       })}
                      </p>
                      <hr className="my-1 w-20" />
-                     {/* <p className="m-0">{...p.type}</p> */}
                      <p>
-                      {p.type?.map((t) => {
-                       return <span className="px-1">{t}</span>;
-                      })}
+                      <span className="px-1">{p.type}</span>
                      </p>
                     </div>
                    </div>
@@ -627,6 +1113,15 @@ class HomePage extends Component {
                </>
               );
              })}
+            </AntRow>
+            <AntRow>
+             <a
+              href="/magazine "
+              className="btn mt-5 seemore mb-5"
+              style={{ paddingTop: "17px !important" }}
+             >
+              Magazine
+             </a>
             </AntRow>
            </div>
           </TabPane>
@@ -662,7 +1157,6 @@ class HomePage extends Component {
            </div>
           </TabPane>
           <TabPane tab="Interior Design" key="3">
-           {/* Content of Tab Pane 3 */}
            <div className="innertab py-5">
             <AntRow span={24} gutter={24}>
              {this.state.projects_types["Interior Design"]?.map((p, index) => {
@@ -709,7 +1203,6 @@ class HomePage extends Component {
                   ></div>
                   <div className="info p-3 left">
                    <p className="project-name">{p.name}</p>
-
                    <div className="project-cover-footer">
                     <p className="m-0">{p.kind}</p>
                     <hr className="my-1 w-20" />
@@ -740,7 +1233,6 @@ class HomePage extends Component {
                   ></div>
                   <div className="info p-3 left">
                    <p className="project-name">{p.name}</p>
-
                    <div className="project-cover-footer">
                     <p className="m-0">{p.kind}</p>
                     <hr className="my-1 w-20" />
@@ -756,208 +1248,20 @@ class HomePage extends Component {
            </div>
           </TabPane>
          </Tabs>
-         {/* <Row>
-          <Col
-           xs={12}
-           sm={12}
-           md={6}
-           lg={4}
-           xl={4}
-           className="h-100 px-2 my-3 "
-           key={generateKey("project")}
-          >
-           <ProjectBox
-            imgUrl="https://www.arch17.com/data/projects/320/cover/img/cover.jpg"
-            name="Elephants Store"
-            location="Shenzehn, China | 2019"
-           />
-          </Col>
-          <Col
-           xs={12}
-           sm={12}
-           md={6}
-           lg={4}
-           xl={4}
-           className="h-100 px-2 my-3 "
-           key={generateKey("project")}
-          >
-           <ProjectBox
-            imgUrl="https://www.arch17.com/data/projects/325/cover/img/cover.jpg"
-            // name="Camels Store"
-            location="Egypt, Cairo | 2020"
-           />
-          </Col>
-          <Col
-           xs={12}
-           sm={12}
-           md={6}
-           lg={4}
-           xl={4}
-           className="h-100 px-2 my-3 "
-           key={generateKey("project")}
-          >
-           <ProjectBox
-            imgUrl="https://www.arch17.com/data/projects/330/cover/img/cover.jpg"
-            name="Grado Store"
-            location="Spain, Madrid | 2018"
-           />
-          </Col>
-          <Col
-           xs={12}
-           sm={12}
-           md={6}
-           lg={4}
-           xl={4}
-           className="h-100 px-2 my-3 "
-           key={generateKey("project")}
-          >
-           <ProjectBox
-            imgUrl="https://www.arch17.com/data/projects/321/cover/img/cover.jpg"
-            location="Shenzehn, China | 2021"
-           />
-          </Col>
-          <Col
-           xs={12}
-           sm={12}
-           md={6}
-           lg={4}
-           xl={4}
-           className="h-100 px-2 my-3 "
-           key={generateKey("project")}
-          >
-           <ProjectBox
-            imgUrl="https://www.arch17.com/data/projects/319/cover/img/cover.jpg"
-            name="Grado Store"
-            location="Spain, Madrid | 2018"
-           />
-          </Col>
-          <Col
-           xs={12}
-           sm={12}
-           md={6}
-           lg={4}
-           xl={4}
-           className="h-100 px-2 my-3 "
-           key={generateKey("project")}
-          >
-           <ProjectBox
-            imgUrl="https://www.arch17.com/data/projects/315/cover/img/cover.jpg"
-            name="Spark Store"
-            location="Shenzehn, China | 2017"
-           />
-          </Col>
-         </Row> */}
-
-         {/* <button className="btn mt-4">Go to Magazine</button> */}
         </section>
        </div>
-       <section className="stores-container bg-white text-left pb-5">
-        <h2 className="px-3">Brands & Stores</h2>
-        <h3 className="px-3">Explore catalogues by brands</h3>
-        <div className="stores-items">{Stores}</div>
-        <button className="btn d-block mx-auto mt-4 seemore">see all</button>
-       </section>
-       <section className="products-container">
-        <h2>Products</h2>
-        <h3>Explore products, get CAD / 3D files</h3>
-       </section>
-       <section id="home-products">
-        <AntRow gutter={24} className="mt-3">
-         {this.state.fetching && (
-          <>
-           <Spin
-            size="large"
-            style={{ position: "absolute", top: "50%", right: "50%" }}
-           />
-          </>
-         )}
-         {this.state.products?.map((product, index) => {
-          return (
-           <>
-            <AntCol className="gutter-row mb-3" md={6}>
-             <div className="product">
-              <a href={`/product/${product.id}`}>
-               <div
-                className="p-img"
-                style={{
-                 background: `url(${product.preview_cover})`,
-                }}
-               >
-                <div className="prlayer"></div>
-
-                <div
-                 className="actns-btn svbtn"
-                 onClick={(e) => {
-                  e.preventDefault();
-                  this.setState(
-                   {
-                    to_save_cover: product.preview_cover,
-                    to_save_productId: product,
-                   },
-                   () => {
-                    this.saveToCollection();
-                   }
-                  );
-                 }}
-                >
-                 Save +
-                </div>
-                {product.file.length > 0 ? (
-                 <>
-                  <div className="actns-btn file-btn cad">CAD</div>
-                  <div className="actns-btn file-btn threeD">3D</div>
-                 </>
-                ) : (
-                 ""
-                )}
-               </div>
-              </a>
-
-              <h5 className="product-store">{product.store_name.store_name}</h5>
-
-              <p className="product-name">{product.name}</p>
-              <div className="product-price">
-               {product.preview_price && product.preview_price > 0 ? (
-                <>
-                 <span>¥ {product.preview_price}</span>
-                </>
-               ) : (
-                <>
-                 <Link
-                  to={{
-                   pathname: `/product/${product.product_id}`,
-                   state: {
-                    request_price: true,
-                   },
-                  }}
-                 >
-                  REQUEST PRICE INFO
-                 </Link>
-                </>
-               )}
-              </div>
-             </div>
-            </AntCol>
-           </>
-          );
-         })}
-         {/* </div> */}
-        </AntRow>
-        <AntRow>
-         <a
-          href="/products "
-          className="btn mt-4 seemore mb-5"
-          style={{ paddingTop: "17px !important" }}
-         >
-          See More Products
-         </a>
-        </AntRow>
-       </section>
       </Container>
      </div>
     </div>
 
-    <div className="lightgray-footer"></div>
+    <div className="lightgray-footer">
+     <section className="stores-container text-left pb-5 home-head">
+      <h2 className="px-3">Brands & Stores</h2>
+      <p className="px-3">Explore catalogues by brands</p>
+      <div className="stores-items">{Stores}</div>
+      <button className="btn d-block mx-auto mt-4 seemore">see all</button>
+     </section>
+    </div>
     <div className="darkgray-footer">
      <div className="px-0 pt-4 container">
       <AntRow gutter={24}>

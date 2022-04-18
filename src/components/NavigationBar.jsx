@@ -42,6 +42,7 @@ import {
  setSearchTerm,
  setAllBrands,
 } from "./../redux/actions/addProductActions";
+
 const furniture = [
  "Cabinets",
  "Beds",
@@ -80,6 +81,7 @@ const lightings = [
  "Emergency Light",
  "Floor lamps",
 ];
+
 const treeData = [
  {
   title: "All Items",
@@ -113,12 +115,6 @@ class NavigationBar extends Component {
  constructor(props) {
   super(props);
   this.state = {
-   //  photoURL: auth.currentUser?.photoURL,
-   //  photoURL:
-   // auth.currentUser?.photoURL ??
-   // this.props.photoURL ??
-   // this.props.userInfo?.info?.photoUrl,
-
    photoURL: this.props.photoURL ?? this.props.userInfo.info?.photoUrl,
    user: auth.currentUser ?? null,
    displayName: this.props.displayName ?? "",
@@ -140,6 +136,7 @@ class NavigationBar extends Component {
    selected_search: "",
    selected: false,
    typeSelected: "",
+   value: "all",
    search_list_loading: false,
    projects: [
     "Hyatt Place Frankfurt Airport",
@@ -151,7 +148,6 @@ class NavigationBar extends Component {
    ],
   };
  }
-
  handleLogout = () => {
   auth.signOut().then(() => {
    this.props.dispatchLogOut();
@@ -194,6 +190,8 @@ class NavigationBar extends Component {
  };
 
  searching = (value) => {
+  console.log(this.state.search_list);
+  console.log(value);
   this.setState({ searchValue: value });
   console.log(value);
   if (value.length > 0) {
@@ -227,7 +225,6 @@ class NavigationBar extends Component {
 
  componentDidMount() {
   console.log(this.props);
-  // this.setState({ photoURL: auth.currentUser?.photoURL, value: "all" });
   axios
    .get(`${API}searchbar`)
    .then((response) => {
@@ -406,6 +403,7 @@ class NavigationBar extends Component {
             width: "100%",
             right: 0,
             left: 0,
+            minHeight: "250px",
             borderTopRightRadius: "2px",
             borderTopLeftRadius: "2px",
             background: "#fff",
@@ -463,11 +461,13 @@ class NavigationBar extends Component {
                 <ul className="inner-list">
                  {this.state.filteredLightings.map((product, index) => {
                   if (index <= 15) {
+                   const lower = product.toLowerCase();
+
                    return (
                     <>
                      <Link
                       to={{
-                       pathname: `/products/sofa/table`,
+                       pathname: `/products/lighting/${lower}`,
                        state: {
                         selected_kind: product,
                         selected_category: "Lighting",

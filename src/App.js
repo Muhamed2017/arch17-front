@@ -72,7 +72,7 @@ class App extends Component {
               
               <Route path='/product/:id' component={Product} exact/>
               <Route path='/project/:id' component={Project} exact/>
-              <Route path='/projects' component={Magazine} exact/>
+              <Route path='/magazine' component={Magazine} exact/>
 
               {/* <Route path="/search" component={Search} exact /> */}
               <Route path='/products' 

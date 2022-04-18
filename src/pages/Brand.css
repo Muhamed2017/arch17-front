@@ -228,6 +228,7 @@ overflow: hidden;
  transition: all 0.3s ease-in;
  padding-bottom: 10px;
  position: relative;
+ text-align: left;
 }
 .product .product-price {
  color: #ff0000;

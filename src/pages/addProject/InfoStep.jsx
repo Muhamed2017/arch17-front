@@ -1,11 +1,9 @@
 import React, { Component } from "react";
 import { Form, Input, Checkbox, Row, Col, Select, DatePicker } from "antd";
 import { connect } from "react-redux";
-
 import ReactFlagsSelect from "react-flags-select";
 import { addProjectInfo } from "./../../redux/actions/addProjectActions";
 import { project_cats } from "../addProduct/ProductClassifications";
-// import moment from "moment";
 
 const { Option } = Select;
 const config = {
@@ -17,8 +15,8 @@ class InfoStep extends Component {
   this.state = {
    country: this.props.info?.country ?? "",
    missed: false,
-   selectedCats: [],
-   selectedTypes: [],
+   selectedCats: this.props.info?.category ?? [],
+   selectedTypes: this.props.info?.type,
   };
  }
 
@@ -33,7 +31,6 @@ class InfoStep extends Component {
  };
 
  onFinishFailed = (errorInfo) => {
-  //   values.country = this.state.country;
   if (!this.state.country) {
    this.setState({ missed: true });
   }
@@ -101,8 +98,9 @@ class InfoStep extends Component {
        className="form-label mb-4"
        labelCol={{ span: 3, offset: 0 }}
        wrapperCol={{ span: 8, offset: 0 }}
-       //    initialValue={this.props.info?.category ?? ""}
-       rules={[{ required: true, message: "Please select your country!" }]}
+       //   initialValue={this.props.info?.category ?? ""}
+       initialValue={this.state.selectedCats ?? []}
+       rules={[{ required: true, message: "Category is required!" }]}
       >
        <Select
         placeholder="Please select "
@@ -110,7 +108,6 @@ class InfoStep extends Component {
         mode="multiple"
         value={this.state.selectedCats}
         onChange={this.handleCatsChange}
-        defaultValue={this.props.info?.category ?? []}
         showArrow
         style={{
          fontSize: "13px",
@@ -126,18 +123,17 @@ class InfoStep extends Component {
       <Form.Item
        name="type"
        label="Project"
+       initialValue={this.state.selectedTypes}
        labelCol={{ span: 3 }}
        wrapperCol={{
         span: 8,
        }}
        className="form-label mb-5"
-       rules={[{ required: true, message: "Please select your country!" }]}
+       rules={[{ required: true, message: "Project kind is required!" }]}
       >
        <Select
         showSearch
-        mode="multiple"
         onChange={this.handleTypesChange}
-        defaultValue={this.props.info?.type ?? []}
         value={this.state.selectedTypes}
         placeholder="Please select a country"
         style={{
@@ -201,6 +197,7 @@ class InfoStep extends Component {
        />
       </Form.Item>
 
+      {/* <div className="next-wrapper"> */}
       <button
        className="next-btn"
        htmlType="submit"
@@ -210,6 +207,7 @@ class InfoStep extends Component {
       >
        Save & Continue
       </button>
+      {/* </div> */}
      </Form>
     </div>
    </>

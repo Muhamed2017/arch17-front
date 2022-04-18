@@ -4,9 +4,9 @@ import { connect } from "react-redux";
 import Cropper from "react-cropper";
 import slide from "../../../src/slide1.jpg";
 import "cropperjs/dist/cropper.css";
-import { ImLocation } from "react-icons/im";
+// import { ImLocation } from "react-icons/im";
 import axios from "axios";
-import { convertToRaw } from "draft-js";
+// import { convertToRaw } from "draft-js";
 import { LoadingOutlined } from "@ant-design/icons";
 import { API } from "../../utitlties";
 import { compressImage } from "../addProduct/OptionsPrice";
@@ -70,33 +70,21 @@ class CoverStep extends Component {
   fd.append("name", this.state.displayName);
   fd.append("article_type", blogType[0]);
 
-  // fd.append("kind", category);
-  // fd.append("type", type);
-
   category.map((c) => {
    fd.append("kind[]", c);
   });
 
-  type.map((t) => {
-   fd.append("type[]", t);
-  });
+
+  fd.append("type", type);
 
   fd.append("country", country);
   fd.append("city", city);
   fd.append("title", "TITLE");
-  // fd.append("year", year?._d.getFullYear());
   fd.append(
    "cover",
    await compressImage(this.dataURLtoFile(this.state.cropped_cover, "file"))
   );
-  fd.append(
-   "content",
-   this.props.project?.project_content
-
-   //  JSON.stringify(
-   //   convertToRaw(this.props.project?.project_content?.getCurrentContent())
-   //  )
-  );
+  fd.append("content", this.props.project?.project_content);
   this.props.project.role_designers?.map((p) => {
    fd.append("users[]", p.id);
   });
@@ -111,7 +99,6 @@ class CoverStep extends Component {
   });
 
   if (this.props.cycle_type === "EDIT") {
-   //  fd.append("year", year);
    fd.append("year", year?._d.getFullYear());
 
    axios
@@ -155,7 +142,6 @@ class CoverStep extends Component {
  render() {
   if (this.state.created)
    return <Redirect to={`/project/${this.state.project_id}`} />;
-
   return (
    <>
     <div id="project-cover-step" className="p-3 py-5">
@@ -163,31 +149,30 @@ class CoverStep extends Component {
       <Col md={8}>
        <div className="border">
         <div className="prev"></div>
-        <div className="project-desc text-left" style={{ textAlign: "left" }}>
-         <div className="project-name mb-2 mt-2">
-          <h4>{this.state.displayName}</h4>
-         </div>
-         <div className="project-category">
-          <p className="mb-1">
-           <ImLocation
-            style={{
-             display: "inline-block",
-             verticalAlign: "center",
-             margin: "2px 3px 3px -2px ",
-            }}
-           />
-           {`${this.props.info?.country}, ${
-            this.props.info?.city
-           } | ${this.props.info?.year?._d?.getFullYear()}`}
+        <div className="info p-3 left">
+         <p className="project-name">{this.state.displayName}</p>
+
+         <div className="project-cover-footer ">
+          <p>
+           {/* {this.props.info?.type?.map((t, index) => {
+            return (
+             <span key={index} className="px-1">
+              {t}
+             </span>
+            );
+           })} */}
+           <span>{this.props.info?.type}</span>
           </p>
-         </div>
-         <div className="pl-3" style={{ width: "95%", margin: "auto" }}>
-          <hr className="m-0 p-0 " />
-         </div>
-         <div className="project-type d-flex justify-content-start align-items-center">
-          <p className="mr-1"> Interior design </p>
-          <p className="mr-1 ml-1"> Architecture </p>
-          <p className="mr-1 ml-1"> Restaurant </p>
+          <hr className="my-2 w-30" />
+          <p>
+           {this.props.info?.category?.map((c, index) => {
+            return (
+             <span key={index} className="px-1">
+              {c}
+             </span>
+            );
+           })}
+          </p>
          </div>
         </div>
        </div>
@@ -199,9 +184,6 @@ class CoverStep extends Component {
          src={this.props.covers[0]}
          viewMode={1}
          style={{ height: "100%", width: "94%" }}
-         // Cropper.js options
-         //  onLoad={() => console.log("loaded")}
-         //  start={() => console.log("MMM")}
          ref={this.cropperRef}
          cropend={this._crop.bind(this)}
          ready={this._crop.bind(this)}
@@ -209,7 +191,6 @@ class CoverStep extends Component {
          preview=".prev"
          autoCropArea={1}
          dragMode="move"
-         //  ready
          cropBoxMovable={false}
          cropBoxResizable={true}
         />

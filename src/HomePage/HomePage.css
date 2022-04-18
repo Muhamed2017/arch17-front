@@ -300,6 +300,8 @@ max-width: 25px !important;
 /* stores section start  */
 .stores-container{
     padding-top: 100px;
+    max-width: 1266px;
+    margin: 0 auto 50px;
 }
 .stores-container h2{
     font: normal normal 400 35px Roboto;
@@ -312,15 +314,16 @@ max-width: 25px !important;
     color: #A8A8A8;
 }
 .stores-items{
-    width: 100%;
-    margin-top: 30px;
-    display: inline-grid;
-    grid-template-columns: repeat(8,auto);
-    grid-template-rows: repeat(2,auto);
-    grid-gap: 5px;
-    max-width: 100%;
-    justify-content:space-evenly;
-    /* overflow: auto; */
+      width: 100%;
+      margin-top: 30px;
+      display: inline-grid;
+      grid-template-columns: repeat(8, auto);
+      grid-template-rows: repeat(2, auto);
+      grid-gap: 21px;
+      max-width: 100%;
+      justify-content: space-between;
+      width: 1266px;
+      margin-bottom: 50px;
 }
 .store-logo{
     border-radius: 5px;
@@ -352,20 +355,26 @@ max-width: 25px !important;
     border-radius: 5px;
     padding-top: 5px !important;
 }
-/* stores section end */
-/* products setcion start */
 .products-container{
-    padding-top: 100px;
+    margin-top: 50px;
+    padding:50px 0;
 }
-.products-container h2{
-    font: normal normal 400 35px Roboto;
-    letter-spacing: 0px;
-    color: #000000;
+
+.home-head{
+    font-family: "Roboto";
+    text-align: center;
 }
-.products-container h3{
-    font: normal normal 300 30px Roboto;
-    letter-spacing: 0px;
-    color: #A8A8A8;
+.home-head > h2{
+color: #505458;
+font-size: 36px;
+font-weight: 500;
+padding: 10px 0 5px;
+width: 100%;
+}
+.home-head > p{
+  color: #000;
+  font-weight: 100;
+  font-size: 21px
 }
 .products-container button{
     width: 332px;

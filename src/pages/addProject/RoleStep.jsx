@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Row, Col, Button, Modal, Input } from "antd";
 import Draggable from "react-draggable";
 import { DeleteOutlined } from "@ant-design/icons";
+import { IoLocation } from "react-icons/io5";
 import { connect } from "react-redux";
 import axios from "axios";
 import {
@@ -154,13 +155,43 @@ class RoleStep extends Component {
        {this.state.addedDesigners?.map((d) => {
         return (
          <>
-          <Col md={12} className="my-3">
-           <div className="wraprow">
-            <div className="d-img inline-block">{d?.displayName[0]}</div>
-            <span className="inline-block">{d?.displayName}</span>
-           </div>
+          <Col md={20} className="my-3">
+           <Row span={24} align="middle" gutter={70}>
+            <Col md={4}>
+             <div className="wraprow">
+              <div
+               className="d-img inline-block"
+               style={{
+                backgroundImage: `url(${d.avatar})`,
+               }}
+              >
+               {d?.avatar?.length < 10 && <>{d?.displayName[0]}</>}
+              </div>
+             </div>
+            </Col>
+            <Col md={20}>
+             <div className="d-info">
+              <span className="inline-block">{d?.displayName}</span>
+              <div className="d-professions">
+               {d.professions.map((p, index) => {
+                return <p key={index}>{p}</p>;
+               })}
+              </div>
+
+              <p className="d-loc">
+               {d.country && (
+                <>
+                 <IoLocation />
+                 {d.country}
+                 {d.city && <>, {d.city}</>}
+                </>
+               )}
+              </p>
+             </div>
+            </Col>
+           </Row>
           </Col>
-          <Col md={12} className="my-3 text-right pr-70">
+          <Col md={4} className="my-3 text-right pr-70">
            <p
             className="pointer"
             onClick={() => {
@@ -189,7 +220,7 @@ class RoleStep extends Component {
         );
        })}
       </Row>
-      <Row className="text-center my-3">
+      <Row className="text-center my-3 mt-5">
        <Col md={24}>
         <Button
          danger
@@ -203,6 +234,7 @@ class RoleStep extends Component {
        </Col>
       </Row>
      </div>
+     {/* <hr className="w-50 text-center m-auto mb-5" /> */}
 
      <div className="brands-sections section">
       <Row span={24} gutter={10}>
@@ -225,13 +257,41 @@ class RoleStep extends Component {
        {this.state.addedBrands?.map((b) => {
         return (
          <>
-          <Col md={12} className="my-3">
-           <div className="wraprow">
-            <div className="d-img inline-block">{b?.name[0]}</div>
-            <span className="inline-block">{b?.name}</span>
-           </div>
+          <Col md={20} className="my-3">
+           <Row span={24} align="middle" gutter={70}>
+            <Col md={4}>
+             <div className="wraprow">
+              <div
+               className="d-img inline-block"
+               style={{
+                backgroundImage: `url(${b.cover})`,
+               }}
+              >
+               {!b.cover && <>{b?.name[0]}</>}
+              </div>
+             </div>
+            </Col>
+            <Col md={20} className="">
+             <div className="d-info">
+              <span className="inline-block">{b?.name}</span>
+              <p className="mb-0 b-type">Brand</p>
+              <p className="mb-0 b-count">
+               <span>{b.followers?.length}</span>Followers
+              </p>
+              <p className="d-loc">
+               {b.country && (
+                <>
+                 <IoLocation />
+                 {b.country}
+                 {b.city && <>, {b.city}</>}
+                </>
+               )}
+              </p>
+             </div>
+            </Col>
+           </Row>
           </Col>
-          <Col md={12} className="my-3 text-right pr-70">
+          <Col md={4} className="my-3 text-right pr-70">
            <p
             className="pointer"
             onClick={() => {
@@ -260,7 +320,7 @@ class RoleStep extends Component {
         );
        })}
       </Row>
-      <Row className="text-center my-3">
+      <Row className="text-center my-3 mt-5">
        <Col md={24}>
         <Button
          danger
@@ -346,8 +406,12 @@ class RoleStep extends Component {
           className="designers-row"
           onClick={() => this.handleAddDesigner(d)}
          >
-          <div className="d-img inline-block middle">
-           {d?.displayName?.slice(0, 1)}
+          <div
+           style={{ background: `url(${d.avatar})` }}
+           className="d-img inline-block middle"
+          >
+           {d?.avatar?.length < 10 && <>{d?.displayName?.slice(0, 1)} </>}
+           {/* {d?.displayName?.slice(0, 1)} */}
           </div>
           <span className="inline-block middle">{d?.displayName}</span>
          </Col>

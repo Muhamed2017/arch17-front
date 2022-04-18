@@ -1,20 +1,23 @@
 import React, { Component } from "react";
-import { steps } from "./AddProjectWrapper";
+// import { steps } from "./AddProjectWrapper";
 import { Steps, Button, Row, Col, Spin } from "antd";
 import { connect } from "react-redux";
 import axios from "axios";
 import { API } from "./../../utitlties";
 import moment from "moment";
-// import { editProject } from "./../../redux/actions/addProjectActions";
 import { LoadingOutlined } from "@ant-design/icons";
 
+import InfoStep from "./InfoStep";
+import RoleStep from "./RoleStep";
+import ProductsTagsStep from "./ProductsTagsStep";
+import CoverStep from "./CoverStep";
+import TextEditor from "../TextEditor";
 import {
+ GO_TO_PROJECT_STEP,
  NEXT_STEP,
  PREV_STEP,
  SET_INTITIAL_PROJECT_FOR_EDIT,
 } from "./../../redux/constants";
-// import { EditorState } from "react-draft-wysiwyg";
-import { convertFromRaw, EditorState } from "draft-js";
 
 const { Step } = Steps;
 class EditProjectWrapper extends Component {
@@ -36,9 +39,10 @@ class EditProjectWrapper extends Component {
    type: PREV_STEP,
   });
  };
+
+ //  gotoStep = (step) => {};
  componentDidMount() {
   const { projectId } = this.state;
-
   axios
    .get(`${API}project/${projectId}`)
    .then((response) => {
@@ -58,9 +62,6 @@ class EditProjectWrapper extends Component {
        blogType: response.data.project.article_type,
       },
       content: response.data.project?.content,
-      // content: EditorState.createWithContent(
-      //  convertFromRaw(JSON.parse(response.data.project.content))
-      // ),
       role_brands: response.data.brands,
       project_covers: response.data.project.images,
       role_designers: response.data.designers,
@@ -77,8 +78,98 @@ class EditProjectWrapper extends Component {
     console.log(error);
    });
  }
+ steps = [
+  {
+   title: (
+    <div
+     className="edit-step-title"
+     onClick={() => {
+      console.log("info");
+      this.props.dispatch({
+       type: GO_TO_PROJECT_STEP,
+       payload: 0,
+      });
+     }}
+    >
+     1.Project Info
+    </div>
+   ),
+   content: <InfoStep />,
+  },
+  {
+   title: (
+    <div
+     className="edit-step-title"
+     onClick={() => {
+      console.log("info");
+      this.props.dispatch({
+       type: GO_TO_PROJECT_STEP,
+       payload: 1,
+      });
+     }}
+    >
+     2.Content
+    </div>
+   ),
+   content: <TextEditor />,
+  },
+  {
+   title: (
+    <div
+     className="edit-step-title"
+     onClick={() => {
+      console.log("info");
+      this.props.dispatch({
+       type: GO_TO_PROJECT_STEP,
+       payload: 2,
+      });
+     }}
+    >
+     3.Role
+    </div>
+   ),
+   content: <RoleStep />,
+  },
+
+  {
+   //  title: "4.Tag Products",
+   title: (
+    <div
+     className="edit-step-title"
+     onClick={() => {
+      console.log("info");
+      this.props.dispatch({
+       type: GO_TO_PROJECT_STEP,
+       payload: 3,
+      });
+     }}
+    >
+     4.Tag Products
+    </div>
+   ),
+   content: <ProductsTagsStep />,
+  },
+  {
+   title: (
+    <div
+     className="edit-step-title"
+     onClick={() => {
+      console.log("info");
+      this.props.dispatch({
+       type: GO_TO_PROJECT_STEP,
+       payload: 4,
+      });
+     }}
+    >
+     5.Cover
+    </div>
+   ),
+   content: <CoverStep />,
+  },
+ ];
  render() {
   const current = this.props.step;
+  const steps = this.steps;
   if (!this.state.fetched)
    return (
     <Spin
@@ -95,7 +186,7 @@ class EditProjectWrapper extends Component {
    <>
     <div className="addprojectwrapper">
      <Row span={24} gutter>
-      <Col md={24} className="bg-white mb-2 py-3">
+      <Col md={24} className="bg-white mb-2 py-3 static-bar">
        <div className="wrapper-inner">
         <Steps current={current} icon="">
          {steps.map((item) => (
@@ -124,18 +215,6 @@ class EditProjectWrapper extends Component {
           >
            Previous
           </button>
-         )}
-
-         {current < steps.length - 1 && (
-          <Button
-           type="primary"
-           onClick={() => this.next()}
-           style={{
-            display: "none",
-           }}
-          >
-           Next
-          </Button>
          )}
         </div>
        </div>

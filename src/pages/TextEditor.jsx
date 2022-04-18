@@ -13,7 +13,7 @@ import {
  addProjectContent,
 } from "../redux/actions/addProjectActions";
 import { connect } from "react-redux";
-import { message } from "antd";
+// import { message } from "antd";
 // import { Mentions } from "@ckeditor/ckeditor5-mention/src/mention";
 
 const TextEditor = (props) => {
@@ -72,7 +72,12 @@ const TextEditor = (props) => {
      config={{
       initialData: props?.content?.length > 0 ? props.content : "",
       extraPlugins: [uploadPlugin],
+      toolbarLocation: "bottom",
+      toolbar: {
+       location: "bottom",
+      },
      }}
+     //  toolbarLocation="bottom"
      editor={ClassicEditor}
      //  onReady={(editor) => {}}
      //  onBlur={(event, editor) => {}}
@@ -87,16 +92,6 @@ const TextEditor = (props) => {
     className="next-btn"
     onClick={() => {
      console.log(loaders);
-     //  if (images.length > 0) {
-     //   if (images.length < filesCounter) {
-     //    images.length < filesCounter && message.error("Stil uploading images");
-     //   } else {
-     //    props.dispatchGoStep(2);
-     //   }
-     //  } else {
-     //   console.log("Upload at least one image");
-     //   message.error("Upload at least one image ");
-     //  }
 
      props.dispatchGoStep(2);
     }}
