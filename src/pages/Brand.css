@@ -155,15 +155,13 @@ overflow: hidden;
  font-weight: 400;
  font-size: 1.2rem;
 }
-.ant-tabs-tab-btn:hover,
-.ant-tabs-tab-btn-active:hover {
- color: #747474 !important;
-}
+
 .ant-tabs-ink-bar {
  background: #000 !important;
 }
 .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
  color: #000 !important;
+    font-weight: 600
 }
 #brand-container .ant-tabs-tab:hover{
     color:#000 !important;

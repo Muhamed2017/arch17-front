@@ -388,7 +388,9 @@ class HomePage extends Component {
             textShadow: "unset",
            }}
           >
-           <h3 className="media-item-desc-heading">Upholstered Lounge Chair</h3>
+           <h3 className="media-item-desc-heading mb-0">
+            Upholstered Lounge Chair
+           </h3>
            <p
             className="text-left w-100 m-0 d-block mg-p"
             style={{
@@ -1070,196 +1072,239 @@ class HomePage extends Component {
          </TabPane>
         </Tabs>
        </section>
-
-       <div>
-        <section className="project-contaienr text-center bg-white mt-5 pt-4 home-head">
-         <h2 className="home-center">Magazine</h2>
-         <p className="mb-4">Explore Design Projects, News & trends</p>
-
-         <Tabs defaultActiveKey="recent" centered onChange={() => {}}>
-          <TabPane tab="Recent" key="recent">
-           <div className="innertab py-5">
-            <AntRow span={24} gutter={24}>
-             {Object.values(this.state.recent_projects)?.map((p, index) => {
-              return (
-               <>
-                <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
-                 <a href={`/project/${p.id}`} className="box-link">
-                  <div className="project-col bg-white">
-                   <div
-                    className="project-image"
-                    style={{
-                     backgroundImage: `url(${p.cover})`,
-                    }}
-                   ></div>
-                   <div className="info p-3 left">
-                    <p className="project-name left">{p.name}</p>
-
-                    <div className="project-cover-footer">
-                     <p>
-                      {p.kind?.map((k) => {
-                       return <span className="px-1">{k}</span>;
-                      })}
-                     </p>
-                     <hr className="my-1 w-20" />
-                     <p>
-                      <span className="px-1">{p.type}</span>
-                     </p>
-                    </div>
-                   </div>
-                  </div>
-                 </a>
-                </AntCol>
-               </>
-              );
-             })}
-            </AntRow>
-            <AntRow>
-             <a
-              href="/magazine "
-              className="btn mt-5 seemore mb-5"
-              style={{ paddingTop: "17px !important" }}
-             >
-              Magazine
-             </a>
-            </AntRow>
-           </div>
-          </TabPane>
-          <TabPane tab="Architecture" key="2">
-           <div className="innertab py-5">
-            <AntRow span={24} gutter={24}>
-             {this.state.projects_types?.Architecture?.map((p, index) => {
-              return (
-               <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
-                <a href={`/project/${p.id}`} className="box-link">
-                 <div className="project-col bg-white">
-                  <div
-                   className="project-image"
-                   style={{
-                    backgroundImage: `url(${p.cover})`,
-                   }}
-                  ></div>
-                  <div className="info p-3 left">
-                   <p className="project-name">{p.name}</p>
-
-                   <div className="project-cover-footer">
-                    <p className="m-0">{p.kind}</p>
-                    <hr className="my-1 w-20" />
-                    <p className="m-0">{p.type}</p>
-                   </div>
-                  </div>
-                 </div>
-                </a>
-               </AntCol>
-              );
-             })}
-            </AntRow>
-           </div>
-          </TabPane>
-          <TabPane tab="Interior Design" key="3">
-           <div className="innertab py-5">
-            <AntRow span={24} gutter={24}>
-             {this.state.projects_types["Interior Design"]?.map((p, index) => {
-              return (
-               <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
-                <a href={`/project/${p.id}`} className="box-link">
-                 <div className="project-col bg-white">
-                  <div
-                   className="project-image"
-                   style={{
-                    backgroundImage: `url(${p.cover})`,
-                   }}
-                  ></div>
-                  <div className="info p-3 left">
-                   <p className="project-name">{p.name}</p>
-
-                   <div className="project-cover-footer">
-                    <p className="m-0">{p.kind}</p>
-                    <hr className="my-1 w-20" />
-                    <p className="m-0">{p.type}</p>
-                   </div>
-                  </div>
-                 </div>
-                </a>
-               </AntCol>
-              );
-             })}
-            </AntRow>
-           </div>
-          </TabPane>
-          <TabPane tab="Product Design" key="4">
-           <div className="innertab py-5">
-            <AntRow span={24} gutter={24}>
-             {this.state.projects_types["Product Design"]?.map((p, index) => {
-              return (
-               <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
-                <a href={`/project/${p.id}`} className="box-link">
-                 <div className="project-col bg-white">
-                  <div
-                   className="project-image"
-                   style={{
-                    backgroundImage: `url(${p.cover})`,
-                   }}
-                  ></div>
-                  <div className="info p-3 left">
-                   <p className="project-name">{p.name}</p>
-                   <div className="project-cover-footer">
-                    <p className="m-0">{p.kind}</p>
-                    <hr className="my-1 w-20" />
-                    <p className="m-0">{p.type}</p>
-                   </div>
-                  </div>
-                 </div>
-                </a>
-               </AntCol>
-              );
-             })}
-            </AntRow>
-           </div>
-          </TabPane>
-          <TabPane tab="Design blogs" key="5">
-           <div className="innertab py-5">
-            <AntRow span={24} gutter={24}>
-             {this.state.projects_types["Blog"]?.map((p, index) => {
-              return (
-               <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
-                <a href={`/project/${p.id}`} className="box-link">
-                 <div className="project-col bg-white">
-                  <div
-                   className="project-image"
-                   style={{
-                    backgroundImage: `url(${p.cover})`,
-                   }}
-                  ></div>
-                  <div className="info p-3 left">
-                   <p className="project-name">{p.name}</p>
-                   <div className="project-cover-footer">
-                    <p className="m-0">{p.kind}</p>
-                    <hr className="my-1 w-20" />
-                    <p className="m-0">{p.type}</p>
-                   </div>
-                  </div>
-                 </div>
-                </a>
-               </AntCol>
-              );
-             })}
-            </AntRow>
-           </div>
-          </TabPane>
-         </Tabs>
-        </section>
-       </div>
       </Container>
      </div>
     </div>
-
     <div className="lightgray-footer">
      <section className="stores-container text-left pb-5 home-head">
-      <h2 className="px-3">Brands & Stores</h2>
-      <p className="px-3">Explore catalogues by brands</p>
+      <h2 className="px-3">Explore catalogues by brand</h2>
       <div className="stores-items">{Stores}</div>
       <button className="btn d-block mx-auto mt-4 seemore">see all</button>
+     </section>
+    </div>
+    <div>
+     <section className="project-contaienr text-center bg-white mt-5 pt-4 home-head">
+      <h2 className="home-center mb-0">Magazine</h2>
+      <p className="mb-4">Explore Design Projects, News & trends</p>
+      <Tabs
+       defaultActiveKey="recent"
+       className="inner-projects-container"
+       centered
+       onChange={() => {}}
+      >
+       <TabPane tab="Recent" key="recent">
+        <div className="innertab py-5">
+         <AntRow span={24} gutter={24}>
+          {Object.values(this.state.recent_projects)?.map((p, index) => {
+           return (
+            <>
+             <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+              <a href={`/project/${p.id}`} className="box-link">
+               <div className="project-col bg-white">
+                <div
+                 className="project-image"
+                 style={{
+                  backgroundImage: `url(${p.cover})`,
+                 }}
+                ></div>
+                <div className="info p-3 left">
+                 <p className="project-name left">{p.name}</p>
+
+                 <div className="project-cover-footer">
+                  <p>
+                   {p.kind?.map((k) => {
+                    return <span className="px-1">{k}</span>;
+                   })}
+                  </p>
+                  <hr className="my-1 w-20" />
+                  <p>
+                   <span className="px-1">{p.type}</span>
+                  </p>
+                 </div>
+                </div>
+               </div>
+              </a>
+             </AntCol>
+            </>
+           );
+          })}
+         </AntRow>
+         <AntRow>
+          <a
+           href="/magazine "
+           className="btn mt-5 seemore mb-5"
+           style={{ paddingTop: "17px !important" }}
+          >
+           Go to Magazine
+          </a>
+         </AntRow>
+        </div>
+       </TabPane>
+       <TabPane tab="Architecture" key="2">
+        <div className="innertab py-5">
+         <AntRow span={24} gutter={24}>
+          {this.state.projects_types?.Architecture?.slice(-6)?.map(
+           (p, index) => {
+            return (
+             <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+              <a href={`/project/${p.id}`} className="box-link">
+               <div className="project-col bg-white">
+                <div
+                 className="project-image"
+                 style={{
+                  backgroundImage: `url(${p.cover})`,
+                 }}
+                ></div>
+                <div className="info p-3 left">
+                 <p className="project-name">{p.name}</p>
+
+                 <div className="project-cover-footer">
+                  <p className="m-0">{p.kind}</p>
+                  <hr className="my-1 w-20" />
+                  <p className="m-0">{p.type}</p>
+                 </div>
+                </div>
+               </div>
+              </a>
+             </AntCol>
+            );
+           }
+          )}
+         </AntRow>
+         <AntRow>
+          <a
+           href="/magazine "
+           className="btn mt-5 seemore mb-5"
+           style={{ paddingTop: "17px !important" }}
+          >
+           Go to Magazine
+          </a>
+         </AntRow>
+        </div>
+       </TabPane>
+       <TabPane tab="Interior Design" key="3">
+        <div className="innertab py-5">
+         <AntRow span={24} gutter={24}>
+          {this.state.projects_types["Interior Design"]
+           ?.slice(-6)
+           ?.map((p, index) => {
+            return (
+             <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+              <a href={`/project/${p.id}`} className="box-link">
+               <div className="project-col bg-white">
+                <div
+                 className="project-image"
+                 style={{
+                  backgroundImage: `url(${p.cover})`,
+                 }}
+                ></div>
+                <div className="info p-3 left">
+                 <p className="project-name">{p.name}</p>
+
+                 <div className="project-cover-footer">
+                  <p className="m-0">{p.kind}</p>
+                  <hr className="my-1 w-20" />
+                  <p className="m-0">{p.type}</p>
+                 </div>
+                </div>
+               </div>
+              </a>
+             </AntCol>
+            );
+           })}
+         </AntRow>
+         <AntRow>
+          <a
+           href="/magazine "
+           className="btn mt-5 seemore mb-5"
+           style={{ paddingTop: "17px !important" }}
+          >
+           Go to Magazine
+          </a>
+         </AntRow>
+        </div>
+       </TabPane>
+       <TabPane tab="Product Design" key="4">
+        <div className="innertab py-5">
+         <AntRow span={24} gutter={24}>
+          {this.state.projects_types["Product Design"]
+           ?.slice(-6)
+           ?.map((p, index) => {
+            return (
+             <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+              <a href={`/project/${p.id}`} className="box-link">
+               <div className="project-col bg-white">
+                <div
+                 className="project-image"
+                 style={{
+                  backgroundImage: `url(${p.cover})`,
+                 }}
+                ></div>
+                <div className="info p-3 left">
+                 <p className="project-name">{p.name}</p>
+                 <div className="project-cover-footer">
+                  <p className="m-0">{p.kind}</p>
+                  <hr className="my-1 w-20" />
+                  <p className="m-0">{p.type}</p>
+                 </div>
+                </div>
+               </div>
+              </a>
+             </AntCol>
+            );
+           })}
+         </AntRow>
+         <AntRow>
+          <a
+           href="/magazine "
+           className="btn mt-5 seemore mb-5"
+           style={{ paddingTop: "17px !important" }}
+          >
+           Go to Magazine
+          </a>
+         </AntRow>
+        </div>
+       </TabPane>
+       <TabPane tab="Design blogs" key="5">
+        <div className="innertab py-5">
+         <AntRow span={24} gutter={24}>
+          {this.state.projects_types["Blog"]?.slice(-6)?.map((p, index) => {
+           return (
+            <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+             <a href={`/project/${p.id}`} className="box-link">
+              <div className="project-col bg-white">
+               <div
+                className="project-image"
+                style={{
+                 backgroundImage: `url(${p.cover})`,
+                }}
+               ></div>
+               <div className="info p-3 left">
+                <p className="project-name">{p.name}</p>
+                <div className="project-cover-footer">
+                 <p className="m-0">{p.kind}</p>
+                 <hr className="my-1 w-20" />
+                 <p className="m-0">{p.type}</p>
+                </div>
+               </div>
+              </div>
+             </a>
+            </AntCol>
+           );
+          })}
+         </AntRow>
+         <AntRow>
+          <a
+           href="/magazine "
+           className="btn mt-5 seemore mb-5"
+           style={{ paddingTop: "17px !important" }}
+          >
+           Go to Magazine
+          </a>
+         </AntRow>
+        </div>
+       </TabPane>
+      </Tabs>
      </section>
     </div>
     <div className="darkgray-footer">

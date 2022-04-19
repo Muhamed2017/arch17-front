@@ -196,12 +196,12 @@ class Project extends Component {
           <Column
            mobile={14}
            tablet={7}
-           computer={10}
+           computer={11}
            className="bg-white radius"
           >
            <div id="project-content">
             <h6>{this.state.project?.name}</h6>
-            <hr className="my-4 w-50 mx-3" />
+            <hr className="my-4 w-10 mx-3" />
 
             {/* <p className="location">{`${this.state.project?.country} ${this.state.project?.city} | ${this.state.project?.year} | 455`}</p> */}
             <p className="location">
@@ -217,7 +217,7 @@ class Project extends Component {
                  ? "/profile"
                  : `/user/${this.state.owner[0]?.uid}`
                }
-               className="bold owner_link"
+               className="owner_link"
               >
                {this.state.owner[0]?.displayName}
               </a>
@@ -225,7 +225,7 @@ class Project extends Component {
              {this.state.project?.ownerable_type?.includes("Store") && (
               <a
                href={`/brand/${this.state.owner[0]?.id}`}
-               className="bold owner_link"
+               className="owner_link"
               >
                {this.state.owner[0]?.name}
               </a>
@@ -249,7 +249,7 @@ class Project extends Component {
            </div>
           </Column>
          </Ref>
-         <Column mobile={14} tablet={7} computer={5}>
+         <Column mobile={14} tablet={7} computer={4}>
           {this.state.designers?.length > 0 && (
            <>
             <Sticky context={this.contextRef} offset={62}>
@@ -315,7 +315,7 @@ class Project extends Component {
                   });
                  }}
                 >
-                 {this.state.designersToShow > 2 ? "See Less" : "See More"}
+                 {this.state.designersToShow > 2 ? "See Less" : "See All"}
                 </p>
                )}
               </div>
@@ -597,20 +597,7 @@ class Project extends Component {
      <Footer />
     </div>
     <BackTop visibilityHeight={2000}>
-     <div
-      style={{
-       height: 40,
-       width: 40,
-       right: -10,
-       bottom: -15,
-       borderRadius: 4,
-       backgroundColor: "#e41e15",
-       color: "#fff",
-       textAlign: "center",
-       fontSize: 25,
-       position: "absolute",
-      }}
-     >
+     <div className="ant-back-project" style={{}}>
       <IoIosArrowUp />
      </div>
     </BackTop>

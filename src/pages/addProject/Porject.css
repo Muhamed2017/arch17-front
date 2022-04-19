@@ -82,20 +82,30 @@ figure.image{
     position: relative;
 }
 .step1{
-/* max-width: 920px; */
 position: relative !important;
 }
-
+.ant-back-project{
+    height: 29px;
+    width: 30px;
+    right: -70px;
+    bottom: -25px;
+    border-radius: 4px;
+    background-color: rgb(228, 30, 21);
+    color: rgb(255, 255, 255);
+    text-align: center;
+    font-size: 17px;
+    background-color: #000;
+    position: absolute
+}
 .owner_link{
-    text-decoration: underline !important;
-    font-size: .85rem;
-    padding: 0 3px;
-    color: #2e2e2e !important;
-    font-family: "Roboto";
-
+ font-size: 1rem;
+padding: 0 3px;
+font-family: "Roboto"
+}
+.owner_link:hover{
+text-decoration: underline !important;
 }
 .step1 .ck.ck-toolbar .ck.ck-toolbar__separator{
-    /* transform: none !important; */
     display: none;
 }
 
@@ -352,22 +362,10 @@ height:80px;
 .project-step-info .ant-checkbox-group{
     font-weight: normal;
 }
-/* .next-wrapper{
-    width: 100%;
-    position: fixed;
-    top: 131px;
-    text-align: right;
-    left: 49%;
-    z-index: 11;
-    text-align: center;
-    width: 1250px;
-    transform: translate(-54px, -50px)
-} */
 
-/* project page stylse */
 
 #project-page{
-    max-width: 1300px;
+    max-width: 1266px;
     margin: 0 auto 15px;
     font-family: "Roboto";
 }
@@ -612,8 +610,8 @@ margin-bottom: 0;
     color: red;
 }
 .brand-slide-logo{
-    width: 95px;
-    height: 95px;
+    width: 80px;
+    height: 80px;
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -624,7 +622,7 @@ margin-bottom: 0;
 }
 .brand-slide-logo p{
     font-family: "Roboto";
-    font-size: 4rem;
+    font-size: 3.25rem;
     font-weight: 600;
     text-align: center
 
