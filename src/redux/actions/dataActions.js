@@ -1,6 +1,4 @@
 import * as actions from '../constants'
-import axios from 'axios'
-import { toast, Flip, Bounce } from 'react-toastify';
 
 
 export const getBrandData = (data) => ({

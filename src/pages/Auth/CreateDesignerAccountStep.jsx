@@ -3,20 +3,18 @@ import React, { Component } from "react";
 import club from "../../../src/club-logo.png";
 import { Form as FormAnt, Input, Select, Spin } from "antd";
 import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
-// import en from "world_countries_lists/data/en/world.json";
 import ReactFlagsSelect from "react-flags-select";
 import axios from "axios";
 import { LoadingOutlined } from "@ant-design/icons";
 import { API } from "./../../utitlties";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
-// import en from "world_countries_lists/";
 import en from "world_countries_lists/data/countries/en/world.json";
 
 const Proffessions = [
  "Engineer",
  "Designer",
- "Archetict",
+ "Architect",
  "Interiour Designer",
 ];
 

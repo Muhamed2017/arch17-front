@@ -23,6 +23,7 @@ const AddProductWrapper = (props) => {
  const [rows, setRows] = useState([]);
  const [loaded, setLoaded] = useState(false);
  const [collections, setCollections] = useState([]);
+ //  const [designers, setDesigners] = useState([]);
  const [store, setStore] = useState([]);
  const params = useParams();
 
@@ -54,7 +55,6 @@ const AddProductWrapper = (props) => {
 
  return (
   <React.Fragment>
-   {/* <ReactNotification /> */}
    <div id="add-product-wrapper">
     <Tabs>
      <div id="tabs-wrapper">
@@ -92,6 +92,7 @@ const AddProductWrapper = (props) => {
        data={{ params }}
        store={store}
        collections={props.location.state?.collections}
+       //  designers={designers}
        selected_collections={props.location.state?.selected_collections}
        category={props.location.state?.category}
       />

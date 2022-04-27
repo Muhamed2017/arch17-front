@@ -1,11 +1,13 @@
 import React, { Component } from "react";
-import { Row, Col, Form, DatePicker, Spin } from "antd";
+import { Row, Col, Form, DatePicker, Spin, message, Modal } from "antd";
 import "./css/Magazine.css";
 import ReactFlagsSelect from "react-flags-select";
 import { API } from "./../utitlties";
 import axios from "axios";
 import { LoadingOutlined } from "@ant-design/icons";
 import Footer from "../components/Footer";
+import { connect } from "react-redux";
+import SaveToBoard from "../components/Modals/SaveToBoard";
 class Magazine extends Component {
  constructor(props) {
   super(props);
@@ -19,6 +21,7 @@ class Magazine extends Component {
    project_type: "",
    projects: [],
    moreExist: true,
+   save_to_board_modal: false,
   };
  }
  selectTab = (tab) => {
@@ -71,6 +74,16 @@ class Magazine extends Component {
      });
    }
   );
+ };
+ saveToBoard = () => {
+  if (!this.props.isLoggedIn) {
+   //  this.setState({ authModal: true });
+   message.warning("Login or register to save project");
+  } else {
+   this.setState({
+    save_to_board_modal: true,
+   });
+  }
  };
  componentDidMount() {
   this.getProjects();
@@ -240,12 +253,31 @@ class Magazine extends Component {
              <Col xs={24} sm={12} md={8} className="mb-4" key={index}>
               <a href={`/project/${p.id}`} className="box-link">
                <div className="project-col bg-white">
-                <div
-                 className="project-image"
-                 style={{
-                  backgroundImage: `url(${p.cover})`,
+                <button
+                 className="project-btn svbtn svprojectbtn"
+                 onClick={(e) => {
+                  e.preventDefault();
+                  this.setState(
+                   {
+                    to_save_project_cover: p.cover,
+                    to_save_projectId: p,
+                   },
+                   () => {
+                    this.saveToBoard();
+                   }
+                  );
                  }}
-                ></div>
+                >
+                 SAVE
+                </button>
+                <div className="project-image-wrapper">
+                 <div
+                  className="project-image"
+                  style={{
+                   backgroundImage: `url(${p.cover})`,
+                  }}
+                 ></div>
+                </div>
                 <div className="info p-3 left">
                  <p className="project-name left">{p.name}</p>
 
@@ -257,8 +289,7 @@ class Magazine extends Component {
                   </p>
                   <hr className="my-1 w-20" />
                   <p>
-                   {/* {p.type?.map((t) => { */}
-                   <span className="px-1">{p.type}</span>;{/* })} */}
+                   <span className="px-1">{p.type}</span>
                   </p>
                  </div>
                 </div>
@@ -314,9 +345,41 @@ class Magazine extends Component {
     <div className="magazine-footer">
      <Footer />
     </div>
+
+    <Modal
+     title={this.state.save_to_board_modal}
+     width={700}
+     className="request-modal"
+     visible={this.state.save_to_board_modal}
+     destroyOnClose={true}
+     footer={false}
+     closeIcon={
+      <>
+       <div onClick={() => this.setState({ save_to_board_modal: false })}>
+        X
+       </div>
+      </>
+     }
+     okButtonProps={{ hidden: true }}
+     cancelButtonProps={{ hidden: true }}
+    >
+     <SaveToBoard
+      cover={this.state.to_save_project_cover}
+      project={this.state.to_save_projectId}
+     />
+    </Modal>
    </React.Fragment>
   );
  }
 }
 
-export default Magazine;
+// export default Magazine;
+const mapStateToProps = (state) => {
+ return {
+  isLoggedIn: state?.regularUser?.isLoggedIn,
+  uid: state?.regularUser?.info?.uid,
+  user: state?.regularUser?.user,
+ };
+};
+
+export default connect(mapStateToProps, null)(Magazine);

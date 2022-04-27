@@ -1,10 +1,10 @@
 import React, { Component } from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Modal } from "react-bootstrap";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { IoMdSettings } from "react-icons/io";
+import { AiOutlinePlus } from "react-icons/ai";
 import CollectionsTab from "./user_profile_tabs/CollectionsTab";
 import FollwingTab from "./user_profile_tabs/FollwingTab";
-import BocList from "./user_profile_tabs/BoqList";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
 import { auth } from "./../firebase";
@@ -12,12 +12,15 @@ import { setUserInfoAction } from "../redux/actions/authActions";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { API } from "../utitlties";
+import ClipLoader from "react-spinners/ClipLoader";
+import { IoWarning } from "react-icons/io5";
 import {
  LoadingOutlined,
  CopyOutlined,
  EnvironmentFilled,
  ShareAltOutlined,
 } from "@ant-design/icons";
+
 import { Spin, Tooltip, Button, Col as AntCol, Row as AntRow } from "antd";
 
 class UserProfile extends Component {
@@ -26,18 +29,41 @@ class UserProfile extends Component {
   this.state = {
    user_uid: auth.currentUser?.uid,
    collections: [],
+   boards: [],
    projects: [],
+   delete_project_modal: false,
    copied: false,
    followed_stores: [],
    is_designer: false,
+   deletingProject: false,
    visitor: this.props?.match?.params?.uid ? true : false,
    visited_uid: this.props?.match?.params?.uid,
    fetched: false,
+   shared: [],
+   to_delete_project: null,
    uid: this.props?.match?.params?.uid
     ? this.props.match?.params?.uid
     : this.props.info.uid,
   };
  }
+
+ handleDeleteSubmit = () => {
+  const fd = new FormData();
+  fd.append("project_id", this.state.to_delete_project);
+  this.setState({
+   deletingProject: true,
+  });
+  axios.post(`${API}deleteproject`, fd).then((response) => {
+   console.log(response);
+   this.setState({
+    deletingProject: false,
+    delete_project_modal: false,
+    projects: this.state.projects?.filter((p) => {
+     return p.id !== this.state.to_delete_project;
+    }),
+   });
+  });
+ };
  componentDidMount() {
   console.log(`visitor is ${this.state.visitor}`);
   console.log(auth.currentUser);
@@ -47,14 +73,24 @@ class UserProfile extends Component {
     .get(`${API}user/folders/${this.state.uid}`)
     .then((response) => {
      console.log(response);
-     const { followed_stores, collections, user, projects } = response.data;
+     const {
+      followed_stores,
+      collections,
+      user,
+      projects,
+      boards,
+      products,
+     } = response.data;
      this.setState({
       collections,
+      boards,
       followed_stores,
       user,
       is_designer: user?.is_designer,
       fetched: true,
       projects,
+      products,
+      shared: user?.shared,
      });
     })
     .catch((err) => {
@@ -98,7 +134,7 @@ class UserProfile extends Component {
            backgroundColor: "#ddd",
           }}
          >
-          {this.state.is_designer === 1 && (
+          {/* {this.state.is_designer === 1 && (
            <>
             <Tooltip placement="top" title="Verified Designer">
              <svg
@@ -122,7 +158,7 @@ class UserProfile extends Component {
              </svg>
             </Tooltip>
            </>
-          )}
+          )} */}
           {this.state.user?.avatar && this.state.user.avatar?.length < 10 && (
            <>{this.state.user?.displayName[0].toUpperCase()}</>
           )}
@@ -140,7 +176,7 @@ class UserProfile extends Component {
            </>
           ) : (
            <>
-            <p className="dc">
+            <p className="dc mb-0">
              DC-125541
              <span>
               <Tooltip title={this.state.copied ? "Copied" : "Copy Code"}>
@@ -165,7 +201,7 @@ class UserProfile extends Component {
               {this.state.user.city && <span>{this.state.user.city}</span>}
              </p>
             )}
-            <p className="mt-4">Professions</p>
+            <p className="mt-4 mb-1">Professions</p>
             <div className="professions">
              {this.state.user?.professions?.map((p) => {
               return (
@@ -233,23 +269,26 @@ class UserProfile extends Component {
            {this.state.is_designer === 1 && <Tab>Projects & Blogs</Tab>}
            <Tab>Collection</Tab>
            <Tab>Following</Tab>
-           <Tab>BOQ Lists</Tab>
+           {this.state.products?.length > 0 && <Tab>Products</Tab>}
           </TabList>
           {this.state.is_designer === 1 && (
            <TabPanel forceRender>
             <AntRow span={24} gutter={24} justify="">
-             <AntCol xs={24} sm={12} md={8}>
+             <AntCol xs={24} sm={12} md={8} className="my-4">
               {!this.state.visitor && (
-               <a href={`/addproject/designer/${this.state.user?.id}`}>
-                Add Project
-               </a>
+               <div className="add-project-icon">
+                <a href={`/addproject/designer/${this.state.user?.id}`}>
+                 <AiOutlinePlus />
+                 Add Project
+                </a>
+               </div>
               )}
              </AntCol>
              {this.state.projects?.length > 0 && (
               <>
                {this.state.projects?.map((p, index) => {
                 return (
-                 <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+                 <AntCol xs={24} sm={12} md={8} className="my-4" key={index}>
                   <a href={`/project/${p.id}`} className="box-link">
                    <div className="project-col bg-white">
                     <a
@@ -262,23 +301,42 @@ class UserProfile extends Component {
                      className="project-btn project-delete-btn"
                      onClick={(e) => {
                       e.preventDefault();
+                      this.setState(
+                       {
+                        to_delete_project: p.id,
+                       },
+                       () => {
+                        this.setState({
+                         delete_project_modal: true,
+                        });
+                       }
+                      );
                      }}
                     >
                      Delete
                     </button>
-                    <div
-                     className="project-image"
-                     style={{
-                      backgroundImage: `url(${p.cover})`,
-                     }}
-                    ></div>
-                    <div className="info p-3">
-                     <p className="project-name">{p.name}</p>
+                    <div className="project-image-wrapper">
+                     <div
+                      className="project-image"
+                      style={{
+                       backgroundImage: `url(${p.cover})`,
+                      }}
+                     ></div>
+                    </div>
+
+                    <div className="info p-3 left">
+                     <p className="project-name left">{p.name}</p>
 
                      <div className="project-cover-footer">
-                      {/* <p className="m-0">{p.kind}</p> */}
+                      <p>
+                       {p.kind?.map((k) => {
+                        return <span className="px-1">{k}</span>;
+                       })}
+                      </p>
                       <hr className="my-1 w-20" />
-                      {/* <p className="m-0">{p.type}</p> */}
+                      <p>
+                       <span className="px-1">{p.type}</span>
+                      </p>
                      </div>
                     </div>
                    </div>
@@ -292,24 +350,178 @@ class UserProfile extends Component {
            </TabPanel>
           )}
           <TabPanel forceRender>
-           <CollectionsTab collections={this.state.collections} />
+           <CollectionsTab
+            collections={this.state.collections}
+            boards={this.state.boards}
+            shared={this.state.shared}
+            user_id={this.state.user?.id}
+           />
           </TabPanel>
+
           <TabPanel forceRender>
            <FollwingTab followed_stores={this.state.followed_stores} />
           </TabPanel>
-          <TabPanel>
-           <BocList />
-          </TabPanel>
+          {this.state.products?.length > 0 && (
+           <TabPanel>
+            <div className="products">
+             <AntRow
+              gutter={{ xs: 8, sm: 16, md: 24, lg: 24 }}
+              className="py-3"
+             >
+              {this.state.products.length > 0 ? (
+               <>
+                {this.state.products.map((product, index) => {
+                 return (
+                  <AntCol className="gutter-row mb-3" md={6}>
+                   <a href={`/product/${product.id}`}>
+                    <div className="product">
+                     <div
+                      className="p-img"
+                      style={{
+                       background: `url(${product?.identity[0].preview_cover})`,
+                      }}
+                     >
+                      <div className="prlayer"></div>
+
+                      {product?.files?.length > 0 ? (
+                       <>
+                        <div className="actns-btn file-btn cad">CAD</div>
+                        <div className="actns-btn file-btn threeD">3D</div>
+                       </>
+                      ) : (
+                       ""
+                      )}
+                     </div>
+                     <h5 className="product-store">{product.stores?.name}</h5>
+                     <p className="product-name">{product?.identity[0].name}</p>
+                     <div className="product-price">
+                      {product.identity[0].preview_price &&
+                      product.identity[0].preview_price > 0 ? (
+                       <>
+                        <span>¥ {product.identity[0].preview_price}</span>
+                       </>
+                      ) : (
+                       <>
+                        <Link
+                         to={{
+                          pathname: `/product/${product?.identity[0].product_id}`,
+                          state: {
+                           request_price: true,
+                          },
+                         }}
+                        >
+                         REQUEST PRICE INFO
+                        </Link>
+                       </>
+                      )}
+                     </div>
+                    </div>
+                   </a>
+                  </AntCol>
+                 );
+                })}
+               </>
+              ) : (
+               <>
+                <p className="indicator">
+                 You Don't have any products in the collection
+                </p>
+               </>
+              )}
+             </AntRow>
+            </div>
+           </TabPanel>
+          )}
          </Tabs>
         </div>
        </Col>
       </Row>
      </Container>
     </div>
+
+    {/* delte project modal */}
+    <Modal
+     show={this.state.delete_project_modal}
+     onHide={() => {
+      this.setState({
+       delete_project_modal: false,
+      });
+     }}
+     closeButton
+     keyboard={false}
+     size="md"
+    >
+     <Modal.Body>
+      <div className="modal-wrapper" style={{ padding: "15px", margin: "" }}>
+       <Row as={Row} style={{ margin: "0px 0" }}>
+        <p style={{ fontSize: "1.4rem", fontWeight: "600" }}>Delete Project</p>
+        <Col md={8}></Col>
+       </Row>
+       <Row as={Row} style={{ margin: "30px 0" }}>
+        <Col md={12}>
+         <div
+          className="warning-danger"
+          style={{
+           background: "#fbe9e7",
+           padding: "15px",
+           color: "#E41E15",
+          }}
+         >
+          <span
+           style={{
+            display: "inline-block",
+            fontSize: "2.5rem",
+            verticalAlign: "center",
+            padding: "0 10px",
+           }}
+          >
+           <IoWarning />
+          </span>
+          <p
+           style={{
+            color: "#c62828",
+            fontWeight: "600",
+            width: "80%",
+            fontSize: ".9rem",
+            display: "inline-block",
+           }}
+          >
+           After you deleting project, it's permanently deleted.
+          </p>
+         </div>
+        </Col>
+       </Row>
+
+       <Button
+        variant="danger"
+        onClick={this.handleDeleteSubmit}
+        type="submit"
+        style={{
+         textAlign: "right",
+         background: "#E41E15",
+         display: "block",
+         float: "right",
+         marginRight: "12px",
+         color: "#fff",
+         border: "none",
+        }}
+       >
+        {this.state.deletingProject ? (
+         <>
+          <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
+         </>
+        ) : (
+         <>Delete</>
+        )}
+       </Button>
+      </div>
+     </Modal.Body>
+    </Modal>
    </React.Fragment>
   );
  }
 }
+
 const mapDispatchToProps = (dispatch) => ({
  setNav: (info) => dispatch(setUserInfoAction(info)),
 });

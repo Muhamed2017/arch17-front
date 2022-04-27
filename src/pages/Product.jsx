@@ -728,7 +728,7 @@ class Product extends Component {
    return (
     <React.Fragment>
      <div id="product-page" className="bg-white py-2">
-      <Container fluid>
+      <Container fluid className="sized-container">
        <Row className="justify-content-md-center">
         <Col md={{ span: 8 }} className="p-0">
          <div id="swiper" style={{ position: "relative" }}>

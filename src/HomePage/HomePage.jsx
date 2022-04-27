@@ -12,6 +12,7 @@ import {
  Tabs,
 } from "antd";
 import { Link } from "react-router-dom";
+import FloatingList from "./FloatingList";
 import { LoadingOutlined } from "@ant-design/icons";
 import SuccessModal from "../components/Modals/SuccessModal";
 import { AiFillYoutube, AiFillWechat } from "react-icons/ai";
@@ -44,13 +45,14 @@ import media_3 from "./../images/HomePage/media_3.jpg";
 import media_4 from "./../images/HomePage/media_4.png";
 import main_3 from "./../images/HomePage/MediaSection/main-03.jpg";
 import main_4 from "./../images/HomePage/MediaSection/main-04.jpg";
-import ProjectBox from "./../Project/ProjectsContainer/ProjectBox/ProjectBox";
+// import ProjectBox from "./../Project/ProjectsContainer/ProjectBox/ProjectBox";
 import grado from "./../images/HomePage/storesSection/grado.jpg";
 import storelogo from "./../images/HomePage/storesSection/storelogo.jpg";
 import scene from "./../images/HomePage/storesSection/scene.jpg";
 import viaform from "./../images/HomePage/storesSection/viaform.jpg";
 import { generateKey } from "./../static/utility";
 import SaveToCollection from "./../components/Modals/SaveToCollection";
+import SaveToBoard from "./../components/Modals/SaveToBoard";
 
 import axios from "axios";
 import { API } from "./../utitlties";
@@ -141,6 +143,9 @@ class HomePage extends Component {
   to_save_productId: null,
   to_save_cover: "",
   save_to_collection_modal: false,
+  to_save_project_cover: "",
+  to_save_projectId: null,
+  save_to_board_modal: false,
  };
 
  saveToCollection = () => {
@@ -153,7 +158,15 @@ class HomePage extends Component {
    });
   }
  };
-
+ saveToBoard = () => {
+  if (!this.props.isLoggedIn) {
+   this.setState({ authModal: true });
+  } else {
+   this.setState({
+    save_to_board_modal: true,
+   });
+  }
+ };
  toggleCreteStore = () => {
   if (!this.props.isLoggedIn) {
    this.setState({ authModal: true });
@@ -258,906 +271,1118 @@ class HomePage extends Component {
   });
   return (
    <React.Fragment>
-    <div className="bg-gray">
-     <div id="sec-nav">
-      <div className="inner">
-       <nav className="menu">
-        <ol>
-         <li className="menu-item">
-          <a href="#0">Get Inspired</a>
-         </li>
-         <li className="menu-item">
-          <a href="#0">Furniture</a>
-         </li>
-         <li className="menu-item">
-          <a href="#0">Living Room</a>
-         </li>
-         <li className="menu-item">
-          <a href="#0">Bedroom</a>
-         </li>
-         <li className="menu-item">
-          <a href="#0">Office</a>
-         </li>
-         <li className="menu-item">
-          <a href="#0">Hotel</a>
-         </li>
-         <li className="menu-item">
-          <a href="#0">Outdoor</a>
-         </li>
-         <li className="menu-item">
-          <a href="#0">Events</a>
-         </li>
-         <li className="menu-item">
-          <a href="#0">Fair</a>
-         </li>
-         <li className="menu-item">
-          <a href="#0">Brands</a>
-         </li>
-         <li className="menu-item">
-          <a href="#0">Magazine</a>
-         </li>
-        </ol>
-       </nav>
-       <a className="arch-link" href="/brandcreate">
-        <span>Publish your Products</span>
-       </a>
+    <div id="homepage">
+     <div className="bg-gray">
+      <div id="sec-nav">
+       <div className="inner">
+        <nav className="menu">
+         <ol>
+          <li className="menu-item">
+           <a href="#0">Get Inspired</a>
+           <div className="floating-list"></div>
+          </li>
+          <li className="menu-item">
+           <a href="#0">Furniture</a>
+           <FloatingList />
+           {/* <div className="floating-list">list2</div> */}
+          </li>
+          <li className="menu-item">
+           <a href="#0">Living Room</a>
+           <div className="floating-list">list3</div>
+          </li>
+          <li className="menu-item">
+           <a href="#0">Bedroom</a>
+           <div className="floating-list">list4</div>
+          </li>
+          <li className="menu-item">
+           <a href="#0">Office</a>
+          </li>
+          <li className="menu-item">
+           <a href="#0">Hotel</a>
+          </li>
+          <li className="menu-item">
+           <a href="#0">Outdoor</a>
+          </li>
+          <li className="menu-item">
+           <a href="#0">Events</a>
+          </li>
+          <li className="menu-item">
+           <a href="#0">Fair</a>
+          </li>
+          <li className="menu-item">
+           <a href="#0">Brands</a>
+          </li>
+          <li className="menu-item">
+           <a href="#0">Magazine</a>
+          </li>
+         </ol>
+        </nav>
+        <a className="arch-link" href="/brandcreate">
+         <span>Publish your Products</span>
+        </a>
+       </div>
+      </div>
+      <section className="slider-section">
+       <Carousel
+        className="home-page-slider"
+        fade={true}
+        slide={false}
+        prevIcon={<img src={prev} alt={prev} width="26" height="26" />}
+        nextIcon={<img src={next} alt={next} width="26" height="26" />}
+       >
+        {Sildes}
+       </Carousel>
+      </section>
+      <div className="w-100 m-auto">
+       <Container className="mt-5 px-0">
+        <section className="w-100 home-heading-2 text-center home-head">
+         <h2>
+          Hot solutions by brands and designers inspires you to design and build
+         </h2>
+         <p>
+          Source Ideas for your projects, explore products catalogues, get CAD /
+          3D files and shop design products
+         </p>
+         {!this.props.isLoggedIn && (
+          <>
+           <button
+            className="btn arch17-btn mt-3"
+            onClick={this.toggleCreteStore}
+           >
+            JOIN NOW
+           </button>
+          </>
+         )}
+        </section>
+        <section className="media-section mt-5">
+         <div>
+          <div className="media-section-item">
+           <Suspense fallback={<p> loading images from supsencd </p>}>
+            <Img
+             src={mediaSectionImg1}
+             key={mediaSectionImg1}
+             loader={<p> loading images from supsencd </p>}
+             unloader={<button> failed </button>}
+             className="img-fluid media-section-item-img"
+            />
+           </Suspense>
+           <div className="media-item-desc">
+            <Suspense fallback={<p> loading images from supsencd </p>}>
+             <Img
+              src={designClubLogo}
+              key={designClubLogo}
+              loader={<p> loading images from supsencd </p>}
+              unloader={<button> failed </button>}
+              className="img-fluid"
+             />
+            </Suspense>
+            <p className="text-white">
+             For architect & designers join 17 designers club and get the best
+             of arch17
+            </p>
+            <button className="btn px-4 py-1 border-white text-white rounded-lg my-2">
+             {" "}
+             Join Now &gt;
+            </button>
+            <span> Why Join </span>
+           </div>
+          </div>
+         </div>
+         <div>
+          <div className="media-section-item">
+           <div>
+            <Suspense fallback={<p> loading images from supsencd </p>}>
+             <Img
+              src={mediaSectionImg2}
+              key={mediaSectionImg2}
+              loader={<p> loading images from supsencd </p>}
+              unloader={<button> failed </button>}
+              className="img-fluid media-section-item-img"
+             />
+            </Suspense>
+           </div>
+           <div
+            className="media-item-desc text-left px-2"
+            style={{
+             textShadow: "unset",
+            }}
+           >
+            <h3 className="media-item-desc-heading mb-0">
+             Upholstered Lounge Chair
+            </h3>
+            <p
+             className="text-left w-100 m-0 d-block mg-p"
+             style={{
+              //  padding: "0 12px",
+              textAlign: "left",
+              fontSize: "1.01rem !important",
+              color: "#000",
+             }}
+            >
+             With full foam and cinched to give a comfortable Cushion look and
+             feel.
+            </p>
+           </div>
+          </div>
+         </div>
+         <div>
+          <div className="media-section-item">
+           <div>
+            <Suspense fallback={<p> loading images from supsencd </p>}>
+             <Img
+              //  src={image_placeholder}
+              src={m3}
+              key={image_placeholder}
+              loader={<p> loading images from supsencd </p>}
+              unloader={<button> failed </button>}
+              className="img-fluid media-section-item-img"
+             />
+            </Suspense>
+           </div>
+           <div className="media-item-desc text-left pl-3 pt-3">
+            <h3 className="media-item-desc-heading text-white">
+             Create breakout
+            </h3>
+            <p
+             className="text-left w-100 m-0 d-block media-item-desc-desc text-white mg-p"
+             style={{
+              //  padding: "0 12px",
+              textAlign: "left",
+              fontSize: "1.01rem !important",
+              color: "#000",
+              fontWeight: "300 !important",
+             }}
+            >
+             For informal meeting, lounging, dining, a space to relax and take a
+             break from the office
+            </p>
+           </div>
+          </div>
+         </div>
+         <div>
+          <div className="media-section-item">
+           <div>
+            <Suspense fallback={<p> loading images from supsencd </p>}>
+             <Img
+              //  src={media_4}
+              src={m4}
+              key={media_4}
+              loader={<p> loading images from supsencd </p>}
+              unloader={<button> failed </button>}
+              className="img-fluid media-section-item-img"
+             />
+            </Suspense>
+           </div>
+           <div className="media-item-desc text-left  pl-3 pt-3 ">
+            <h3
+             className="media-item-desc-heading text-white"
+             // style={{ fontSize: "28px" }}
+            >
+             Create breakout
+            </h3>
+            <p
+             className="text-left w-100 text-white m-0 d-block media-item-desc-desc"
+             style={{
+              //  padding: "0 12px",
+              textAlign: "left",
+              fontSize: "1.01rem !important",
+              color: "#000",
+             }}
+            >
+             For informal meeting, lounging, dining, a space to relax and take a
+             break
+            </p>
+           </div>
+          </div>
+         </div>
+         <div>
+          <div className="media-section-item">
+           <div>
+            <Suspense fallback={<p> loading images from supsencd </p>}>
+             <Img
+              //  src={media_3}
+              src={m5}
+              key={media_3}
+              loader={<p> loading images from supsencd </p>}
+              unloader={<button> failed </button>}
+              className="img-fluid media-section-item-img"
+             />
+            </Suspense>
+           </div>
+           <div className="media-item-desc text-left pl-3 pt-3 ">
+            <h3
+             className="media-item-desc-heading text-white"
+             // style={{ fontSize: "24px", textShadow: "0px 3px 6px #00000029" }}
+            >
+             Outdoor Sofa
+            </h3>
+            <p
+             className="text-left w-100 text-white m-0 d-block media-item-desc-desc"
+             style={{
+              //  padding: "0 12px",
+              textAlign: "left",
+              fontSize: "1.01rem !important",
+              color: "#000",
+             }}
+            >
+             For informal meeting, lounging, dining, a space to relax and take a
+             break
+            </p>
+           </div>
+          </div>
+         </div>
+         <div>
+          <div className="media-section-item">
+           <div>
+            <Suspense fallback={<p> loading images from supsencd </p>}>
+             <Img
+              src={main_3}
+              key={main_3}
+              loader={<p> loading images from supsencd </p>}
+              unloader={<button> failed </button>}
+              className="img-fluid media-section-item-img"
+             />
+            </Suspense>
+           </div>
+           <div className="media-item-desc text-left pl-3 pt-3 ">
+            <h3 className="media-item-desc-heading text-white">
+             Create breakout area
+            </h3>
+            <p
+             className="text-left w-100 m-0 d-block media-item-desc-desc text-white mg-p"
+             style={{
+              //  padding: "0 12px",
+              textAlign: "left",
+              fontSize: "1.01rem !important",
+              color: "#000",
+             }}
+            >
+             With full foam and cinched to give a comfortable Cushion look and
+             feel.
+            </p>
+           </div>
+          </div>
+         </div>
+         <div>
+          <div className="media-section-item">
+           <div>
+            <Suspense fallback={<p> loading images from supsencd </p>}>
+             <Img
+              src={main_4}
+              key={main_4}
+              loader={<p> loading images from supsencd </p>}
+              unloader={<button> failed </button>}
+              className="img-fluid media-section-item-img"
+             />
+            </Suspense>
+           </div>
+           <div className="media-item-desc text-left pl-3 pt-3">
+            <h3 className="media-item-desc-heading">Coffee & Side table</h3>
+            <p
+             className="text-left w-75 m-0 d-block media-item-desc-desc"
+             style={{
+              //  padding: "0 12px",
+              textAlign: "left",
+              fontSize: "1.01rem !important",
+              color: "#000",
+             }}
+            >
+             You can go for a simple table with space for remote controls and
+             cups of coffee.
+            </p>
+           </div>
+          </div>
+         </div>
+        </section>
+       </Container>
       </div>
      </div>
-     <section className="slider-section">
-      <Carousel
-       className="home-page-slider"
-       fade={true}
-       slide={false}
-       prevIcon={<img src={prev} alt={prev} width="26" height="26" />}
-       nextIcon={<img src={next} alt={next} width="26" height="26" />}
-      >
-       {Sildes}
-      </Carousel>
-     </section>
-     <div className="w-100 m-auto">
-      <Container className="mt-5 px-0">
-       <section className="w-100 home-heading-2 text-center home-head">
-        <h2>
-         Hot solutions by brands and designers inspires you to design and build
-        </h2>
-        <p>
-         Source Ideas for your projects, explore products catalogues, get CAD /
-         3D files and shop design products
-        </p>
-        {!this.props.isLoggedIn && (
-         <>
-          <button
-           className="btn arch17-btn mt-3"
-           onClick={this.toggleCreteStore}
-          >
-           JOIN NOW
-          </button>
-         </>
-        )}
-       </section>
-       <section className="media-section mt-5">
-        <div>
-         <div className="media-section-item">
-          <Suspense fallback={<p> loading images from supsencd </p>}>
-           <Img
-            src={mediaSectionImg1}
-            key={mediaSectionImg1}
-            loader={<p> loading images from supsencd </p>}
-            unloader={<button> failed </button>}
-            className="img-fluid media-section-item-img"
-           />
-          </Suspense>
-          <div className="media-item-desc">
-           <Suspense fallback={<p> loading images from supsencd </p>}>
-            <Img
-             src={designClubLogo}
-             key={designClubLogo}
-             loader={<p> loading images from supsencd </p>}
-             unloader={<button> failed </button>}
-             className="img-fluid"
-            />
-           </Suspense>
-           <p className="text-white">
-            For architect & designers join 17 designers club and get the best of
-            arch17
-           </p>
-           <button className="btn px-4 py-1 border-white text-white rounded-lg my-2">
-            {" "}
-            Join Now &gt;
-           </button>
-           <span> Why Join </span>
-          </div>
-         </div>
-        </div>
-        <div>
-         <div className="media-section-item">
-          <div>
-           <Suspense fallback={<p> loading images from supsencd </p>}>
-            <Img
-             src={mediaSectionImg2}
-             key={mediaSectionImg2}
-             loader={<p> loading images from supsencd </p>}
-             unloader={<button> failed </button>}
-             className="img-fluid media-section-item-img"
-            />
-           </Suspense>
-          </div>
-          <div
-           className="media-item-desc text-left px-2"
-           style={{
-            textShadow: "unset",
-           }}
-          >
-           <h3 className="media-item-desc-heading mb-0">
-            Upholstered Lounge Chair
-           </h3>
-           <p
-            className="text-left w-100 m-0 d-block mg-p"
-            style={{
-             //  padding: "0 12px",
-             textAlign: "left",
-             fontSize: "1.01rem !important",
-             color: "#000",
-            }}
-           >
-            With full foam and cinched to give a comfortable Cushion look and
-            feel.
-           </p>
-          </div>
-         </div>
-        </div>
-        <div>
-         <div className="media-section-item">
-          <div>
-           <Suspense fallback={<p> loading images from supsencd </p>}>
-            <Img
-             //  src={image_placeholder}
-             src={m3}
-             key={image_placeholder}
-             loader={<p> loading images from supsencd </p>}
-             unloader={<button> failed </button>}
-             className="img-fluid media-section-item-img"
-            />
-           </Suspense>
-          </div>
-          <div className="media-item-desc text-left pl-3 pt-3">
-           <h3 className="media-item-desc-heading text-white">
-            Create breakout
-           </h3>
-           <p
-            className="text-left w-100 m-0 d-block media-item-desc-desc text-white mg-p"
-            style={{
-             //  padding: "0 12px",
-             textAlign: "left",
-             fontSize: "1.01rem !important",
-             color: "#000",
-             fontWeight: "300 !important",
-            }}
-           >
-            For informal meeting, lounging, dining, a space to relax and take a
-            break from the office
-           </p>
-          </div>
-         </div>
-        </div>
-        <div>
-         <div className="media-section-item">
-          <div>
-           <Suspense fallback={<p> loading images from supsencd </p>}>
-            <Img
-             //  src={media_4}
-             src={m4}
-             key={media_4}
-             loader={<p> loading images from supsencd </p>}
-             unloader={<button> failed </button>}
-             className="img-fluid media-section-item-img"
-            />
-           </Suspense>
-          </div>
-          <div className="media-item-desc text-left  pl-3 pt-3 ">
-           <h3
-            className="media-item-desc-heading text-white"
-            // style={{ fontSize: "28px" }}
-           >
-            Create breakout
-           </h3>
-           <p
-            className="text-left w-100 text-white m-0 d-block media-item-desc-desc"
-            style={{
-             //  padding: "0 12px",
-             textAlign: "left",
-             fontSize: "1.01rem !important",
-             color: "#000",
-            }}
-           >
-            For informal meeting, lounging, dining, a space to relax and take a
-            break
-           </p>
-          </div>
-         </div>
-        </div>
-        <div>
-         <div className="media-section-item">
-          <div>
-           <Suspense fallback={<p> loading images from supsencd </p>}>
-            <Img
-             //  src={media_3}
-             src={m5}
-             key={media_3}
-             loader={<p> loading images from supsencd </p>}
-             unloader={<button> failed </button>}
-             className="img-fluid media-section-item-img"
-            />
-           </Suspense>
-          </div>
-          <div className="media-item-desc text-left pl-3 pt-3 ">
-           <h3
-            className="media-item-desc-heading text-white"
-            // style={{ fontSize: "24px", textShadow: "0px 3px 6px #00000029" }}
-           >
-            Outdoor Sofa
-           </h3>
-           <p
-            className="text-left w-100 text-white m-0 d-block media-item-desc-desc"
-            style={{
-             //  padding: "0 12px",
-             textAlign: "left",
-             fontSize: "1.01rem !important",
-             color: "#000",
-            }}
-           >
-            For informal meeting, lounging, dining, a space to relax and take a
-            break
-           </p>
-          </div>
-         </div>
-        </div>
-        <div>
-         <div className="media-section-item">
-          <div>
-           <Suspense fallback={<p> loading images from supsencd </p>}>
-            <Img
-             src={main_3}
-             key={main_3}
-             loader={<p> loading images from supsencd </p>}
-             unloader={<button> failed </button>}
-             className="img-fluid media-section-item-img"
-            />
-           </Suspense>
-          </div>
-          <div className="media-item-desc text-left pl-3 pt-3 ">
-           <h3 className="media-item-desc-heading text-white">
-            Create breakout area
-           </h3>
-           <p
-            className="text-left w-100 m-0 d-block media-item-desc-desc text-white mg-p"
-            style={{
-             //  padding: "0 12px",
-             textAlign: "left",
-             fontSize: "1.01rem !important",
-             color: "#000",
-            }}
-           >
-            With full foam and cinched to give a comfortable Cushion look and
-            feel.
-           </p>
-          </div>
-         </div>
-        </div>
-        <div>
-         <div className="media-section-item">
-          <div>
-           <Suspense fallback={<p> loading images from supsencd </p>}>
-            <Img
-             src={main_4}
-             key={main_4}
-             loader={<p> loading images from supsencd </p>}
-             unloader={<button> failed </button>}
-             className="img-fluid media-section-item-img"
-            />
-           </Suspense>
-          </div>
-          <div className="media-item-desc text-left pl-3 pt-3">
-           <h3 className="media-item-desc-heading">Coffee & Side table</h3>
-           <p
-            className="text-left w-75 m-0 d-block media-item-desc-desc"
-            style={{
-             //  padding: "0 12px",
-             textAlign: "left",
-             fontSize: "1.01rem !important",
-             color: "#000",
-            }}
-           >
-            You can go for a simple table with space for remote controls and
-            cups of coffee.
-           </p>
-          </div>
-         </div>
-        </div>
-       </section>
-      </Container>
+     <div className="bg-white">
+      <div className="w-100 home-page m-auto ">
+       <Container className="mt-5 px-0">
+        <section className="products-container home-head">
+         <h2
+          style={{
+           fontSize: "38px",
+          }}
+         >
+          Products
+         </h2>
+         <p
+          style={{
+           fontSize: "24px",
+          }}
+         >
+          Explore products, get CAD / 3D files
+         </p>
+         <Tabs defaultActiveKey="recent_products" centered>
+          <TabPane tab="Recent" key="recent_products">
+           <div className="innertab py-5">
+            <section id="home-products">
+             <AntRow gutter={24} className="mt-3">
+              {this.state.products?.map((product, index) => {
+               return (
+                <>
+                 <AntCol className="gutter-row mb-3" md={6}>
+                  <div className="product">
+                   <a href={`/product/${product.id}`}>
+                    <div
+                     className="p-img"
+                     style={{
+                      background: `url(${product.preview_cover})`,
+                     }}
+                    >
+                     <div className="prlayer"></div>
+                     <div
+                      className="actns-btn svbtn"
+                      onClick={(e) => {
+                       e.preventDefault();
+                       this.setState(
+                        {
+                         to_save_cover: product.preview_cover,
+                         to_save_productId: product,
+                        },
+                        () => {
+                         this.saveToCollection();
+                        }
+                       );
+                      }}
+                     >
+                      Save +
+                     </div>
+                     {product.file.length > 0 ? (
+                      <>
+                       <div className="actns-btn file-btn cad">CAD</div>
+                       <div className="actns-btn file-btn threeD">3D</div>
+                      </>
+                     ) : (
+                      ""
+                     )}
+                    </div>
+                   </a>
+
+                   <h5 className="product-store">
+                    {product.store_name.store_name}
+                   </h5>
+
+                   <p className="product-name">{product.name}</p>
+                   <div className="product-price">
+                    {product.preview_price && product.preview_price > 0 ? (
+                     <>
+                      <span>¥ {product.preview_price}</span>
+                     </>
+                    ) : (
+                     <>
+                      <Link
+                       to={{
+                        pathname: `/product/${product.product_id}`,
+                        state: {
+                         request_price: true,
+                        },
+                       }}
+                      >
+                       REQUEST PRICE INFO
+                      </Link>
+                     </>
+                    )}
+                   </div>
+                  </div>
+                 </AntCol>
+                </>
+               );
+              })}
+             </AntRow>
+             <AntRow>
+              <a
+               href="/products "
+               className="btn mt-4 seemore mb-5"
+               style={{ paddingTop: "17px !important" }}
+              >
+               See More Products
+              </a>
+             </AntRow>
+            </section>
+           </div>
+          </TabPane>
+          <TabPane tab="Furniture" key="furniture">
+           <div className="innertab py-5">
+            <section id="home-products">
+             <AntRow gutter={24} className="mt-3">
+              {/* {this.state.fetching && (
+               <>
+                <Spin
+                 size="large"
+                 style={{ position: "absolute", top: "50%", right: "50%" }}
+                />
+               </>
+              )} */}
+              {this.state.products?.map((product, index) => {
+               return (
+                <>
+                 <AntCol className="gutter-row mb-3" md={6}>
+                  <div className="product">
+                   <a href={`/product/${product.id}`}>
+                    <div
+                     className="p-img"
+                     style={{
+                      background: `url(${product.preview_cover})`,
+                     }}
+                    >
+                     <div className="prlayer"></div>
+
+                     <div
+                      className="actns-btn svbtn"
+                      onClick={(e) => {
+                       e.preventDefault();
+                       this.setState(
+                        {
+                         to_save_cover: product.preview_cover,
+                         to_save_productId: product,
+                        },
+                        () => {
+                         this.saveToCollection();
+                        }
+                       );
+                      }}
+                     >
+                      Save +
+                     </div>
+                     {product.file.length > 0 ? (
+                      <>
+                       <div className="actns-btn file-btn cad">CAD</div>
+                       <div className="actns-btn file-btn threeD">3D</div>
+                      </>
+                     ) : (
+                      ""
+                     )}
+                    </div>
+                   </a>
+
+                   <h5 className="product-store">
+                    {product.store_name.store_name}
+                   </h5>
+
+                   <p className="product-name">{product.name}</p>
+                   <div className="product-price">
+                    {product.preview_price && product.preview_price > 0 ? (
+                     <>
+                      <span>¥ {product.preview_price}</span>
+                     </>
+                    ) : (
+                     <>
+                      <Link
+                       to={{
+                        pathname: `/product/${product.product_id}`,
+                        state: {
+                         request_price: true,
+                        },
+                       }}
+                      >
+                       REQUEST PRICE INFO
+                      </Link>
+                     </>
+                    )}
+                   </div>
+                  </div>
+                 </AntCol>
+                </>
+               );
+              })}
+             </AntRow>
+             <AntRow>
+              <a
+               href="/products "
+               className="btn mt-4 seemore mb-5"
+               style={{ paddingTop: "17px !important" }}
+              >
+               See More Products
+              </a>
+             </AntRow>
+            </section>
+           </div>
+          </TabPane>
+          <TabPane tab="Lighting" key="lighting">
+           <div className="innertab py-5">
+            <section id="home-products">
+             <AntRow gutter={24} className="mt-3">
+              {/* {this.state.fetching && (
+               <>
+                <Spin
+                 size="large"
+                 style={{ position: "absolute", top: "50%", right: "50%" }}
+                />
+               </>
+              )} */}
+              {this.state.products?.map((product, index) => {
+               return (
+                <>
+                 <AntCol className="gutter-row mb-3" md={6}>
+                  <div className="product">
+                   <a href={`/product/${product.id}`}>
+                    <div
+                     className="p-img"
+                     style={{
+                      background: `url(${product.preview_cover})`,
+                     }}
+                    >
+                     <div className="prlayer"></div>
+
+                     <div
+                      className="actns-btn svbtn"
+                      onClick={(e) => {
+                       e.preventDefault();
+                       this.setState(
+                        {
+                         to_save_cover: product.preview_cover,
+                         to_save_productId: product,
+                        },
+                        () => {
+                         this.saveToCollection();
+                        }
+                       );
+                      }}
+                     >
+                      Save +
+                     </div>
+                     {product.file.length > 0 ? (
+                      <>
+                       <div className="actns-btn file-btn cad">CAD</div>
+                       <div className="actns-btn file-btn threeD">3D</div>
+                      </>
+                     ) : (
+                      ""
+                     )}
+                    </div>
+                   </a>
+
+                   <h5 className="product-store">
+                    {product.store_name.store_name}
+                   </h5>
+
+                   <p className="product-name">{product.name}</p>
+                   <div className="product-price">
+                    {product.preview_price && product.preview_price > 0 ? (
+                     <>
+                      <span>¥ {product.preview_price}</span>
+                     </>
+                    ) : (
+                     <>
+                      <Link
+                       to={{
+                        pathname: `/product/${product.product_id}`,
+                        state: {
+                         request_price: true,
+                        },
+                       }}
+                      >
+                       REQUEST PRICE INFO
+                      </Link>
+                     </>
+                    )}
+                   </div>
+                  </div>
+                 </AntCol>
+                </>
+               );
+              })}
+             </AntRow>
+             <AntRow>
+              <a
+               href="/products "
+               className="btn mt-4 seemore mb-5"
+               style={{ paddingTop: "17px !important" }}
+              >
+               See More Products
+              </a>
+             </AntRow>
+            </section>
+           </div>
+          </TabPane>
+          <TabPane tab="Decore" key="decore">
+           <div className="innertab py-5">
+            <section id="home-products">
+             <AntRow gutter={24} className="mt-3">
+              {/* {this.state.fetching && (
+               <>
+                <Spin
+                 size="large"
+                 style={{ position: "absolute", top: "50%", right: "50%" }}
+                />
+               </>
+              )} */}
+              {this.state.products?.map((product, index) => {
+               return (
+                <>
+                 <AntCol className="gutter-row mb-3" md={6}>
+                  <div className="product">
+                   <a href={`/product/${product.id}`}>
+                    <div
+                     className="p-img"
+                     style={{
+                      background: `url(${product.preview_cover})`,
+                     }}
+                    >
+                     <div className="prlayer"></div>
+
+                     <div
+                      className="actns-btn svbtn"
+                      onClick={(e) => {
+                       e.preventDefault();
+                       this.setState(
+                        {
+                         to_save_cover: product.preview_cover,
+                         to_save_productId: product,
+                        },
+                        () => {
+                         this.saveToCollection();
+                        }
+                       );
+                      }}
+                     >
+                      Save +
+                     </div>
+                     {product.file.length > 0 ? (
+                      <>
+                       <div className="actns-btn file-btn cad">CAD</div>
+                       <div className="actns-btn file-btn threeD">3D</div>
+                      </>
+                     ) : (
+                      ""
+                     )}
+                    </div>
+                   </a>
+
+                   <h5 className="product-store">
+                    {product.store_name.store_name}
+                   </h5>
+
+                   <p className="product-name">{product.name}</p>
+                   <div className="product-price">
+                    {product.preview_price && product.preview_price > 0 ? (
+                     <>
+                      <span>¥ {product.preview_price}</span>
+                     </>
+                    ) : (
+                     <>
+                      <Link
+                       to={{
+                        pathname: `/product/${product.product_id}`,
+                        state: {
+                         request_price: true,
+                        },
+                       }}
+                      >
+                       REQUEST PRICE INFO
+                      </Link>
+                     </>
+                    )}
+                   </div>
+                  </div>
+                 </AntCol>
+                </>
+               );
+              })}
+             </AntRow>
+             <AntRow>
+              <a
+               href="/products "
+               className="btn mt-4 seemore mb-5"
+               style={{ paddingTop: "17px !important" }}
+              >
+               See More Products
+              </a>
+             </AntRow>
+            </section>
+           </div>
+          </TabPane>
+          <TabPane tab="Finishes" key="finishes">
+           <div className="innertab py-5">
+            <section id="home-products">
+             <AntRow gutter={24} className="mt-3">
+              {/* {this.state.fetching && (
+               <>
+                <Spin
+                 size="large"
+                 style={{ position: "absolute", top: "50%", right: "50%" }}
+                />
+               </>
+              )} */}
+              {this.state.products?.map((product, index) => {
+               return (
+                <>
+                 <AntCol className="gutter-row mb-3" md={6}>
+                  <div className="product">
+                   <a href={`/product/${product.id}`}>
+                    <div
+                     className="p-img"
+                     style={{
+                      background: `url(${product.preview_cover})`,
+                     }}
+                    >
+                     <div className="prlayer"></div>
+
+                     <div
+                      className="actns-btn svbtn"
+                      onClick={(e) => {
+                       e.preventDefault();
+                       this.setState(
+                        {
+                         to_save_cover: product.preview_cover,
+                         to_save_productId: product,
+                        },
+                        () => {
+                         this.saveToCollection();
+                        }
+                       );
+                      }}
+                     >
+                      Save +
+                     </div>
+                     {product.file.length > 0 ? (
+                      <>
+                       <div className="actns-btn file-btn cad">CAD</div>
+                       <div className="actns-btn file-btn threeD">3D</div>
+                      </>
+                     ) : (
+                      ""
+                     )}
+                    </div>
+                   </a>
+
+                   <h5 className="product-store">
+                    {product.store_name.store_name}
+                   </h5>
+
+                   <p className="product-name">{product.name}</p>
+                   <div className="product-price">
+                    {product.preview_price && product.preview_price > 0 ? (
+                     <>
+                      <span>¥ {product.preview_price}</span>
+                     </>
+                    ) : (
+                     <>
+                      <Link
+                       to={{
+                        pathname: `/product/${product.product_id}`,
+                        state: {
+                         request_price: true,
+                        },
+                       }}
+                      >
+                       REQUEST PRICE INFO
+                      </Link>
+                     </>
+                    )}
+                   </div>
+                  </div>
+                 </AntCol>
+                </>
+               );
+              })}
+             </AntRow>
+             <AntRow>
+              <a
+               href="/products "
+               className="btn mt-4 seemore mb-5"
+               style={{ paddingTop: "17px !important" }}
+              >
+               See More Products
+              </a>
+             </AntRow>
+            </section>
+           </div>
+          </TabPane>
+         </Tabs>
+        </section>
+       </Container>
+      </div>
      </div>
-    </div>
-    <div className="bg-white">
-     <div className="w-100 home-page m-auto ">
-      <Container className="mt-5 px-0">
-       <section className="products-container home-head">
-        <h2>Products</h2>
-        <p>Explore products, get CAD / 3D files</p>
-        <Tabs defaultActiveKey="recent_products" centered onChange={() => {}}>
-         <TabPane tab="Recent" key="recent_products">
-          <div className="innertab py-5">
-           <section id="home-products">
-            <AntRow gutter={24} className="mt-3">
-             {this.state.fetching && (
-              <>
-               <Spin
-                size="large"
-                style={{ position: "absolute", top: "50%", right: "50%" }}
-               />
-              </>
-             )}
-             {this.state.products?.map((product, index) => {
-              return (
-               <>
-                <AntCol className="gutter-row mb-3" md={6}>
-                 <div className="product">
-                  <a href={`/product/${product.id}`}>
-                   <div
-                    className="p-img"
-                    style={{
-                     background: `url(${product.preview_cover})`,
-                    }}
-                   >
-                    <div className="prlayer"></div>
-
-                    <div
-                     className="actns-btn svbtn"
-                     onClick={(e) => {
-                      e.preventDefault();
-                      this.setState(
-                       {
-                        to_save_cover: product.preview_cover,
-                        to_save_productId: product,
-                       },
-                       () => {
-                        this.saveToCollection();
-                       }
-                      );
-                     }}
-                    >
-                     Save +
-                    </div>
-                    {product.file.length > 0 ? (
-                     <>
-                      <div className="actns-btn file-btn cad">CAD</div>
-                      <div className="actns-btn file-btn threeD">3D</div>
-                     </>
-                    ) : (
-                     ""
-                    )}
-                   </div>
-                  </a>
-
-                  <h5 className="product-store">
-                   {product.store_name.store_name}
-                  </h5>
-
-                  <p className="product-name">{product.name}</p>
-                  <div className="product-price">
-                   {product.preview_price && product.preview_price > 0 ? (
-                    <>
-                     <span>¥ {product.preview_price}</span>
-                    </>
-                   ) : (
-                    <>
-                     <Link
-                      to={{
-                       pathname: `/product/${product.product_id}`,
-                       state: {
-                        request_price: true,
-                       },
-                      }}
-                     >
-                      REQUEST PRICE INFO
-                     </Link>
-                    </>
-                   )}
-                  </div>
-                 </div>
-                </AntCol>
-               </>
-              );
-             })}
-            </AntRow>
-            <AntRow>
-             <a
-              href="/products "
-              className="btn mt-4 seemore mb-5"
-              style={{ paddingTop: "17px !important" }}
-             >
-              See More Products
-             </a>
-            </AntRow>
-           </section>
-          </div>
-         </TabPane>
-         <TabPane tab="Furniture" key="furniture">
-          <div className="innertab py-5">
-           <section id="home-products">
-            <AntRow gutter={24} className="mt-3">
-             {this.state.fetching && (
-              <>
-               <Spin
-                size="large"
-                style={{ position: "absolute", top: "50%", right: "50%" }}
-               />
-              </>
-             )}
-             {this.state.products?.map((product, index) => {
-              return (
-               <>
-                <AntCol className="gutter-row mb-3" md={6}>
-                 <div className="product">
-                  <a href={`/product/${product.id}`}>
-                   <div
-                    className="p-img"
-                    style={{
-                     background: `url(${product.preview_cover})`,
-                    }}
-                   >
-                    <div className="prlayer"></div>
-
-                    <div
-                     className="actns-btn svbtn"
-                     onClick={(e) => {
-                      e.preventDefault();
-                      this.setState(
-                       {
-                        to_save_cover: product.preview_cover,
-                        to_save_productId: product,
-                       },
-                       () => {
-                        this.saveToCollection();
-                       }
-                      );
-                     }}
-                    >
-                     Save +
-                    </div>
-                    {product.file.length > 0 ? (
-                     <>
-                      <div className="actns-btn file-btn cad">CAD</div>
-                      <div className="actns-btn file-btn threeD">3D</div>
-                     </>
-                    ) : (
-                     ""
-                    )}
-                   </div>
-                  </a>
-
-                  <h5 className="product-store">
-                   {product.store_name.store_name}
-                  </h5>
-
-                  <p className="product-name">{product.name}</p>
-                  <div className="product-price">
-                   {product.preview_price && product.preview_price > 0 ? (
-                    <>
-                     <span>¥ {product.preview_price}</span>
-                    </>
-                   ) : (
-                    <>
-                     <Link
-                      to={{
-                       pathname: `/product/${product.product_id}`,
-                       state: {
-                        request_price: true,
-                       },
-                      }}
-                     >
-                      REQUEST PRICE INFO
-                     </Link>
-                    </>
-                   )}
-                  </div>
-                 </div>
-                </AntCol>
-               </>
-              );
-             })}
-            </AntRow>
-            <AntRow>
-             <a
-              href="/products "
-              className="btn mt-4 seemore mb-5"
-              style={{ paddingTop: "17px !important" }}
-             >
-              See More Products
-             </a>
-            </AntRow>
-           </section>
-          </div>
-         </TabPane>
-         <TabPane tab="Lighting" key="lighting">
-          <div className="innertab py-5">
-           <section id="home-products">
-            <AntRow gutter={24} className="mt-3">
-             {this.state.fetching && (
-              <>
-               <Spin
-                size="large"
-                style={{ position: "absolute", top: "50%", right: "50%" }}
-               />
-              </>
-             )}
-             {this.state.products?.map((product, index) => {
-              return (
-               <>
-                <AntCol className="gutter-row mb-3" md={6}>
-                 <div className="product">
-                  <a href={`/product/${product.id}`}>
-                   <div
-                    className="p-img"
-                    style={{
-                     background: `url(${product.preview_cover})`,
-                    }}
-                   >
-                    <div className="prlayer"></div>
-
-                    <div
-                     className="actns-btn svbtn"
-                     onClick={(e) => {
-                      e.preventDefault();
-                      this.setState(
-                       {
-                        to_save_cover: product.preview_cover,
-                        to_save_productId: product,
-                       },
-                       () => {
-                        this.saveToCollection();
-                       }
-                      );
-                     }}
-                    >
-                     Save +
-                    </div>
-                    {product.file.length > 0 ? (
-                     <>
-                      <div className="actns-btn file-btn cad">CAD</div>
-                      <div className="actns-btn file-btn threeD">3D</div>
-                     </>
-                    ) : (
-                     ""
-                    )}
-                   </div>
-                  </a>
-
-                  <h5 className="product-store">
-                   {product.store_name.store_name}
-                  </h5>
-
-                  <p className="product-name">{product.name}</p>
-                  <div className="product-price">
-                   {product.preview_price && product.preview_price > 0 ? (
-                    <>
-                     <span>¥ {product.preview_price}</span>
-                    </>
-                   ) : (
-                    <>
-                     <Link
-                      to={{
-                       pathname: `/product/${product.product_id}`,
-                       state: {
-                        request_price: true,
-                       },
-                      }}
-                     >
-                      REQUEST PRICE INFO
-                     </Link>
-                    </>
-                   )}
-                  </div>
-                 </div>
-                </AntCol>
-               </>
-              );
-             })}
-            </AntRow>
-            <AntRow>
-             <a
-              href="/products "
-              className="btn mt-4 seemore mb-5"
-              style={{ paddingTop: "17px !important" }}
-             >
-              See More Products
-             </a>
-            </AntRow>
-           </section>
-          </div>
-         </TabPane>
-         <TabPane tab="Decore" key="decore">
-          <div className="innertab py-5">
-           <section id="home-products">
-            <AntRow gutter={24} className="mt-3">
-             {this.state.fetching && (
-              <>
-               <Spin
-                size="large"
-                style={{ position: "absolute", top: "50%", right: "50%" }}
-               />
-              </>
-             )}
-             {this.state.products?.map((product, index) => {
-              return (
-               <>
-                <AntCol className="gutter-row mb-3" md={6}>
-                 <div className="product">
-                  <a href={`/product/${product.id}`}>
-                   <div
-                    className="p-img"
-                    style={{
-                     background: `url(${product.preview_cover})`,
-                    }}
-                   >
-                    <div className="prlayer"></div>
-
-                    <div
-                     className="actns-btn svbtn"
-                     onClick={(e) => {
-                      e.preventDefault();
-                      this.setState(
-                       {
-                        to_save_cover: product.preview_cover,
-                        to_save_productId: product,
-                       },
-                       () => {
-                        this.saveToCollection();
-                       }
-                      );
-                     }}
-                    >
-                     Save +
-                    </div>
-                    {product.file.length > 0 ? (
-                     <>
-                      <div className="actns-btn file-btn cad">CAD</div>
-                      <div className="actns-btn file-btn threeD">3D</div>
-                     </>
-                    ) : (
-                     ""
-                    )}
-                   </div>
-                  </a>
-
-                  <h5 className="product-store">
-                   {product.store_name.store_name}
-                  </h5>
-
-                  <p className="product-name">{product.name}</p>
-                  <div className="product-price">
-                   {product.preview_price && product.preview_price > 0 ? (
-                    <>
-                     <span>¥ {product.preview_price}</span>
-                    </>
-                   ) : (
-                    <>
-                     <Link
-                      to={{
-                       pathname: `/product/${product.product_id}`,
-                       state: {
-                        request_price: true,
-                       },
-                      }}
-                     >
-                      REQUEST PRICE INFO
-                     </Link>
-                    </>
-                   )}
-                  </div>
-                 </div>
-                </AntCol>
-               </>
-              );
-             })}
-            </AntRow>
-            <AntRow>
-             <a
-              href="/products "
-              className="btn mt-4 seemore mb-5"
-              style={{ paddingTop: "17px !important" }}
-             >
-              See More Products
-             </a>
-            </AntRow>
-           </section>
-          </div>
-         </TabPane>
-         <TabPane tab="Finishes" key="finishes">
-          <div className="innertab py-5">
-           <section id="home-products">
-            <AntRow gutter={24} className="mt-3">
-             {this.state.fetching && (
-              <>
-               <Spin
-                size="large"
-                style={{ position: "absolute", top: "50%", right: "50%" }}
-               />
-              </>
-             )}
-             {this.state.products?.map((product, index) => {
-              return (
-               <>
-                <AntCol className="gutter-row mb-3" md={6}>
-                 <div className="product">
-                  <a href={`/product/${product.id}`}>
-                   <div
-                    className="p-img"
-                    style={{
-                     background: `url(${product.preview_cover})`,
-                    }}
-                   >
-                    <div className="prlayer"></div>
-
-                    <div
-                     className="actns-btn svbtn"
-                     onClick={(e) => {
-                      e.preventDefault();
-                      this.setState(
-                       {
-                        to_save_cover: product.preview_cover,
-                        to_save_productId: product,
-                       },
-                       () => {
-                        this.saveToCollection();
-                       }
-                      );
-                     }}
-                    >
-                     Save +
-                    </div>
-                    {product.file.length > 0 ? (
-                     <>
-                      <div className="actns-btn file-btn cad">CAD</div>
-                      <div className="actns-btn file-btn threeD">3D</div>
-                     </>
-                    ) : (
-                     ""
-                    )}
-                   </div>
-                  </a>
-
-                  <h5 className="product-store">
-                   {product.store_name.store_name}
-                  </h5>
-
-                  <p className="product-name">{product.name}</p>
-                  <div className="product-price">
-                   {product.preview_price && product.preview_price > 0 ? (
-                    <>
-                     <span>¥ {product.preview_price}</span>
-                    </>
-                   ) : (
-                    <>
-                     <Link
-                      to={{
-                       pathname: `/product/${product.product_id}`,
-                       state: {
-                        request_price: true,
-                       },
-                      }}
-                     >
-                      REQUEST PRICE INFO
-                     </Link>
-                    </>
-                   )}
-                  </div>
-                 </div>
-                </AntCol>
-               </>
-              );
-             })}
-            </AntRow>
-            <AntRow>
-             <a
-              href="/products "
-              className="btn mt-4 seemore mb-5"
-              style={{ paddingTop: "17px !important" }}
-             >
-              See More Products
-             </a>
-            </AntRow>
-           </section>
-          </div>
-         </TabPane>
-        </Tabs>
-       </section>
-      </Container>
+     <div className="lightgray-footer">
+      <section className="stores-container text-left pb-5 home-head">
+       <h2 className="px-3">Explore Catalogues By Brand</h2>
+       <div className="stores-items">{Stores}</div>
+       <button className="btn d-block mx-auto mt-4 seemore">see all</button>
+      </section>
      </div>
-    </div>
-    <div className="lightgray-footer">
-     <section className="stores-container text-left pb-5 home-head">
-      <h2 className="px-3">Explore catalogues by brand</h2>
-      <div className="stores-items">{Stores}</div>
-      <button className="btn d-block mx-auto mt-4 seemore">see all</button>
-     </section>
-    </div>
-    <div>
-     <section className="project-contaienr text-center bg-white mt-5 pt-4 home-head">
-      <h2 className="home-center mb-0">Magazine</h2>
-      <p className="mb-4">Explore Design Projects, News & trends</p>
-      <Tabs
-       defaultActiveKey="recent"
-       className="inner-projects-container"
-       centered
-       onChange={() => {}}
-      >
-       <TabPane tab="Recent" key="recent">
-        <div className="innertab py-5">
-         <AntRow span={24} gutter={24}>
-          {Object.values(this.state.recent_projects)?.map((p, index) => {
-           return (
-            <>
-             <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
-              <a href={`/project/${p.id}`} className="box-link">
-               <div className="project-col bg-white">
-                <div
-                 className="project-image"
-                 style={{
-                  backgroundImage: `url(${p.cover})`,
-                 }}
-                ></div>
-                <div className="info p-3 left">
-                 <p className="project-name left">{p.name}</p>
+     <div>
+      <section className="project-contaienr text-center bg-white mt-5 pt-4 home-head">
+       <h2 className="home-center mb-0">Magazine</h2>
+       <p className="mb-4">Explore Design Projects, News & trends</p>
+       <Tabs
+        getPopupContainer
+        tabBarGutter={25}
+        defaultActiveKey="recent"
+        translate="no"
+        className="inner-projects-container"
+        centered
+       >
+        <TabPane forceRender={true} tab="Recent" key="recent">
+         <div className="innertab py-5">
+          <AntRow span={24} gutter={24}>
+           {Object.values(this.state.recent_projects)?.map((p, index) => {
+            return (
+             <>
+              <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+               <a href={`/project/${p.id}`} className="box-link">
+                <div className="project-col bg-white">
+                 <button
+                  className="project-btn svbtn svprojectbtn"
+                  onClick={(e) => {
+                   e.preventDefault();
+                   this.setState(
+                    {
+                     to_save_project_cover: p.cover,
+                     to_save_projectId: p,
+                    },
+                    () => {
+                     this.saveToBoard();
+                    }
+                   );
+                  }}
+                 >
+                  SAVE
+                 </button>
+                 <div className="project-image-wrapper">
+                  <div
+                   className="project-image"
+                   style={{
+                    backgroundImage: `url(${p.cover})`,
+                   }}
+                  ></div>
+                 </div>
+                 <div className="info p-3 left">
+                  <p className="project-name left">{p.name}</p>
 
-                 <div className="project-cover-footer">
-                  <p>
-                   {p.kind?.map((k) => {
-                    return <span className="px-1">{k}</span>;
-                   })}
-                  </p>
-                  <hr className="my-1 w-20" />
-                  <p>
-                   <span className="px-1">{p.type}</span>
-                  </p>
+                  <div className="project-cover-footer">
+                   <p>
+                    {p.kind?.map((k) => {
+                     return <span className="px-1">{k}</span>;
+                    })}
+                   </p>
+                   <hr className="my-1 w-20" />
+                   <p>
+                    <span className="px-1">{p.type}</span>
+                   </p>
+                  </div>
                  </div>
                 </div>
-               </div>
-              </a>
-             </AntCol>
-            </>
-           );
-          })}
-         </AntRow>
-         <AntRow>
-          <a
-           href="/magazine "
-           className="btn mt-5 seemore mb-5"
-           style={{ paddingTop: "17px !important" }}
-          >
-           Go to Magazine
-          </a>
-         </AntRow>
-        </div>
-       </TabPane>
-       <TabPane tab="Architecture" key="2">
-        <div className="innertab py-5">
-         <AntRow span={24} gutter={24}>
-          {this.state.projects_types?.Architecture?.slice(-6)?.map(
-           (p, index) => {
+               </a>
+              </AntCol>
+             </>
+            );
+           })}
+          </AntRow>
+          <AntRow>
+           <a
+            href="/magazine "
+            className="btn mt-5 seemore mb-5"
+            style={{ paddingTop: "17px !important" }}
+           >
+            Go to Magazine
+           </a>
+          </AntRow>
+         </div>
+        </TabPane>
+        <TabPane forceRender={true} tab="Architecture" key="architecture">
+         <div className="innertab py-5">
+          <AntRow span={24} gutter={24}>
+           {this.state.projects_types?.Architecture?.slice(-6)?.map(
+            (p, index) => {
+             return (
+              <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+               <a href={`/project/${p.id}`} className="box-link">
+                <div className="project-col bg-white">
+                 <button
+                  className="project-btn svbtn svprojectbtn"
+                  onClick={(e) => {
+                   e.preventDefault();
+                   this.setState(
+                    {
+                     to_save_project_cover: p.cover,
+                     to_save_projectId: p,
+                    },
+                    () => {
+                     this.saveToBoard();
+                    }
+                   );
+                  }}
+                 >
+                  SAVE
+                 </button>
+                 <div className="project-image-wrapper">
+                  <div
+                   className="project-image"
+                   style={{
+                    backgroundImage: `url(${p.cover})`,
+                   }}
+                  ></div>
+                 </div>
+                 <div className="info p-3 left">
+                  <p className="project-name">{p.name}</p>
+
+                  <div className="project-cover-footer">
+                   <p className="m-0">{p.kind}</p>
+                   <hr className="my-1 w-20" />
+                   <p className="m-0">{p.type}</p>
+                  </div>
+                 </div>
+                </div>
+               </a>
+              </AntCol>
+             );
+            }
+           )}
+          </AntRow>
+          <AntRow>
+           <a
+            href="/magazine "
+            className="btn mt-5 seemore mb-5"
+            style={{ paddingTop: "17px !important" }}
+           >
+            Go to Magazine
+           </a>
+          </AntRow>
+         </div>
+        </TabPane>
+        <TabPane forceRender={true} tab="Interior Design" key="interiordesign">
+         <div className="innertab py-5">
+          <AntRow span={24} gutter={24}>
+           {this.state.projects_types["Interior Design"]
+            ?.slice(-6)
+            ?.map((p, index) => {
+             return (
+              <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+               <a href={`/project/${p.id}`} className="box-link">
+                <div className="project-col bg-white">
+                 <button
+                  className="project-btn svbtn svprojectbtn"
+                  onClick={(e) => {
+                   e.preventDefault();
+                   this.setState(
+                    {
+                     to_save_project_cover: p.cover,
+                     to_save_projectId: p,
+                    },
+                    () => {
+                     this.saveToBoard();
+                    }
+                   );
+                  }}
+                 >
+                  SAVE
+                 </button>
+                 <div className="project-image-wrapper">
+                  <div
+                   className="project-image"
+                   style={{
+                    backgroundImage: `url(${p.cover})`,
+                   }}
+                  ></div>
+                 </div>
+                 <div className="info p-3 left">
+                  <p className="project-name">{p.name}</p>
+
+                  <div className="project-cover-footer">
+                   <p className="m-0">{p.kind}</p>
+                   <hr className="my-1 w-20" />
+                   <p className="m-0">{p.type}</p>
+                  </div>
+                 </div>
+                </div>
+               </a>
+              </AntCol>
+             );
+            })}
+          </AntRow>
+          <AntRow>
+           <a
+            href="/magazine "
+            className="btn mt-5 seemore mb-5"
+            style={{ paddingTop: "17px !important" }}
+           >
+            Go to Magazine
+           </a>
+          </AntRow>
+         </div>
+        </TabPane>
+        <TabPane tab="Product Design" forceRender={true} key="productdesign">
+         <div className="innertab py-5">
+          <AntRow span={24} gutter={24}>
+           {this.state.projects_types["Product Design"]
+            ?.slice(-6)
+            ?.map((p, index) => {
+             return (
+              <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
+               <a href={`/project/${p.id}`} className="box-link">
+                <div className="project-col bg-white">
+                 <div className="project-image-wrapper">
+                  <div
+                   className="project-image"
+                   style={{
+                    backgroundImage: `url(${p.cover})`,
+                   }}
+                  ></div>
+                 </div>
+                 <div className="info p-3 left">
+                  <p className="project-name">{p.name}</p>
+                  <div className="project-cover-footer">
+                   <p className="m-0">{p.kind}</p>
+                   <hr className="my-1 w-20" />
+                   <p className="m-0">{p.type}</p>
+                  </div>
+                 </div>
+                </div>
+               </a>
+              </AntCol>
+             );
+            })}
+          </AntRow>
+          <AntRow>
+           <a
+            href="/magazine "
+            className="btn mt-5 seemore mb-5"
+            style={{ paddingTop: "17px !important" }}
+           >
+            Go to Magazine
+           </a>
+          </AntRow>
+         </div>
+        </TabPane>
+        <TabPane tab="Design blogs" key="designblogs" forceRender={true}>
+         <div className="innertab py-5">
+          <AntRow span={24} gutter={24}>
+           {this.state.projects_types["Blog"]?.slice(-6)?.map((p, index) => {
             return (
              <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
               <a href={`/project/${p.id}`} className="box-link">
                <div className="project-col bg-white">
-                <div
-                 className="project-image"
-                 style={{
-                  backgroundImage: `url(${p.cover})`,
+                <button
+                 className="project-btn svbtn svprojectbtn"
+                 onClick={(e) => {
+                  e.preventDefault();
+                  this.setState(
+                   {
+                    to_save_project_cover: p.cover,
+                    to_save_projectId: p,
+                   },
+                   () => {
+                    this.saveToBoard();
+                   }
+                  );
                  }}
-                ></div>
+                >
+                 SAVE
+                </button>
+                <div className="project-image-wrapper">
+                 <div
+                  className="project-image"
+                  style={{
+                   backgroundImage: `url(${p.cover})`,
+                  }}
+                 ></div>
+                </div>
                 <div className="info p-3 left">
                  <p className="project-name">{p.name}</p>
-
                  <div className="project-cover-footer">
                   <p className="m-0">{p.kind}</p>
                   <hr className="my-1 w-20" />
@@ -1168,286 +1393,164 @@ class HomePage extends Component {
               </a>
              </AntCol>
             );
+           })}
+          </AntRow>
+          <AntRow>
+           <a
+            href="/magazine "
+            className="btn mt-5 seemore mb-5"
+            style={{ paddingTop: "17px !important" }}
+           >
+            Go to Magazine
+           </a>
+          </AntRow>
+         </div>
+        </TabPane>
+       </Tabs>
+      </section>
+     </div>
+     <div className="darkgray-footer">
+      <div className="px-0 pt-4 container">
+       <AntRow gutter={24}>
+        <AntCol md={8}>
+         <p className="substext">
+          Keep Updated with the Latest Design News, Projects and products
+         </p>
+        </AntCol>
+        <AntCol md={10}>
+         <Input.Group compact className="mb-4">
+          <Input
+           rules={[
+            {
+             required: true,
+             message: "Please input your name",
+            },
+           ]}
+           size="large"
+           type="email"
+           value={this.state.subscribe_email}
+           style={{ width: "calc(100% - 200px)" }}
+           placeholder="insert your email address"
+           onChange={(e) => this.setState({ subscribe_email: e.target.value })}
+          />
+          <AntButton
+           size="large"
+           className="subsricbtn"
+           type="submit"
+           onClick={() =>
+            this.subscribe(
+             this.state.subscribe_email,
+             this.state.subscribe_checked
+            )
            }
-          )}
-         </AntRow>
-         <AntRow>
-          <a
-           href="/magazine "
-           className="btn mt-5 seemore mb-5"
-           style={{ paddingTop: "17px !important" }}
           >
-           Go to Magazine
-          </a>
-         </AntRow>
-        </div>
-       </TabPane>
-       <TabPane tab="Interior Design" key="3">
-        <div className="innertab py-5">
-         <AntRow span={24} gutter={24}>
-          {this.state.projects_types["Interior Design"]
-           ?.slice(-6)
-           ?.map((p, index) => {
-            return (
-             <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
-              <a href={`/project/${p.id}`} className="box-link">
-               <div className="project-col bg-white">
-                <div
-                 className="project-image"
-                 style={{
-                  backgroundImage: `url(${p.cover})`,
-                 }}
-                ></div>
-                <div className="info p-3 left">
-                 <p className="project-name">{p.name}</p>
-
-                 <div className="project-cover-footer">
-                  <p className="m-0">{p.kind}</p>
-                  <hr className="my-1 w-20" />
-                  <p className="m-0">{p.type}</p>
-                 </div>
-                </div>
-               </div>
-              </a>
-             </AntCol>
-            );
-           })}
-         </AntRow>
-         <AntRow>
-          <a
-           href="/magazine "
-           className="btn mt-5 seemore mb-5"
-           style={{ paddingTop: "17px !important" }}
-          >
-           Go to Magazine
-          </a>
-         </AntRow>
-        </div>
-       </TabPane>
-       <TabPane tab="Product Design" key="4">
-        <div className="innertab py-5">
-         <AntRow span={24} gutter={24}>
-          {this.state.projects_types["Product Design"]
-           ?.slice(-6)
-           ?.map((p, index) => {
-            return (
-             <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
-              <a href={`/project/${p.id}`} className="box-link">
-               <div className="project-col bg-white">
-                <div
-                 className="project-image"
-                 style={{
-                  backgroundImage: `url(${p.cover})`,
-                 }}
-                ></div>
-                <div className="info p-3 left">
-                 <p className="project-name">{p.name}</p>
-                 <div className="project-cover-footer">
-                  <p className="m-0">{p.kind}</p>
-                  <hr className="my-1 w-20" />
-                  <p className="m-0">{p.type}</p>
-                 </div>
-                </div>
-               </div>
-              </a>
-             </AntCol>
-            );
-           })}
-         </AntRow>
-         <AntRow>
-          <a
-           href="/magazine "
-           className="btn mt-5 seemore mb-5"
-           style={{ paddingTop: "17px !important" }}
-          >
-           Go to Magazine
-          </a>
-         </AntRow>
-        </div>
-       </TabPane>
-       <TabPane tab="Design blogs" key="5">
-        <div className="innertab py-5">
-         <AntRow span={24} gutter={24}>
-          {this.state.projects_types["Blog"]?.slice(-6)?.map((p, index) => {
-           return (
-            <AntCol xs={24} sm={12} md={8} className="mb-4" key={index}>
-             <a href={`/project/${p.id}`} className="box-link">
-              <div className="project-col bg-white">
-               <div
-                className="project-image"
+           {!this.state.subscribing ? (
+            "Subscribe"
+           ) : (
+            <>
+             <Spin
+              indicator={
+               <LoadingOutlined
                 style={{
-                 backgroundImage: `url(${p.cover})`,
+                 fontSize: 18,
+                 margin: "1px 3px 3px 8px",
+                 color: "#fff",
                 }}
-               ></div>
-               <div className="info p-3 left">
-                <p className="project-name">{p.name}</p>
-                <div className="project-cover-footer">
-                 <p className="m-0">{p.kind}</p>
-                 <hr className="my-1 w-20" />
-                 <p className="m-0">{p.type}</p>
-                </div>
-               </div>
-              </div>
-             </a>
-            </AntCol>
-           );
-          })}
-         </AntRow>
-         <AntRow>
-          <a
-           href="/magazine "
-           className="btn mt-5 seemore mb-5"
-           style={{ paddingTop: "17px !important" }}
-          >
-           Go to Magazine
-          </a>
-         </AntRow>
-        </div>
-       </TabPane>
-      </Tabs>
-     </section>
-    </div>
-    <div className="darkgray-footer">
-     <div className="px-0 pt-4 container">
-      <AntRow gutter={24}>
-       <AntCol md={8}>
-        <p className="substext">
-         Keep Updated with the Latest Design News, Projects and products
-        </p>
-       </AntCol>
-       <AntCol md={10}>
-        <Input.Group compact className="mb-4">
-         <Input
-          rules={[
-           {
-            required: true,
-            message: "Please input your name",
-           },
-          ]}
-          size="large"
-          type="email"
-          value={this.state.subscribe_email}
-          style={{ width: "calc(100% - 200px)" }}
-          placeholder="insert your email address"
-          onChange={(e) => this.setState({ subscribe_email: e.target.value })}
-         />
-         <AntButton
-          size="large"
-          className="subsricbtn"
-          type="submit"
-          onClick={() =>
-           this.subscribe(
-            this.state.subscribe_email,
-            this.state.subscribe_checked
-           )
+                spin
+               />
+              }
+             />
+            </>
+           )}
+          </AntButton>
+         </Input.Group>
+         <Checkbox
+          value="yes"
+          style={{ fontSize: ".75rem", color: "#2b2d3a" }}
+          onChange={(e) =>
+           this.setState({ subscribe_checked: e.target.checked })
           }
          >
-          {!this.state.subscribing ? (
-           "Subscribe"
-          ) : (
-           <>
-            <Spin
-             indicator={
-              <LoadingOutlined
-               style={{
-                fontSize: 18,
-                margin: "1px 3px 3px 8px",
-                color: "#fff",
-               }}
-               spin
-              />
-             }
-            />
-           </>
-          )}
-         </AntButton>
-        </Input.Group>
-        <Checkbox
-         value="yes"
-         style={{ fontSize: ".75rem", color: "#2b2d3a" }}
-         onChange={(e) =>
-          this.setState({ subscribe_checked: e.target.checked })
-         }
-        >
-         I hereby consent to the processing of my personal data to receive
-         offers and commercial communication from ARCH17.COM (Privacy Policy).
-        </Checkbox>
-       </AntCol>
-      </AntRow>
+          I hereby consent to the processing of my personal data to receive
+          offers and commercial communication from ARCH17.COM (Privacy Policy).
+         </Checkbox>
+        </AntCol>
+       </AntRow>
+      </div>
      </div>
-    </div>
-    <div className="black-footer">
-     <div className="px-0 container">
-      <AntRow gutter={24}>
-       <AntCol md={4}>
-        <div className="footer-links">
-         <p>Arch17</p>
-         <p>About arch17</p>
-         <p>17 Roomcraft</p>
-         <p>Join our team</p>
-        </div>
-       </AntCol>
-       <AntCol md={4}>
-        <div className="footer-links">
-         <p>Arch17 Business</p>
-         <p>Create New Store</p>
-         <p>Add Products</p>
-         <p>Pricing</p>
-        </div>
-       </AntCol>
-       <AntCol md={4}>
-        <div className="footer-links">
-         <p>Explore</p>
-         <p>Furniture</p>
-         <p>Projects & News</p>
-        </div>
-       </AntCol>
-       <AntCol md={5}>
-        <div className="footer-links">
-         <p>Let Us Help</p>
-         <p>How to create store on arch17</p>
-         <p>How to add products</p>
-         <p>Contact Us</p>
-        </div>
-       </AntCol>
-       <AntCol md={7}>
-        <div>
-         <p>Follow Us On</p>
-         <AntRow gutter={10} className="footer-social">
-          <AntCol id="fb">
-           <FaFacebookF />
-          </AntCol>
-          <AntCol id="linkdin">
-           <FaLinkedinIn />
-          </AntCol>
-          <AntCol id="pinterest">
-           <FaPinterestP />
-          </AntCol>
-          <AntCol id="vimo">
-           <FaVimeoV />
-          </AntCol>
-          <AntCol id="ytb">
-           <AiFillYoutube />
-          </AntCol>
-          <AntCol id="wechat">
-           <AiFillWechat />
-          </AntCol>
-         </AntRow>
-        </div>
-       </AntCol>
-      </AntRow>
+     <div className="black-footer">
+      <div className="px-0 container">
+       <AntRow gutter={24}>
+        <AntCol md={4}>
+         <div className="footer-links">
+          <p>Arch17</p>
+          <p>About arch17</p>
+          <p>17 Roomcraft</p>
+          <p>Join our team</p>
+         </div>
+        </AntCol>
+        <AntCol md={4}>
+         <div className="footer-links">
+          <p>Arch17 Business</p>
+          <p>Create New Store</p>
+          <p>Add Products</p>
+          <p>Pricing</p>
+         </div>
+        </AntCol>
+        <AntCol md={4}>
+         <div className="footer-links">
+          <p>Explore</p>
+          <p>Furniture</p>
+          <p>Projects & News</p>
+         </div>
+        </AntCol>
+        <AntCol md={5}>
+         <div className="footer-links">
+          <p>Let Us Help</p>
+          <p>How to create store on arch17</p>
+          <p>How to add products</p>
+          <p>Contact Us</p>
+         </div>
+        </AntCol>
+        <AntCol md={7}>
+         <div>
+          <p>Follow Us On</p>
+          <AntRow gutter={10} className="footer-social">
+           <AntCol id="fb">
+            <FaFacebookF />
+           </AntCol>
+           <AntCol id="linkdin">
+            <FaLinkedinIn />
+           </AntCol>
+           <AntCol id="pinterest">
+            <FaPinterestP />
+           </AntCol>
+           <AntCol id="vimo">
+            <FaVimeoV />
+           </AntCol>
+           <AntCol id="ytb">
+            <AiFillYoutube />
+           </AntCol>
+           <AntCol id="wechat">
+            <AiFillWechat />
+           </AntCol>
+          </AntRow>
+         </div>
+        </AntCol>
+       </AntRow>
+      </div>
      </div>
-    </div>
-    <div className="dark-footer">
-     <div className="px-0 container">
-      <AntRow className="pt-2">
-       <AntCol md={8}>
-        <p>© 2017-2019, ARCH17 TECHNOLOGY CO., LTD. SZ </p>
-       </AntCol>
-      </AntRow>
+     <div className="dark-footer">
+      <div className="px-0 container">
+       <AntRow className="pt-2">
+        <AntCol md={8}>
+         <p>© 2017-2019, ARCH17 TECHNOLOGY CO., LTD. SZ </p>
+        </AntCol>
+       </AntRow>
+      </div>
      </div>
+     <div className="home-layer"></div>
     </div>
-
     {/* signup/signin modal */}
     <>
      <Modal
@@ -1694,6 +1797,29 @@ class HomePage extends Component {
       <SaveToCollection
        cover={this.state.to_save_cover}
        product={this.state.to_save_productId}
+      />
+     </AntModal>
+
+     <AntModal
+      title={this.state.save_to_board_modal}
+      width={700}
+      className="request-modal"
+      visible={this.state.save_to_board_modal}
+      destroyOnClose={true}
+      footer={false}
+      closeIcon={
+       <>
+        <div onClick={() => this.setState({ save_to_board_modal: false })}>
+         X
+        </div>
+       </>
+      }
+      okButtonProps={{ hidden: true }}
+      cancelButtonProps={{ hidden: true }}
+     >
+      <SaveToBoard
+       cover={this.state.to_save_project_cover}
+       project={this.state.to_save_projectId}
       />
      </AntModal>
     </>

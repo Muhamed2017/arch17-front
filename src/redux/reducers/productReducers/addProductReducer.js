@@ -7,6 +7,7 @@ const initialState = {
     tabIndex:0,
     optionsAdded:false,
     requesting:false,
+    share_modal:false,
     searchTerm:null,
     prices:[],
     modal_codes:[],
@@ -62,6 +63,17 @@ export const AddProductReducer = (state= initialState, action)=>{
             return {
                 ...state,
                 requesting:false
+            }
+
+            case actions.OPEN_SHARE_COLLECTION_MODAL:
+            return {
+                ...state,
+                share_modal:true
+            }
+              case actions.CLOSE_SHARE_COLLECTION_MODAL:
+            return {
+                ...state,
+                share_modal:false
             }
             
             case actions.SET_SEARCH_TERM:

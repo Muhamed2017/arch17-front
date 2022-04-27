@@ -2,8 +2,8 @@ import { Component } from "react";
 import { Form, Col, Row } from "react-bootstrap";
 import ReactSelect from "react-select";
 import ReactFlagsSelect from "react-flags-select";
-import AsyncSelect from "react-select/async";
-import { Row as AntRow, Col as AntCol, Checkbox } from "antd";
+// import AsyncSelect from "react-select/async";
+import { Row as AntRow, Col as AntCol, Checkbox, Select } from "antd";
 import * as productClass from "./../addProduct/ProductClassifications";
 import ClipLoader from "react-spinners/ClipLoader";
 import * as cnst from "./../addProduct/Identity";
@@ -14,11 +14,15 @@ import { PlusOutlined } from "@ant-design/icons";
 import { collectionSelectStyles } from "./../addProduct/Identity";
 import axios from "axios";
 import { API } from "./../../utitlties";
+const { Option } = Select;
+const src =
+ "https://cdn.allfamous.org/people/avatars/fiona-zanetti-srcs-allfamous.org.jpg?v=56";
 
 class EditIdentity extends Component {
  constructor(props) {
   super(props);
   this.state = {
+   designers: [],
    name: this.props?.data?.name,
    category: this.props?.category,
    kindsOptions: [],
@@ -422,8 +426,25 @@ class EditIdentity extends Component {
   );
   console.log(this.state);
  };
+ onDesignersChange = (value) => {
+  console.log(`selected ${value}`);
+ };
+
+ handleAddDesigner = (e) => {
+  const fd = new FormData();
+  fd.append("product_id", this.state.product_id);
+  fd.append("user_id", e);
+  axios.post(`${API}adddesignerproduct`, fd).then((res) => {
+   console.log(res);
+  });
+ };
  componentDidMount() {
   console.log(this.props);
+  axios.get(`${API}designers`).then((res) => {
+   this.setState({
+    designers: res.data.designers,
+   });
+  });
   // console.log(this.props.selected_collections);
   console.log(this.state.for_kids);
   console.log(this.state.is_for_kids);
@@ -1167,14 +1188,32 @@ class EditIdentity extends Component {
        </Col>
       </Form.Group>
       <Form.Group as={Row}>
-       <Col md={7}>
+       <Col md={7} className="designerselect">
         <Form.Label>Designer</Form.Label>
-        <AsyncSelect
-         isMulti
-         defaultOptions
-         placeholder="Search"
-         loadOptions={this.promiseOptions}
-        />
+        <Select
+         mode="multiple"
+         style={{ width: "100%" }}
+         size="large"
+         onChange={this.onDesignersChange}
+         optionLabelProp="label"
+         onSelect={this.handleAddDesigner}
+        >
+         {this.state.designers?.map((d) => {
+          return (
+           <Option value={d.id} label={d.displayName}>
+            <div className="designer-option-item">
+             <div
+              className="desimg"
+              style={{
+               backgroundImage: `url(${d.avatar})`,
+              }}
+             ></div>
+             <p>{d.displayName}</p>
+            </div>
+           </Option>
+          );
+         })}
+        </Select>
 
         <p className="light">
          Search and tag the product’s designer, If you can’t in find the

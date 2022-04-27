@@ -672,12 +672,22 @@ background-position: top  !important;
     min-height: 600px;
 }
 
+.project-image-wrapper{
+    overflow: hidden;
+}
 .project-image{
     width:100%;
     padding-top: 66.6%;
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
+    transition: all 600ms ease-in-out;
+    transform: scale(1.01);
+
+}
+.project-image:hover{
+    transform :scale(1.1);
+    transform-origin: center;
 }
 .project-name{
     color: #2e2e2e;
@@ -700,7 +710,7 @@ background-position: top  !important;
 .project-btn{
     position: absolute;
     display: none;
-
+z-index: 5;
     border-radius: 2px;
     color: #fff !important;
     text-transform: uppercase;
@@ -728,6 +738,13 @@ top: 10px;
 .project-col:hover .project-btn{
     display: block;
 
+}
+.svprojectbtn{
+  height: 30px !important;
+  border:none !important;
+  color:#fff !important;
+  width: 50px !important;
+  font-size: 9px !important;
 }
 
 .ck-toolbar {

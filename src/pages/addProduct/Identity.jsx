@@ -211,11 +211,7 @@ export const filterDesigners = (inputValue = "") => {
 const handleChange = (value) => {
  console.log(`selected ${value}`);
 };
-const collectionSelectFilter = (inputValue = "") => {
- return collectionsOptions.filter((i) =>
-  i.value.toLowerCase().includes(inputValue.toLowerCase())
- );
-};
+
 const promiseOptions = (inputValue) =>
  new Promise((resolve) => {
   setTimeout(() => {

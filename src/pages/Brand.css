@@ -161,7 +161,14 @@ overflow: hidden;
 }
 .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
  color: #000 !important;
-    font-weight: 600
+    /* font-weight: 600 */
+}
+.home-page .ant-tabs-tab-btn{
+    font-size: 1.2rem !important;
+}
+.home-page .ant-tabs-tab{
+font-size: 1.2rem !important;
+font-weight: 300 !important;
 }
 #brand-container .ant-tabs-tab:hover{
     color:#000 !important;
@@ -316,4 +323,39 @@ overflow: hidden;
 
 #user-settings .profile-container{
     margin: 0 auto;
+}
+
+.designer-text{
+    display: grid;
+    grid-template-columns: 50px auto ;
+    margin:12px 0;  
+    height: auto;
+    grid-gap:10px;
+    font-family: "Roboto";
+}
+.designer-text .d-avatar{
+    height: 45px;
+    width: 45px;
+    background-position: center;
+    background-size: contain;
+    background-color: #999898;
+    border-radius: 5px;
+}
+.designer-text .d-info .d-name{
+    font-weight: 700;
+    font-size: 21px;
+    margin-right: 15px;
+    font-family: "Roboto";
+}
+
+.designer-text .d-info .d-loc{
+color: #727272;
+font-size: 16px;
+font-weight: 400;
+    
+}
+.designer-text .d-count {
+    color: #747474;
+    font-weight: 400;
+    font-size: 14px;
 }

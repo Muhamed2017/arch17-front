@@ -538,19 +538,44 @@ class Project extends Component {
             <Col xs={24} sm={12} md={8} className="mb-4">
              <a href={`/project/${p.id}`} className="box-link">
               <div className="project-col bg-white">
-               <div
-                className="project-image"
-                style={{
-                 backgroundImage: `url(${p.cover})`,
+               {/* <button
+                className="project-btn svbtn svprojectbtn"
+                onClick={(e) => {
+                 e.preventDefault();
+                 this.setState(
+                  {
+                   to_save_project_cover: p.cover,
+                   to_save_projectId: p,
+                  },
+                  () => {
+                   this.saveToBoard();
+                  }
+                 );
                 }}
-               ></div>
-               <div className="info p-3">
-                <p className="project-name">{p.name}</p>
+               >
+                SAVE
+               </button> */}
+               <div className="project-image-wrapper">
+                <div
+                 className="project-image"
+                 style={{
+                  backgroundImage: `url(${p.cover})`,
+                 }}
+                ></div>
+               </div>
+               <div className="info p-3 left">
+                <p className="project-name left">{p.name}</p>
 
                 <div className="project-cover-footer">
-                 <p className="m-0">{p.kind}</p>
+                 <p>
+                  {p.kind?.map((k) => {
+                   return <span className="px-1">{k}</span>;
+                  })}
+                 </p>
                  <hr className="my-1 w-20" />
-                 <p className="m-0">{p.type}</p>
+                 <p>
+                  <span className="px-1">{p.type}</span>
+                 </p>
                 </div>
                </div>
               </div>

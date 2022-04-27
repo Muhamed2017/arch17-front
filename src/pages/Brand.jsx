@@ -224,6 +224,7 @@ class Brand extends Component {
      about,
      collections,
      followers,
+     designers,
     } = response.data.store;
     console.log(response.data);
     this.setState({
@@ -236,6 +237,7 @@ class Brand extends Component {
      email,
      country,
      city,
+     designers,
      official_website,
      phone_code: Number(phone_code),
      phone,
@@ -1041,7 +1043,7 @@ class Brand extends Component {
            </Row>
           </TabPane>
 
-          <TabPane tab="Projects" key="3" className="section">
+          <TabPane tab="Projects & Blogs" key="3" className="section">
            <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }} className="py-5">
             {this.state.isOwner && this.props.isLoggedIn && (
              <>
@@ -1103,17 +1105,62 @@ class Brand extends Component {
             )}
            </Row>
           </TabPane>
-          <TabPane tab="Blogs" key="4" className="section">
-           Content of Tab Pane 3
-          </TabPane>
-          <TabPane tab="Reseller" key="5" className="section">
-           Content of Tab Pane 3
-          </TabPane>
-          <TabPane tab="Shworooms" key="6" className="section">
-           Content of Tab Pane 3
-          </TabPane>
+
           <TabPane tab="Designers" key="7" className="section">
-           Content of Tab Pane 3
+           <>
+            <Row span={24} gutter={25} className="mt-5">
+             {this.state.designers?.brand_designers?.map((designer, index) => {
+              return (
+               <>
+                <Col md={8} className="collection-col" key={index}>
+                 <a href={`/designerproducts/${designer?.id}`}>
+                  <div className="collection-box">
+                   <div
+                    className="rect rect-0"
+                    style={{
+                     backgroundImage: `url(${this.state.designers?.pics[index][2]?.identity[0]?.preview_cover})`,
+                    }}
+                   ></div>
+                   <div
+                    className="rect rect-1"
+                    style={{
+                     backgroundImage: `url(${this.state.designers?.pics[index][1]?.identity[0]?.preview_cover})`,
+                    }}
+                   ></div>
+                   <div
+                    className="rect rect-2"
+                    style={{
+                     backgroundImage: `url(${this.state.designers?.pics[index][0]?.identity[0]?.preview_cover})`,
+                    }}
+                   ></div>
+                  </div>
+                  <div className="designer-text">
+                   <div
+                    className="d-avatar"
+                    style={{
+                     backgroundImage: `url(${designer?.avatar})`,
+                    }}
+                   ></div>
+                   <div className="d-info">
+                    <p style={{ marginBottom: "3px" }}>
+                     <span className="d-name">{designer?.displayName}</span>
+                     <span className="d-loc">{`${designer?.city}`}</span>
+                    </p>
+                    <p>
+                     {" "}
+                     <span className="d-count">
+                      {50} Products . Designed for {this.state.name}
+                     </span>
+                    </p>
+                   </div>
+                  </div>
+                 </a>
+                </Col>
+               </>
+              );
+             })}
+            </Row>
+           </>
           </TabPane>
           {this.state.isOwner && this.props.isLoggedIn ? (
            <>

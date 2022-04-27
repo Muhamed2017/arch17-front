@@ -40,6 +40,8 @@ import { ParallaxProvider } from "react-scroll-parallax";
 import "semantic-ui-css/semantic.min.css";
 import EditProjectWrapper from './pages/addProject/EditProjectWrapper';
 import Magazine from './pages/Magazine';
+import DesignerProducts from './pages/DesignerProducts';
+import BoardProjects from './pages/BoardProjects';
 class App extends Component {
    constructor(props){
      super(props)
@@ -126,6 +128,8 @@ class App extends Component {
               <Route path='/collection/:id' component={Collection} exact />
               <Route path='/profile' component={UserProfile} exact />
               <Route path='/usercollection/:id' component={UserCollection} exact />
+              <Route path='/designerproducts/:id' component={DesignerProducts} exact />
+              <Route path='/projectcollection/:id' component={BoardProjects} exact />
               <Route path='/types/:store_id/:type_name' component={Type} exact />
                <Route path='/product/edit/122' exact>
                 <TableStep/>

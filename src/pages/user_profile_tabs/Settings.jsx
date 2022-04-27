@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import blank from "../../../src/blank.jpg";
 import { auth } from "./../../firebase";
-import firebase from "firebase/app";
 import { connect } from "react-redux";
 import { Modal } from "react-bootstrap";
 import { toast, Flip } from "react-toastify";
@@ -18,7 +17,7 @@ import { Link } from "react-router-dom";
 import { Redirect } from "react-router";
 import { logginOut } from "./../../redux/actions/authActions";
 import { API } from "./../../utitlties";
-import { Spin, Select } from "antd";
+import { Spin, Select, Row as AntRow, Col as AntCol } from "antd";
 import ReactFlagsSelect from "react-flags-select";
 import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
 
@@ -328,7 +327,7 @@ class Settings extends Component {
   return (
    <>
     <div id="user-settings">
-     <Container fluid>
+     <Container fluid className="sized-container">
       <Row md={{ span: 12 }} style={{ marginBottom: "70px" }}>
        <Col sm={4}>
         <h2
@@ -359,20 +358,6 @@ class Settings extends Component {
          Profile Picture
         </h6>
         <div className="profile-container">
-         {/* {this.props.info?.photoURL ? ( */}
-         {/* {this.props.photoURL || this.state.user?.avatar ? (
-          <>
-           <img
-            // src={this.props.info?.photoURL}
-            src={this.props.photoURL ?? this.state.user?.avatar}
-            alt={this.props.displayName}
-           />
-          </>
-         ) : (
-          <>
-           <img src={blank} alt={this.props.info?.displayName} />
-          </>
-         )} */}
          <img
           src={
            this.props?.photoURL ??
@@ -516,6 +501,7 @@ class Settings extends Component {
              <Form.Control
               placeholder="Email"
               onChange={this.handleEmailChange}
+              disabled={true}
               value={this.state.email}
              />
             </Col>
@@ -525,36 +511,8 @@ class Settings extends Component {
           <></>
          )}
 
-         <Row md={{ span: 12 }}>
-          {!this.props.userInfo.info?.email?.includes("+") ? (
-           <>
-            {this.state.providerId === "password" && (
-             <>
-              <Col md={6}>
-               <button
-                href="#"
-                style={{
-                 textAlign: "right",
-                 textDecoration: "underline",
-                 fontWeight: "600",
-                 color: "#000",
-                 background: "transparent",
-                 outline: "none",
-                 border: "none",
-                }}
-                // onClick={this.changePasswordOpen}
-                onClick={this.changePasswordOpen}
-               >
-                Change Password
-               </button>
-              </Col>
-             </>
-            )}
-           </>
-          ) : (
-           <></>
-          )}
-          <Col md={6} style={{ textAlign: "right" }}>
+         <AntRow span={24} gutter={15} justify="end" align="middle">
+          <AntCol md={4}>
            <button
             style={{
              textAlign: "right",
@@ -569,12 +527,33 @@ class Settings extends Component {
            >
             Delete Account
            </button>
-          </Col>
-         </Row>
-         <Row span={{ span: 12 }} className="py-3">
-          <Col md={3}></Col>
-          <Col md={3}></Col>
-          <Col md={3} style={{ padding: "0" }}>
+          </AntCol>
+          {!this.props.userInfo.info?.email?.includes("+") ? (
+           <>
+            {this.state.providerId === "password" && (
+             <AntCol md={4}>
+              <button
+               href="#"
+               style={{
+                textAlign: "right",
+                textDecoration: "underline",
+                fontWeight: "600",
+                color: "#000",
+                background: "transparent",
+                outline: "none",
+                border: "none",
+               }}
+               onClick={this.changePasswordOpen}
+              >
+               Change Password
+              </button>
+             </AntCol>
+            )}
+           </>
+          ) : (
+           <></>
+          )}
+          <AntCol md={4}>
            <Link to="/profile">
             <Button
              style={{
@@ -591,6 +570,59 @@ class Settings extends Component {
              Cancel
             </Button>
            </Link>
+          </AntCol>
+          <AntCol md={4}>
+           {!isChanged ? (
+            <>
+             <Button
+              disabled
+              style={{
+               background: "#797979",
+               display: "block",
+               float: "right",
+               width: "120px",
+               textAlign: "center",
+               border: "none",
+              }}
+             >
+              Save
+             </Button>
+            </>
+           ) : (
+            <>
+             <Button
+              variant="danger"
+              onClick={this.handleUpdateProfile}
+              type="submit"
+              style={{
+               background: "#E41E15",
+               display: "block",
+               float: "right",
+               width: "120px",
+               textAlign: "center",
+              }}
+             >
+              {this.state.prfl_loading ? (
+               <>
+                <ClipLoader
+                 style={{ height: "20px" }}
+                 color="#ffffff"
+                 size={20}
+                />
+               </>
+              ) : (
+               <>Save</>
+              )}
+             </Button>
+            </>
+           )}
+          </AntCol>
+         </AntRow>
+         {/* <Row span={{ span: 12 }} className="py-3">
+          <Col md={3}></Col>
+          <Col md={3}></Col>
+          <Col md={3} style={{ padding: "0" }}>
+           
           </Col>
           <Col md={3}>
            {!isChanged ? (
@@ -638,7 +670,7 @@ class Settings extends Component {
             </>
            )}
           </Col>
-         </Row>
+         </Row> */}
         </div>
        </Col>
       </Row>

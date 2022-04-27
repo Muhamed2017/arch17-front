@@ -119,7 +119,6 @@ class RoleStep extends Component {
    .then((response) => {
     this.setState({
      brands: response.data.brands,
-     //  designers: response.data.users,
      designers: Object.values(response.data.users),
     });
     console.log(response);

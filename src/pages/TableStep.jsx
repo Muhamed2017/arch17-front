@@ -173,15 +173,15 @@ class TableStep extends React.Component {
             margin: "0 1px",
            }}
           >
-           {cover.src !== "" && (
+           {cover.src !== "" && cover?._src !== "" && (
             <>
              {record.option_id ? (
               <>
                <img
                 style={{ display: "block", width: "100%", height: "100%" }}
                 alt=""
-                //  src={cover._src}
-                src={cover.src}
+                src={cover._src}
+                // src={cover._src}
                />
               </>
              ) : (

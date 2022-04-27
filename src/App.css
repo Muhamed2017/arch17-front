@@ -1085,9 +1085,24 @@ button.save-product-step-btn {
  display: inline-block;
 }
 .ant-select-item-option {
- height: 36px !important;
+ /* height: 36px !important; */
  align-items: center !important;
  font-size: 1rem;
+}
+.designer-option-item {
+display: grid;
+grid-template-columns: 60px auto;
+align-items: center;
+font-family: "Roboto";
+font-weight: 400;
+
+}
+.designer-option-item .desimg{
+width: 50px;
+height: 50px;
+background-repeat: no-repeat;
+background-position: center;
+background-size: contain;
 }
 .react-select__option:hover {
  background-color: #e41e15;
@@ -1784,9 +1799,7 @@ input.file-upload {
  margin-bottom: 65px;
 }
 
-#react-tabs-9 {
- width: 850px !important ;
-}
+
 
 /* product files overview */
 
@@ -1975,6 +1988,14 @@ span.learn-more {
 #offer_modal .modal-header {
  border-bottom: none;
  justify-content: flex-end;
+}
+#price-request-modal .ant-tabs>.ant-tabs-nav .ant-tabs-nav-wrap{
+  justify-content: center;
+}
+#price-request-modal .ant-tabs-bottom>.ant-tabs-nav::before{
+
+    width: 80%;
+    margin: auto !important
 }
 .request-modal .ant-modal-header {
  border-radius: 10px 10px 0 0 !important;
@@ -2327,14 +2348,40 @@ span.learn-more {
  height: 100%;
 }
 /* end of add product styles */
-
+.add-project-icon{
+  position: relative;
+  width: 100%;
+  padding-top: 66.6%;
+  border: 1px solid #0000000a;
+  transition: border 400ms ease-in-out;
+}
+.add-project-icon a {
+  position:absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+text-align: center;
+}
+.add-project-icon svg{
+  font-size: 6rem;
+  display: block;
+  width: 100%;
+}
+.add-project-icon:hover{
+  border-color: #000;
+}
+.user-collection-tab{
+min-height: 600px;
+}
 @media (min-width: 1200px) {
  .container,
  .container-lg,
  .container-md,
  .container-sm,
  .container-xl,
- .container-fluid {
+.sized-container
+ /* .container-fluid  */
+ {
   max-width: 1266px !important;
  }
 }
@@ -2352,20 +2399,21 @@ span.learn-more {
 /* user profile styles */
 
 .profile-section {
- min-width: 300px;
- max-width: 695px;
- margin: 58px auto;
- display: grid;
- grid-template-columns: repeat(3, auto);
- align-items: flex-start;
- font-family: "Roboto";
+    min-width: 300px;
+    max-width: 745px;
+    margin: 58px auto 110px;
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    align-items: flex-start;
+    font-family: "Roboto";
+    grid-gap: 10p
 }
 .profile-img {
- width: 160px;
- height: 160px;
+ width: 150px;
+ height: 150px;
  border-radius: 50%;
  text-align: center;
- font-size: 7rem;
+ font-size: 6rem;
  font-weight: 600;
  font-family: "Roboto";
  vertical-align: middle;
@@ -2423,6 +2471,7 @@ span.learn-more {
  font-size: 40px;
  color: #000000;
  font-weight: 700;
+font-family: "Roboto";
 }
 .profile-heading .join-design {
  font-size: 16px;
@@ -2434,20 +2483,23 @@ span.learn-more {
  text-align: center;
 }
 .profile-tabs ul.react-tabs__tab-list li {
- display: inline-block;
- margin: 0 25px;
+display: inline-block;
+margin: 0 20px;
+height: 41px;
+font-size: 14px;
+font-family: "Roboto"
 }
 .profile-tabs .react-tabs__tab-list {
- max-width: unset;
- border-bottom: 1px solid #d8d8d8 !important;
- font-size: 20px;
- font-family: "Roboto";
- height: 57px;
- font-weight: 400 !important;
+    max-width: unset;
+    border-bottom: 1px solid #d8d8d8 !important;
+    font-size: 20px;
+    font-family: "Roboto";
+    height: 52px;
+    font-weight: 400 !important
 }
 .profile-tabs .react-tabs__tab--selected {
- border-bottom: 3px solid #000 !important;
- font-weight: 600;
+ border-bottom: 2px solid #000 !important;
+ /* font-weight: 600; */
 }
 .profile-tabs .react-tabs__tab {
  padding-bottom: 8px;
@@ -2558,6 +2610,7 @@ span.learn-more {
 .rect {
  background-color: #ededed;
  margin: 2px;
+  box-sizing: border-box;
  /* border-radius: 7px; */
  position: absolute;
  background-position: -1px center;
@@ -2573,6 +2626,7 @@ span.learn-more {
  border-top-left-radius: 7px;
  border-bottom-left-radius: 7px;
 }
+
 .rect-1,
 .rect-2 {
  right: -4.5px;
@@ -2588,6 +2642,42 @@ span.learn-more {
  border-bottom-right-radius: 7px;
  bottom: 0;
  top: 50%;
+}
+
+.rect-project-0 {
+  width: 49.7% ;
+  height: 49% ;
+  box-sizing: border-box;
+  border-top-left-radius: 7px;
+  border-bottom-left-radius: 0px;
+}
+.rect-project-1, .rect-project-2 {
+  width: 49.7% ;
+  height: 49.2% ;
+ margin-bottom: 2px;
+}
+.rect-project-3{
+  top:50%;
+  left:0;
+  height: 49.3%;
+  width: 49.5%;
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 7px;
+}
+
+.sharebtn{
+position: absolute;
+background: #e41e15;
+right: 5px;
+height: auto;
+top: 10px;
+border-radius: 4px;
+color: #fff;
+padding: 5px 20px;  
+display: none;
+}
+.collection-box:hover .sharebtn{
+display: block;
 }
 .profile-action-btn {
  vertical-align: middle;
@@ -4365,4 +4455,19 @@ p.designer-name-select {
 }
 a[href="https://www.froala.com/wysiwyg-editor?k=u"]{
 display: none !important;
+}
+
+.user-collection-tab .ant-tabs-top>.ant-tabs-nav::before, .sharemodal .ant-tabs-top>.ant-tabs-nav::before {
+
+  border-color: transparent;
+}
+
+.d-share-rows{
+  min-height: 180px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+.sharetype{
+      font-weight: 500;
+      font-size: 13px;
 }
