@@ -1,0 +1,171 @@
+.w-900{
+    font-weight: 900;
+}
+.w-300{
+    font-weight: 300;
+}
+.w-400{
+    font-weight: 400;
+}
+.w-500{
+    font-weight: 500;
+}
+.bg-black{
+    background-color: #000;
+    color: #fff;
+}
+.radius-5{
+    border-radius: 5px;
+}
+.decorated{
+    text-decoration: underline;
+}
+.btns  .bg-black{
+    max-width: 170px;
+}
+#procurement section{
+    max-width: 1265px;
+    margin: auto;
+    padding: 50px;
+}
+.side-head{
+    font-size: 24px;
+        font-weight: 600;
+        width: 80%
+}
+.side-p{
+    font-size: 15px;
+    font-weight: 300;
+}
+section.bg-gray{
+    background-color: silver;
+}
+.grid-box{
+position: relative;
+    width: 100%;
+    padding-top: 150%;
+    /* background: linear-gradient(180deg, #0000006b, transparent); */
+    background: #ddd;
+    border-radius: 10px;
+    font-size: 19px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+h5.main-head{
+font-size: 28px;
+font-weight: 600;
+text-align: center;
+margin-bottom: 10px;
+}
+.sec-head{
+margin: 0px 0 35px;
+    font-size: 16px;
+    font-weight: 600;
+    text-align:center
+}
+
+h5.main-head:nth-child(2){
+line-height: 15px;
+margin-bottom: 5px;
+}
+#products-grid .image-text{
+position: absolute;
+top: 35px;
+width: 100%;
+text-align: center;
+}
+#procurement-slider{
+    position: relative;
+}
+#procurement-slider button{
+    position: absolute;
+    bottom: 50%;
+}
+#procurement-slider button.next {
+    right: -10px;
+}
+#procurement-slider button.previuos {
+    left: -32px;
+}
+div{
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+.slide-img{
+    /* background-color: black; */
+    color: #fff;
+    width: 100%;
+    padding-top: 46%;
+    position: relative;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+.slide p{
+    color: #000 !important;
+    top: 100%;
+    display: block;
+    font-size: 2rem;
+}
+#procurement-timeline .ant-timeline-item-head-custom{
+background-color: transparent;
+}
+#procurement-timeline .ant-timeline-item {
+    height: 180px;
+}
+#procurement-timeline .ant-timeline-item-tail{
+    border-color: #000;
+    border-width: 3px;
+}
+#procurement-timeline .ant-timeline-item-content{
+    padding: 0 20px;
+}
+.timelinedot{
+width: 19px;
+height: 19px;
+background-color: #000;
+border-radius: 50%;
+margin: 0 10px;
+}
+.section-box{
+    margin:20px 0;
+}
+.section-box p:last-child{
+    color: #6c6c6c;
+    padding: 5px 40px;
+}
+#inner-grid{
+    color: #fff;
+}
+#products-grid > h5, section > h5{
+    font-size: 24px;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+p.second-p{
+    font-size: 14px;
+        font-weight: 400;
+        width: 450px !important;
+}
+.dwnld{
+    font-size: 18px;
+}
+#procurement .ant-row{
+row-gap: 100px !important;
+}
+.slide p {
+    font-size: 14px;
+    margin-top: 25px;
+    width: 100%;
+    display: block;
+    text-align: center;
+}
+.slide p:last-child{
+    margin-top: 0;
+}
+#procurement .ant-timeline {
+    max-width: 650px;
+    margin: auto;
+}

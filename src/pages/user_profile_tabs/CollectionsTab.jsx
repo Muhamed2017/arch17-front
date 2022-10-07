@@ -3,7 +3,10 @@ import { Container, Row, Col } from "react-bootstrap";
 import { Tabs, Modal } from "antd";
 import ShareModal from "../../components/Modals/ShareModal";
 import { connect } from "react-redux";
-import { OPEN_SHARE_COLLECTION_MODAL } from "./../../redux/constants";
+import {
+ OPEN_SHARE_COLLECTION_MODAL,
+ CLOSE_SHARE_COLLECTION_MODAL,
+} from "./../../redux/constants";
 
 const { TabPane } = Tabs;
 class CollectionsTab extends Component {
@@ -24,15 +27,15 @@ class CollectionsTab extends Component {
    <>
     <div className="user-collection-tab user-tab profile-tab">
      <Container fluid>
-      <Tabs type="" defaultActiveKey="productscollections">
+      <Tabs type="" defaultActiveKey="">
        <TabPane tab="Products" key="productscollections">
-        <Row md={{ span: 12 }} className="mt-5">
+        <Row className="mt-5">
          {Object.values(this.props.collections)?.length > 0 ? (
           <>
            {Object.values(this.props.collections).map((collection) => {
             return (
              <>
-              <Col lg={4} sm={6} xs={12} className="collection-col">
+              <Col md={4} lg={4} sm={6} xs={6} className="collection-col">
                {collection.pics.ids.length > 0 ? (
                 <>
                  <a href={`/usercollection/${collection.id}`}>
@@ -123,13 +126,13 @@ class CollectionsTab extends Component {
         </Row>
        </TabPane>
        <TabPane tab="Projects" key="projectscollections">
-        <Row md={{ span: 12 }} className="mt-5">
-         {Object.values(this.props.collections)?.length > 0 ? (
+        <Row className="mt-5">
+         {Object.values(this.props.boards)?.length > 0 ? (
           <>
            {Object.values(this.props.boards).map((collection) => {
             return (
              <>
-              <Col lg={4} sm={6} xs={12} className="collection-col">
+              <Col md={4} lg={4} sm={6} xs={6} className="collection-col">
                {collection.pics.ids.length > 0 ? (
                 <>
                  <a href={`/projectcollection/${collection.id}`}>
@@ -169,9 +172,11 @@ class CollectionsTab extends Component {
                        sharable: "board",
                       },
                       () => {
-                       this.setState({
-                        share_modal: true,
-                       });
+                       //    this.setState({
+                       //     // share_modal: true,
+
+                       //    });
+                       this.openShareModal();
                       }
                      );
                     }}
@@ -239,12 +244,11 @@ class CollectionsTab extends Component {
          {this.props.shared?.shared_folders?.length > 0 && (
           <>
            <p className="mt-5">Products Collections</p>
-
-           <Row md={{ span: 12 }} className="mt-2">
+           <Row className="mt-2">
             {this.props.shared?.shared_folders?.map((collection) => {
              return (
               <>
-               <Col lg={4} sm={6} xs={12} className="collection-col">
+               <Col md={4} lg={4} sm={6} xs={6} className="collection-col">
                 {collection.pics.ids.length > 0 ? (
                  <>
                   <a href={`/usercollection/${collection.id}`}>
@@ -315,11 +319,11 @@ class CollectionsTab extends Component {
          {this.props.shared?.shared_boards?.length > 0 && (
           <>
            <p className="mt-5">Project Collections</p>
-           <Row md={{ span: 12 }} className="mt-2">
+           <Row className="mt-2">
             {this.props.shared?.shared_boards?.map((collection) => {
              return (
               <>
-               <Col lg={4} sm={6} xs={12} className="collection-col">
+               <Col md={4} lg={4} sm={6} xs={6} className="collection-col">
                 {collection.pics.ids.length > 0 ? (
                  <>
                   <a href={`/projectcollection/${collection.id}`}>
@@ -427,9 +431,20 @@ class CollectionsTab extends Component {
      title="Share Collection"
      className="sharemodal"
      visible={this.props.share_modal}
-     style={{ top: 40 }}
-     on
-     onCancel={() => this.setState({ share_modal: false })}
+     style={{ top: 20 }}
+     footer={false}
+     closeIcon={
+      <div
+       className="mb-0"
+       onClick={() => {
+        this.props.dispatch({
+         type: CLOSE_SHARE_COLLECTION_MODAL,
+        });
+       }}
+      >
+       X
+      </div>
+     }
     >
      <ShareModal
       shareUrl={this.props.share_modal}
@@ -437,6 +452,7 @@ class CollectionsTab extends Component {
       sharable={this.state.sharable}
       user_id={this.state.user_id}
       sharer_id={this.props.user_id}
+      cl
      />
     </Modal>
    </>

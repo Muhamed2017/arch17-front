@@ -1,0 +1,168 @@
+
+
+
+/* auth pages in small screans */
+
+
+
+.auth-form.signup-form p.underiled-footer{
+font-weight: 400;
+    text-align: center;
+    margin-top: 20px;
+    color: #606060;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.designer-form .heading h6{
+            font-size: 1.3rem;
+            font-family: "Roboto";
+            font-weight: 300;
+}
+h2.design-form-head{
+    letter-spacing: -1.9px;
+            font-family: "Roboto";
+            font-size:2.8rem !important;
+}
+.design-form-head span:first-child{
+    font-weight:500 !important;
+}
+.design-form-head span:last-child{
+    font-weight: 300 !important;
+}
+@media screen and (min-width :768px){
+.auth-form.signup-form p.underiled-footer{
+    display: none;
+}
+
+span.undered{
+display: block;
+width: 100%;
+text-align: center;
+text-decoration: underline;
+margin-top: 10px;
+background-color: transparent !important;
+color: #606060;
+}
+}
+@media screen and (max-width :768px){
+    .auth-form.signup-form .ant-form-item{
+        margin-bottom: 18px;
+    }
+        span.undered{
+            display: none;
+        }
+    .auth-form.signup-form .form-group{
+        margin-bottom: -4px !important;
+    }
+    .auth-form .form-group input{
+        min-height: 42px;
+    }
+    .auth-form.signup-form input {
+                padding: 7px !important;
+    }
+    .auth-form.signup-form .terms{
+        width: 100%;
+    }
+    .auth-form.auth-form.signup-form .ant-input-affix-wrapper-lg{
+        padding: 1.5px 11px !important;
+    }
+    .auth-form.signup-form .ant-input:placeholder-shown{
+        font-size: 1.05rem !important;
+    }
+    .auth-form.auth-form.signup-form input#password{
+        min-height: 29px !important;
+    }
+    .auth-form.signup-form .terms,
+    .switch {
+        font-weight: 400;
+        font-size: 0.95rem
+    }
+    .auth-form.signup-form .switch {
+        font-weight: 600;
+    }
+    .auth-form .sign-footer{
+        position: unset;
+        width: 100%;
+            border-radius: 5px;
+            min-height: auto;
+            padding: 10px 0;
+            font-weight: 400;
+    }
+       .auth-form.signup-form
+        .switch span {
+            font-weight: 900;
+            padding: 0 5px;
+        }
+
+        .designer-form .col-12{
+            margin-bottom :16px !important;
+        }
+        .designer-form .ant-form{
+max-height: 100px !important;
+        }
+                .city-input{
+margin-bottom:2px !important;
+                }
+                .designer-form .ant-input-affix-wrapper.antd-country-phone-input.ant-input-affix-wrapper-lg{
+                    padding: 0px 11px !important;
+                    
+                }
+                .designer-form .ant-form-item{
+                    margin-bottom:0 !important;
+                }
+}
+
+@media screen and (max-width: 576px) {
+
+    .auth-form{
+    margin-top:0 ;
+    }
+    .auth-form .heading h2{
+        font-size: 2rem;
+    }
+        h2.design-form-head {
+            /* letter-spacing: -1.9px; */
+            /* font-family: "Roboto"; */
+            font-size: 2.8rem !important;
+        }
+    .auth-form .heading h6{
+        font-size: .95rem;
+        font-family: 'Roboto';
+        font-weight: 400;
+        /* width: 80%; */
+    }
+    .steps-content .auth-form .heading h6{
+        font-size: 1.3rem !important;
+
+
+    }
+        .custom-auth-steps .ant-steps-item-content{
+text-align: center !important;
+        }
+        .custom-auth-steps input#password{
+                min-height: 36px !important;
+                    padding: 7px !important;
+        }
+        .ant-steps-vertical>.ant-steps-item .ant-steps-item-title{
+            font-size: 16px;
+            padding-top: 10px;
+        }
+        .terms{
+            margin-bottom: 15px;
+        }
+}
+ .terms {
+     margin-bottom: 10px;
+ }
+@media screen and (max-width:343px){
+.auth-form .heading h2 {
+        font-size: 1.8rem;
+
+    }
+
+    .auth-form .heading h6 {
+        /* font-family: sans-serif; */
+        font-size: 1rem
+    }
+}

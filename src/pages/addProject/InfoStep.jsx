@@ -1,9 +1,10 @@
 import React, { Component } from "react";
-import { Form, Input, Checkbox, Row, Col, Select, DatePicker } from "antd";
+import { Form, Input, Row, Col, Select, DatePicker, Radio } from "antd";
 import { connect } from "react-redux";
 import ReactFlagsSelect from "react-flags-select";
 import { addProjectInfo } from "./../../redux/actions/addProjectActions";
 import { project_cats } from "../addProduct/ProductClassifications";
+import { customLabels } from "../CreateBrandFinish";
 
 const { Option } = Select;
 const config = {
@@ -17,6 +18,7 @@ class InfoStep extends Component {
    missed: false,
    selectedCats: this.props.info?.category ?? [],
    selectedTypes: this.props.info?.type,
+   _cat: this.props.info?.blogType ?? "",
   };
  }
 
@@ -63,7 +65,6 @@ class InfoStep extends Component {
        className="form-label mb-5"
        label="Project Name"
        initialValue={this.props.info?.name}
-       // in
        name="name"
        rules={[{ required: true, message: "Project Name is required" }]}
       >
@@ -71,27 +72,25 @@ class InfoStep extends Component {
       </Form.Item>
       <Form.Item
        name="blogType"
-       initialValue={this.props.info?.blogType ?? ""}
        label="Article Type"
+       initialValue={this.props.info?.blogType ?? ""}
        className="form-label mb-5"
        rules={[{ required: true, message: "Kind is required" }]}
        wrapperCol={{ offset: 0, span: 24 }}
       >
-       <Checkbox.Group>
-        <Row span={24} gutter={12}>
-         <Col md={10}>
-          <Checkbox value="project" style={{ lineHeight: "32px" }}>
-           Project
-          </Checkbox>
-         </Col>
-         <Col md={14}>
-          <Checkbox value="blog" style={{ lineHeight: "32px" }}>
-           Design Blog
-          </Checkbox>
-         </Col>
-        </Row>
-       </Checkbox.Group>
+       <Radio.Group
+        value={this.state._cat}
+        onChange={(e) => {
+         this.setState({
+          _cat: e.target.value,
+         });
+        }}
+       >
+        <Radio value="project">Project</Radio>
+        <Radio value="blog">Design Blog</Radio>
+       </Radio.Group>
       </Form.Item>
+
       <Form.Item
        name="category"
        label="Type"
@@ -100,7 +99,12 @@ class InfoStep extends Component {
        wrapperCol={{ span: 8, offset: 0 }}
        //   initialValue={this.props.info?.category ?? ""}
        initialValue={this.state.selectedCats ?? []}
-       rules={[{ required: true, message: "Category is required!" }]}
+       rules={[
+        {
+         required: this.state._cat === "project",
+         message: "Category is required!",
+        },
+       ]}
       >
        <Select
         placeholder="Please select "
@@ -129,13 +133,18 @@ class InfoStep extends Component {
         span: 8,
        }}
        className="form-label mb-5"
-       rules={[{ required: true, message: "Project kind is required!" }]}
+       rules={[
+        {
+         required: this.state._cat === "project",
+         message: "Project kind is required!",
+        },
+       ]}
       >
        <Select
         showSearch
         onChange={this.handleTypesChange}
         value={this.state.selectedTypes}
-        placeholder="Please select a country"
+        placeholder="Please select a category"
         style={{
          fontSize: "13px",
         }}
@@ -159,6 +168,7 @@ class InfoStep extends Component {
          selectedSize={14}
          optionsSize={18}
          searchable
+         customLabels={customLabels}
          placeholder="Select Country *"
          onSelect={(code) => {
           this.setState({ country: code });
@@ -197,17 +207,19 @@ class InfoStep extends Component {
        />
       </Form.Item>
 
-      {/* <div className="next-wrapper"> */}
-      <button
-       className="next-btn"
-       htmlType="submit"
-       onClick={() => {
-        console.log(this.state);
-       }}
-      >
-       Save & Continue
-      </button>
-      {/* </div> */}
+      <div className="next-wrapper">
+       <div className="next-inner">
+        <button
+         className="next-btn"
+         htmlType="submit"
+         onClick={() => {
+          console.log(this.state);
+         }}
+        >
+         Save & Continue
+        </button>
+       </div>
+      </div>
      </Form>
     </div>
    </>

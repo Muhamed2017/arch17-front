@@ -1,0 +1,159 @@
+
+
+
+.notif-item{
+    display: grid;
+    grid-template-columns: auto 80px 80px;
+    margin: 21px 0;
+    background: #efefef;
+    padding: 16px;
+    grid-gap: 20px;
+}
+.notif-info{
+    display: grid;
+     grid-template-columns: 100px auto auto;
+     align-items: center;
+     grid-gap: 20px;
+}
+.notif-img{
+    width: 100px;
+    height: 100px;
+    background-color: #fff;
+    border-radius: 50%;
+    border: 1px solid #c3c3c3;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.notif-btn{
+    height: 40px;
+        align-self: center;
+        color: #fff;
+        font-weight: bold;
+        border-radius: 5px;
+}
+.notif-btn.reject{
+        background: #a3a3a3;
+}
+.notif-btn.confirm{
+        background: #fc0c0c;
+}
+.notif-info .name{
+    font-weight:600;
+    font-size:18px;
+}
+.notif-info .title span{
+font-weight:500;
+}
+
+.tab-icon{
+width: 16px;
+    height: 16px;
+    position: relative;
+    border-radius: 50%;
+    display: inline-block;
+    color: #fff;
+    top: -13px;
+    right: 6px;
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+}
+.tab-icon-info{
+    background-color: #a3a3a3;
+}
+.tab-icon-red{
+    background-color: #fc0c0c;
+}
+.profile-tabs ul.react-tabs__tab-list li{
+    overflow: visible;
+}
+@media screen and (max-width:768px){
+    #user-profile .container-fluid{
+        padding: 0 8px !important;
+    }
+    .project-edit-btn, .project-delete-btn{
+        display: none;
+    }
+    .add-col{
+        display: none;
+    }
+    .profile-heading .name {
+            font-size: 19px;
+            margin: 20px auto 4px;
+            
+    }
+    .profile-heading{
+        height:auto;
+    }
+        .profile-heading .professions {
+            grid-template-columns: repeat(3, auto);
+            grid-gap: 12px;
+        }
+        .profile-heading .loc span{
+            margin-right: 9px;
+        }
+
+       .profile-section{
+        margin:25px auto 0px;
+       }
+       .profile-tabs ul.react-tabs__tab-list{
+        justify-content: left;
+        text-align: left;
+        min-width:1000px;
+       }
+        .profile-tabs ul.react-tabs__tab-list li {
+            margin: 0px 0px;
+            font-size: 13px;
+        }
+        .profile-settings-btn span{
+            display: none;
+        }
+        .profile-settings-btn {       
+            width: 29px;
+                height: 29px;
+                font-size: 16px;
+                position: absolute;
+                top: -29px;
+                right: 43px;
+                padding-top: 1px;
+                text-align: center;
+        }
+
+        .mobile-profile-btns{
+            position:absolute;
+            right: -3px;
+            top: 68px;
+
+        }
+        .profile-follow-btn {
+            width: 33px;
+            height: 31px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        #user-profile .profile-img{
+    width: 115px;
+        height: 115px;
+    
+        }
+         .profile-heading .loc{
+                    font-size:14px;
+                    margin-top: 8px;
+                }
+
+        .profile-heading .dc{
+          display:none;
+                            }
+
+        .profile-heading .proff-head{
+            display: none;
+        }
+
+        #user-profile .products{
+            padding: 5px;
+        }
+
+                        
+
+}

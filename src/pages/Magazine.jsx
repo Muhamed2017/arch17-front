@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Row, Col, Form, DatePicker, Spin, message, Modal } from "antd";
+import { Row, Col, Form, DatePicker, Spin, message, Modal, Select } from "antd";
 import "./css/Magazine.css";
 import ReactFlagsSelect from "react-flags-select";
 import { API } from "./../utitlties";
@@ -7,21 +7,32 @@ import axios from "axios";
 import { LoadingOutlined } from "@ant-design/icons";
 import Footer from "../components/Footer";
 import { connect } from "react-redux";
+import moment from "moment";
+import { project_cats } from "./../pages/addProduct/ProductClassifications";
 import SaveToBoard from "../components/Modals/SaveToBoard";
+
 class Magazine extends Component {
  constructor(props) {
   super(props);
+  this.urlString = new URLSearchParams(window.location.search);
   this.state = {
-   selectedTab: "",
-   country: "",
-   year: "",
+   selectedTab: this.urlString.get("category") ?? "",
+   country: this.urlString.get("country") ?? "",
+   year: this.urlString.get("year") ?? "",
    offset: 0,
    fetching: true,
-   creator: "",
-   project_type: "",
+   creator: this.urlString.get("kind") ?? "",
+   project_type: this.urlString.get("kind") ?? "",
    projects: [],
+   filteredOptions: project_cats,
    moreExist: true,
+   selectedTypes: this.urlString.get("types")
+    ? this.urlString.get("types")?.split(",")
+    : [],
    save_to_board_modal: false,
+   initialYear: this.urlString.get("year")
+    ? moment({ year: this.urlString.get("year"), month: 1, day: 1 })
+    : "",
   };
  }
  selectTab = (tab) => {
@@ -48,6 +59,7 @@ class Magazine extends Component {
   );
  };
  getProjects = (more = "") => {
+  this.setURL();
   const current_offset = this.state.offset;
   this.setState(
    {
@@ -56,10 +68,17 @@ class Magazine extends Component {
     loadingmore: more === "more" ? true : false,
    },
    () => {
-    const { year, country, selectedTab, offset, project_type } = this.state;
+    const {
+     year,
+     country,
+     selectedTab,
+     offset,
+     project_type,
+     selectedTypes,
+    } = this.state;
     axios
      .get(
-      `${API}projects/${offset}?filter[year]=${year}&filter[country]=${country}&filter[kind]=${selectedTab}&filter[article_type]=${project_type}`
+      `${API}projects/${offset}?filter[year]=${year}&filter[country]=${country}&filter[kind]=${selectedTab}&filter[article_type]=${project_type}&filter[type]=${selectedTypes}`
      )
      .then((response) => {
       this.setState({
@@ -77,7 +96,6 @@ class Magazine extends Component {
  };
  saveToBoard = () => {
   if (!this.props.isLoggedIn) {
-   //  this.setState({ authModal: true });
    message.warning("Login or register to save project");
   } else {
    this.setState({
@@ -85,9 +103,45 @@ class Magazine extends Component {
    });
   }
  };
+ setURL = () => {
+  const {
+   selectedTab,
+   year,
+   project_type,
+   country,
+   selectedTypes,
+  } = this.state;
+  const catParam = selectedTab ? `category=${selectedTab}` : "";
+  const kindParam = project_type ? `&kind=${project_type}` : "";
+  const countryParam = country ? `&country=${country}` : "";
+  const yearParam = year ? `&year=${year}` : "";
+  const typeParam = selectedTypes.length > 0 ? `&types=${selectedTypes}` : "";
+  const params =
+   selectedTab || project_type || country || year || typeParam ? "?" : "";
+
+  window.history.pushState(
+   {},
+   null,
+   `/magazine${params}${catParam}${kindParam}${countryParam}${yearParam}${typeParam}`
+  );
+ };
+
  componentDidMount() {
   this.getProjects();
  }
+
+ selectTypes = (types) => {
+  console.log(types);
+  this.setState(
+   {
+    selectedTypes: types,
+    filteredOptions: project_cats.filter((o) => !types.includes(o)),
+   },
+   () => {
+    this.getProjects();
+   }
+  );
+ };
  render() {
   const { selectedTab, project_type } = this.state;
   return (
@@ -100,7 +154,11 @@ class Magazine extends Component {
          <Row span={24} justify="start" align="middle">
           <Col md={13}>
            <Form name="basic" size="large" autoComplete="off">
-            <Form.Item name="year" className="form-label">
+            <Form.Item
+             name="year"
+             className="form-label"
+             initialValue={this.state.initialYear}
+            >
              <DatePicker
               size="middle"
               onChange={(e) => {
@@ -108,7 +166,9 @@ class Magazine extends Component {
                 {
                  year: e ? e?._d?.getFullYear() : "",
                 },
-                () => this.getProjects()
+                () => {
+                 this.getProjects();
+                }
                );
               }}
               placeholder="Year"
@@ -200,18 +260,7 @@ class Magazine extends Component {
           >
            All
           </p>
-          {/* <p
-           className={creator.includes("User") ? "active" : ""}
-           onClick={() => this.selectCreator("User")}
-          >
-           Designers
-          </p>
-          <p
-           className={creator.includes("Store") ? "active" : ""}
-           onClick={() => this.selectCreator("Store")}
-          >
-           Brands
-          </p> */}
+
           <p
            className={project_type === "project" ? "active" : ""}
            onClick={() => this.selectCreator("project")}
@@ -231,6 +280,27 @@ class Magazine extends Component {
      </div>
      <div>
       <div className="wrapper pt-5">
+       <div className="type-select mt-5">
+        <Select
+         mode="multiple"
+         clearIcon
+         size="large"
+         //  bordered={false}
+         showArrow
+         placeholder="select project type"
+         value={this.state.selectedTypes}
+         onChange={this.selectTypes}
+         style={{
+          width: "100%",
+         }}
+        >
+         {this.state.filteredOptions?.map((item) => (
+          <Select.Option key={item} value={item}>
+           {item}
+          </Select.Option>
+         ))}
+        </Select>
+       </div>
        <h5 className="magazine-head">17 Magazine</h5>
        <p className="magazine-p mb-5">
         Source Design Projects, Blogs, News and more & Get In Touch With
@@ -373,7 +443,6 @@ class Magazine extends Component {
  }
 }
 
-// export default Magazine;
 const mapStateToProps = (state) => {
  return {
   isLoggedIn: state?.regularUser?.isLoggedIn,

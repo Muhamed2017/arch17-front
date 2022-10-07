@@ -1,6 +1,6 @@
 import {
   SET_OPTIONS,
-  SET_PRICES,
+  // SET_PRICES,
   ADD_ROW,
   SET_ROWS,
   ADD_MATERIAL,
@@ -16,7 +16,7 @@ import {
 } from "../constants";
 
 const defaultState = {
-  covers:[],
+  // covers:JSON.parse(localStorage.getItem('covers'))??[],
   rows:[],
   optionsStored:false,
 
@@ -56,12 +56,12 @@ export default function userReducer(state = defaultState, action) {
           rows:action.payload
       }
 
-    case SET_OPTIONS:
-          return {
-            covers:[...state.covers, 
-            action.payload
-            ]
-      }
+    // case SET_OPTIONS:
+    //       return {
+    //         covers:[...state.covers, 
+    //         action.payload
+    //         ]
+    //   }
 
     case ADD_MATERIAL:
       state.rows[action.row_index]["material"] = action.data;

@@ -163,53 +163,55 @@ class UserCollection extends Component {
    <>
     <div id="collection-page">
      <div className="head-container">
-      <p className="name">{this.state.collection.name}</p>
-      <p className="col-name">
-       Products in
-       <span className="px-2 pr-5">
-        {this.state.collection_name}
-        {this.state.collection_user_uid === this.props.uid && (
-         <EditFilled onClick={() => this.setState({ visible: true })} />
-        )}
-       </span>
-      </p>
-      <p
-       className="share-btn"
-       onClick={() => this.setState({ share_modal: true })}
-      >
-       <ShareAltOutlined />
-      </p>
-      {this.props.uid === this.state.collection_user_uid && (
-       <>
-        <p className="delete-p" onClick={this.handleDeleteCollection}>
-         {this.state.deleting ? (
-          <>
-           <Spin
-            size="large"
-            indicator={
-             <LoadingOutlined
-              style={{ fontSize: "15px", color: "#000" }}
-              spin
-             />
-            }
-           />
-          </>
-         ) : (
-          "Delete Collection"
+      <div className="head-wrapper">
+       <p className="name">{this.state.collection.name}</p>
+       <p className="col-name">
+        Products in
+        <span className="px-2 pr-5">
+         {this.state.collection_name}
+         {this.state.collection_user_uid === this.props.uid && (
+          <EditFilled onClick={() => this.setState({ visible: true })} />
          )}
-        </p>
-       </>
-      )}
+        </span>
+       </p>
+       <p
+        className="share-btn"
+        onClick={() => this.setState({ share_modal: true })}
+       >
+        <ShareAltOutlined />
+       </p>
+       {this.props.uid === this.state.collection_user_uid && (
+        <>
+         <p className="delete-p" onClick={this.handleDeleteCollection}>
+          {this.state.deleting ? (
+           <>
+            <Spin
+             size="large"
+             indicator={
+              <LoadingOutlined
+               style={{ fontSize: "15px", color: "#000" }}
+               spin
+              />
+             }
+            />
+           </>
+          ) : (
+           "Delete Collection"
+          )}
+         </p>
+        </>
+       )}
+      </div>
      </div>
 
      <>
       <div className="products">
-       <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 24 }} className="py-5">
-        {this.state.products.length > 0 ? (
+       <Row gutter={{ xs: 15, sm: 16, md: 24, lg: 24 }} className="py-5">
+        {this.state.products?.length > 0 ? (
          <>
-          {this.state.products.map((product, index) => {
+          {this.state.products?.map((product, index) => {
            return (
-            <Col className="gutter-row mb-3" md={6}>
+            <Col className="gutter-row mb-3" lg={6} md={6} sm={12} xs={12}>
              <a href={`/product/${product.id}`}>
               <div className="product">
                <div
@@ -219,46 +221,46 @@ class UserCollection extends Component {
                 }}
                >
                 <div className="prlayer"></div>
-               {
-                 this.state.collection_user_uid===this.props.uid&&(<>
+                {this.state.collection_user_uid === this.props.uid && (
+                 <>
                   <div
-                 className="actns-btn svbtn"
-                 style={{
-                  background: "red",
-                  color: "#fff",
-                  border: "none",
-                  minHeight: "29px",
-                  textAlign: "center",
-                  fontSize: ".8rem",
-                  fontWeight: "600",
-                  width: "80px",
-                 }}
-                 onClick={(e) => {
-                  e.preventDefault();
-                  this.handleRemoveFromCollection(
-                   product.id,
-                   this.state.collection.id
-                  );
-                 }}
-                >
-                 {this.state.removing ? (
-                  <>
-                   <Spin
-                    size="large"
-                    indicator={
-                     <LoadingOutlined
-                      style={{ fontSize: "20px", color: "#000" }}
-                      spin
+                   className="actns-btn svbtn"
+                   style={{
+                    background: "red",
+                    color: "#fff",
+                    border: "none",
+                    minHeight: "29px",
+                    textAlign: "center",
+                    fontSize: ".8rem",
+                    fontWeight: "600",
+                    width: "80px",
+                   }}
+                   onClick={(e) => {
+                    e.preventDefault();
+                    this.handleRemoveFromCollection(
+                     product.id,
+                     this.state.collection.id
+                    );
+                   }}
+                  >
+                   {this.state.removing ? (
+                    <>
+                     <Spin
+                      size="large"
+                      indicator={
+                       <LoadingOutlined
+                        style={{ fontSize: "20px", color: "#000" }}
+                        spin
+                       />
+                      }
                      />
-                    }
-                   />
-                  </>
-                 ) : (
-                  "REMOVE -"
-                 )}
-                </div>
-                 </>)
-               }
+                    </>
+                   ) : (
+                    "REMOVE -"
+                   )}
+                  </div>
+                 </>
+                )}
                 {product?.files?.length > 0 ? (
                  <>
                   <div className="actns-btn file-btn cad">CAD</div>

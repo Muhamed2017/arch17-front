@@ -1,6 +1,8 @@
 import * as actions from '../constants'
 import axios from 'axios'
 import { API } from './../../utitlties';
+// import { dispatch } from 'react-hot-toast/dist/core/store';
+// import { getBrandData } from './dataActions';
 const addProductIdentity = ()=>{
     return {
         type:actions.ADD_PRODUCT_IDENTITY_REQUEST
@@ -12,6 +14,7 @@ const addProductIdentitySuccess = (identity) => {
         payload:identity
     }
 }
+
 
 const addProductIOptions = () => {
     return {
@@ -25,17 +28,25 @@ const addProductIOptionsSuccess = (options) => {
         payload:options
     }
 }
-const addProductDescription = () => {
+const addProductDescription = (description) => {
     return {
-        type: actions.ADD_PRODUCT_DESCRIPTION
-    }
-}
-const addProductDescriotionSuccess = (description)=>{
-    return {
-        type:actions.ADD_PRODUCT_DESCRIPTION_SUCCESS,
+        type: actions.ADD_PRODUCT_DESCRIPTION,
         payload:description
     }
 }
+
+const addProductFiles = (files) => {
+    return {
+        type: actions.ADD_PRODUCT_FILES,
+        payload:files
+    }
+}
+// const addProductDescriotionSuccess = (description)=>{
+//     return {
+//         type:actions.ADD_PRODUCT_DESCRIPTION_SUCCESS,
+//         payload:description
+//     }
+// }
 const nextTabAction = () => {
     return {
         type: actions.ADD_PRODUCT_NEXT_TAB
@@ -72,6 +83,18 @@ const addPrices = (prices)=>{
     return {
         type:actions.SET_PRICES,
         payload:prices
+    }
+}
+const saveOpts = (options)=>{
+
+    return {
+        type:actions.SAVE_OPTIONS,
+        payload:options
+    }
+}
+const resetAddProductAction = ()=>{
+    return {
+        type:actions.RESET_ADD_PRODUCT,
     }
 }
 const resetPrices = ()=>{
@@ -115,7 +138,9 @@ export const productIdentity = (name,
     places_tags,
     is_outdoor,
     is_for_kids,
-    product_file_kind, id)=>{
+    product_file_kind, id,
+    // collections, designers
+    )=>{
     return (dispatch)=>{
         dispatch(addProductIdentity());
         axios.post(`${API}identity/${id}`, {
@@ -137,12 +162,18 @@ export const productIdentity = (name,
             places_tags,
             is_outdoor,
             is_for_kids,
-            product_file_kind
+            product_file_kind,
+    // collections, designers
+
         })
         .then(response=>{
             dispatch(addProductIdentitySuccess(response.data.identity))
+
+            localStorage.setItem('identity' ,JSON.stringify(response.data.identity))
             console.log(response.data.identity);
             dispatch(gotoTap(1))
+            localStorage.setItem("tabIndex" ,1)
+
         })
         .catch(error=>{
             console.log(error)
@@ -150,19 +181,26 @@ export const productIdentity = (name,
     }
 
 }
-
-export const productDescription = (data, id)=>{
-    return (dispatch)=>{
-        dispatch(addProductDescription());
-        axios.post(`${API}desc/${id}`, data)
-            .then(response => {
-                console.log(response)
-                dispatch(addProductDescriotionSuccess())
-            }).catch(error => {
-                console.log(error)
-            })
+export const collectionsAndDesigners = (data)=>{
+    localStorage.setItem('coldes', JSON.stringify(data))
+return (dispatch =>{
+    dispatch(setCollectionsAndDesigners(data))
+})
+}
+const setCollectionsAndDesigners = (data)=>{
+      return {
+        type: actions.SET_COLLECTIONS_AND_DESIGNERS,
+        payload:data
     }
+}
+
+export const productDescription = (desc)=>{
     
+    localStorage.setItem('description', JSON.stringify(desc))
+    return (dispatch)=>{
+        dispatch(addProductDescription(desc));
+
+    }
 }
 export const productOptions = (options) => {
     return (dispatch) => {
@@ -179,27 +217,55 @@ export const productOptions = (options) => {
 
   
 }
+
+export const productFiles = (files)=>{
+    
+    localStorage.setItem('files', JSON.stringify(files))
+    return (dispatch)=>{
+        dispatch(addProductFiles(files));
+    }
+}
+
+export const saveOptions = (options)=>{
+      return (dispatch)=>{
+        dispatch(saveOpts(options))
+        localStorage.setItem('options', JSON.stringify(options))
+}}
+export const resetAddProduct = ()=>{
+    localStorage.removeItem('identity')
+    localStorage.removeItem('options')
+    localStorage.removeItem('files')
+    localStorage.removeItem('description')
+    localStorage.removeItem('covers')
+    localStorage.removeItem('coldes')
+    localStorage.setItem('tabIndex', 0)
+      return (dispatch)=>{
+        dispatch(resetAddProductAction())
+        // localStorage.setItem('options', JSON.stringify(options))
+}}
 export const addProductPrices = (price)=>{
       return (dispatch)=>{
         dispatch(addPrices(price))
     }
 }
+
 export const resetProductPrices =()=>{
      return (dispatch)=>{
         dispatch(resetPrices())
     }
 }
+
 export const addProductModalCodes = (code)=>{
       return (dispatch)=>{
         dispatch(addModalCodes(code))
     }
 }
+
 export const resetProductModalCodes =()=>{
      return (dispatch)=>{
         dispatch(resetModalCodes())
     }
 }
-
 
 
 export const nextTab = () => {
@@ -225,6 +291,7 @@ export const closeProductRequestAction=()=>{
 }
 
 export const gotoTap = (step) => {
+    localStorage.setItem("tabIndex" ,JSON.stringify(step))
     return (dispatch) => {
         dispatch(gotoTabStep(step))
     }

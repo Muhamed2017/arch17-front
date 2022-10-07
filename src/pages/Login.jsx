@@ -46,10 +46,11 @@ const Login = (props) => {
         <Form.Group>
          <Form.Control
           type="text"
+          size="large"
           name="email"
           id="email"
           noValidate
-          placeholder="Email Or Phone"
+          placeholder="Email"
           onChange={(e) => setEmail(e.target.value)}
          />
         </Form.Group>
@@ -59,6 +60,7 @@ const Login = (props) => {
           name="password"
           id="password"
           noValidate
+          size="large"
           placeholder="Password"
           onChange={(e) => setPassword(e.target.value)}
          />
@@ -82,7 +84,7 @@ const Login = (props) => {
          )}
         </button>
         <div className="form-separator"></div>
-        <button
+        {/* <button
          className="coninue-btn facebook-auth"
          onClick={(e) => {
           e.preventDefault();
@@ -99,7 +101,7 @@ const Login = (props) => {
           <FaLinkedinIn />
          </span>{" "}
          Continue With Linkedin
-        </button>
+        </button> */}
         {/* <button className="coninue-btn wechat-auth" type="submit">
          <span>
           <AiFillWechat />
@@ -108,7 +110,7 @@ const Login = (props) => {
         </button> */}
 
         <button
-         className="coninue-btn google-auth"
+         className="coninue-btn google-auth mb-4"
          onClick={(e) => {
           e.preventDefault();
           props.dispatchGoogleSignup();
@@ -130,7 +132,9 @@ const Login = (props) => {
         <div className="switch">
          <p>
           Don’t have an Arch17 ID?
-          <span> Register Now </span>
+          <a href="signup">
+           <span> Register Now </span>
+          </a>
          </p>
         </div>
        </Form>

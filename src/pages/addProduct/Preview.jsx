@@ -5,11 +5,9 @@ import { Form } from "react-bootstrap";
 import { Redirect } from "react-router-dom";
 import Cropper from "react-cropper";
 import { compressImage } from "./OptionsPrice";
-
 import axios from "axios";
 import { API } from "./../../utitlties";
 import { connect } from "react-redux";
-
 import { FaCloudUploadAlt } from "react-icons/fa";
 
 const { Option } = Select;
@@ -44,9 +42,8 @@ class Preview extends Component {
    inputValue: 0,
    aspectRatio: "free",
    edit: this.props?.edit ?? false,
-   options_covers: !this.props.edit
-    ? this.props?.options_covers
-    : this.props?.covers[0]?.covers,
+   options_covers: this.props?.options_covers,
+   selected_index: 0,
   };
  }
 
@@ -68,7 +65,6 @@ class Preview extends Component {
   this.setState({
    inputValue: value,
   });
-  // console.log(value);
  };
 
  handleDisplayNameChange = (e) => {
@@ -91,39 +87,35 @@ class Preview extends Component {
  };
 
  componentDidMount() {
-  // console.log(this.props);
-  // console.log(this.preview_src);
-  // console.log(this.state.prices);
+  console.log(this.props);
   this.setState({
    active: this.props?.options[0]?.url,
-   covers: this.props.edit
-    ? this.state?.covers?.flat(1)
-    : this.props.options_covers,
+   covers:
+    this.props.options_covers?.length > 0 ? this.props.options_covers : [],
   });
  }
 
  _crop() {
   const imageElement = this.cropperRef?.current;
   const cropper = imageElement?.cropper;
-  let cropped = cropper.getCroppedCanvas().toDataURL();
-  this.setState({ cropped_cover: cropper.getCroppedCanvas().toDataURL() });
+  let cropped = cropper.getCroppedCanvas()?.toDataURL();
+  this.setState({ cropped_cover: cropper.getCroppedCanvas()?.toDataURL() });
 
   this.setState({ cropped_cover: cropped });
   cropped_imgs.push(cropped);
   this.setState({ cropped_previews: cropped_imgs });
  }
- replaceImg(src) {
+ replaceImg(src, selected_index) {
   const imageElement = this.cropperRef?.current;
   const cropper = imageElement?.cropper;
   cropper.replace(src);
+  this.setState({
+   selected_index,
+  });
  }
- onCropComplete = (croppedArea, croppedAreaPixels) => {
-  // console.log(croppedArea, croppedAreaPixels);
- };
 
  handlePreview = (c) => {
   this.setState({ active: c.target.currentSrc });
-  // console.log(c);
  };
 
  dataURLtoFile = (dataurl, filename) => {
@@ -141,7 +133,6 @@ class Preview extends Component {
  };
  handlePublishProduct = async (e) => {
   e.preventDefault();
-
   if (this.state.cropped_cover) {
    this.setState({ loading: true });
 
@@ -151,31 +142,28 @@ class Preview extends Component {
    fd.append("display_name", this.state.displayName);
    fd.append(
     "preview_cover",
-    await compressImage(this.dataURLtoFile(this.state.cropped_cover, "file"))
+    // await compressImage(this.dataURLtoFile(this.state.cropped_cover, "file"))
+    this.dataURLtoFile(this.state.cropped_cover, "preview_cover")
    );
 
    axios
     .post(`${API}preview`, fd)
     .then((response) => {
-     //  console.log(response);
      this.setState({ published: true, loading: false });
     })
     .catch((err) => {
      this.setState({ published: true, loading: false });
     });
-   this.setState({ loading: false });
   } else {
    return;
   }
  };
- handleClickThumb = (index) => {
-  // console.log(this.state.img);
- };
+
  handleDisplayPriceChange = (e) => {
   this.setState({ displayPrice: e });
  };
  render() {
-  if (this.state.published) {
+  if (this.state.published && !this.state.loading) {
    return (
     <Redirect
      to={{
@@ -187,21 +175,29 @@ class Preview extends Component {
    return (
     <React.Fragment>
      <div className="step-form preview">
-      <button
-       className="save-product-step-btn"
-       style={{
-        top: "-110px",
-        height: "20px",
-        background: this.state.loading ? "#898989" : "",
-       }}
-       onClick={this.handlePublishProduct}
-      >
-       {this.state.loading ? (
-        <ClipLoader color="#ffffff" loading={true} size={18} />
-       ) : (
-        "Publish"
-       )}
-      </button>
+      <div className="next-wrapper">
+       <div
+        className="next-inner"
+        style={{
+         maxWidth: "1000px",
+        }}
+       >
+        <button
+         className="next-btn"
+         style={{
+          top: "-110px",
+          background: this.state.loading ? "#898989" : "",
+         }}
+         onClick={this.handlePublishProduct}
+        >
+         {this.state.loading ? (
+          <ClipLoader color="#ffffff" loading={true} size={18} />
+         ) : (
+          "Publish"
+         )}
+        </button>
+       </div>
+      </div>
 
       <Row>
        <Col span={10} className="pt-4">
@@ -209,7 +205,9 @@ class Preview extends Component {
          <div className="preview-wrapper">
           <div className={"preview image-preview"}></div>
          </div>
-         <div className="preview-store">Kelly Wearstler</div>
+         <div className="preview-store">
+          {this.props?.identity?.store_name?.store_name}
+         </div>
          <div className="preview-name">
           {this.state.displayName ?? this.props?.identity?.name}
          </div>
@@ -222,7 +220,6 @@ class Preview extends Component {
               padding: "0 0 0 5px",
              }}
             >
-             {" "}
              ¥ {this.state.displayPrice}
             </span>
            ) : (
@@ -238,17 +235,17 @@ class Preview extends Component {
          <Checkbox onChange={(e) => this.handleChangeAspRtio(e)}>
           Square
          </Checkbox>
-
          <div className="img-box">
           <Cropper
-           src={this.state.preview_src ?? ""}
+           src={this.state.preview_src}
            viewMode={1}
            style={{ height: "100%", width: "94%" }}
-           // Cropper.js options
            ref={this.cropperRef}
            cropend={this._crop.bind(this)}
            ready={this._crop.bind(this)}
-           crossOrigin="anonymous"
+           crossOrigin="Anonymous"
+           checkCrossOrigin={false}
+           checkOrientation={false}
            preview=".image-preview"
            aspectRatio={this.state.aspectRatio}
            autoCropArea={1}
@@ -258,47 +255,31 @@ class Preview extends Component {
            zoom={this.state.inputValue}
           />
          </div>
-         {/* <Slider
-          min={-10}
-          max={10}
-          // current={0}
-          onChange={(value) => this.onZoomChange(value)}
-          value={
-           typeof this.state.inputValue === "number" ? this.state.inputValue : 0
-          }
-         /> */}
         </>
-        {/* )} */}
         <div className="preview-options">
-         {/* {this.props.options_covers?.map((option, index) => { */}
-
-         {/* {this.state.options_covers.map((option, index) => { */}
          {this.state.covers?.map((option, index) => {
           if (option.src) {
            return (
             <>
-             <div className="preview-box">
-              <img
+             <div
+              onClick={() => this.replaceImg(option.src, index)}
+              className={`preview-box ${
+               this.state.selected_index === index ? "selected" : ""
+              }`}
+              style={{
+               backgroundImage: `url("${option?.src}")`,
+              }}
+             >
+              {/* <img
                src={option.src}
                alt="preview"
-               onClick={() => this.replaceImg(option.src)}
-              />
+              /> */}
              </div>
             </>
            );
           }
          })}
-         <div
-          className="upload-side-box"
-          style={{
-           background: "#ccc",
-           border: "1px dashed #666",
-           color: "#666",
-           textAlign: "center",
-           padding: "10px",
-           position: "relative",
-          }}
-         >
+         <div className="upload-side-box">
           <input
            type="file"
            style={{
@@ -344,9 +325,7 @@ class Preview extends Component {
          <Select
           listHeight={350}
           style={{ width: "100%" }}
-          // allowClear={true}
           showArrow={true}
-          // placeholder="Available Prices"
           size="large"
           value={
            this.state.displayPrice != "null" ? this.state.displayPrice : ""
@@ -378,7 +357,7 @@ const mapStateToProps = (state) => ({
  options: state?.optionsPrice?.rows?.productPictures ?? [],
  displayPrice: state.optionsPrice?.rows?.price ?? "",
  identity: state.addProduct?.identity,
- options_covers: state.optionsPrice?.covers,
+ options_covers: state.addProduct?.covers,
  pricesOptions: state.addProduct.prices,
 });
 export default connect(mapStateToProps, null)(Preview);

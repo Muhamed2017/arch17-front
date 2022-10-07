@@ -1,10 +1,7 @@
 import React, { useState } from "react";
-// import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import axios from "axios";
-// import ClassicEditor from "ckeditor5-custom-build/build/ckeditor";
-// import axios from "axios";
 import { API } from "../utitlties";
 import "../pages/addProject/Porject.css";
 import {
@@ -13,8 +10,6 @@ import {
  addProjectContent,
 } from "../redux/actions/addProjectActions";
 import { connect } from "react-redux";
-// import { message } from "antd";
-// import { Mentions } from "@ckeditor/ckeditor5-mention/src/mention";
 
 const TextEditor = (props) => {
  const [uploading, setUploading] = useState(false);
@@ -40,7 +35,6 @@ const TextEditor = (props) => {
         props.dispatchProjectCover(res.data.src);
         setUploading(false);
         setImages([...images, res.data.src]);
-        // console.log(loader);
         setLoaders([...loaders, loader]);
        })
        .catch((err) => {
@@ -77,31 +71,36 @@ const TextEditor = (props) => {
        location: "bottom",
       },
      }}
-     //  toolbarLocation="bottom"
      editor={ClassicEditor}
-     //  onReady={(editor) => {}}
-     //  onBlur={(event, editor) => {}}
-     //  onFocus={(event, editor) => {}}
      onChange={(event, editor) => {
       props.dispatchProjectContent(editor.getData());
       console.log(editor);
      }}
     />
    </div>
-   <button
-    className="next-btn"
-    onClick={() => {
-     console.log(loaders);
 
-     props.dispatchGoStep(2);
-    }}
-   >
-    Save & Continue
-   </button>
+   <div className="next-wrapper">
+    <div className="next-inner">
+     <button
+      className="prev-btn"
+      style={{ margin: "0 0px", position: "relative" }}
+      onClick={() => props.dispatchGoStep(0)}
+     >
+      Previous
+     </button>
+     <button
+      className="next-btn"
+      onClick={() => {
+       props.dispatchGoStep(2);
+      }}
+     >
+      Save & Continue
+     </button>
+    </div>
+   </div>
   </>
  );
 };
-//  export default ContentStep;
 const mapDispatchToProps = (dispatch) => ({
  dispatchProjectContent: (content) => dispatch(addProjectContent(content)),
  dispatchProjectCover: (cover) => dispatch(addProjectCover(cover)),

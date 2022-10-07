@@ -1,10 +1,31 @@
 import React, { Component, createRef } from "react";
-import { Row, Col, Carousel as AntCarousel, Spin, BackTop } from "antd";
+import {
+ Row,
+ Col,
+ Carousel as AntCarousel,
+ Spin,
+ BackTop,
+ Modal as AntModal,
+ Menu,
+} from "antd";
 import "./addProject/Porject.css";
 import axios from "axios";
 import { IoIosMail } from "react-icons/io";
 import { connect } from "react-redux";
-
+import {
+ FacebookShareButton,
+ LinkedinShareButton,
+ TwitterShareButton,
+ PinterestShareButton,
+ TumblrShareButton,
+ EmailShareButton,
+ PinterestIcon,
+ FacebookIcon,
+ LinkedinIcon,
+ TwitterIcon,
+ TumblrIcon,
+ EmailIcon,
+} from "react-share";
 import { LoadingOutlined } from "@ant-design/icons";
 import { ParallaxBanner } from "react-scroll-parallax";
 import { IoIosArrowUp } from "react-icons/io";
@@ -23,6 +44,8 @@ import { API } from "./../utitlties";
 import { Link } from "react-router-dom";
 import { Grid, Sticky, Ref, Icon } from "semantic-ui-react";
 import Footer from "./../components/Footer";
+import { regionNames } from "./../redux/constants";
+import SaveToBoard from "./../components/Modals/SaveToBoard";
 
 const { Column } = Grid;
 class Project extends Component {
@@ -34,6 +57,8 @@ class Project extends Component {
 
   this.state = {
    products: [],
+   save_to_board_modal: false,
+   share_menu: false,
    content_state: null,
    project_id: this.props.match.params.id,
    project: {
@@ -55,6 +80,7 @@ class Project extends Component {
    currentSlide: 1,
    designersToShow: 2,
    owner: [],
+   //  country: regionNames()
   };
  }
 
@@ -115,6 +141,7 @@ class Project extends Component {
      brands: response.data.brands,
      designers: response.data.designers,
      similars: response.data.similar,
+     country: regionNames.of(response.data.project?.country),
     });
    })
    .catch((error) => {
@@ -137,7 +164,71 @@ class Project extends Component {
  designer_prev = () => {
   this.designerCarousel.current.prev();
  };
+ menu = (
+  <Menu>
+   <Menu.Item key="1">
+    <FacebookShareButton
+     url="https://www.arch17test.live/product/155"
+     hashtag={"#Arch17"}
+    >
+     <FacebookIcon size={25} />
+    </FacebookShareButton>
+   </Menu.Item>
+   <Menu.Item key="2">
+    <LinkedinShareButton url={this.shareUrl} title="Share">
+     <LinkedinIcon size={25} />
+    </LinkedinShareButton>
+   </Menu.Item>
+   <Menu.Item key="3">
+    <PinterestShareButton
+     url={this.shareUrl}
+     title="Share"
+     media="https://res.cloudinary.com/azharuniversity/image/upload/v1639859531/ewhbtrqgav8xxoobzbyo.jpg"
+    >
+     <PinterestIcon size={25} />
+    </PinterestShareButton>
+   </Menu.Item>
+   <Menu.Item key="4">
+    <TwitterShareButton url={this.shareUrl} title="Share">
+     <TwitterIcon size={25} />
+    </TwitterShareButton>
+   </Menu.Item>
+   <Menu.Item key="5">
+    <TumblrShareButton
+     url={this.shareUrl}
+     title="Share"
+     tags={["Arch17", "Arch155"]}
+     caption="Arch17 Product Name with skneknekn"
+    >
+     <TumblrIcon size={25} />
+    </TumblrShareButton>
+   </Menu.Item>
+   <Menu.Item key="6">
+    <EmailShareButton
+     url={this.shareUrl}
+     title="Share"
+     tags={["Arch17", "Arch155"]}
+     caption="Arch17 Product Name with skneknekn"
+    >
+     <EmailIcon size={25} />
+    </EmailShareButton>
+   </Menu.Item>
+  </Menu>
+ );
+ shareUrl = `https://www.arch17.com/project/${this.props.match.params.id}`;
+ saveToBoard = () => {
+  if (!this.props.isLoggedIn) {
+   this.setState({ authModal: true });
+  } else {
+   this.setState({
+    save_to_board_modal: true,
+   });
+  }
+ };
  render() {
+  // const country = this.state.fetched
+  //  ? regionNames(this.state.project?.country)
+  //  : "";
   if (!this.state.fetched)
    return (
     <>
@@ -168,7 +259,7 @@ class Project extends Component {
       <section id="project-main">
        <Grid>
         <Grid.Row centered>
-         <Column mobile={2} tablet={2} computer={1}>
+         <Column mobile={0} tablet={2} computer={1} className="wide-view">
           <Sticky context={this.contextRef} offset={65} bottomOffset={0}>
            <div className="socials">
             <div>
@@ -194,7 +285,7 @@ class Project extends Component {
          </Column>
          <Ref innerRef={this.contextRef}>
           <Column
-           mobile={14}
+           mobile={16}
            tablet={7}
            computer={11}
            className="bg-white radius"
@@ -206,7 +297,7 @@ class Project extends Component {
             {/* <p className="location">{`${this.state.project?.country} ${this.state.project?.city} | ${this.state.project?.year} | 455`}</p> */}
             <p className="location">
              <MdLocationOn />
-             {`China , ${this.state.project?.city} | ${this.state.project?.year}`}
+             {`${this.state?.country} , ${this.state.project?.city} | ${this.state.project?.year}`}
             </p>
             <p className="location mx-1">
              By
@@ -231,6 +322,16 @@ class Project extends Component {
               </a>
              )}
             </p>
+            {this.state.designers?.length > 0 && (
+             <p className="designers-mobile">
+              Designers:
+              {this.state.designers?.map((designer) => {
+               return (
+                <a href={`/user/${designer?.uid}`}>{designer?.displayName}</a>
+               );
+              })}
+             </p>
+            )}
             <div className="editor-state my-3">
              {this.state.content_state && (
               <>
@@ -249,14 +350,13 @@ class Project extends Component {
            </div>
           </Column>
          </Ref>
-         <Column mobile={14} tablet={7} computer={4}>
-          {this.state.designers?.length > 0 && (
+         <Column mobile={16} tablet={7} computer={4}>
+          {this.state.designers?.length + this.state.brands?.length > 0 && (
            <>
             <Sticky context={this.contextRef} offset={62}>
              <div className="project-right-side">
               <div className="designers p-3">
                <p className="via">Designers</p>
-
                <AntCarousel
                 ref={this.designerCarousel}
                 autoplay
@@ -275,10 +375,10 @@ class Project extends Component {
                      <div
                       className="brand-slide-logo"
                       style={{
-                       backgroundImage: `url(${d.avatar})`,
+                       backgroundImage: `url(${d.photoURL})`,
                       }}
                      >
-                      {d.avatar && d.avatar?.length > 10 ? (
+                      {d.photoURL && d.photoURL?.length > 10 ? (
                        ""
                       ) : (
                        <p>{d.displayName[0]}</p>
@@ -286,13 +386,15 @@ class Project extends Component {
                      </div>
                     </Col>
                     <Col md={17}>
-                     <p className="name my-0">{d.displayName}</p>
+                     <a href={`/user/${d?.uid}`}>
+                      <p className="name my-0">{d.displayName}</p>
+                     </a>
                      <p className="title my-0">{d.professions[0]}</p>
                      <div className="des-btns">
-                      <button>
+                      <button disabled>
                        <IoIosMail />
                       </button>
-                      <button>
+                      <button disabled>
                        <AiOutlinePlus /> Follow
                       </button>
                      </div>
@@ -348,7 +450,9 @@ class Project extends Component {
                           {brand.logo && brand.logo?.length > 10 ? (
                            <></>
                           ) : (
-                           <p>{brand.name[0]}</p>
+                           <a href={`/brand/${brand.id}`}>
+                            <p>{brand.name[0]}</p>
+                           </a>
                           )}
                          </div>
                         </Col>
@@ -359,8 +463,8 @@ class Project extends Component {
                           {brand.city ? `, ${brand.city}` : ""}
                          </p>
                          <div className="des-btns">
-                          <button>
-                           <IoIosMail />
+                          <button disabled>
+                           <IoIosMail disabled />
                           </button>
                           <button>
                            <AiOutlinePlus /> Follow
@@ -418,12 +522,12 @@ class Project extends Component {
       <>
        <section id="product-tags">
         <div className="products">
-         <p className="py-2 mb-5 head">Featured Products in this project …</p>
-         <Row span={24} gutter={30}>
+         <p className="head">Featured Products in this project …</p>
+         <Row span={24} gutter={{ lg: 30, md: 24, sm: 15, xs: 15 }}>
           {this.state.products?.map((product, index) => {
            return (
             <>
-             <Col className="gutter-row mb-3" md={6}>
+             <Col className="gutter-row mb-3" md={6} lg={6} sm={12} xs={12}>
               <div className="product">
                <a href={`/product/${product.id}`}>
                 <div
@@ -531,14 +635,14 @@ class Project extends Component {
       <>
        <section id="similar-projects">
         <div className="inner-projects px-2">
-         <p className="py-2 mb-5 head">Similar Projects</p>
-         <Row span={24} gutter={24} justify="">
+         <p className="head">Similar Projects</p>
+         <Row span={24} gutter={{ lg: 24, md: 24, sm: 16, xs: 10 }} justify="">
           {this.state.similars?.map((p) => {
            return (
-            <Col xs={24} sm={12} md={8} className="mb-4">
+            <Col lg={8} sm={12} md={8} xs={12} className="mb-4">
              <a href={`/project/${p.id}`} className="box-link">
               <div className="project-col bg-white">
-               {/* <button
+               <button
                 className="project-btn svbtn svprojectbtn"
                 onClick={(e) => {
                  e.preventDefault();
@@ -553,8 +657,8 @@ class Project extends Component {
                  );
                 }}
                >
-                SAVE
-               </button> */}
+                +
+               </button>
                <div className="project-image-wrapper">
                 <div
                  className="project-image"
@@ -621,11 +725,53 @@ class Project extends Component {
      )}
      <Footer />
     </div>
+
     <BackTop visibilityHeight={2000}>
      <div className="ant-back-project" style={{}}>
       <IoIosArrowUp />
      </div>
     </BackTop>
+    <button
+     id="share-project"
+     className={!this.state.share_menu ? "rounded-circle" : ""}
+     onClick={(e) => {
+      e.preventDefault();
+      this.setState(
+       {
+        to_save_project_cover: this.state.project?.cover,
+        to_save_projectId: this.state.project,
+       },
+       () => {
+        this.saveToBoard();
+       }
+      );
+     }}
+    >
+     +
+    </button>
+
+    <AntModal
+     title={this.state.save_to_board_modal}
+     width={700}
+     className="request-modal"
+     visible={this.state.save_to_board_modal}
+     destroyOnClose={true}
+     footer={false}
+     closeIcon={
+      <>
+       <div onClick={() => this.setState({ save_to_board_modal: false })}>
+        X
+       </div>
+      </>
+     }
+     okButtonProps={{ hidden: true }}
+     cancelButtonProps={{ hidden: true }}
+    >
+     <SaveToBoard
+      cover={this.state.to_save_project_cover}
+      project={this.state.to_save_projectId}
+     />
+    </AntModal>
    </>
   );
  }

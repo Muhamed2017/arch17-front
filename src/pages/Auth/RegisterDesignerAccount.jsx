@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import { Container, Col, Row, Form } from "react-bootstrap";
-import { FaLinkedinIn, FaFacebookF } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { connect } from "react-redux";
 import { Form as FormAnt, Input } from "antd";
-import { LinkedIn } from "react-linkedin-login-oauth2";
 import club from "../../../src/club-logo.png";
+import "./../auth.css";
 import {
  signupEmailPassword,
  signupFacebook,
@@ -54,40 +53,51 @@ const RegisterDesignerAccount = (props) => {
        className="m-auto p-5 bg-white rounded"
        style={{ position: "relative" }}
       >
-       <div className="heading">
-        <img
-         src={club}
-         alt=""
-         style={{
-          width: "110px",
-          display: "block",
-          margin: "auto",
-         }}
-        />
-        <h2
-         style={{
-          letterSpacing: "-2.5px",
-          fontFamily: "Roboto",
-         }}
-        >
-         designclub
-        </h2>
+       {!props.for_company && (
+        <>
+         <div className="heading">
+          <img
+           src={club}
+           alt=""
+           style={{
+            width: "110px",
+            display: "block",
+            margin: "auto",
+           }}
+          />
+          <h2
+           className="design-form-head"
+           style={{
+            letterSpacing: "-1.9px",
+            fontFamily: "Roboto",
+           }}
+          >
+           <span>design</span>
+           <span>club</span>
+          </h2>
 
-        <h6
-         style={{
-          color: "#a1a1a1",
-          fontSize: "1.4rem",
-          fontFamily: "Roboto",
-         }}
-        >
-         For architecture & designers club and get the best of Arch17
-        </h6>
-       </div>
+          <h6
+           style={{
+            color: "#a1a1a1",
+            fontSize: "1.4rem",
+            fontFamily: "Roboto",
+           }}
+          >
+           For architecture & designers club and get the best of Arch17
+          </h6>
+         </div>
+        </>
+       )}
        <Form noValidate>
         <Form.Group style={{ marginBottom: "0" }}>
          <FormAnt>
           <Row>
-           <Col>
+           <Col
+            lg={{ span: 6 }}
+            md={{ span: 6 }}
+            sm={{ span: 12 }}
+            xs={{ span: 12 }}
+           >
             <FormAnt.Item
              name="fname"
              rules={[
@@ -112,7 +122,12 @@ const RegisterDesignerAccount = (props) => {
              />
             </FormAnt.Item>
            </Col>
-           <Col>
+           <Col
+            lg={{ span: 6 }}
+            md={{ span: 6 }}
+            sm={{ span: 12 }}
+            xs={{ span: 12 }}
+           >
             <FormAnt.Item
              name="lname"
              rules={[
@@ -218,27 +233,7 @@ const RegisterDesignerAccount = (props) => {
         </button>
         <div id="recaptch-container"></div>
         <div className="form-separator"></div>
-        <button
-         className="coninue-btn facebook-auth"
-         onClick={(e) => {
-          e.preventDefault();
-          props.dispatchFacebookSignup();
-         }}
-        >
-         <span>
-          <FaFacebookF />
-         </span>
-         Continue With Facebook
-        </button>
 
-        <LinkedIn className="coninue-btn linkedin-auth" disabled>
-         <button className="coninue-btn linkedin-auth" disabled={true}>
-          <span>
-           <FaLinkedinIn />
-          </span>
-          Continue With Linkedin
-         </button>
-        </LinkedIn>
         <button
          className="coninue-btn google-auth"
          onClick={(e) => {
@@ -259,8 +254,10 @@ const RegisterDesignerAccount = (props) => {
         </div>
         <div className="switch">
          <p>
-          Already have an Arch17 ID?
-          <span> Sign in</span>
+          Create regular account
+          <a href="/signup">
+           <span> Signup</span>
+          </a>
          </p>
         </div>
        </Form>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 
-import EditIdentity from "../editProduct/EditIdentity";
+// import EditIdentity from "../editProduct/EditIdentity";
 import ProductFiles from "./ProductFiles";
 import { connect } from "react-redux";
 import {
@@ -15,15 +15,15 @@ import { useParams } from "react-router-dom";
 import "react-notifications-component/dist/theme.css";
 import Preview from "./Preview";
 import TableStep from "../TableStep";
+import OptionsStep from "../addProduct/OptionsStep";
 import axios from "axios";
 import { API } from "./../../utitlties";
+import IdentityStep from "./IdentityStep";
 const AddProductWrapper = (props) => {
  const [tabIndex, setTabIndex] = useState(props.tabIndex);
- //  const [tabIndex, setTabIndex] = useState(0);
  const [rows, setRows] = useState([]);
  const [loaded, setLoaded] = useState(false);
  const [collections, setCollections] = useState([]);
- //  const [designers, setDesigners] = useState([]);
  const [store, setStore] = useState([]);
  const params = useParams();
 
@@ -37,8 +37,8 @@ const AddProductWrapper = (props) => {
    .then((response) => {
     setRows(response.data.product.options);
     console.log(response.data.product);
-    setCollections(response.data.product.store.collections);
-    setStore(response.data.product.store);
+    setCollections(response.data.product?.store?.collections);
+    setStore(response.data.product.stores);
     setLoaded(true);
     // return;
    })
@@ -63,7 +63,10 @@ const AddProductWrapper = (props) => {
        <Tab
         onClick={() => {
          if (props.identity) {
-          props.dispatchMoveToTab(1);
+          // props.dispatchMoveToTab(1);
+          if (props.tabIndex > 1) {
+           props.dispatchMoveToTab(1);
+          }
          }
         }}
        >
@@ -71,23 +74,29 @@ const AddProductWrapper = (props) => {
        </Tab>
        <Tab
         onClick={() => {
-         props.dispatchMoveToTab(2);
+         //  props.dispatchMoveToTab(2);
+         if (props.tabIndex > 2) {
+          props.dispatchMoveToTab(2);
+         }
         }}
        >
         3. Product Description
        </Tab>
        <Tab
         onClick={() => {
-         props.dispatchMoveToTab(3);
+         //  props.dispatchMoveToTab(3);
+         if (props.tabIndex > 3) {
+          props.dispatchMoveToTab(3);
+         }
         }}
        >
         4. Files Uploads
        </Tab>
-       <Tab onClick={() => props.dispatchMoveToTab(4)}>5. Product Cover</Tab>
+       <Tab>5. Product Cover</Tab>
       </TabList>
      </div>
      <TabPanel forceRender>
-      <EditIdentity
+      {/* <EditIdentity
        id={params.id}
        data={{ params }}
        store={store}
@@ -95,10 +104,22 @@ const AddProductWrapper = (props) => {
        //  designers={designers}
        selected_collections={props.location.state?.selected_collections}
        category={props.location.state?.category}
+      /> */}
+
+      <IdentityStep
+       id={params.id}
+       data={{ params }}
+       store={store}
+       pidentity={JSON.parse(localStorage.getItem("identity"))}
+       collections={props.location.state?.collections}
+       //  designers={designers}
+       selected_collections={props.location.state?.selected_collections}
+       category={props.location.state?.category}
       />
      </TabPanel>
      <TabPanel forceRender id="options-step">
-      <TableStep edit={false} id={params.id} rows={rows} />
+      <OptionsStep edit={false} id={params.id} rows={rows} />
+      {/* <TableStep edit={false} id={params.id} rows={rows} /> */}
      </TabPanel>
      <TabPanel forceRender>
       <ProductFiles id={params.id} edit={false} />

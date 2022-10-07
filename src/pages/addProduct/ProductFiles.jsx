@@ -2,35 +2,58 @@ import React, { Component } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import { RiCodeSSlashFill } from "react-icons/ri";
-import ProgressBar from "react-bootstrap/ProgressBar";
-import { Form, Col, Row, Modal, Button } from "react-bootstrap";
-import { convertToRaw, EditorState, convertFromRaw } from "draft-js";
+import { Modal, Button } from "react-bootstrap";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { Editor } from "react-draft-wysiwyg";
-import { DeleteOutlined } from "@ant-design/icons";
+import ReactPlayer from "react-player";
+
 import { connect } from "react-redux";
 import axios from "axios";
-import { Progress } from "antd";
+import { Popover, Input, Progress } from "antd";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
 import {
  nextTab,
  productDescription,
 } from "../../redux/actions/addProductActions";
 import ClipLoader from "react-spinners/ClipLoader";
 import { API } from "./../../utitlties";
+function uploadAdapter(loader) {
+ return {
+  upload: () => {
+   return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    loader.file.then((file) => {
+     fd.append("cover", file);
+     axios
+      .post(`${API}uploadimg`, fd)
+      .then((res) => {
+       resolve({
+        default: res.data.src,
+       });
+      })
+      .catch((err) => {
+       reject(err);
+       console.log(err);
+      });
+    });
+   });
+  },
+ };
+}
+function uploadPlugin(editor) {
+ editor.plugins.get("FileRepository").createUploadAdapter = (loader) => {
+  return uploadAdapter(loader);
+ };
+}
 class ProductFiles extends Component {
- //  galleriyFiles = [];
- embed_urls = [];
-
  constructor(props) {
   super(props);
   console.log(this.props);
-
   this.state = {
    modals: {
     overview_ex_modal: false,
     dimension_ex_modal: false,
     material_ex_modal: false,
-    embed_modal: false,
    },
    index: 0,
    over_view_image: null,
@@ -48,24 +71,36 @@ class ProductFiles extends Component {
    loading: false,
    product_id: null,
    stateChanged: false,
+   vidoes: [],
+   url: "",
+   galleryItmes: this.props?.edit
+    ? this.props.galleries?.map((g) => {
+       if (
+        g.desc_gallery_files[0]?.includes("api.arch17.com") ||
+        g.desc_gallery_files[0]?.includes("/upload/")
+       ) {
+        return {
+         type: "image",
+         src: g.desc_gallery_files[0],
+         loaded: 100,
+         gallery_id: g?.id,
+        };
+       }
+      })
+    : this.props._description?.galleryItmes ?? [],
+   visible: false,
    overViewEditorState:
     this.props?.edit && this.props.description
-     ? EditorState?.createWithContent(
-        convertFromRaw(JSON.parse(this.props?.description?.overview_content))
-       )
-     : EditorState?.createEmpty(),
+     ? this.props?.description?.overview_content
+     : this.props._description?.overViewEditorState ?? "",
    materialDesceditorState:
     this.props?.edit && this.props.description
-     ? EditorState?.createWithContent(
-        convertFromRaw(JSON.parse(this.props?.description?.mat_desc_content))
-       )
-     : EditorState?.createEmpty(),
+     ? this.props?.description?.mat_desc_content
+     : this.props._description?.materialDesceditorState ?? "",
    sizeDescEditorState:
-    this.props.edit && this.props.description
-     ? EditorState?.createWithContent(
-        convertFromRaw(JSON.parse(this.props?.description?.size_content))
-       )
-     : EditorState?.createEmpty(),
+    this.props?.edit && this.props.description
+     ? this.props?.description?.size_content
+     : this.props._description?.sizeDescEditorState ?? "",
    overviewLength: 0,
    sizeLength: 0,
    materialLength: 0,
@@ -75,25 +110,51 @@ class ProductFiles extends Component {
    startLoading: false,
   };
  }
+ uploadAdapter = (loader) => {
+  return {
+   upload: () => {
+    // setUploading(true);
+    return new Promise((resolve, reject) => {
+     //  IncrementFilesCounter(filesCounter + 1);
 
+     const fd = new FormData();
+     loader.file.then((file) => {
+      fd.append("cover", file);
+      axios
+       .post(`${API}uploadimg`, fd)
+       .then((res) => {
+        resolve({
+         default: res.data.src,
+        });
+       })
+       .catch((err) => {
+        reject(err);
+        console.log(err);
+       });
+     });
+    });
+   },
+  };
+ };
+
+ uploadPlugin = (editor) => {
+  editor.plugins.get("FileRepository").createUploadAdapter = (loader) => {
+   return uploadAdapter(loader);
+  };
+ };
  fd = new FormData();
  overviewExample_open = () => {
   this.setState({ overview_ex_modal: true });
  };
- embedModal_open = () => {
-  this.setState({ embed_modal: true });
- };
+
  skip_modal_close = () => {
   this.setState({ skip_modal: false });
  };
- embedModal_close = () => {
-  this.setState({ embed_modal: false });
- };
+
  overviewExample_close = () => {
   this.setState({ overview_ex_modal: false });
  };
  componentDidMount() {
-  // console.log(this.state.galleries);
   this.setState({
    gelleries: this.props.edit ? this.props.galleries : [],
   });
@@ -106,114 +167,12 @@ class ProductFiles extends Component {
   console.log(this.state.index);
  }
 
- onChangeEmbedUrl = (e) => {
-  this.setState({ embed_url: e.target.value });
- };
- addEmbedBox = () => {
-  this.embed_urls.push(this.state.embed_url);
- };
-
- handleDeleteGllery = (id, index) => {
-  const gelleries = this.state.gelleries;
-
-  axios.post(`${API}product/delete/gallery/${id}`).then((response) => {
-   console.log(response);
-   this.setState({
-    gelleries: gelleries.filter((file, ind) => {
-     return file.id !== id;
-    }),
-
-    stateChanged: true,
-   });
-  });
- };
-
- onChangeGallery = ({ target: { files } }) => {
-  if (files && files.length > 0) {
-   let galleriyFiles = this.state.gelleries;
-   const src = URL.createObjectURL(files[0]);
-   galleriyFiles.push({
-    id: null,
-    desc_gallery_files: [src],
-   });
-   this.setState({ gallery_url: src, startLoading: true });
-   this.setState({ gelleries: galleriyFiles });
-   console.log(galleriyFiles);
-   const reader = new FileReader();
-   reader.addEventListener("load", () => {
-    this.setState({ gallery_video: files[0] });
-   });
-   reader.readAsDataURL(files[0]);
-   this.setState({ gallery_video: files[0] });
-  }
-
-  let formData = new FormData();
-  formData.append("desc_gallery_files[]", files[0]);
-
-  const options = {
-   onUploadProgress: (progressEvent) => {
-    const { loaded, total } = progressEvent;
-    let percent = Math.floor((loaded * 100) / total);
-    this.setState({ loaded: percent });
-    console.log(`${loaded} kb of ${total} | ${percent}%`);
-    if (percent < 100) {
-     this.setState({ loading_gallery_pecent: percent });
-    } else {
-     this.setState({
-      startLoading: false,
-     });
-    }
-   },
-  };
-  axios
-   .post(`${API}desc/${this.state.product_id}`, formData, options)
-   .then((response) => {
-    console.log(response);
-    this.setState({
-     gelleries: response.data.product_desc.gallery,
-     startLoading: false,
-     stateChanged: true,
-    });
-   })
-   .catch((err) => {
-    this.setState({
-     startLoading: false,
-    });
-    console.log(err);
-   });
- };
-
  skip = () => {
   this.props.dispatchNextStep();
  };
 
- uploadSizeCallback = (file) => {
-  return new Promise((resolve, reject) => {
-   const formData = new FormData();
-   formData.append("img[]", file);
-   formData.append("desc_id", this.state.desc_id);
-   axios
-    .post(`${API}upload/${this.props.id}`, formData)
-    .then((response) => {
-     resolve({
-      data: { link: response.data.img[response.data.lastIndex].file_url },
-     });
-     console.log(response.data);
-
-     this.setState({
-      desc_id: response.data.product_desc.description[0].id,
-      stateChanged: true,
-     });
-    })
-    .catch((err) => {
-     console.log(err);
-     reject(err);
-    });
-  });
- };
-
  handleNextStep = (e) => {
-  if (!this.state.stateChanged) {
+  if (!this.state.stateChanged && this.state.galleryItmes?.length < 1) {
    if (this.props.edit) {
     this.props.dispatchNextStep();
    } else {
@@ -223,99 +182,229 @@ class ProductFiles extends Component {
    }
   } else {
    this.setState({ loading: true });
+   const videos = [];
+   const images = [];
+   const { galleryItmes } = this.state;
+   for (let i = 0; i < this.state.galleryItmes?.length; i++) {
+    if (galleryItmes[i].type === "video") {
+     videos.push(galleryItmes[i].src);
+    } else {
+     images.push(galleryItmes[i].file);
+    }
+   }
+
+   const fdGallery = new FormData();
+
+   images.map((i) => {
+    fdGallery.append("desc_gallery_files[]", i);
+   });
+   videos.map((v) => {
+    fdGallery.append("desc_gallery_srcs[]", v);
+   });
+
+   //
+   const {
+    overViewEditorState,
+    sizeDescEditorState,
+    materialDesceditorState,
+   } = this.state;
+   const description = {
+    overViewEditorState,
+    sizeDescEditorState,
+    materialDesceditorState,
+    galleryItmes,
+   };
+
    const formDataOverview = new FormData();
-   formDataOverview.append(
-    "overview_content",
-    JSON.stringify(
-     convertToRaw(this.state.overViewEditorState.getCurrentContent())
-    )
-   );
-   formDataOverview.append(
-    "size_content",
-    JSON.stringify(
-     convertToRaw(this.state.sizeDescEditorState.getCurrentContent())
-    )
-   );
+   formDataOverview.append("overview_content", this.state.overViewEditorState);
+   formDataOverview.append("size_content", this.state.sizeDescEditorState);
    formDataOverview.append(
     "mat_desc_content",
-    JSON.stringify(
-     convertToRaw(this.state.materialDesceditorState.getCurrentContent())
-    )
+    this.state.materialDesceditorState
    );
    formDataOverview.append("desc_id", this.state.desc_id);
    axios
     .post(`${API}overviewContnet/${this.state.product_id}`, formDataOverview)
     .then((response) => {
-     this.setState({ loading: false });
+     this.props.dispatchDescriptionStep(description);
+     this.setState({
+      loading: false,
+     });
      this.props.dispatchNextStep();
     })
     .catch((error) => console.log(error));
   }
  };
 
- onEditorStateOverviewChange = (overViewEditorState) => {
-  this.setState({
-   overViewEditorState,
-   stateChanged: true,
-   overviewLength: convertToRaw(
-    this.state.overViewEditorState.getCurrentContent()
-   ).blocks[0].text.length,
+ // gallery hooks and function
+ addImages = (e) => {
+  const { galleryItmes } = this.state;
+  const previews = [...e.target.files]?.map((file) => {
+   return {
+    src: URL.createObjectURL(file),
+    type: "image",
+    file,
+    loaded: 0,
+   };
   });
-  console.log(overViewEditorState);
+  this.setState({
+   galleryItmes: [...galleryItmes, ...previews],
+  });
+
+  [...e.target.files]?.map((file, index) => {
+   const options = {
+    onUploadProgress: (progressEvent) => {
+     const { loaded, total } = progressEvent;
+     let percent = Math.floor((loaded * 100) / total);
+     console.log(`${loaded} kb of ${total} | ${percent}%`);
+     if (percent <= 100) {
+      console.log(percent);
+      previews[index].loaded = percent;
+      this.setState({
+       galleryItmes: [...galleryItmes, ...previews],
+      });
+      // tempCovers[img_index].loaded = percent;
+      // this.setState({ dataSource: tempDataSource });
+     }
+    },
+   };
+   this.setState({
+    galleryItmes: [...galleryItmes, ...previews],
+   });
+   const fdGImages = new FormData();
+   fdGImages.append("desc_gallery_files[]", file);
+   axios
+    .post(`${API}desc/${this.state.product_id}`, fdGImages, options)
+    .then((response) => {
+     console.log(response);
+     //  previews[index].gallery_id= response.data
+    })
+    .catch((err) => {
+     console.log(err);
+    });
+  });
+
+  console.log(previews);
+ };
+ addVideoUrl = () => {
+  let { url } = this.state;
+  // videos.push(url);
+  this.setState({
+   url: "",
+   visible: false,
+  });
+
+  const fd = new FormData();
+  fd.append("src", url);
+  axios
+   .post(`${API}video/${this.state.product_id}`, fd)
+   .then((response) => {
+    console.log(response);
+    this.setState({
+     vidoes: [...this.state.vidoes, url],
+    });
+   })
+   .catch((er) => {
+    console.log(er);
+   });
  };
 
- onEditorStateMaterialChange = (materialDesceditorState) => {
+ handleSaveGallery = () => {
+  const videos = [];
+  const images = [];
+  const { galleryItmes } = this.state;
+  for (let i = 0; i < this.state.galleryItmes.length; i++) {
+   if (galleryItmes[i].type === "video") {
+    videos.push(galleryItmes[i].src);
+   } else {
+    images.push(galleryItmes[i].file);
+   }
+  }
+
+  const fd = new FormData();
+
+  images.map((i) => {
+   fd.append("desc_gallery_files[]", i);
+  });
+  videos.map((v) => {
+   fd.append("desc_gallery_srcs[]", v);
+  });
+
+  axios
+   .post(`${API}desc/${5}`, fd)
+   .then((response) => {
+    console.log(response);
+   })
+   .catch((err) => {
+    console.log(err);
+   });
+ };
+ handleRemoveGalleryItem = (index) => {
+  const removeSrc = this.state.galleryItmes[index].src;
   this.setState({
-   materialDesceditorState,
-   stateChanged: true,
-   materialLength: convertToRaw(
-    this.state.materialDesceditorState.getCurrentContent()
-   ).blocks[0].text.length,
+   galleryItmes: this.state.galleryItmes.filter((item) => {
+    return item?.src !== removeSrc;
+   }),
+  });
+ };
+ hide = () => {
+  this.setState({
+   visible: false,
+  });
+ };
+ handleVisibleChange = (visible) => {
+  this.setState({
+   visible,
   });
  };
 
- onEditorStateSizeChange = (sizeDescEditorState) => {
-  this.setState({
-   sizeDescEditorState,
-   stateChanged: true,
-   sizeLength: convertToRaw(this.state.sizeDescEditorState.getCurrentContent())
-    .blocks[0].text.length,
-  });
- };
  render() {
   return (
    <div id="product-files-step">
-    <button className="product-skip-btn" onClick={this.skip}>
-     Skip
-    </button>
-    <button
-     className="save-product-step-btn"
-     style={{
-      top: "-110px",
-      height: "20px",
-      color: "#fff",
-      background: this.state.loading ? "#B4B4B4" : "#E41E15",
-     }}
-     onClick={this.handleNextStep}
-    >
-     {this.state.loading ? (
-      <>
-       <ClipLoader
-        style={{ height: "20px" }}
-        color="#ffffff"
-        loading={this.state.loading}
-        size={20}
-       />
-      </>
-     ) : (
-      "Save & Continue"
-     )}
-    </button>
+    <div className="next-wrapper">
+     <div
+      className="next-inner"
+      style={{
+       maxWidth: "1000px",
+      }}
+     >
+      <button
+       onClick={this.skip}
+       className="prev-btn"
+       style={{ margin: "0 0px", position: "relative" }}
+      >
+       Skip
+      </button>
+      <button
+       className="next-btn"
+       style={{
+        top: "-110px",
+        color: "#fff",
+        background: this.state.loading ? "#B4B4B4" : "#E41E15",
+       }}
+       onClick={this.handleNextStep}
+      >
+       {this.state.loading ? (
+        <>
+         <ClipLoader
+          style={{ height: "20px" }}
+          color="#ffffff"
+          loading={this.state.loading}
+          size={20}
+         />
+        </>
+       ) : (
+        "Save & Continue"
+       )}
+      </button>
+     </div>
+    </div>
 
     <Tabs
      forceRenderTabPanel={true}
      onSelect={(index) => this.setState({ index })}
      selectedIndex={this.state.index}
+     //  selectedIndex={3}
     >
      <div id="tabs-desc-wrapper">
       <TabList>
@@ -323,6 +412,7 @@ class ProductFiles extends Component {
        <Tab>Material Description</Tab>
        <Tab>Dimensions</Tab>
        <Tab>Photo Gallery</Tab>
+       <Tab>Videos</Tab>
        <span className="learn-more">Learn how to add description</span>
       </TabList>
      </div>
@@ -330,32 +420,46 @@ class ProductFiles extends Component {
      <TabPanel forceRender>
       <>
        <div className="text-editor">
-        <Editor
-         editorState={this.state.overViewEditorState}
-         onChange={() => {
-          console.log("Changed");
-         }}
-         wrapperClassName="rich-editor demo-wrapper"
-         editorClassName="demo-editor cs-editor"
-         //  style={{ lineHeight: "75%" }}
-         onEditorStateChange={this.onEditorStateOverviewChange}
-         onContentStateChange={() => {
-          console.log("SSSS");
-         }}
-         placeholder="Add Your Product Description Overview "
-         stripPastedStyles={true}
-         toolbar={{
-          options: [
-           "inline",
-           "fontSize",
-           "fontFamily",
-           "list",
-           "textAlign",
-           "history",
-          ],
-          fontSize: {
-           options: [8, 9, 10, 11, 12, 14, 16, 18, 24, 30, 36, 48, 60, 72, 96],
+        <CKEditor
+         config={{
+          initialData:
+           this.state.overViewEditorState?.length > 0
+            ? this.state.overViewEditorState
+            : "",
+
+          toolbarLocation: "bottom",
+          toolbar: {
+           location: "bottom",
+           items: [
+            "Heading",
+            "|",
+            "Autoformat",
+            "|",
+            "bold",
+            "italic",
+            "Indent",
+            "|",
+            "Link",
+            "|",
+            "bulletedList",
+            "numberedList",
+            "|",
+            "BlockQuote",
+            "|",
+            "insertTable",
+            "|",
+            "undo",
+            "redo",
+           ],
           },
+         }}
+         editor={ClassicEditor}
+         onChange={(event, editor) => {
+          console.log(editor.getData());
+          this.setState({
+           overViewEditorState: editor.getData(),
+           stateChanged: true,
+          });
          }}
         />
        </div>
@@ -382,33 +486,27 @@ class ProductFiles extends Component {
       {/* end of overview modal */}
      </TabPanel>
      <TabPanel forceRender>
-      {/* <MaterialDescription id={this.state.product_id} /> */}
       <>
        <div className="text-editor">
-        <Editor
-         editorState={this.state.materialDesceditorState}
-         wrapperClassName="rich-editor demo-wrapper"
-         on={(e) => {
-          console.log("Changed");
-          console.log(e);
-         }}
-         editorClassName="demo-editor"
-         onEditorStateChange={this.onEditorStateMaterialChange}
-         placeholder="Add Your Product Mateial Description "
-         toolbar={{
-          image: {
-           uploadEnabled: true,
-           urlEnabled: false,
-           uploadCallback: this.uploadSizeCallback,
-           previewImage: true,
-           alignmentEnabled: "Left",
-           inputAccept: "image/gif,image/jpeg,image/jpg,image/png,image/svg",
-           alt: { present: false, mandatory: false },
-           defaultSize: {
-            height: "auto",
-            width: "80%",
-           },
+        <CKEditor
+         config={{
+          initialData:
+           this.state.materialDesceditorState?.length > 0
+            ? this.state.materialDesceditorState
+            : "",
+          extraPlugins: [uploadPlugin],
+          toolbarLocation: "bottom",
+          toolbar: {
+           location: "bottom",
           },
+         }}
+         editor={ClassicEditor}
+         onChange={(event, editor) => {
+          this.setState({
+           materialDesceditorState: editor.getData(),
+           stateChanged: true,
+          });
+          console.log(editor.getData());
          }}
         />
        </div>
@@ -417,111 +515,87 @@ class ProductFiles extends Component {
      <TabPanel forceRender>
       <>
        <div className="text-editor">
-        <Editor
-         editorState={this.state.sizeDescEditorState}
-         wrapperClassName="rich-editor demo-wrapper"
-         editorClassName="demo-editor"
-         onEditorStateChange={this.onEditorStateSizeChange}
-         placeholder="Add Your Product Size Description"
-         toolbar={{
-          image: {
-           uploadEnabled: true,
-           urlEnabled: true,
-           uploadCallback: this.uploadSizeCallback,
-           previewImage: true,
-           alignmentEnabled: "LEFT",
-           inputAccept: "image/gif,image/jpeg,image/jpg,image/png,image/svg",
-           alt: { present: false, mandatory: false },
-           defaultSize: {
-            height: "auto",
-            width: "80%",
-           },
+        <CKEditor
+         config={{
+          initialData:
+           this.state.sizeDescEditorState?.length > 0
+            ? this.state.sizeDescEditorState
+            : "",
+          extraPlugins: [uploadPlugin],
+          toolbarLocation: "bottom",
+          toolbar: {
+           location: "bottom",
           },
+         }}
+         editor={ClassicEditor}
+         onChange={(event, editor) => {
+          console.log(editor.getData());
+          this.setState({
+           sizeDescEditorState: editor.getData(),
+           stateChanged: true,
+          });
          }}
         />
        </div>
       </>
      </TabPanel>
+
      <TabPanel forceRender>
+      {/* <DescGallery /> */}
       <div
        className="tab-form-content"
-       style={{ position: "relative" }}
+       style={{ position: "relative", padding: "135px 0px 75px 126px" }}
        id="gallery"
       >
-       <div className="files-previews">
-        {this.state.gelleries?.map((file, index) => {
+       <div
+        className="files-previews"
+        style={{
+         gridTemplateColumns: "repeat(4, 25%) ",
+        }}
+       >
+        {this.state.galleryItmes?.map((item, index) => {
          return (
           <>
-           <div style={{ position: "relative" }} key={index}>
-            <img
-             src={file?.desc_gallery_files[0]}
-             alt=""
-             style={{
-              filter:
-               !file.id && this.state.startLoading ? "blur(5px)" : "none",
-             }}
-            />
-            {file.id && (
-             <>
-              <p
-               onClick={() => this.handleDeleteGllery(file.id, index)}
-               style={{ cursor: "pointer" }}
-              >
-               <DeleteOutlined />
-              </p>
-             </>
-            )}
-            {this.state.startLoading && !file?.id && (
-             <>
+           {item?.type !== "video" && (
+            <div className="gallery-item">
+             <img src={item?.src} alt="" />
+             <button
+              className="delbutton"
+              onClick={() => {
+               this.handleRemoveGalleryItem(index);
+              }}
+             >
+              Delete
+             </button>
+             {item?.loaded >= 0 && item?.loaded < 100 && (
               <Progress
                style={{
                 position: "absolute",
-                top: "24%",
-                bottom: 0,
-                maxWidth: "130px",
-                left: "31%",
-                display: this.state.loaded >= 100 ? "none" : "",
+                top: "33px",
+                left: "22px",
                }}
                type="circle"
-               width={38}
-               percent={this.state.loaded}
+               percent={item?.loaded}
+               width={item?.loaded < 100 ? 35 : 1}
                strokeWidth={12}
-               trailColor="#fff"
-               strokeColor="#000"
+               trailColor="#666666"
+               strokeColor="#fff"
                success={{
                 percent: 0,
                 strokeColor: "transparent",
                }}
               />
-             </>
-            )}
-           </div>
+             )}
+            </div>
+           )}
           </>
-         );
-        })}
-
-        {this.embed_urls?.map((url, index) => {
-         return (
-          <div style={{ position: "relative" }} key={index}>
-           {/* <iframe src={url} alt="" title="embeded" /> */}
-           <iframe
-            width="130"
-            // height="315"
-            src={url}
-            title="YouTube video player"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-           ></iframe>
-          </div>
          );
         })}
        </div>
        <div className="tab-head">
-        <h2>Add products’s Gallery photos / videos</h2>
+        <h2>Add product Gallery</h2>
         <div className="tip">
-         You can add photos or embed videos from YouTube, Vimeo, DailyMotion,
-         Tencent Video (QQ), Youku, iQiyi
+         Add photos of the product or projects where the product featured.
         </div>
         <div className="bold-tip">
          You can skip if informations not available
@@ -531,14 +605,15 @@ class ProductFiles extends Component {
           className="red-bg"
           style={{
            position: "relative",
-           visibility: this.state.startLoading ? "hidden" : "visible",
           }}
          >
           <FaCloudUploadAlt className="m-auto" />
-          <input
+
+          <Input
            type="file"
            accept="image/*"
-           onChange={this.onChangeGallery}
+           multiple
+           onChange={this.addImages}
            style={{
             position: "absolute",
             top: 0,
@@ -550,15 +625,77 @@ class ProductFiles extends Component {
            }}
           />
          </span>
-         {/* <span className='gray-bg'><MdTitle/></span> */}
+        </div>
+       </div>
+      </div>
+     </TabPanel>
+     <TabPanel forceRender>
+      <div
+       className="tab-form-content"
+       style={{ position: "relative", padding: "135px 0px 75px 126px" }}
+       id="gallery"
+      >
+       <div
+        className="files-previews"
+        style={{
+         gridTemplateColumns: "repeat(4, 25%) ",
+        }}
+       >
+        {this.state.vidoes?.map((item, index) => {
+         return (
+          <div className="gallery-item">
+           <ReactPlayer url={item} width={"100%"} height={"100%"} />
+           <button
+            className="delbutton"
+            onClick={() => {
+             this.handleRemoveGalleryItem(index);
+            }}
+           >
+            Delete
+           </button>
+          </div>
+         );
+        })}
+       </div>
+       <div className="tab-head">
+        <h2>Add products videos</h2>
+        <div className="tip">
+         You can embed videos from YouTube, Vimeo, DailyMotion, Tencent Video
+         (QQ), Youku, iQiyi
+        </div>
+        <div className="bold-tip">
+         You can skip if informations not available
+        </div>
+        <div className="file-icons-tabs" style={{ position: "relative" }}>
          <span className="gray-bg">
-          <RiCodeSSlashFill className="m-auto" onClick={this.embedModal_open} />
+          <Popover
+           content={
+            <Input
+             value={this.state.url}
+             onChange={(e) => {
+              this.setState({ url: e.target.value });
+             }}
+            />
+           }
+           title={
+            <>
+             <button onClick={this.addVideoUrl}>ADD</button>
+            </>
+           }
+           trigger="click"
+           visible={this.state.visible}
+           onVisibleChange={this.handleVisibleChange}
+          >
+           <RiCodeSSlashFill
+            className="m-auto"
+            onClick={this.embedModal_open}
+           />
+          </Popover>
          </span>
         </div>
        </div>
       </div>
      </TabPanel>
-     <TabPanel forceRender></TabPanel>
     </Tabs>
     <Modal
      id="price-request-modal"
@@ -568,7 +705,6 @@ class ProductFiles extends Component {
      onHide={this.skip_modal_close}
      aria-labelledby="example-modal-sizes-title-lg"
     >
-     {/* <Modal.Header closeButton></Modal.Header> */}
      <Modal.Body>
       <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
        <h6
@@ -599,60 +735,18 @@ class ProductFiles extends Component {
       </div>
      </Modal.Body>
     </Modal>
-    <Modal
-     id="price-request-modal"
-     className="arch-wide-modal product-modal pics-modal"
-     size="md"
-     show={this.state.embed_modal}
-     onHide={this.embedModal_close}
-     aria-labelledby="example-modal-sizes-title-lg"
-    >
-     <Modal.Header closeButton></Modal.Header>
-     <Modal.Body>
-      <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
-       <h6>Media Embed</h6>
-       <Form.Row as={Row} style={{ margin: "20px 0" }}>
-        <Form.Label column md={2}>
-         URL
-        </Form.Label>
-        <Col md={10}>
-         <Form.Control
-          placeholder="Video URL"
-          // value={""}
-          onChange={this.onChangeEmbedUrl}
-         />
-        </Col>
-       </Form.Row>
-       <Button
-        variant="danger"
-        onClick={() => {
-         this.addEmbedBox();
-         this.setState({ embed_modal: false });
-        }}
-        type="submit"
-        style={{
-         textAlign: "right",
-         background: "#E41E15",
-         display: "block",
-         float: "right",
-         marginRight: "12px",
-        }}
-       >
-        {/* {this.displayButtonText(this.state.size_modal_edit)} */}
-        Embed
-       </Button>
-      </div>
-     </Modal.Body>
-    </Modal>
    </div>
   );
  }
 }
 const mapDispatchToProps = (dispatch) => ({
- dispatchDescriptionStep: (data, id) => dispatch(productDescription(data, id)),
+ //  dispatchDescriptionStep: (data, id) => dispatch(productDescription(data, id)),
+ dispatchDescriptionStep: (description) =>
+  dispatch(productDescription(description)),
  dispatchNextStep: () => dispatch(nextTab()),
 });
 const mapStateToProps = (state) => ({
  loading: state.addProduct.loading,
+ _description: state.addProduct.description,
 });
 export default connect(mapStateToProps, mapDispatchToProps)(ProductFiles);

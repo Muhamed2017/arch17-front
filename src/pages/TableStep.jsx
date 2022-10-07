@@ -8,7 +8,7 @@ import {
  Row,
  Modal,
 } from "react-bootstrap";
-// import { compressImage } from "./addProduct/OptionsPrice";
+import { toast, Flip } from "react-toastify";
 import { CloseCircleFilled } from "@ant-design/icons";
 import {
  FaCloudUploadAlt,
@@ -21,7 +21,6 @@ import {
  FaArrowUp,
  FaPencilAlt,
 } from "react-icons/fa";
-import Cropper from "react-cropper";
 import ClipLoader from "react-spinners/ClipLoader";
 import { API } from "./../utitlties";
 import axios from "axios";
@@ -29,6 +28,7 @@ import { connect } from "react-redux";
 import {
  addProductPrices,
  nextTab,
+ saveOptions,
  addProductModalCodes,
  resetProductPrices,
  resetProductModalCodes,
@@ -106,12 +106,6 @@ const EditableCell = ({
      margin: "auto",
     }}
     name={dataIndex}
-    rules={[
-     {
-      // required:true,
-      // message: `${title} is required.`,
-     },
-    ]}
    >
     <Input
      ref={inputRef}
@@ -140,7 +134,19 @@ const EditableCell = ({
    </div>
   );
  }
- return <td {...restProps}>{childNode}</td>;
+
+ return (
+  <td
+   //  onClick={() => {
+   // console.log("SSSS");
+   // save();
+   //  }}
+   //  onClick={save}
+   {...restProps}
+  >
+   {childNode}
+  </td>
+ );
 };
 
 class TableStep extends React.Component {
@@ -160,8 +166,8 @@ class TableStep extends React.Component {
      return (
       <>
        <div className="row-img-grid">
-        {record.covers.map((cover, index) => {
-         if (cover._src != "" && cover._src != null) {
+        {record?.covers?.map((cover, index) => {
+         if (cover?._src != "" && cover?._src != null) {
           cover.src = cover._src;
          }
          return (
@@ -173,7 +179,7 @@ class TableStep extends React.Component {
             margin: "0 1px",
            }}
           >
-           {cover.src !== "" && cover?._src !== "" && (
+           {cover?.src !== "" && cover?._src !== "" && (
             <>
              {record.option_id ? (
               <>
@@ -200,7 +206,7 @@ class TableStep extends React.Component {
         })}
        </div>
        <div className="edit-add-row-btn">
-        {record.covers.length < 1 ? (
+        {record.covers?.length < 1 ? (
          <>
           <button
            onClick={() => {
@@ -247,7 +253,7 @@ class TableStep extends React.Component {
     render: (_, record) => {
      return (
       <>
-       {!record.material.name && (
+       {!record.material?.name && (
         <FaPlus
          onClick={() => {
           this.setState(
@@ -261,17 +267,17 @@ class TableStep extends React.Component {
          }}
         />
        )}
-       {record.material.image && record.material_name != "null" && (
+       {record.material?.image && record?.material_name != "null" && (
         <>
          <div className="material-cell option-cell">
-          <img src={record.material.image} alt="" />
-          {record.material.name}
+          <img src={record.material?.image} alt="" />
+          {record.material?.name}
 
           <FaPencilAlt
            className="edit-pencil"
            onClick={() => {
             console.log([this.state.material_name, this.state.material_image]);
-            this.material_modal_open(record.key, record.material);
+            this.material_modal_open(record.key, record?.material);
            }}
           />
          </div>
@@ -288,9 +294,9 @@ class TableStep extends React.Component {
     render: (_, record) => {
      return (
       <>
-       {record.size.l === null &&
-        record.size.w === null &&
-        record.size.h === null && (
+       {record?.size?.l === null &&
+        record?.size?.w === null &&
+        record?.size?.h === null && (
          <FaPlus
           onClick={() => {
            this.setState({ editing_row: record.key }, () => {
@@ -299,7 +305,7 @@ class TableStep extends React.Component {
           }}
          />
         )}
-       {record.size.l > 0 && record.size.w > 0 && record.size.h > 0 && (
+       {record?.size?.l > 0 && record?.size?.w > 0 && record?.size?.h > 0 && (
         <>
          <FaPencilAlt
           onClick={() => {
@@ -355,7 +361,12 @@ class TableStep extends React.Component {
     },
    },
    {
-    title: "CPM",
+    title: (
+     <div>
+      <div>CBM</div>
+      <small className="lower-word">Package Volume</small>
+     </div>
+    ),
     dataIndex: "quantity",
     editable: true,
    },
@@ -363,7 +374,7 @@ class TableStep extends React.Component {
     title: "",
     dataIndex: "operation",
     render: (_, record) =>
-     this.state.dataSource.length >= 1 ? (
+     this.state.dataSource?.length >= 1 ? (
       <Popconfirm
        title="Sure to delete?"
        onConfirm={() => this.handleDelete(record.key, record.option_id)}
@@ -384,30 +395,8 @@ class TableStep extends React.Component {
    covers_modal: false,
    cover_box_index: 0,
    tempCover: "",
-   dataSource:
-    this.props.rows.options & this.props.edit
-     ? this.props.rows.options
-     : [
-        {
-         key: 0,
-         code: null,
-         covers: [],
-         size: {
-          l: null,
-          h: null,
-          w: null,
-         },
-         price: null,
-         offer_price: "",
-         material: {
-          name: null,
-          image: null,
-         },
-         quantity: null,
-         option_id: null,
-        },
-       ],
-   count: 0,
+   dataSource: this.props.edit ? this.props.rows : this.props.options,
+   count: !this.props.edit ? this.props.options?.length - 1 : 0,
    modal_covers: [],
    editing_row: null,
    material_modal: false,
@@ -427,8 +416,8 @@ class TableStep extends React.Component {
   this.setState({
    material_modal: true,
    editing_row,
-   material_name: material.name,
-   material_image: material.image,
+   material_name: material?.name,
+   material_image: material?.image,
   });
   console.log(this.state.editing_row);
  };
@@ -460,50 +449,65 @@ class TableStep extends React.Component {
   console.log(this.state.editing_row);
  };
  AddMaterialToOption = (row_index) => {
-  const tempDataSource = this.state.dataSource;
-  tempDataSource.map((row) => {
-   if (row.key == row_index) {
-    row["material"].name = this.state.material_name;
-    row["material"].image = this.state.material_image;
-   }
+  const tempDataSource = [...this.state.dataSource];
+  const index = tempDataSource.findIndex((item) => row_index === item.key);
+  const item = tempDataSource[index];
+  item["material"].name = this.state.material_name;
+  item["material"].image = this.state.material_image;
+  const row = tempDataSource[index];
+  tempDataSource.splice(index, 1, { ...item, ...row });
+  this.setState({
+   dataSource: tempDataSource,
+   material_modal: false,
   });
-  this.setState({ dataSource: tempDataSource, material_modal: false });
  };
 
  AddSizeToOption = (row_index) => {
-  const tempDataSource = this.state.dataSource;
-  tempDataSource.map((row) => {
-   if (row.key === row_index) {
-    row["size"].l = this.state.size_l;
-    row["size"].h = this.state.size_h;
-    row["size"].w = this.state.size_w;
-   }
+  const tempDataSource = [...this.state.dataSource];
+  const index = tempDataSource.findIndex((item) => row_index === item.key);
+  const item = tempDataSource[index];
+  item["size"].l = this.state.size_l;
+  item["size"].h = this.state.size_h;
+  item["size"].w = this.state.size_w;
+  const row = tempDataSource[index];
+  tempDataSource.splice(index, 1, { ...item, ...row });
+  this.setState({
+   dataSource: tempDataSource,
+   size_modal: false,
   });
-  console.log(this.state.size_l);
-  this.setState({ dataSource: tempDataSource, size_modal: false });
  };
 
  AddPriceToOption = (row_index) => {
-  const tempDataSource = this.state.dataSource;
-  tempDataSource.map((row) => {
-   if (row.key === row_index) {
-    row.price = this.state.price;
-   }
+  const tempDataSource = [...this.state.dataSource];
+  const index = tempDataSource.findIndex((item) => row_index === item.key);
+  const item = tempDataSource[index];
+  item.price = this.state.price;
+  const row = tempDataSource[index];
+  tempDataSource.splice(index, 1, { ...item, ...row });
+  this.setState({
+   dataSource: tempDataSource,
+   price_modal: false,
   });
-  this.setState({ dataSource: tempDataSource, price_modal: false });
  };
 
- _crop() {
-  const imageElement = this.cropperRef?.current;
-  const cropper = imageElement?.cropper;
-  const data = cropper.getData();
-  console.log(data);
- }
+ dataURLtoFile = (dataurl, filename) => {
+  var arr = dataurl.split(","),
+   mime = arr[0].match(/:(.*?);/)[1],
+   bstr = atob(arr[1]),
+   n = bstr.length,
+   u8arr = new Uint8Array(n);
+
+  while (n--) {
+   u8arr[n] = bstr.charCodeAt(n);
+  }
+
+  return new File([u8arr], filename, { type: mime });
+ };
 
  //edit option picture modal
  handleAddCover = (row_key, covers) => {
   const boxes = [];
-  for (let i = covers.length; i < 6; i++) {
+  for (let i = covers?.length; i < 6; i++) {
    boxes.push({
     src: null,
     cropping_data: {},
@@ -519,7 +523,7 @@ class TableStep extends React.Component {
  handleEditCover = (row_key, covers) => {
   const boxes = [];
 
-  for (let i = covers.length; i < 6; i++) {
+  for (let i = covers?.length; i < 6; i++) {
    boxes.push({
     src: null,
     cropping_data: {},
@@ -534,11 +538,6 @@ class TableStep extends React.Component {
   });
  };
 
- // navigate addedd cropped images in product pics modal
- handlePreviewCroppingImage = (img_index) => {
-  console.log(this.state.modal_covers[img_index]);
- };
-
  //remove pic from product add picture modal
  removePiceFromOption = (cover_id, tab_index) => {
   let tempCovers = this.state.modal_covers;
@@ -548,29 +547,35 @@ class TableStep extends React.Component {
      cover_id: "",
      src: "",
      cropping_data: {},
+     loaded: 0,
     };
    }
   });
   this.setState({ modal_covers: tempCovers });
  };
 
- onCroppChange = (cropping_data) => {
-  console.log(cropping_data);
- };
  handleAddOrUpdatePicture = (row_index) => {
-  const tempDataSource = this.state.dataSource;
-  tempDataSource.map((row) => {
-   if (row.key == row_index) {
-    row["covers"] = this.state.modal_covers;
+  const tempDataSource = [...this.state.dataSource];
+  const index = tempDataSource.findIndex((item) => row_index === item.key);
+  const item = tempDataSource[index];
+  item["covers"] = this.state.modal_covers;
+  const row = tempDataSource[index];
+  tempDataSource.splice(index, 1, { ...item, ...row });
+  this.setState(
+   {
+    dataSource: tempDataSource,
+    covers_modal: false,
+    // still_uploading_covers: true,
+   },
+   () => {
+    console.log(tempDataSource);
    }
-  });
-
-  this.setState({ covers_modal: false });
+  );
  };
 
  componentDidMount() {
   console.log(this.props);
-  if (this.props.rows.length < 1) {
+  if (this.props.rows?.length < 1) {
   }
 
   this.props.rows.map((item, index) => {
@@ -581,7 +586,7 @@ class TableStep extends React.Component {
       {
        key: index,
        option_id: item.id,
-       covers: item.covers,
+       covers: item?.covers,
        material:
         item.material?.name != "null"
          ? item.material
@@ -601,7 +606,7 @@ class TableStep extends React.Component {
     () => {
      this.setState({
       dataSource: this.state.items,
-      count: this.state.items.length,
+      count: this.state.items?.length - 1,
      });
     }
    );
@@ -633,9 +638,7 @@ class TableStep extends React.Component {
     dataSource: dataSource.filter((item) => item.key !== key),
    });
   }
-  // this.setState({
-  //  dataSource: dataSource.filter((item) => item.key !== key),
-  // });
+
   console.log(dataSource);
  };
 
@@ -652,12 +655,13 @@ class TableStep extends React.Component {
    _previews.push(...row.covers);
   }
 
-  this.props.dispatchNextStep();
+  // this.props.dispatchNextStep();
+  this.props.dispatchSaveOptions(this.state.dataSource);
+
   this.setState({ loading: false });
  }
 
  saveRow = async (row) => {
-  //  saveRow = (row) => {
   const formData = new FormData();
   formData.append(`option_id`, row.option_id);
   formData.append(`material_image`, row.material.image);
@@ -678,14 +682,16 @@ class TableStep extends React.Component {
     console.log(data);
    });
  };
+
  addPriceForPreview = (price, code) => {
-  // if (price > 0) this.props.dispatchPricesForPreview(price);
-  // if (code) this.props.dispatchModalCodesForFileUpload(code);
   this.props.dispatchPricesForPreview(price);
   this.props.dispatchModalCodesForFileUpload(code);
  };
  handleAdd = () => {
   console.log(this.props.id);
+
+  // message.info("Maximum size for single image 2MB");
+
   const { count, dataSource } = this.state;
   const newData = {
    key: count + 1,
@@ -708,23 +714,32 @@ class TableStep extends React.Component {
   this.setState({
    dataSource: [...dataSource, newData],
    count: count + 1,
-   //  editing_row: count + 1,
   });
   console.log(this.state.dataSource);
  };
-
+ sizeExceeded = () => {
+  toast.error("Maximum size allowed is 1MB", {
+   position: "bottom-center",
+   autoClose: 1500,
+   progress: undefined,
+   theme: "colored",
+   transition: Flip,
+  });
+ };
  handleUploadMaterialImage = (e, row_index) => {
   let file = e.target.files[0];
   if (!file) return;
   if (file.size > 1048576 * 1.5) {
    console.log("Size is to Large");
+   this.sizeExceeded();
+
    return;
   } else {
    this.setState({ adding_material: true });
    const fd = new FormData();
    this.setState({ material_image: URL.createObjectURL(file) });
    fd.append("cover", file);
-   axios.post(`${API}cover-upload`, fd).then((response) => {
+   axios.post(`${API}cover-upload-new`, fd).then((response) => {
     this.setState({
      material_image: response.data.cover.src,
      adding_material: false,
@@ -733,21 +748,88 @@ class TableStep extends React.Component {
   }
  };
 
- handleUploadProductImg = (e, img_index) => {
+ // making it mutliple
+ //  handleUploadProductImg = async (e, img_index) => {
+ //   let images = Object.values(e.target?.files);
+
+ //   const initialLength = this.state.modal_covers.length;
+ //   console.log(this.state.modal_covers);
+ //   let newAdded = [];
+ //   images.forEach((image) => {
+ //    newAdded.push({
+ //     loaded: 0,
+ //     src: URL.createObjectURL(image),
+ //     _src: null,
+ //    });
+ //   });
+
+ //   this.setState({
+ //    modal_covers: newAdded,
+ //   });
+
+ //   images.forEach((image, index) => {
+ //    if (!image) return;
+
+ //    if (image.size > 1048576) {
+ //     console.log("Size is to Large");
+ //     this.sizeExceeded();
+ //     return;
+ //    } else {
+ //     this.setState({ cover_box_index: img_index });
+ //     const tempCovers = this.state.modal_covers;
+ //     // console.log(tempCovers);
+ //     // console.log(initialLength);
+ //     // tempCovers[index].src = URL.createObjectURL(image);
+ //     const fd = new FormData();
+ //     fd.append("cover", image);
+ //     const options = {
+ //      onUploadProgress: (progressEvent) => {
+ //       const { loaded, total } = progressEvent;
+ //       let percent = Math.floor((loaded * 100) / total);
+ //       console.log(`${loaded} kb of ${total} | ${percent}%`);
+ //       if (percent <= 100) {
+ //        console.log(percent);
+ //        console.log(tempCovers);
+ //        tempCovers[index].loaded = percent;
+ //        this.setState({ dataSource: tempDataSource });
+ //       }
+ //      },
+ //     };
+
+ //     axios.post(`${API}cover-upload-new`, fd, options).then((response) => {
+ //      console.log(response.data);
+ //      tempCovers[index]._src = response.data.cover.src;
+ //      tempCovers[index].src = response.data.cover.src;
+ //      tempCovers[index].cover_id = response.data.cover.id;
+ //      this.props.dispatchAddOptionsforPreview({
+ //       src: response.data.cover.src,
+ //       data: response.data.cover.cropping_data,
+ //      });
+ //      const covers = this.props.options_covers;
+ //      localStorage.setItem("covers", JSON.stringify(covers));
+ //     });
+
+ //     const tempDataSource = this.state.dataSource;
+ //     // tempDataSource[this.state.editing_row].covers = tempCovers;
+ //     this.setState({ dataSource: tempDataSource });
+ //    }
+ //   });
+ //  };
+
+ //  old upload single one by one
+ handleUploadProductImg = async (e, img_index) => {
   let file = e.target.files[0];
   if (!file) {
    return;
   }
   if (file.size > 1048576 * 1.5) {
    console.log("Size is to Large");
+   this.sizeExceeded();
    return;
   } else {
    this.setState({ cover_box_index: img_index });
-   //  this.setState({ cover_box_index: img_index });
    const tempCovers = this.state.modal_covers;
    tempCovers[img_index].src = URL.createObjectURL(file);
-   //  tempCovers[img_index].cropping_data = {};
-
    const fd = new FormData();
    fd.append("cover", file);
    const options = {
@@ -764,24 +846,22 @@ class TableStep extends React.Component {
     },
    };
    //
-   axios.post(`${API}cover-upload`, fd, options).then((response) => {
+   axios.post(`${API}cover-upload-new`, fd, options).then((response) => {
     console.log(response.data);
     tempCovers[img_index]._src = response.data.cover.src;
+    tempCovers[img_index].src = response.data.cover.src;
     tempCovers[img_index].cover_id = response.data.cover.id;
     this.props.dispatchAddOptionsforPreview({
      src: response.data.cover.src,
      data: response.data.cover.cropping_data,
     });
+    const covers = this.props.options_covers;
+    localStorage.setItem("covers", JSON.stringify(covers));
    });
 
-   // comment this for error in add cover
-
-   //  this.setState({ modal_covers: tempCovers });
    const tempDataSource = this.state.dataSource;
-   //  tempDataSource[this.state.editing_row].covers = tempCovers;
-   // this.setState({ dataSource: tempDataSource });
-   console.log(this.state.tempDataSource);
-   console.log(this.state.editing_row);
+   tempDataSource[this.state.editing_row].covers = tempCovers;
+   this.setState({ dataSource: tempDataSource });
   }
  };
  handleSave = (row) => {
@@ -821,42 +901,60 @@ class TableStep extends React.Component {
      dataIndex: col.dataIndex,
      title: col.title,
      handleSave: this.handleSave,
-     onClick: this.handleClick,
     }),
    };
   });
   return (
    <React.Fragment>
     <div className="step-form">
-     <button
-      className="save-product-step-btn"
+     <div
+      className="next-wrapper"
       style={{
-       top: "-110px",
-       height: "20px",
-       backgroundColor: this.state.loading ? "#898989" : "",
+       top: "80px",
       }}
-      onClick={this.saveAndContinue.bind(this)}
      >
-      {this.state.loading ? (
-       <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
-      ) : (
-       "Save & Continue"
-      )}
-     </button>
+      <div
+       className="next-inner"
+       style={{
+        maxWidth: "1010px",
+       }}
+      >
+       <button
+        className="next-btn"
+        style={{
+         top: "-110px",
+         backgroundColor: this.state.loading ? "#898989" : "",
+        }}
+        onClick={this.saveAndContinue.bind(this)}
+       >
+        {this.state.loading ? (
+         <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
+        ) : (
+         "Save & Continue"
+        )}
+       </button>
+      </div>
+     </div>
      <div className="step-head">
-      <h5>Options & Price</h5>
+      <h5
+       style={{
+        minHeight: "51px",
+       }}
+      >
+       Options & Price
+      </h5>
      </div>
      <div className="options-wrapper">
       <div>
        <span style={{ marginLeft: 8 }}>
-        {hasSelected ? `Selected ${selectedRowKeys.length} Options` : ""}
+        {hasSelected ? `Selected ${selectedRowKeys?.length} Options` : ""}
        </span>
        <Table
         className="option-table"
         bordered={false}
         pagination={false}
         components={components}
-        rowClassName={() => "editable-row"}
+        rowClassName="editable-row"
         dataSource={dataSource}
         columns={columns}
         rowSelection={rowSelection}
@@ -867,10 +965,10 @@ class TableStep extends React.Component {
         </div>
         <div className="under-link">Add Option</div>
        </div>
+
        <>
         {/* offer modal */}
 
-        {/* d,dl */}
         <Modal
          id="offer_modal"
          className="arch-wide-modal product-modal"
@@ -941,135 +1039,88 @@ class TableStep extends React.Component {
            <Tabs tabPosition="bottom">
             {this.state.modal_covers?.map((cover, index) => {
              return (
-              <>
-               <TabPane
-                // forceRender
-                tab={
-                 cover.src ? (
-                  <>
-                   <div key={index} style={{ width: "70px", height: "68px" }}>
-                    <img
-                     src={cover.src}
-                     alt="cover"
-                     style={{
-                      width: "100%",
-                      height: "100%",
-                      display: "block",
-                      position: "relative",
-                     }}
-                    />
-                    {(cover.loaded > 0 || cover.loaed < 100) && (
-                     <Progress
-                      style={{
-                       position: "absolute",
-                       top: "33px",
-                       left: "22px",
-                      }}
-                      type="circle"
-                      percent={cover.loaded}
-                      width={cover.loaded < 100 ? 35 : 1}
-                      strokeWidth={12}
-                      trailColor="#666666"
-                      strokeColor="#fff"
-                      success={{
-                       percent: 0,
-                       strokeColor: "transparent",
-                      }}
-                     />
-                    )}
-                   </div>
-                   {cover.loaded >= 100 && (
-                    <>
-                     <div class="delete-btn">
-                      <button
-                       onClick={() =>
-                        this.removePiceFromOption(cover.cover_id, index)
-                       }
-                      >
-                       <CloseCircleFilled />
-                      </button>
-                     </div>
-                    </>
-                   )}
-                  </>
-                 ) : (
-                  <>
-                   <div
-                    className="up-btn"
+              <TabPane
+               tab={
+                cover.src ? (
+                 <>
+                  <div key={index} style={{ width: "70px", height: "68px" }}>
+                   <img
+                    src={cover.src}
+                    alt="cover"
                     style={{
-                     width: "70px",
-                     height: "68px",
+                     width: "100%",
+                     height: "100%",
+                     display: "block",
                      position: "relative",
-                     fontSize: "2rem",
-                     background: "#F7F7F7",
-                     padding: "17px 10px",
-                     color: "#CCCCCC",
-                     border: "1px dashed #ccc",
-                     textAlign: "center",
                     }}
-                   >
-                    <UplpadIcon
-                     style={{
-                      position: "absolute",
-                      right: "0",
-                      left: "0",
-                      top: "0",
-                      bottom: "0",
-                     }}
-                     index={index}
-                    />
-
-                    <input
-                     type="file"
-                     style={{
-                      position: "absolute",
-                      right: "0",
-                      left: "0",
-                      top: "0",
-                      bottom: "0",
-                      opacity: 0,
-                     }}
-                     onChange={(e) => this.handleUploadProductImg(e, index)}
-                    />
-                   </div>
-                  </>
-                 )
-                }
-                key={index}
-               >
-                <div className="img-box" style={{ marginBottom: "30px" }}>
-                 {cover?.src !== "" && (
-                  <>
-                   <Cropper
-                    key={index}
-                    src={cover?.src}
-                    viewMode={2}
-                    style={{ height: "100%", width: "100%" }}
-                    // Cropper.js options
-                    ref={this.cropperRef}
-                    initialAspectRatio="free"
-                    guides={false}
-                    cropend={this._crop.bind(this)}
-                    ready={this._crop.bind(this)}
-                    // crop={() => this._crop(this.state.editing_row)}
-                    crossOrigin="anonymous"
-                    // preview=".image-preview"
-                    scalable={false}
-                    aspectRatio={"free"}
-                    data={cover?.cropping_data}
-                    autoCropArea={1}
-                    dragMode="move"
-                    rotatable={false}
-                    // zoomOnWheel={true}
-                    cropBoxMovable={false}
-                    cropBoxResizable={true}
-                    wheelZoomRatio
                    />
-                  </>
-                 )}
-                </div>
-               </TabPane>
-              </>
+                   {(cover.loaded > 0 || cover.loaed < 100) && (
+                    <Progress
+                     style={{
+                      position: "absolute",
+                      top: "33px",
+                      left: "22px",
+                     }}
+                     type="circle"
+                     percent={cover.loaded}
+                     width={cover.loaded < 100 ? 35 : 1}
+                     strokeWidth={12}
+                     trailColor="#666666"
+                     strokeColor="#fff"
+                     success={{
+                      percent: 0,
+                      strokeColor: "transparent",
+                     }}
+                    />
+                   )}
+                  </div>
+                  {(cover.loaded >= 100 || cover.cover_id > 0) && (
+                   <>
+                    <div class="delete-btn">
+                     <button
+                      onClick={() =>
+                       this.removePiceFromOption(cover.cover_id, index)
+                      }
+                     >
+                      <CloseCircleFilled />
+                     </button>
+                    </div>
+                   </>
+                  )}
+                 </>
+                ) : (
+                 <>
+                  <div className="up-btn">
+                   <UplpadIcon className="option-upload-icon" index={index} />
+                   <input
+                    type="file"
+                    className="option-upload-icon hide"
+                    multiple
+                    onChange={(e) => this.handleUploadProductImg(e, index)}
+                   />
+                  </div>
+                 </>
+                )
+               }
+               key={index}
+              >
+               <div className="img-box" style={{ marginBottom: "30px" }}>
+                {cover?.src !== "" && (
+                 <>
+                  <div
+                   style={{
+                    height: "100%",
+                    width: "100%",
+                    backgroundImage: `url(${cover?.src})`,
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                    backgroundSize: "contain",
+                   }}
+                  ></div>
+                 </>
+                )}
+               </div>
+              </TabPane>
              );
             })}
            </Tabs>
@@ -1279,7 +1330,7 @@ class TableStep extends React.Component {
            <div as={Row} className="add-btn">
             <div column md={12}>
              <BButton variant="danger" type="submit">
-              {/* {this.displayButtonText(this.state.size_modal_edit)} */}
+              Add Size
              </BButton>
             </div>
            </div>
@@ -1299,9 +1350,16 @@ const mapDispatchToProps = (dispatch) => ({
  dispatchNextStep: () => dispatch(nextTab()),
  dispatchAddOptionsforPreview: (rows) => dispatch(addOptionAction(rows)),
  dispatchPricesForPreview: (price) => dispatch(addProductPrices(price)),
+ dispatchSaveOptions: (options) => dispatch(saveOptions(options)),
  dispatchModalCodesForFileUpload: (code) =>
   dispatch(addProductModalCodes(code)),
  dispatchResetPrices: () => dispatch(resetProductPrices()),
  dispatchResetCodes: () => dispatch(resetProductModalCodes()),
 });
-export default connect(null, mapDispatchToProps)(TableStep);
+const mapStateToProps = (state) => {
+ return {
+  options: state.addProduct.options,
+  options_covers: state.addProduct?.covers,
+ };
+};
+export default connect(mapStateToProps, mapDispatchToProps)(TableStep);

@@ -4,6 +4,8 @@ import axios from "axios";
 import { Redirect } from "react-router-dom";
 import ClipLoader from "react-spinners/ClipLoader";
 import { API } from "./../../utitlties";
+import { connect } from "react-redux";
+import { resetAddProduct } from "../../redux/actions/addProductActions";
 
 class Kind extends Component {
  constructor(props) {
@@ -14,13 +16,14 @@ class Kind extends Component {
    id: null,
    brand_id: this.props.match.params.id,
    collections: [],
-   selected_collections: [],
+   //  selected_collections: [],
    category: "Furniture",
   };
  }
+
  addProduct = (e, category) => {
   e.preventDefault();
-
+  this.props.resetAddPRoduct();
   this.setState(
    {
     category,
@@ -35,8 +38,9 @@ class Kind extends Component {
       this.setState({ loading: false, category });
       this.setState({ id: response.data.product.id });
       this.setState({
-       collections: response.data.product.store?.collections,
-       selected_collections: response.data.product.collections,
+       //  collections: response.data.product.store?.collections,
+       collections: response.data?.store_collections,
+       //  selected_collections: response.data.product.collections,
       });
       this.setState({ added: true });
      })
@@ -53,7 +57,7 @@ class Kind extends Component {
       state: {
        brand_id: this.state.brand_id,
        collections: this.state.collections,
-       selected_collections: this.state.selected_collections,
+       //  selected_collections: this.state.selected_collections,
        category: this.state.category,
       },
      }}
@@ -331,4 +335,8 @@ class Kind extends Component {
   }
  }
 }
-export default Kind;
+const mapDispatchToProps = (dispatch) => ({
+ resetAddPRoduct: () => dispatch(resetAddProduct()),
+});
+// export default Kind;
+export default connect(null, mapDispatchToProps)(Kind);

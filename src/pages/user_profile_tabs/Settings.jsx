@@ -50,6 +50,7 @@ class Settings extends Component {
    provider: null,
    signgedin: false,
    pswrd_loading: false,
+   pswrd_add_loading: false,
    prfl_loading: false,
    change_password_modal: false,
    delete_acc_modal: false,
@@ -86,6 +87,7 @@ class Settings extends Component {
  password_modal_close = () => {
   this.setState({ change_password_modal: false });
  };
+
  onChangeProfile = (e) => {
   const file = e.target.files[0];
   const src = URL.createObjectURL(file);
@@ -153,29 +155,52 @@ class Settings extends Component {
  };
  changePassword = () => {
   this.setState({ pswrd_loading: true });
-  auth
-   .signInWithEmailAndPassword(auth.currentUser.email, this.state.password)
-   .then((userCreds) => {
-    userCreds.user
-     .updatePassword(this.state.new_password)
-     .then(() => {
-      console.log("Password Changed");
-      this.setState({ pswrd_loading: false });
-      this.setState({ change_password_modal: false });
-      toast.success("Password Updated Successfully", {
-       position: toast.POSITION.BOTTOM_LEFT,
-       theme: "colored",
-       transition: Flip,
-      });
-     })
-     .catch((err) => {
-      console.log(err);
+
+  const fd = new FormData();
+  fd.append("password", this.state.new_password);
+  fd.append("password_confirmation", this.state.new_password);
+  axios
+   .post(`${API}user/registration/password-change/${this.state.user.uid}`, fd)
+   .then((response) => {
+    console.log("Password Changed");
+    this.setState({ pswrd_loading: false });
+    this.setState({ change_password_modal: false });
+    toast.success("Password Updated Successfully", {
+     position: toast.POSITION.BOTTOM_LEFT,
+     theme: "colored",
+     transition: Flip,
+    });
+   });
+ };
+
+ addPassword = () => {
+  this.setState({ pswrd_add_loading: true });
+  const { added_password, confirm_added_password } = this.state;
+  if (added_password === confirm_added_password) {
+   const fd = new FormData();
+   fd.append("password", added_password);
+   fd.append("password_confirmation", confirm_added_password);
+   axios
+    .post(`${API}user/registration/add-password/${this.state.user.uid}`, fd)
+    .then((response) => {
+     console.log("Password Added");
+     this.setState({ pswrd_add_loading: false });
+     this.setState({ change_password_modal: false });
+     toast.success("Password set Successfully", {
+      position: toast.POSITION.BOTTOM_LEFT,
+      theme: "colored",
+      transition: Flip,
      });
-   })
-   .catch((err) => console.log(err));
+    });
+  } else {
+   return;
+  }
  };
  changePasswordOpen = () => {
   this.setState({ change_password_modal: true });
+ };
+ addPasswordOpen = () => {
+  this.setState({ add_password_modal: true });
  };
  deleteAccountOpen = () => {
   this.setState({ delete_acc_modal: true });
@@ -189,12 +214,12 @@ class Settings extends Component {
   const fd = new FormData();
   fd.append("displayName", `${this.state.fname} ${this.state.lname}`);
   fd.append("email", this.state.email);
-  if (this.state.city.length > 0) fd.append("city", this.state.city);
-  if (this.state.country.length > 0) fd.append("country", this.state.country);
+  if (this.state.city?.length > 0) fd.append("city", this.state.city);
+  if (this.state.country?.length > 0) fd.append("country", this.state.country);
   if (this.state.phoneNumber > 0)
    fd.append("phoneNumber", Number(this.state.phoneNumber));
   if (this.state.code > 0) fd.append("phoneCode", this.state.code);
-  if (this.state.selectedProfessions.length > 0)
+  if (this.state.selectedProfessions?.length > 0)
    this.state.selectedProfessions.map((p) => fd.append("professions[]", p));
 
   if (this.props.isLoggedIn) {
@@ -303,12 +328,18 @@ class Settings extends Component {
  handleNewPasswordChange = (e) => {
   this.setState({ new_password: e.target.value });
  };
+ handleConfirmPasswordChange = (e) => {
+  this.setState({ confirm_added_password: e.target.value });
+ };
 
+ handleAddPasswordChange = (e) => {
+  this.setState({ added_password: e.target.value });
+ };
  render() {
   const { selectedProfessions, isChanged } = this.state;
 
   const filteredOptions = Proffessions.filter(
-   (o) => !selectedProfessions.includes(o)
+   (o) => !selectedProfessions?.includes(o)
   );
   if (!this.props.isLoggedIn || !this.props.userInfo?.info)
    return <Redirect to="/" />;
@@ -511,8 +542,8 @@ class Settings extends Component {
           <></>
          )}
 
-         <AntRow span={24} gutter={15} justify="end" align="middle">
-          <AntCol md={4}>
+         <AntRow span={24} gutter={15} justify="space-around" align="middle">
+          <AntCol md={4} className="mb-2">
            <button
             style={{
              textAlign: "right",
@@ -530,8 +561,8 @@ class Settings extends Component {
           </AntCol>
           {!this.props.userInfo.info?.email?.includes("+") ? (
            <>
-            {this.state.providerId === "password" && (
-             <AntCol md={4}>
+            {this.state.providerId === "regular" && (
+             <AntCol md={4} className="mb-2">
               <button
                href="#"
                style={{
@@ -546,6 +577,25 @@ class Settings extends Component {
                onClick={this.changePasswordOpen}
               >
                Change Password
+              </button>
+             </AntCol>
+            )}
+            {this.state.providerId?.includes("google") && (
+             <AntCol md={4}>
+              <button
+               href="#"
+               style={{
+                textAlign: "right",
+                textDecoration: "underline",
+                fontWeight: "600",
+                color: "#000",
+                background: "transparent",
+                outline: "none",
+                border: "none",
+               }}
+               onClick={this.addPasswordOpen}
+              >
+               Add Password
               </button>
              </AntCol>
             )}
@@ -618,59 +668,6 @@ class Settings extends Component {
            )}
           </AntCol>
          </AntRow>
-         {/* <Row span={{ span: 12 }} className="py-3">
-          <Col md={3}></Col>
-          <Col md={3}></Col>
-          <Col md={3} style={{ padding: "0" }}>
-           
-          </Col>
-          <Col md={3}>
-           {!isChanged ? (
-            <>
-             <Button
-              disabled
-              style={{
-               background: "#797979",
-               display: "block",
-               float: "right",
-               width: "120px",
-               textAlign: "center",
-               border: "none",
-              }}
-             >
-              Save
-             </Button>
-            </>
-           ) : (
-            <>
-             <Button
-              variant="danger"
-              onClick={this.handleUpdateProfile}
-              type="submit"
-              style={{
-               background: "#E41E15",
-               display: "block",
-               float: "right",
-               width: "120px",
-               textAlign: "center",
-              }}
-             >
-              {this.state.prfl_loading ? (
-               <>
-                <ClipLoader
-                 style={{ height: "20px" }}
-                 color="#ffffff"
-                 size={20}
-                />
-               </>
-              ) : (
-               <>Save</>
-              )}
-             </Button>
-            </>
-           )}
-          </Col>
-         </Row> */}
         </div>
        </Col>
       </Row>
@@ -714,7 +711,7 @@ class Settings extends Component {
            variant="danger"
            onClick={() => {
             this.changePassword();
-            this.setState({ embed_modal: false });
+            // this.setState({ embed_modal: false });
            }}
            type="submit"
            style={{
@@ -741,6 +738,71 @@ class Settings extends Component {
          </div>
         </Modal.Body>
        </Modal>
+
+       {/* add password modal for google */}
+       <Modal
+        show={this.state.add_password_modal}
+        onHide={() => {
+         this.setState({ change_password_modal: false });
+        }}
+        className="example-modals"
+        keyboard={false}
+       >
+        <Modal.Header closeButton></Modal.Header>
+        <Modal.Body>
+         <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
+          <Form.Row as={Row} style={{ margin: "20px 0" }}>
+           <Form.Label column md={4}>
+            Password
+           </Form.Label>
+           <Col md={8}>
+            <Form.Control
+             type="password"
+             value={this.state.added_password}
+             placeholder="Password"
+             onChange={this.handleAddPasswordChange}
+            />
+           </Col>
+          </Form.Row>
+          <Form.Row as={Row} style={{ margin: "20px 0" }}>
+           <Form.Label column md={4}>
+            Confirm Password
+           </Form.Label>
+           <Col md={8}>
+            <Form.Control
+             type="password"
+             placeholder="Confirm password"
+             onChange={this.handleConfirmPasswordChange}
+             value={this.state.confirm_added_password}
+            />
+           </Col>
+          </Form.Row>
+          <Button
+           variant="danger"
+           onClick={() => {
+            this.addPassword();
+           }}
+           type="submit"
+           style={{
+            textAlign: "right",
+            background: "#E41E15",
+            display: "block",
+            float: "right",
+            marginRight: "12px",
+           }}
+          >
+           {this.state.pswrd_add_loading ? (
+            <>
+             <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
+            </>
+           ) : (
+            <>Set Password</>
+           )}
+          </Button>
+         </div>
+        </Modal.Body>
+       </Modal>
+
        <Modal
         show={this.state.delete_acc_modal}
         onHide={this.deleteAccClose}

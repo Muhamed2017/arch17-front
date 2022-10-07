@@ -1,18 +1,26 @@
 import React, { Component } from "react";
 import logo from "../../src/logo-gray.png";
-// import { BrowserRouter as Router, Link } from "react-router-dom";
 import { toast, Flip } from "react-toastify";
 import { auth } from "../firebase";
 import ClipLoader from "react-spinners/ClipLoader";
-import { TreeSelect, Spin } from "antd";
-import { LoadingOutlined } from "@ant-design/icons";
 
 import {
- //  Redirect,
- BrowserRouter as Router,
- Link,
- //  Switch,
-} from "react-router-dom";
+ TreeSelect,
+ Spin,
+ Input,
+ Button,
+ //  Row as AntRow,
+ //  Col as AntCol,
+} from "antd";
+import {
+ LoadingOutlined,
+ SearchOutlined,
+ CloseOutlined,
+} from "@ant-design/icons";
+import "./Nav.css";
+// import { VerificationPin } from "react-verification-pin";
+
+import { BrowserRouter as Router, Link, Redirect } from "react-router-dom";
 
 import {
  Container,
@@ -22,9 +30,9 @@ import {
  FormControl,
  NavDropdown,
  Modal,
- Col,
+ //  Col,
  Row,
- Button,
+ //  Button,
 } from "react-bootstrap";
 import { connect } from "react-redux";
 import {
@@ -32,18 +40,20 @@ import {
  phoneSignupSuccess,
  setUserInfoAction,
  updateInfo,
+ //  loadHomepage,
 } from "../redux/actions/authActions";
-import { BsChatFill } from "react-icons/bs";
-import { IoNotifications } from "react-icons/io5";
 import axios from "axios";
 import { presistInfo } from "./../redux/actions/authActions";
+import { setMenu } from "./../redux/actions/componentActions";
 import { API } from "./../utitlties";
 import {
  setSearchTerm,
  setAllBrands,
 } from "./../redux/actions/addProductActions";
-
-const furniture = [
+import Notifications from "./Notifications";
+import SearchMobileSideMenu from "./SearchMobileSideMenu";
+// const { Search } = Input;
+export const furniture = [
  "Cabinets",
  "Beds",
  "Bencheds",
@@ -71,7 +81,7 @@ const furniture = [
  "Tatami",
  "Food trolleys",
 ];
-const lightings = [
+export const lightings = [
  "Bollard lights",
  "Pendant lamps",
  "Chandeliers",
@@ -82,7 +92,7 @@ const lightings = [
  "Floor lamps",
 ];
 
-const treeData = [
+export const treeData = [
  {
   title: "All Items",
   value: "all",
@@ -90,23 +100,13 @@ const treeData = [
  {
   title: "Products",
   value: "Products",
-  children: [
-   {
-    title: "Furniture",
-    value: "Furniture",
-   },
-   {
-    title: "Lighting",
-    value: "Ligthing",
-   },
-  ],
  },
  {
   title: "Brands",
   value: "Brands",
  },
  {
-  title: "Projects",
+  title: "Magazine",
   value: "Projects",
  },
 ];
@@ -132,20 +132,78 @@ class NavigationBar extends Component {
    filterProjects: [],
    filteredLightings: [],
    lightings: [],
+   search_mobile: false,
    searchDataLoaded: false,
    selected_search: "",
    selected: false,
    typeSelected: "",
    value: "all",
    search_list_loading: false,
+   status: "process",
    projects: [
-    "Hyatt Place Frankfurt Airport",
-    "Rheingold Bushwick",
-    "Arch House",
-    "A Neighborhood Candy-Sweet Bakery",
-    "Pearl House",
-    "Annex Coach House",
+    "Airport",
+    "Animal & Hospital and Clinic",
+    "Apartmant",
+    "Bus Station",
+    "Café",
+    "Cathedral",
+    "Chapal",
+    "Churches",
+    "Cinema",
+    "City Planning",
+    "Clinic",
+    "Club",
+    "Coffee shop",
+    "Dorms",
+    "Exhibit Design",
+    "Football Stadium",
+    "Furniture Design",
+    "Garden & Plaza",
+    "Grocery Store",
+    "Gym & Fitness Design",
+    "Home Design",
+    "Hospital",
+    "Hostel",
+    "Hotel",
+    "Restaurant",
+    "House",
+    "Housing",
+    "Kid Garden",
+    "Loft Appartment",
+    "Lighting Design",
+    "Material Design",
+    "Master Plan",
+    "Monastery",
+    "Mosque",
+    "Motel",
+    "Mueseum",
+    "Night Club",
+    "Office",
+    "Opera House",
+    "Pavilion",
+    "Penthouse",
+    "Parmacy",
+    "Port",
+    "Praying Room",
+    "Residence",
+    "Sales Center",
+    "Schoole",
+    "Shopping Mall",
+    "Show Room",
+    "Spa & Sauna",
+    "Store",
+    "Super Market",
+    "Swimming Pool",
+    "Synagogue",
+    "Tea House",
+    "Tea Shop",
+    "Temple",
+    "Temporary Store",
+    "Theater",
+    "University & Institute",
    ],
+
+   myBrands: [],
   };
  }
  handleLogout = () => {
@@ -154,37 +212,7 @@ class NavigationBar extends Component {
   });
  };
 
- handleNotify = () => {
-  toast.success(
-   <h style={{ color: "#000" }}>
-    Welcome Muhamed ,
-    <a
-     style={{ color: "#000", textDecoration: "underline" }}
-     href="/user/settings"
-    >
-     Update Your profile Now
-    </a>
-   </h>,
-   {
-    position: toast.POSITION.BOTTOM_CENTER,
-    theme: "white",
-    transition: Flip,
-    pauseOnHover: true,
-    closeOnClick: false,
-    style: {
-     fontFamily: "Roboto",
-     color: "#fff",
-     backgroundColor: "#EAEAEA",
-     padding: "25px 0",
-     margin: "auto",
-    },
-    autoClose: 20000,
-    className: "welcome-notify",
-   }
-  );
- };
-
- onChange = (value) => {
+ onSearchMenuChange = (value) => {
   console.log(value);
   this.setState({ value, selected_search: value });
  };
@@ -256,6 +284,12 @@ class NavigationBar extends Component {
          ?.toLowerCase()
          .includes(this.state.searchValue.toLowerCase());
        }),
+
+       myBrands: this.props.isLoggedIn
+        ? this.state.searchData?.brands?.filter((brand) => {
+           return brand.user_id === this.props.info?.uid;
+          })
+        : [],
       });
      }
     );
@@ -296,7 +330,6 @@ class NavigationBar extends Component {
    let code = this.state.vCode;
    this.setState({ verifying: true });
    const fd = new FormData();
-   //  fd.append("uid", auth.currentUser.uid);
    fd.append("uid", this.props.info.uid);
    fd.append("code", code);
    axios
@@ -305,7 +338,12 @@ class NavigationBar extends Component {
      console.log(response);
      this.props.updateInfo(response.data.user);
      presistInfo(response.data.user, true);
-     this.setState({ verifying: false, validate_modal: false, verified: true });
+     this.setState({
+      verifying: false,
+      validate_modal: false,
+      verified: true,
+      status: "success",
+     });
      toast.success("Your email has been verified", {
       position: toast.POSITION.TOP_CENTER,
       theme: "colored",
@@ -314,85 +352,648 @@ class NavigationBar extends Component {
       toastId: "nav-msg",
      });
     })
-    .catch((error) => console.log(error));
+
+    .catch((error) => {
+     this.setState({
+      status: "success",
+     });
+     console.log(error);
+    });
   }
  };
 
+ handleSearchMobileField = () => {
+  const { search_mobile } = this.state;
+  this.setState({
+   search_mobile: !search_mobile,
+   searchValue: "",
+  });
+ };
+ onSearch = () => {};
  render() {
   return (
-   <div
-    id="navigation-component"
-    className="w-100 bg-white navbar-border-bottom sticky-top"
-   >
-    <Container>
-     <Navbar bg="white" expand="md" sticky="top">
-      <Navbar.Brand>
-       <Router>
-        <a href="/">
-         <img id="nav-logo" src={logo} alt="Logo" />
-        </a>
-       </Router>
-      </Navbar.Brand>
-      <Navbar.Toggle aria-controls="basic-navbar-nav" />
-      <Navbar.Collapse id="basic-navbar-nav">
-       <Form
-        inline
-        className="nav-search rounded col-md-6"
-        style={{ display: "inherit", position: "relative" }}
-       >
-        <TreeSelect
-         style={{
-          width: 130,
-          fontSize: "1rem",
-          fontWeight: 600,
-          backgroundColor: "#F7F8FA",
-          display: "none",
-         }}
-         value={this.state.value}
-         size={"large"}
-         bordered={false}
-         dropdownStyle={{
-          maxHeight: 600,
-          minHeight: 300,
-          overflow: "auto",
-          minWidth: 200,
-         }}
-         treeData={treeData}
-         defaultValue={"all"}
-         treeDefaultExpandAll
-         onChange={this.onChange}
-        />
-        <div
-         className={
-          this.state.search_list_loading
-           ? "search-bar-input search-loading"
-           : "search-bar-input"
-         }
-        >
-         <FormControl
-          value={this.state.searchValue}
-          type="text"
-          placeholder={`Search ${this.state.selected_search}`}
-          className="mr-sm-2 border-0"
-          onChange={(e) => this.searching(e.target.value)}
-         />
-         {this.state.search_list_loading && (
-          <Spin
-           size="large"
-           indicator={
-            <LoadingOutlined style={{ fontSize: "16px", color: "#555" }} spin />
-           }
+   <>
+    {this.state.value === "Products" && <Redirect to="/products" />}
+    {this.state.value === "Projects" && <Redirect to="/magazine" />}
+    {this.state.value === "Brands" && <Redirect to="/brands" />}
+    <div
+     id="navigation-component"
+     className="w-100 bg-white navbar-border-bottom sticky-top"
+    >
+     <Container>
+      <div className="wide-nav-view">
+       <Navbar bg="white" expand="md" sticky="top">
+        <Navbar.Brand>
+         <Router>
+          <a href="/">
+           <img id="nav-logo" src={logo} alt="Logo" />
+          </a>
+         </Router>
+        </Navbar.Brand>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse id="basic-navbar-nav">
+         <Form
+          inline
+          className="nav-search rounded col-md-6 search-dropdown"
+          style={{ display: "inherit", position: "relative" }}
+         >
+          <TreeSelect
            style={{
-            position: "absolute",
-            top: "12px",
-            right: "8px",
-            width: "50px",
-            zIndex: 5,
+            width: 165,
+            textAlign: "center",
+            fontWeight: 600,
+            backgroundColor: "rgb(242 242 242)",
+            borderTopLeftRadius: "7px",
+            borderBottomLeftRadius: "7px",
+           }}
+           value={this.state.value}
+           size={"large"}
+           bordered={false}
+           dropdownStyle={{
+            paddingTop: "20px",
+            overflow: "auto",
+            minWidth: 145,
+           }}
+           treeData={treeData}
+           defaultValue={"all"}
+           treeDefaultExpandAll
+           onChange={this.onSearchMenuChange}
+          />
+          <div
+           className={
+            this.state.search_list_loading
+             ? "search-bar-input search-loading"
+             : "search-bar-input"
+           }
+          >
+           <FormControl
+            value={this.state.searchValue}
+            type="text"
+            placeholder={`Search ${this.state.selected_search}`}
+            className="mr-sm-2 border-0"
+            onChange={(e) => this.searching(e.target.value)}
+           />
+           {this.state.search_list_loading && (
+            <Spin
+             size="large"
+             indicator={
+              <LoadingOutlined
+               style={{ fontSize: "16px", color: "#555" }}
+               spin
+              />
+             }
+             style={{
+              position: "absolute",
+              top: "12px",
+              right: "8px",
+              width: "50px",
+              zIndex: 5,
+             }}
+            />
+           )}
+          </div>
+          {this.state.search_list && (
+           <>
+            <div
+             className="col-md-5"
+             id="search-list"
+             style={{
+              position: "absolute",
+              top: 45,
+              width: "100%",
+              right: 0,
+              left: 0,
+              minHeight: "250px",
+              borderTopRightRadius: "2px",
+              borderTopLeftRadius: "2px",
+              background: "#fff",
+              border: "1px solid #ddd",
+              borderTop: "0",
+             }}
+            >
+             {this.state.value === "all" && this.state.searchDataLoaded && (
+              <ul>
+               {this.state.filteredFurniture?.length > 0 && (
+                <>
+                 <li>
+                  Furniture
+                  <ul className="inner-list">
+                   {this.state.filteredFurniture.map((product, index) => {
+                    if (index <= 13) {
+                     return (
+                      <>
+                       <a
+                        href={`/products?category=furniture&kinds=${product}`}
+                       >
+                        <li
+                         onClick={() => {
+                          this.setState({
+                           search_list: false,
+                           searchValue: product,
+                          });
+                          console.log(product);
+                          this.props.setSearchTerm(product);
+                         }}
+                        >
+                         {product}
+                        </li>
+                       </a>
+                      </>
+                     );
+                    }
+                   })}
+                  </ul>
+                 </li>
+                </>
+               )}
+               {this.state.filteredLightings.length > 0 && (
+                <>
+                 <li>
+                  Lightings
+                  <ul className="inner-list">
+                   {this.state.filteredLightings.map((product, index) => {
+                    if (index <= 15) {
+                     return (
+                      <>
+                       <a href={`/products?category=lighting&kinds=${product}`}>
+                        <li
+                         onClick={() => {
+                          this.setState({
+                           search_list: false,
+                           searchValue: product,
+                          });
+                          console.log(product);
+                          this.props.setSearchTerm(product);
+                         }}
+                        >
+                         {product}
+                        </li>
+                       </a>
+                      </>
+                     );
+                    }
+                   })}
+                  </ul>
+                 </li>
+                </>
+               )}
+               {this.state.filteredBrands?.length > 0 && (
+                <>
+                 <li>
+                  Brands
+                  <ul className="inner-list">
+                   {this.state.filteredBrands.map((brand, index) => {
+                    return (
+                     <>
+                      <li>
+                       <a href={`/brand/${brand.id}`}>{brand.name}</a>
+                      </li>
+                     </>
+                    );
+                   })}
+                  </ul>
+                 </li>
+                </>
+               )}
+               <li>
+                {this.state.filterProjects.length > 0 && (
+                 <>
+                  Projects
+                  <ul className="inner-list">
+                   {this.state.filterProjects.map((project, index) => {
+                    return (
+                     <a href={`/magazine?types=${project}`}>
+                      <li>{project}</li>
+                     </a>
+                    );
+                   })}
+                  </ul>
+                 </>
+                )}
+               </li>
+              </ul>
+             )}
+             {this.state.value === "Brands" && this.state.searchDataLoaded && (
+              <ul>
+               {this.state.filteredBrands?.length > 0 && (
+                <>
+                 <li>
+                  Brands
+                  <ul className="inner-list">
+                   {this.state.filteredBrands.map((brand, index) => {
+                    return (
+                     <>
+                      <li>
+                       <a href={`/brand/${brand.id}`}>{brand.name}</a>
+                      </li>
+                     </>
+                    );
+                   })}
+                  </ul>
+                 </li>
+                </>
+               )}
+              </ul>
+             )}
+             {this.state.value === "Products" && this.state.searchDataLoaded && (
+              <ul>
+               {this.state.filteredFurniture?.length > 0 && (
+                <>
+                 <li>
+                  Furnitures
+                  <ul className="inner-list">
+                   {this.state.filteredFurniture.map((product, index) => {
+                    if (index <= 9) {
+                     return (
+                      <>
+                       <Link
+                        to={{
+                         pathname: `/products/furniture/${product}`,
+                         state: {
+                          selected_kind: product,
+                         },
+                        }}
+                       >
+                        <li
+                         onClick={() => {
+                          this.setState({
+                           search_list: false,
+                           searchValue: product,
+                          });
+                          console.log(product);
+                          this.props.setSearchTerm(product);
+                         }}
+                        >
+                         {product}
+                        </li>
+                       </Link>
+                      </>
+                     );
+                    }
+                   })}
+                  </ul>
+                 </li>
+                </>
+               )}
+               {this.state.filteredLightings.length > 0 && (
+                <>
+                 <li>
+                  Lightings
+                  <ul className="inner-list">
+                   {this.state.filteredLightings.map((product, index) => {
+                    if (index <= 9) {
+                     return (
+                      <>
+                       <Link
+                        to={{
+                         pathname: `/products/furniture/${product}`,
+                         state: {
+                          selected_kind: product,
+                         },
+                        }}
+                       >
+                        <li
+                         onClick={() => {
+                          this.setState({
+                           search_list: false,
+                           searchValue: product,
+                          });
+                          console.log(product);
+                          this.props.setSearchTerm(product);
+                         }}
+                        >
+                         {product}
+                        </li>
+                       </Link>
+                      </>
+                     );
+                    }
+                   })}
+                  </ul>
+                 </li>
+                </>
+               )}
+              </ul>
+             )}
+             {this.state.value === "Projects" && this.state.searchDataLoaded && (
+              <ul>
+               <li>
+                Projects
+                <ul className="inner-list">
+                 {this.state.filterProjects?.map((project, index) => {
+                  return <li key={index}>{project}</li>;
+                 })}
+                </ul>
+               </li>
+              </ul>
+             )}
+            </div>
+           </>
+          )}
+         </Form>
+         <Nav className="ml-auto">
+          {this.props.userInfo.isLoggedIn === false ? (
+           <React.Fragment>
+            <a href="/signup" className="nav-link">
+             Register
+            </a>
+            <a href="/signin" className="nav-link">
+             Login
+            </a>
+           </React.Fragment>
+          ) : (
+           <>
+            <div
+             style={{
+              fontSize: "1.7rem",
+              paddingTop: "1px",
+              color: "#797979",
+             }}
+            >
+             <Notifications />
+            </div>
+            <div
+             style={{
+              margin: "0 20px",
+              width: "1px",
+              height: "50px",
+              borderRight: "1px solid #EAEAEA",
+             }}
+            ></div>
+            <div
+             style={{
+              width: "38px",
+              height: "38px",
+              paddingTop: "5px",
+              borderRadius: "50%",
+              alignItems: "center",
+              textAlign: "center",
+              display: "grid",
+              fontSize: "1.5rem",
+              fontWeight: "600",
+
+              background:
+               this.props.userInfo?.info?.photoURL &&
+               this.props.userInfo?.info?.photoURL?.length > 5
+                ? "transparent"
+                : "#ddd",
+             }}
+            >
+             {this.props?.userInfo?.info?.photoURL &&
+             this.props?.userInfo?.info?.photoURL?.length > 5 ? (
+              <img
+               style={{ display: "block", borderRadius: "50%" }}
+               src={this.props?.photoURL ?? this.props.userInfo?.info?.photoUrl}
+               alt=""
+              />
+             ) : (
+              <span>{this.props.userInfo.info?.displayName[0]}</span>
+             )}
+            </div>
+
+            <NavDropdown
+             alignRight
+             className="archnav-dropdown"
+             title={
+              this.props.displayName ?? this.props.userInfo.user?.displayName
+              // this.props.userInfo.user?.displayName
+             }
+             style={{
+              paddingTop: "5px",
+              fontWeight: "600",
+              fontFamily: "Roboto",
+              color: "#000",
+              fontSize: "1.1rem",
+             }}
+             id="basic-nav-dropdown"
+            >
+             <NavDropdown.Item href="/profile">Profile</NavDropdown.Item>
+
+             <NavDropdown.Divider />
+             {this.state.myBrands?.length > 0 && (
+              <p className="strs">Brands/ Stores</p>
+             )}
+             {this.state.myBrands?.map((brand, index) => {
+              return (
+               <>
+                {index < 3 && (
+                 <NavDropdown.Item href={`/brand/${brand?.id}`} key={index}>
+                  {brand?.logo && brand?.logo?.length > 10 ? (
+                   <span
+                    className="br-img"
+                    style={{
+                     backgroundImage: `url(${brand.logo})`,
+                    }}
+                   ></span>
+                  ) : (
+                   <span className="br-img">{brand?.name[0]}</span>
+                  )}
+                  <span className="br-name">{brand?.name}</span>
+                 </NavDropdown.Item>
+                )}
+               </>
+              );
+             })}
+
+             {this.state.myBrands?.length > 2 && (
+              <>
+               <a href="/profile" className="navanchor">
+                See all
+               </a>
+              </>
+             )}
+             {this.state.myBrands?.length > 0 && <NavDropdown.Divider />}
+
+             <NavDropdown.Item onClick={this.handleLogout}>
+              Logout
+             </NavDropdown.Item>
+            </NavDropdown>
+           </>
+          )}
+         </Nav>
+        </Navbar.Collapse>
+       </Navbar>
+      </div>
+      <div className="mobile-nav-view">
+       <Navbar bg="white" expand="md" sticky="top">
+        <Navbar.Brand>
+         <Router>
+          <a href="/">
+           <img id="nav-logo" src={logo} alt="Logo" />
+          </a>
+         </Router>
+        </Navbar.Brand>
+        <div></div>
+        <Button
+         className="search-nav-btn"
+         //  onClick={this.handleSearchMobileField}
+         onClick={() => {
+          this.props.dispatchSetMenu(true);
+          console.log("MMMMME");
+         }}
+        >
+         <SearchOutlined />
+        </Button>
+        {this.props.isLoggedIn ? (
+         <NavDropdown
+          alignRight
+          className="archnav-dropdown"
+          title={
+           this.props.userInfo?.info?.photoURL &&
+           this.props.userInfo?.info?.photoURL?.length > 5 ? (
+            <img
+             style={{
+              display: "block",
+              borderRadius: "50%",
+              width: "38px",
+              height: "38px",
+             }}
+             src={this.props?.photoURL ?? this.props.userInfo?.info?.photoUrl}
+             alt=""
+            />
+           ) : (
+            <div
+             className="nav-avatar"
+             style={{
+              width: "38px",
+              height: "38px",
+              paddingTop: "5px",
+              borderRadius: "50%",
+              alignItems: "center",
+              textAlign: "center",
+              display: "grid",
+              fontSize: "1.5rem",
+              fontWeight: "600",
+
+              background:
+               this.props.userInfo?.info?.photoURL &&
+               this.props.userInfo?.info?.photoURL?.length > 5
+                ? "transparent"
+                : "#ddd",
+             }}
+            >
+             {this.props.userInfo?.info?.displayName[0]}
+            </div>
+           )
+          }
+          style={{
+           paddingTop: "5px",
+           fontWeight: "600",
+           fontFamily: "Roboto",
+           color: "#000",
+           fontSize: "1.1rem",
+          }}
+          id="basic-nav-dropdown"
+         >
+          <NavDropdown.Item href="/profile">Profile</NavDropdown.Item>
+
+          <NavDropdown.Divider />
+          {this.state.myBrands?.length > 0 && (
+           <p className="strs">Brands/ Stores</p>
+          )}
+          {this.state.myBrands?.map((brand, index) => {
+           return (
+            <>
+             {index < 3 && (
+              <NavDropdown.Item href={`/brand/${brand?.id}`} key={index}>
+               {brand?.logo && brand?.logo?.length > 10 ? (
+                <span
+                 className="br-img"
+                 style={{
+                  backgroundImage: `url(${brand.logo})`,
+                 }}
+                ></span>
+               ) : (
+                <span className="br-img">{brand?.name[0]}</span>
+               )}
+               <span className="br-name">{brand?.name}</span>
+              </NavDropdown.Item>
+             )}
+            </>
+           );
+          })}
+
+          {this.state.myBrands?.length > 2 && (
+           <>
+            <a href="/profile" className="navanchor">
+             See all
+            </a>
+           </>
+          )}
+          {this.state.myBrands?.length > 0 && <NavDropdown.Divider />}
+
+          <NavDropdown.Item onClick={this.handleLogout}>
+           Logout
+          </NavDropdown.Item>
+         </NavDropdown>
+        ) : (
+         <NavDropdown
+          alignRight
+          className="archnav-dropdown"
+          title={
+           this.props.userInfo?.info?.photoURL &&
+           this.props.userInfo?.info?.photoURL?.length > 5 ? (
+            <img
+             style={{ display: "block", borderRadius: "50%" }}
+             src={this.props?.photoURL ?? this.props.userInfo?.info?.photoUrl}
+             alt=""
+            />
+           ) : (
+            <div
+             className="nav-avatar"
+             style={{
+              width: "38px",
+              height: "38px",
+              paddingTop: "5px",
+              borderRadius: "50%",
+              alignItems: "center",
+              textAlign: "center",
+              display: "grid",
+              fontSize: "1.5rem",
+              fontWeight: "600",
+
+              background:
+               this.props.userInfo?.info?.photoURL &&
+               this.props.userInfo?.info?.photoURL?.length > 5
+                ? "transparent"
+                : "#ddd",
+             }}
+            ></div>
+           )
+          }
+          style={{
+           paddingTop: "5px",
+           fontWeight: "600",
+           fontFamily: "Roboto",
+           color: "#000",
+           fontSize: "1.1rem",
+          }}
+          id="basic-nav-dropdown"
+         >
+          <NavDropdown.Item href="/signin">Login</NavDropdown.Item>
+          <NavDropdown.Item href="/signup">Register</NavDropdown.Item>
+         </NavDropdown>
+        )}
+       </Navbar>
+      </div>
+
+      {this.state.search_mobile && (
+       <div className="search-mobile-container">
+        <Input
+         size="large"
+         suffix={
+          <CloseOutlined
+           onClick={() => {
+            this.setState({
+             search_mobile: false,
+            });
            }}
           />
-         )}
-        </div>
-        {this.state.search_list && (
+         }
+         placeholder="Search Products, Brands and Magazine"
+         onChange={(e) => this.searching(e.target.value)}
+        />
+        {this.state.search_list && this.state.search_mobile && (
          <>
           <div
            className="col-md-5"
@@ -420,19 +1021,9 @@ class NavigationBar extends Component {
                 <ul className="inner-list">
                  {this.state.filteredFurniture.map((product, index) => {
                   if (index <= 13) {
-                   const lower = product.toLowerCase();
-
                    return (
                     <>
-                     <Link
-                      to={{
-                       pathname: `/products/furniture/${lower}`,
-                       state: {
-                        selected_kind: product,
-                        selected_category: "Furniture",
-                       },
-                      }}
-                     >
+                     <a href={`/products?category=furniture&kinds=${product}`}>
                       <li
                        onClick={() => {
                         this.setState({
@@ -445,7 +1036,7 @@ class NavigationBar extends Component {
                       >
                        {product}
                       </li>
-                     </Link>
+                     </a>
                     </>
                    );
                   }
@@ -461,19 +1052,9 @@ class NavigationBar extends Component {
                 <ul className="inner-list">
                  {this.state.filteredLightings.map((product, index) => {
                   if (index <= 15) {
-                   const lower = product.toLowerCase();
-
                    return (
                     <>
-                     <Link
-                      to={{
-                       pathname: `/products/lighting/${lower}`,
-                       state: {
-                        selected_kind: product,
-                        selected_category: "Lighting",
-                       },
-                      }}
-                     >
+                     <a href={`/products?category=lighting&kinds=${product}`}>
                       <li
                        onClick={() => {
                         this.setState({
@@ -486,7 +1067,7 @@ class NavigationBar extends Component {
                       >
                        {product}
                       </li>
-                     </Link>
+                     </a>
                     </>
                    );
                   }
@@ -520,9 +1101,9 @@ class NavigationBar extends Component {
                 <ul className="inner-list">
                  {this.state.filterProjects.map((project, index) => {
                   return (
-                   <>
+                   <a href={`/magazine?types=${project}`}>
                     <li>{project}</li>
-                   </>
+                   </a>
                   );
                  })}
                 </ul>
@@ -555,12 +1136,50 @@ class NavigationBar extends Component {
            )}
            {this.state.value === "Products" && this.state.searchDataLoaded && (
             <ul>
-             {this.state.filteredBrands?.length > 0 && (
+             {this.state.filteredFurniture?.length > 0 && (
               <>
                <li>
-                Products
+                Furnitures
                 <ul className="inner-list">
                  {this.state.filteredFurniture.map((product, index) => {
+                  if (index <= 9) {
+                   return (
+                    <>
+                     <Link
+                      to={{
+                       pathname: `/products/furniture/${product}`,
+                       state: {
+                        selected_kind: product,
+                       },
+                      }}
+                     >
+                      <li
+                       onClick={() => {
+                        this.setState({
+                         search_list: false,
+                         searchValue: product,
+                        });
+                        console.log(product);
+                        this.props.setSearchTerm(product);
+                       }}
+                      >
+                       {product}
+                      </li>
+                     </Link>
+                    </>
+                   );
+                  }
+                 })}
+                </ul>
+               </li>
+              </>
+             )}
+             {this.state.filteredLightings.length > 0 && (
+              <>
+               <li>
+                Lightings
+                <ul className="inner-list">
+                 {this.state.filteredLightings.map((product, index) => {
                   if (index <= 9) {
                    return (
                     <>
@@ -600,11 +1219,9 @@ class NavigationBar extends Component {
              <li>
               Projects
               <ul className="inner-list">
-               <li>Project 1</li>
-               <li>Project 2</li>
-               <li>Chair Project</li>
-               <li>4-base Project</li>
-               <li>Outdoor Desk Project</li>
+               {this.state.filterProjects?.map((project, index) => {
+                return <li key={index}>{project}</li>;
+               })}
               </ul>
              </li>
             </ul>
@@ -612,188 +1229,80 @@ class NavigationBar extends Component {
           </div>
          </>
         )}
-       </Form>
-
-       <Nav className="ml-auto">
-        {this.props.userInfo.isLoggedIn === false ? (
-         <React.Fragment>
-          <a href="/signup" className="nav-link">
-           Register
-          </a>
-          <a href="/signin" className="nav-link">
-           Login
-          </a>
-         </React.Fragment>
-        ) : (
-         <>
-          <div
-           style={{ fontSize: "1.7rem", paddingTop: "1px", color: "#797979" }}
-          >
-           <IoNotifications
-            style={{ width: "60px", display: "inline-block" }}
-           />
-           <BsChatFill style={{ width: "60px", display: "inline-block" }} />
-          </div>
-          <div
-           style={{
-            margin: "0 20px",
-            width: "1px",
-            height: "50px",
-            borderRight: "1px solid #EAEAEA",
-           }}
-          ></div>
-          <div
-           style={{
-            width: "38px",
-            height: "38px",
-            paddingTop: "8px",
-            borderRadius: "50%",
-            alignItems: "flex-end",
-           }}
-          >
-           {/* {this.state.photoURL ? (
-            <>
-             <img
-              style={{ display: "block", borderRadius: "50%" }}
-              // src={this.props.photoURL}
-              src={this.state.photoURL}
-              alt=""
-             />
-            </>
-           ) : (
-            <>
-             <div
-              style={{
-               width: "38px",
-               height: "38px",
-               background: "#797979",
-               borderRadius: "50%",
-              }}
-             ></div>
-            </>
-           )} */}
-           <img
-            style={{ display: "block", borderRadius: "50%" }}
-            // src={this.props.photoURL}
-            src={this.props?.photoURL ?? this.props.userInfo?.info?.photoUrl}
-            alt=""
-           />
-          </div>
-
-          <NavDropdown
-           className="test-name"
-           title={
-            this.props.displayName ?? this.props.userInfo.user?.displayName
-           }
-           style={{
-            paddingTop: "5px",
-            fontWeight: "500",
-            fontFamily: "Roboto",
-            color: "#000",
-           }}
-           id="basic-nav-dropdown"
-          >
-           <NavDropdown.Item href="/product/5">Action</NavDropdown.Item>
-           <NavDropdown.Item href="/profile">Profile</NavDropdown.Item>
-           <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-           <NavDropdown.Divider />
-           <NavDropdown.Item onClick={this.handleLogout}>
-            Logout
-           </NavDropdown.Item>
-           <NavDropdown.Item onClick={this.handleNotify}>
-            Notify
-           </NavDropdown.Item>
-          </NavDropdown>
-         </>
-        )}
-       </Nav>
-      </Navbar.Collapse>
-     </Navbar>
-    </Container>
-    {this.props.isLoggedIn &&
-    !this.props.userInfo.info?.emailVerified &&
-    !this.props.userInfo.info?.phoneNumber &&
-    !this.state.verified ? (
-     <>
-      <button
-       style={{
-        width: "100%",
-        background: "#E41E15",
-        color: "#fff",
-        padding: "5px 0",
-        fontFamily: "Roboto",
-        fontSize: ".8rem",
-       }}
-       onClick={this.sendVerificationCode}
-      >
-       Your account is not activated.
-       <span
+       </div>
+      )}
+     </Container>
+     {this.props.isLoggedIn &&
+     !this.props.userInfo.info?.emailVerified &&
+     !this.props.userInfo.info?.phoneNumber &&
+     !this.state.verified ? (
+      <>
+       <button
         style={{
-         textDecoration: "underline",
-         textAlign: "center",
-         padding: "0 3px",
+         width: "100%",
+         background: "#E41E15",
+         color: "#fff",
+         padding: "5px 0",
+         fontFamily: "Roboto",
+         fontSize: ".8rem",
         }}
+        onClick={this.sendVerificationCode}
        >
-        Click here
-       </span>
-       to activate it
-       {this.state.sendingVcode ? (
-        <>
-         <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
-        </>
-       ) : (
-        ""
-       )}
-      </button>
-      <Modal
-       show={this.state.validate_modal}
-       onHide={this.validate_modal_close}
-       className="example-modals"
-       keyboard={false}
-      >
-       <Modal.Body>
-        <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
-         <Form.Row as={Row} style={{ margin: "20px 0" }}>
-          <Form.Label column md={4}>
-           6-digit code
-          </Form.Label>
-          <Col md={8}>
-           <Form.Control
+        Your account is not activated.
+        <span
+         style={{
+          textDecoration: "underline",
+          textAlign: "center",
+          padding: "0 3px",
+         }}
+        >
+         Click here
+        </span>
+        to activate it
+        {this.state.sendingVcode ? (
+         <>
+          <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
+         </>
+        ) : (
+         ""
+        )}
+       </button>
+       <Modal
+        show={this.state.validate_modal}
+        onHide={this.validate_modal_close}
+        className="example-modals"
+        keyboard={false}
+       >
+        <Modal.Body>
+         <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
+          <Form.Row as={Row} style={{ margin: "20px 0" }}>
+           <Input
+            size="large"
+            placeholder="Enter 6 digits sent to your email"
             value={this.state.vCode}
-            placeholder="Six digit code"
-            onChange={this.onChangeVcode}
+            onChange={(e) => {
+             this.setState({
+              vCode: e.target.value,
+             });
+            }}
            />
-          </Col>
-         </Form.Row>
+          </Form.Row>
+          <Button color="red" onClick={this.verify}>
+           Verify
+          </Button>
+         </div>
+        </Modal.Body>
+       </Modal>
+      </>
+     ) : (
+      ""
+     )}
+    </div>
 
-         <Button
-          variant="danger"
-          onClick={this.verify}
-          type="submit"
-          style={{
-           textAlign: "right",
-           background: "#E41E15",
-           display: "block",
-           float: "right",
-           marginRight: "12px",
-          }}
-         >
-          {this.state.verifying ? (
-           <>
-            <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
-           </>
-          ) : (
-           <>Verify</>
-          )}
-         </Button>
-        </div>
-       </Modal.Body>
-      </Modal>
-     </>
-    ) : (
-     ""
+    {this.state.searchDataLoaded && (
+      <SearchMobileSideMenu data={this.state.searchData} />
     )}
-   </div>
+   </>
   );
  }
  //  }
@@ -806,6 +1315,9 @@ const mapDispatchToProps = (dispatch) => ({
  updateInfo: (information) => dispatch(updateInfo(information)),
  setSearchTerm: (term) => dispatch(setSearchTerm(term)),
  setAllBrands: (brands) => dispatch(setAllBrands(brands)),
+ dispatchSetMenu: (visible) => dispatch(setMenu(visible)),
+
+ //  setHomepage: (homepage) => dispatch(loadHomepage(homepage)),
 });
 
 const mapStateToProps = (state) => {

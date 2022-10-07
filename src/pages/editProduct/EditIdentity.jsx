@@ -2,7 +2,6 @@ import { Component } from "react";
 import { Form, Col, Row } from "react-bootstrap";
 import ReactSelect from "react-select";
 import ReactFlagsSelect from "react-flags-select";
-// import AsyncSelect from "react-select/async";
 import { Row as AntRow, Col as AntCol, Checkbox, Select } from "antd";
 import * as productClass from "./../addProduct/ProductClassifications";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -13,16 +12,18 @@ import CreatableSelect from "react-select/creatable";
 import { PlusOutlined } from "@ant-design/icons";
 import { collectionSelectStyles } from "./../addProduct/Identity";
 import axios from "axios";
+import { customLabels } from "../CreateBrandFinish";
 import { API } from "./../../utitlties";
 const { Option } = Select;
-const src =
- "https://cdn.allfamous.org/people/avatars/fiona-zanetti-srcs-allfamous.org.jpg?v=56";
 
 class EditIdentity extends Component {
  constructor(props) {
   super(props);
   this.state = {
    designers: [],
+   selected_designers: this.props?.selected_designers?.map((d) => {
+    return d.id;
+   }),
    name: this.props?.data?.name,
    category: this.props?.category,
    kindsOptions: [],
@@ -441,19 +442,21 @@ class EditIdentity extends Component {
  componentDidMount() {
   console.log(this.props);
   axios.get(`${API}designers`).then((res) => {
+   const des = res.data.designers;
+   console.log(res.data.designers);
    this.setState({
-    designers: res.data.designers,
+    designers: Object.values(des),
+    // selected_designers: des.map((d) => {
+    //  return d.id;
+    // }),
    });
   });
-  // console.log(this.props.selected_collections);
   console.log(this.state.for_kids);
   console.log(this.state.is_for_kids);
   this.props?.data?.places_tags?.map((m) => {
    this.places_tags_label.push({ label: m, value: m });
    return this.places_tags.push(m);
   });
-
-  // console.log(this.props.collections);
 
   this.props?.collections?.map((collection, index) => {
    this.collections.push({
@@ -691,571 +694,574 @@ class EditIdentity extends Component {
  }
  render() {
   return (
-   <>
-    <div className="step-form identity">
-     <button
-      className="save-product-step-btn"
+   <div className="step-form identity">
+    <div
+     className="next-wrapper"
+     style={{
+      top: "80px",
+     }}
+    >
+     <div
+      className="next-inner"
       style={{
-       top: "-110px",
-       height: "20px",
-       background: this.props.loading ? "#898989" : "",
+       maxWidth: "1010px",
       }}
-      onClick={this.handleIdentitySubmit}
      >
-      {this.props.loading ? (
-       <ClipLoader
-        style={{ height: "20px" }}
-        color="#ffffff"
-        loading={this.props.loading}
-        size={18}
-       />
-      ) : (
-       "Save & Continue"
-      )}
-     </button>
-     <Form>
-      <div className="form-block">
-       <Form.Group>
-        <Form.Row>
-         <Col>
-          <Form.Label>Product Name</Form.Label>
-          <Form.Control
-           className="py-3"
-           placeholder="Product name"
-           value={this.state.name}
-           onChange={(e) => {
-            this.setState({ name: e.target.value });
-           }}
-          />
-         </Col>
-        </Form.Row>
-       </Form.Group>
-      </div>
-      <div className="form-block">
-       <Form.Group as={Row}>
-        <Form.Label column md={12} className="mb-4">
-         Product Category
-        </Form.Label>
-        <Form.Label column md={2} className="sub-label">
-         Category *
-        </Form.Label>
-        <Col md={4}>
-         <ReactSelect
-          // value="Furniture"
-          value={this.state.category}
-          // placeholder="Furniture"
-          placeholder={this.state.category}
-          isDisabled
-          onChange={this.onChangeCategory}
-          theme={(theme) => ({
-           ...theme,
-           colors: {
-            ...theme.colors,
-            primary25: "#f5f0f0",
-            primary: "#e41e15",
-            primary50: "#f5f0f0",
-           },
-          })}
-         />
-        </Col>
-        <Form.Label column md={2} className="sub-label">
-         Kind
-        </Form.Label>
-        <Col md={4}>
-         {/* <Select */}
-         <ReactSelect
-          options={
-           //  this.state.category === "Furniture"
-           //   ? productClass.kind_options
-           //   : productClass.lighting_kinds
-           this.state.kindsOptions
-          }
-          value={this.state.kind}
-          onChange={this.onChangeKind}
-          theme={(theme) => ({
-           ...theme,
-           colors: {
-            ...theme.colors,
-            primary25: "#f5f0f0",
-            primary: "#e41e15",
-            primary50: "#f5f0f0",
-           },
-          })}
-         />
-        </Col>
-        {this.state.furniture.types?.length > 0 ? (
-         <>
-          <Form.Label
-           column
-           md={2}
-           className="sub-label"
-           onClick={() =>
-            console.log(
-             this.state.product_file_kind,
-             this.state.is_for_kids,
-             this.state.places_tags
-            )
-           }
-          >
-           Type
-          </Form.Label>
-          <Col md={4}>
-           {/* <Select */}
-           <ReactSelect
-            isMulti
-            // options={rightType}
-            options={this.state.furniture.types}
-            value={this.state.types_label}
-            // onChange={onChangeType}
-            onChange={this.onChangeProductTypes}
-            theme={(theme) => ({
-             ...theme,
-             colors: {
-              ...theme.colors,
-              primary25: "#f5f0f0",
-              primary: "#e41e15",
-              primary50: "#f5f0f0",
-             },
-            })}
-           />
-          </Col>
-         </>
-        ) : (
-         <></>
-        )}
-        {this.state.furniture?.shapes?.length > 0 ||
-        this.state.lighting_shapes?.length > 0 ? (
-         <>
-          <Form.Label column md={2} className="sub-label">
-           Shape
-          </Form.Label>
-          <Col md={4}>
-           {/* <Select */}
-           <ReactSelect
-            isMulti
-            // options={rightShape}
-            options={
-             this.state.furniture.shapes
-
-             //  this.state.category === "Furniture"
-             //   ? this.state.furniture.shapes
-             //   : this.state.lighting_shapes
-            }
-            value={this.state.shapes_label}
-            onChange={this.onChangeShape}
-            theme={(theme) => ({
-             ...theme,
-             colors: {
-              ...theme.colors,
-              primary25: "#f5f0f0",
-              primary: "#e41e15",
-              primary50: "#f5f0f0",
-             },
-            })}
-           />
-          </Col>
-         </>
-        ) : (
-         <></>
-        )}
-        <Form.Label column md={2} className="sub-label">
-         Style
-        </Form.Label>
-        <Col md={4}>
-         {/* <Select */}
-         <ReactSelect
-          isMulti
-          // options={productClass.furniture_styles}
-          options={
-           this.state.furniture_styles
-           //  productClass.furniture_styles
-           //  this.state.category === "Furniture"
-           //   ? productClass.furniture_styles
-           //   : productClass.lighting_styles
-          }
-          value={this.state.styles_label}
-          onChange={this.onChangeStyle}
-          theme={(theme) => ({
-           ...theme,
-           colors: {
-            ...theme.colors,
-            primary25: "#f5f0f0",
-            primary: "#e41e15",
-            primary50: "#f5f0f0",
-           },
-          })}
-         />
-        </Col>
-        <Form.Label column md={2} className="sub-label">
-         Material
-        </Form.Label>
-        <Col md={4}>
-         {/* <Select */}
-         <ReactSelect
-          isMulti
-          options={productClass.furniture_materials}
-          value={this.state.materials_label}
-          onChange={this.onChangeMaterial}
-          styles={this.state.material_styles}
-          theme={(theme) => ({
-           ...theme,
-           colors: {
-            ...theme.colors,
-            primary25: "#f5f0f0",
-            primary: "#e41e15",
-            primary50: "#f5f0f0",
-           },
-          })}
-         />
-        </Col>
-        {this.state.furniture?.bases?.length > 0 ? (
-         <>
-          <Form.Label column md={2} className="sub-label">
-           Base
-          </Form.Label>
-          <Col md={4}>
-           {/* <Select */}
-           <ReactSelect
-            isMulti
-            options={this.state.furniture.bases}
-            value={this.state.bases_label}
-            onChange={this.onChangeBase}
-            theme={(theme) => ({
-             ...theme,
-             colors: {
-              ...theme.colors,
-              primary25: "#f5f0f0",
-              primary: "#e41e15",
-              primary50: "#f5f0f0",
-             },
-            })}
-           />
-          </Col>
-         </>
-        ) : (
-         <></>
-        )}
-        {this.state.furniture.seats?.length > 0 ? (
-         <>
-          <Form.Label column md={2} className="sub-label">
-           Seats
-          </Form.Label>
-          <Col md={4}>
-           {/* <Select */}
-           <ReactSelect
-            isMulti
-            options={this.state.furniture.seats}
-            value={this.state.seats_label}
-            onChange={this.onChangeSeats}
-            theme={(theme) => ({
-             ...theme,
-             colors: {
-              ...theme.colors,
-              primary25: "#f5f0f0",
-              primary: "#e41e15",
-              primary50: "#f5f0f0",
-             },
-            })}
-           />
-          </Col>
-         </>
-        ) : (
-         <></>
-        )}
-        {this.state.lighting_types?.length > 0 ? (
-         <>
-          <Form.Label column md={2} className="sub-label">
-           Lighting Types
-          </Form.Label>
-          <Col md={4}>
-           {/* <Select */}
-           <ReactSelect
-            isMulti
-            options={this.state.lighting_types}
-            value={this.state.lighting_types_label}
-            onChange={this.onChangeLightingTypes}
-            theme={(theme) => ({
-             ...theme,
-             colors: {
-              ...theme.colors,
-              primary25: "#f5f0f0",
-              primary: "#e41e15",
-              primary50: "#f5f0f0",
-             },
-            })}
-           />
-          </Col>
-         </>
-        ) : (
-         <></>
-        )}
-        {this.state.installation_options?.length > 0 ? (
-         <>
-          <Form.Label column md={2} className="sub-label">
-           Installations
-          </Form.Label>
-          <Col md={4}>
-           {/* <Select */}
-           <ReactSelect
-            isMulti
-            options={this.state.installation_options}
-            value={this.state.installation_label}
-            onChange={this.onChangeInstallations}
-            theme={(theme) => ({
-             ...theme,
-             colors: {
-              ...theme.colors,
-              primary25: "#f5f0f0",
-              primary: "#e41e15",
-              primary50: "#f5f0f0",
-             },
-            })}
-           />
-          </Col>
-         </>
-        ) : (
-         <></>
-        )}
-        {this.state.colorTempratureOptions?.length > 0 ? (
-         <>
-          <Form.Label
-           column
-           md={2}
-           className="sub-label"
-           style={{ fontSize: ".75rem" }}
-          >
-           Color Temprature
-          </Form.Label>
-          <Col md={4}>
-           {/* <Select */}
-           <ReactSelect
-            isMulti
-            options={this.state.colorTempratureOptions}
-            value={this.state.colorTemp_label}
-            onChange={this.onChangeColorTemprature}
-            theme={(theme) => ({
-             ...theme,
-             colors: {
-              ...theme.colors,
-              primary25: "#f5f0f0",
-              primary: "#e41e15",
-              primary50: "#f5f0f0",
-             },
-            })}
-           />
-          </Col>
-         </>
-        ) : (
-         <></>
-        )}
-        {this.state.bulbTypeOptions?.length > 0 ? (
-         <>
-          <Form.Label column md={2} className="sub-label">
-           Bulb Types
-          </Form.Label>
-          <Col md={4}>
-           {/* <Select */}
-           <ReactSelect
-            isMulti
-            options={this.state.bulbTypeOptions}
-            value={this.state.bulbType_label}
-            onChange={this.onChangeBulbTypes}
-            theme={(theme) => ({
-             ...theme,
-             colors: {
-              ...theme.colors,
-              primary25: "#f5f0f0",
-              primary: "#e41e15",
-              primary50: "#f5f0f0",
-             },
-            })}
-           />
-          </Col>
-         </>
-        ) : (
-         <></>
-        )}
-        {this.state.finishes_applied_on?.length > 0 ? (
-         <>
-          <Form.Label column md={2} className="sub-label">
-           Applied On
-          </Form.Label>
-          <Col md={4}>
-           {/* <Select */}
-           <ReactSelect
-            isMulti
-            options={this.state.finishes_applied_on}
-            value={this.state.finishes_applied_label}
-            onChange={this.onChangeFinishesApplied}
-            theme={(theme) => ({
-             ...theme,
-             colors: {
-              ...theme.colors,
-              primary25: "#f5f0f0",
-              primary: "#e41e15",
-              primary50: "#f5f0f0",
-             },
-            })}
-           />
-          </Col>
-         </>
-        ) : (
-         <></>
-        )}
-       </Form.Group>
-      </div>
-      <div className="form-blc">
-       <Form.Group as={Row}>
-        <Col md={12}>
-         <Form.Label>Is this Product made for kids ? (Required)</Form.Label>
-        </Col>
-        <Col md={1}>
-         <Checkbox
-          onChange={(e) => this.onChangeForKids(e)}
-          value={this.state.for_kids}
-          checked={this.state.for_kids ? true : false}
-         >
-          Yes
-         </Checkbox>
-        </Col>
-        {/* <Col md={1}></Col> */}
-
-        <Col md={12}>
-         <p className="light">
-          Please check on yes if this products made spicily for kids.
-         </p>
-        </Col>
-       </Form.Group>
-      </div>
-      <Form.Group as={Row}>
-       <Col md={5}>
-        <Form.Label>Collections / Sereies</Form.Label>
-        <div>
-         <CreatableSelect
-          isMulti
-          closeMenuOnSelect={false}
-          // defaultValue={this.selected_collections}
-          defaultValue={this.state.default_collections}
-          // defaultValue={[{ label: "SSS", value: "EEE" }]}
-          // value={this.selected_collections}
-          styles={collectionSelectStyles}
-          // defaultOptions={this.selected_collections}
-          // defaultInputValue={this.selected_collections}
-          createOptionPosition={"first"}
-          formatCreateLabel={(input) => {
-           return (
-            <>
-             <AntRow
-              justify="space-between"
-              style={{
-               borderBottom: "1px solid #f5f5f5",
-               minHeight: "38px",
-              }}
-             >
-              <AntCol span={12} className="mb-4">
-               <p className="crt">
-                Create:
-                <span
-                 style={{
-                  fontWeight: "900",
-                 }}
-                >
-                 {` ${input}`}
-                </span>
-               </p>
-              </AntCol>
-              <AntCol span={4} className="mb-4">
-               <button
-                className="collect-new"
-                onClick={() => {
-                 console.log(input);
-                 this.createStoreCollectionAttach(input);
-                }}
-               >
-                <PlusOutlined />
-               </button>
-              </AntCol>
-             </AntRow>
-            </>
-           );
-          }}
-          options={this.collections}
-         />
-        </div>
-        <p className="light">
-         Collect each series’s products in one collection.
-        </p>
-       </Col>
-      </Form.Group>
-      <Form.Group as={Row}>
-       <Col md={7} className="designerselect">
-        <Form.Label>Designer</Form.Label>
-        <Select
-         mode="multiple"
-         style={{ width: "100%" }}
-         size="large"
-         onChange={this.onDesignersChange}
-         optionLabelProp="label"
-         onSelect={this.handleAddDesigner}
-        >
-         {this.state.designers?.map((d) => {
-          return (
-           <Option value={d.id} label={d.displayName}>
-            <div className="designer-option-item">
-             <div
-              className="desimg"
-              style={{
-               backgroundImage: `url(${d.avatar})`,
-              }}
-             ></div>
-             <p>{d.displayName}</p>
-            </div>
-           </Option>
-          );
-         })}
-        </Select>
-
-        <p className="light">
-         Search and tag the product’s designer, If you can’t in find the
-         designer click here to invite.
-        </p>
-       </Col>
-      </Form.Group>
+      <button
+       // className="save-product-step-btn next-btn"
+       className="next-btn"
+       style={{
+        top: "-110px",
+        //  height: "20px",
+        background: this.props.loading ? "#898989" : "",
+       }}
+       onClick={this.handleIdentitySubmit}
+      >
+       {this.props.loading ? (
+        <ClipLoader
+         style={{ height: "20px" }}
+         color="#ffffff"
+         loading={this.props.loading}
+         size={18}
+        />
+       ) : (
+        "Save & Continue"
+       )}
+      </button>
+     </div>
+    </div>
+    <Form>
+     <div className="form-block">
       <Form.Group>
        <Form.Row>
-        <Col md={8}>
-         <Form.Label>Product Tags </Form.Label>
-         {/* <Select */}
-         <ReactSelect
-          closeMenuOnSelect={false}
-          isMulti
-          onChange={this.onChangeProductTags}
-          value={this.state.places_tags_label}
-          options={cnst.TagsOptions}
-          styles={cnst.colourStyles}
+        <Col>
+         <Form.Label>Product Name</Form.Label>
+         <Form.Control
+          className="py-3"
+          placeholder="Product name"
+          value={this.state.name}
+          onChange={(e) => {
+           this.setState({ name: e.target.value });
+          }}
          />
         </Col>
        </Form.Row>
       </Form.Group>
+     </div>
+     <div className="form-block">
       <Form.Group as={Row}>
-       <Col md={6} style={{ marginBottom: "100px" }}>
-        <Form.Label>Product Country or Origin</Form.Label>
-        <ReactFlagsSelect
-         selected={this.state.country}
-         //  selected={}
-         selectedSize={20}
-         optionsSize={20}
-         searchable
-         onSelect={(code, value) => {
-          this.setState({ country: code });
-          console.log(code, value);
-         }}
+       <Form.Label column md={12} className="mb-4">
+        Product Category
+       </Form.Label>
+       <Form.Label column md={2} className="sub-label">
+        Category *
+       </Form.Label>
+       <Col md={4}>
+        <ReactSelect
+         // value="Furniture"
+         value={this.state.category}
+         // placeholder="Furniture"
+         placeholder={this.state.category}
+         isDisabled
+         onChange={this.onChangeCategory}
+         theme={(theme) => ({
+          ...theme,
+          colors: {
+           ...theme.colors,
+           primary25: "#f5f0f0",
+           primary: "#e41e15",
+           primary50: "#f5f0f0",
+          },
+         })}
         />
        </Col>
+       <Form.Label column md={2} className="sub-label">
+        Kind
+       </Form.Label>
+       <Col md={4}>
+        <ReactSelect
+         options={this.state.kindsOptions}
+         value={this.state.kind}
+         onChange={this.onChangeKind}
+         theme={(theme) => ({
+          ...theme,
+          colors: {
+           ...theme.colors,
+           primary25: "#f5f0f0",
+           primary: "#e41e15",
+           primary50: "#f5f0f0",
+          },
+         })}
+        />
+       </Col>
+       {this.state.furniture.types?.length > 0 ? (
+        <>
+         <Form.Label
+          column
+          md={2}
+          className="sub-label"
+          onClick={() =>
+           console.log(
+            this.state.product_file_kind,
+            this.state.is_for_kids,
+            this.state.places_tags
+           )
+          }
+         >
+          Type
+         </Form.Label>
+         <Col md={4}>
+          <ReactSelect
+           isMulti
+           options={this.state.furniture.types}
+           value={this.state.types_label}
+           onChange={this.onChangeProductTypes}
+           theme={(theme) => ({
+            ...theme,
+            colors: {
+             ...theme.colors,
+             primary25: "#f5f0f0",
+             primary: "#e41e15",
+             primary50: "#f5f0f0",
+            },
+           })}
+          />
+         </Col>
+        </>
+       ) : (
+        <></>
+       )}
+       {this.state.furniture?.shapes?.length > 0 ||
+       this.state.lighting_shapes?.length > 0 ? (
+        <>
+         <Form.Label column md={2} className="sub-label">
+          Shape
+         </Form.Label>
+         <Col md={4}>
+          {/* <Select */}
+          <ReactSelect
+           isMulti
+           // options={rightShape}
+           options={
+            this.state.furniture.shapes
+
+            //  this.state.category === "Furniture"
+            //   ? this.state.furniture.shapes
+            //   : this.state.lighting_shapes
+           }
+           value={this.state.shapes_label}
+           onChange={this.onChangeShape}
+           theme={(theme) => ({
+            ...theme,
+            colors: {
+             ...theme.colors,
+             primary25: "#f5f0f0",
+             primary: "#e41e15",
+             primary50: "#f5f0f0",
+            },
+           })}
+          />
+         </Col>
+        </>
+       ) : (
+        <></>
+       )}
+       <Form.Label column md={2} className="sub-label">
+        Style
+       </Form.Label>
+       <Col md={4}>
+        {/* <Select */}
+        <ReactSelect
+         isMulti
+         // options={productClass.furniture_styles}
+         options={
+          this.state.furniture_styles
+          //  productClass.furniture_styles
+          //  this.state.category === "Furniture"
+          //   ? productClass.furniture_styles
+          //   : productClass.lighting_styles
+         }
+         value={this.state.styles_label}
+         onChange={this.onChangeStyle}
+         theme={(theme) => ({
+          ...theme,
+          colors: {
+           ...theme.colors,
+           primary25: "#f5f0f0",
+           primary: "#e41e15",
+           primary50: "#f5f0f0",
+          },
+         })}
+        />
+       </Col>
+       <Form.Label column md={2} className="sub-label">
+        Material
+       </Form.Label>
+       <Col md={4}>
+        {/* <Select */}
+        <ReactSelect
+         isMulti
+         options={productClass.furniture_materials}
+         value={this.state.materials_label}
+         onChange={this.onChangeMaterial}
+         styles={this.state.material_styles}
+         theme={(theme) => ({
+          ...theme,
+          colors: {
+           ...theme.colors,
+           primary25: "#f5f0f0",
+           primary: "#e41e15",
+           primary50: "#f5f0f0",
+          },
+         })}
+        />
+       </Col>
+       {this.state.furniture?.bases?.length > 0 ? (
+        <>
+         <Form.Label column md={2} className="sub-label">
+          Base
+         </Form.Label>
+         <Col md={4}>
+          {/* <Select */}
+          <ReactSelect
+           isMulti
+           options={this.state.furniture.bases}
+           value={this.state.bases_label}
+           onChange={this.onChangeBase}
+           theme={(theme) => ({
+            ...theme,
+            colors: {
+             ...theme.colors,
+             primary25: "#f5f0f0",
+             primary: "#e41e15",
+             primary50: "#f5f0f0",
+            },
+           })}
+          />
+         </Col>
+        </>
+       ) : (
+        <></>
+       )}
+       {this.state.furniture.seats?.length > 0 ? (
+        <>
+         <Form.Label column md={2} className="sub-label">
+          Seats
+         </Form.Label>
+         <Col md={4}>
+          {/* <Select */}
+          <ReactSelect
+           isMulti
+           options={this.state.furniture.seats}
+           value={this.state.seats_label}
+           onChange={this.onChangeSeats}
+           theme={(theme) => ({
+            ...theme,
+            colors: {
+             ...theme.colors,
+             primary25: "#f5f0f0",
+             primary: "#e41e15",
+             primary50: "#f5f0f0",
+            },
+           })}
+          />
+         </Col>
+        </>
+       ) : (
+        <></>
+       )}
+       {this.state.lighting_types?.length > 0 ? (
+        <>
+         <Form.Label column md={2} className="sub-label">
+          Lighting Types
+         </Form.Label>
+         <Col md={4}>
+          {/* <Select */}
+          <ReactSelect
+           isMulti
+           options={this.state.lighting_types}
+           value={this.state.lighting_types_label}
+           onChange={this.onChangeLightingTypes}
+           theme={(theme) => ({
+            ...theme,
+            colors: {
+             ...theme.colors,
+             primary25: "#f5f0f0",
+             primary: "#e41e15",
+             primary50: "#f5f0f0",
+            },
+           })}
+          />
+         </Col>
+        </>
+       ) : (
+        <></>
+       )}
+       {this.state.installation_options?.length > 0 ? (
+        <>
+         <Form.Label column md={2} className="sub-label">
+          Installations
+         </Form.Label>
+         <Col md={4}>
+          {/* <Select */}
+          <ReactSelect
+           isMulti
+           options={this.state.installation_options}
+           value={this.state.installation_label}
+           onChange={this.onChangeInstallations}
+           theme={(theme) => ({
+            ...theme,
+            colors: {
+             ...theme.colors,
+             primary25: "#f5f0f0",
+             primary: "#e41e15",
+             primary50: "#f5f0f0",
+            },
+           })}
+          />
+         </Col>
+        </>
+       ) : (
+        <></>
+       )}
+       {this.state.colorTempratureOptions?.length > 0 ? (
+        <>
+         <Form.Label
+          column
+          md={2}
+          className="sub-label"
+          style={{ fontSize: ".75rem" }}
+         >
+          Color Temprature
+         </Form.Label>
+         <Col md={4}>
+          {/* <Select */}
+          <ReactSelect
+           isMulti
+           options={this.state.colorTempratureOptions}
+           value={this.state.colorTemp_label}
+           onChange={this.onChangeColorTemprature}
+           theme={(theme) => ({
+            ...theme,
+            colors: {
+             ...theme.colors,
+             primary25: "#f5f0f0",
+             primary: "#e41e15",
+             primary50: "#f5f0f0",
+            },
+           })}
+          />
+         </Col>
+        </>
+       ) : (
+        <></>
+       )}
+       {this.state.bulbTypeOptions?.length > 0 ? (
+        <>
+         <Form.Label column md={2} className="sub-label">
+          Bulb Types
+         </Form.Label>
+         <Col md={4}>
+          {/* <Select */}
+          <ReactSelect
+           isMulti
+           options={this.state.bulbTypeOptions}
+           value={this.state.bulbType_label}
+           onChange={this.onChangeBulbTypes}
+           theme={(theme) => ({
+            ...theme,
+            colors: {
+             ...theme.colors,
+             primary25: "#f5f0f0",
+             primary: "#e41e15",
+             primary50: "#f5f0f0",
+            },
+           })}
+          />
+         </Col>
+        </>
+       ) : (
+        <></>
+       )}
+       {this.state.finishes_applied_on?.length > 0 ? (
+        <>
+         <Form.Label column md={2} className="sub-label">
+          Applied On
+         </Form.Label>
+         <Col md={4}>
+          {/* <Select */}
+          <ReactSelect
+           isMulti
+           options={this.state.finishes_applied_on}
+           value={this.state.finishes_applied_label}
+           onChange={this.onChangeFinishesApplied}
+           theme={(theme) => ({
+            ...theme,
+            colors: {
+             ...theme.colors,
+             primary25: "#f5f0f0",
+             primary: "#e41e15",
+             primary50: "#f5f0f0",
+            },
+           })}
+          />
+         </Col>
+        </>
+       ) : (
+        <></>
+       )}
       </Form.Group>
-     </Form>
-    </div>
-   </>
+     </div>
+     <div className="form-blc">
+      <Form.Group as={Row}>
+       <Col md={12}>
+        <Form.Label>Is this Product made for kids ? (Required)</Form.Label>
+       </Col>
+       <Col md={1}>
+        <Checkbox
+         onChange={(e) => this.onChangeForKids(e)}
+         value={this.state.for_kids}
+         checked={this.state.for_kids ? true : false}
+        >
+         Yes
+        </Checkbox>
+       </Col>
+       {/* <Col md={1}></Col> */}
+
+       <Col md={12}>
+        <p className="light">
+         Please check on yes if this products made spicily for kids.
+        </p>
+       </Col>
+      </Form.Group>
+     </div>
+     <Form.Group as={Row}>
+      <Col md={5}>
+       <Form.Label>Collections / Sereies</Form.Label>
+       <div>
+        <CreatableSelect
+         isMulti
+         closeMenuOnSelect={false}
+         defaultValue={this.state.default_collections}
+         styles={collectionSelectStyles}
+         createOptionPosition={"first"}
+         formatCreateLabel={(input) => {
+          return (
+           <>
+            <AntRow
+             justify="space-between"
+             style={{
+              borderBottom: "1px solid #f5f5f5",
+              minHeight: "38px",
+             }}
+            >
+             <AntCol span={12} className="mb-4">
+              <p className="crt">
+               Create:
+               <span
+                style={{
+                 fontWeight: "900",
+                }}
+               >
+                {` ${input}`}
+               </span>
+              </p>
+             </AntCol>
+             <AntCol span={4} className="mb-4">
+              <button
+               className="collect-new"
+               onClick={() => {
+                console.log(input);
+                this.createStoreCollectionAttach(input);
+               }}
+              >
+               <PlusOutlined />
+              </button>
+             </AntCol>
+            </AntRow>
+           </>
+          );
+         }}
+         options={this.collections}
+        />
+       </div>
+       <p className="light">
+        Collect each series’s products in one collection.
+       </p>
+      </Col>
+     </Form.Group>
+     {this.state.designers && this.state.designers?.length > 0 && (
+      <>
+       <Form.Group as={Row}>
+        <Col md={7} className="designerselect">
+         <Form.Label>Designer</Form.Label>
+         <Select
+          mode="multiple"
+          style={{ width: "100%" }}
+          size="large"
+          defaultValue={this.state.selected_designers}
+          onChange={this.onDesignersChange}
+          optionLabelProp="label"
+          onSelect={this.handleAddDesigner}
+         >
+          {this.state?.designers?.map((d) => {
+           return (
+            <Option value={d?.id} label={d?.displayName}>
+             <div className="designer-option-item">
+              <div
+               className="desimg"
+               style={{
+                backgroundImage: `url(${d?.photoURL})`,
+               }}
+              ></div>
+              <p>{d?.displayName}</p>
+             </div>
+            </Option>
+           );
+          })}
+         </Select>
+
+         <p className="light">
+          Search and tag the product’s designer, If you can’t in find the
+          designer click here to invite.
+         </p>
+        </Col>
+       </Form.Group>
+      </>
+     )}
+     <Form.Group>
+      <Form.Row>
+       <Col md={8}>
+        <Form.Label>Product Tags </Form.Label>
+        {/* <Select */}
+        <ReactSelect
+         closeMenuOnSelect={false}
+         isMulti
+         onChange={this.onChangeProductTags}
+         value={this.state.places_tags_label}
+         options={productClass.placesTags}
+         styles={cnst.colourStyles}
+        />
+       </Col>
+      </Form.Row>
+     </Form.Group>
+     <Form.Group as={Row}>
+      <Col md={6} style={{ marginBottom: "100px" }}>
+       <Form.Label>Product Country or Origin</Form.Label>
+       <ReactFlagsSelect
+        selected={this.state.country}
+        selectedSize={20}
+        optionsSize={20}
+        searchable
+        customLabels={customLabels}
+        onSelect={(code) => {
+         this.setState({ country: code });
+        }}
+       />
+      </Col>
+     </Form.Group>
+    </Form>
+   </div>
   );
  }
 }

@@ -10,13 +10,9 @@ import { API } from "./../../utitlties";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
 import en from "world_countries_lists/data/countries/en/world.json";
+import { customLabels } from "../CreateBrandFinish";
 
-const Proffessions = [
- "Engineer",
- "Designer",
- "Architect",
- "Interiour Designer",
-];
+const Proffessions = ["Engineer", "Designer", "Architect", "Interior Designer"];
 
 class CreateDesignerAccountStep extends Component {
  constructor(props) {
@@ -85,12 +81,14 @@ class CreateDesignerAccountStep extends Component {
           }}
          />
          <h2
+          className="design-form-head"
           style={{
-           letterSpacing: "-2.5px",
+           letterSpacing: "-1.9px",
            fontFamily: "Roboto",
           }}
          >
-          designclub
+          <span>design</span>
+          <span>club</span>
          </h2>
 
          <h6
@@ -100,14 +98,19 @@ class CreateDesignerAccountStep extends Component {
            fontFamily: "Roboto",
           }}
          >
-          For architecture & designers club and get the best of Arch17
+          For architects & designers club and get the best of Arch17
          </h6>
         </div>
-        <Form noValidate>
+        <Form noValidate className="designer-form">
          <Form.Group style={{ marginBottom: "0" }}>
           <FormAnt>
            <Row>
-            <Col>
+            <Col
+             lg={{ span: 6 }}
+             md={{ span: 6 }}
+             sm={{ span: 12 }}
+             xs={{ span: 12 }}
+            >
              <Select
               size="large"
               mode="multiple"
@@ -126,12 +129,18 @@ class CreateDesignerAccountStep extends Component {
               ))}
              </Select>
             </Col>
-            <Col>
+            <Col
+             lg={{ span: 6 }}
+             md={{ span: 6 }}
+             sm={{ span: 12 }}
+             xs={{ span: 12 }}
+            >
              <ReactFlagsSelect
               selected={this.state.country}
               selectedSize={14}
               optionsSize={18}
               searchable
+              customLabels={customLabels}
               placeholder="Select Country *"
               onSelect={(code) => {
                this.setState({ country: code });
@@ -144,7 +153,13 @@ class CreateDesignerAccountStep extends Component {
          <Form.Group className="my-3">
           <FormAnt>
            <Row>
-            <Col>
+            <Col
+             className="city-input"
+             lg={{ span: 6 }}
+             md={{ span: 6 }}
+             sm={{ span: 12 }}
+             xs={{ span: 12 }}
+            >
              <FormAnt.Item name="city">
               <Input
                onChange={(e) => this.setState({ city: e.target.value })}
@@ -153,7 +168,12 @@ class CreateDesignerAccountStep extends Component {
               />
              </FormAnt.Item>
             </Col>
-            <Col>
+            <Col
+             lg={{ span: 6 }}
+             md={{ span: 6 }}
+             sm={{ span: 12 }}
+             xs={{ span: 12 }}
+            >
              <ConfigProvider
               locale={en}
               areaMapper={(area) => {
@@ -183,7 +203,7 @@ class CreateDesignerAccountStep extends Component {
           </FormAnt>
          </Form.Group>
          <button
-          className="coninue-btn designer"
+          className="coninue-btn designer mt-5"
           onClick={(e) => {
            e.preventDefault();
            this.handleCreatingDesignerAccount();

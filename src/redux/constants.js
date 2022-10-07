@@ -1,5 +1,7 @@
-export const ENDPOINT = 'https://arch17-apis.herokuapp.com/api/'
+// export const ENDPOINT = 'https://arch17-apis.herokuapp.com/api/'
+// export const ENDPOINT = 'https://arch17test.live/api/'
 // export const ENDPOINT = 'http://locahost:8000/api/'
+export const ENDPOINT = 'https://api.arch17.com/api/'
 export const SIGNUP_EMAIL_PASSWORD_REQUEST = 'SIGNUP_EMAIL_PASSWORD_REQUEST';
 export const SIGNIN_EMAIL_PASSWORD_REQUEST = 'SIGNIN_EMAIL_PASSWORD_REQUEST';
 export const NORMAL_SIGNUP_REQUEST = 'NORMAL_SIGNUP_REQUEST'
@@ -38,15 +40,18 @@ export const UPDATE_INFO = 'UPDATE_INFO'
 
 export const ADD_PRODUCT_IDENTITY_REQUEST = 'ADD_PRODUCT_IDENTITY_REQUEST';
 export const ADD_PRODUCT_IDENTITY_SUCCESS = 'ADD_PRODUCT_IDENTITY_SUCCESS';
+export const SET_COLLECTIONS_AND_DESIGNERS = 'SET_COLLECTIONS_AND_DESIGNERS'
 export const ADD_PRODUCT_DESCRIPTION = 'ADD_PRODUCT_DESCRIPTION'
+export const ADD_PRODUCT_FILES = 'ADD_PRODUCT_FILES'
 export const ADD_PRODUCT_DESCRIPTION_SUCCESS = 'ADD_PRODUCT_DESCRIPTION_SUCCESS'
 export const ADD_PRODUCT_OPTIONS_AND_PRICES = 'ADD_PRODUCT_OPTIONS_AND_PRICES'
+export const SAVE_OPTIONS = 'SAVE_OPTIONS'
 export const ADD_PRODUCT_FILE_UPLOADS = 'ADD_PRODUCT_FILE_UPLOADS'
 export const ADD_PRODUCT_OPTIONS_AND_PRICES_SUCCESS = 'ADD_PRODUCT_OPTIONS_AND_PRICES_SUCCESS'
 export const ADD_PRODUCT_FILE_OVERVIEW = 'ADD_PRODUCT_FILE_OVERVIEW'
 export const ADD_PRODUCT_NEXT_TAB ='ADD_PRODUCT_NEXT_TAB'
 export const GO_TO_TAB_STEP= 'GO_TO_TAB_STEP'
-
+export const RESET_ADD_PRODUCT = 'RESET_ADD_PRODUCT'
 // product page 
 export const OPEN_PRODUCT_REQUEST_MODAL = 'OPEN_PRODUCT_REQUEST_MODAL'
 export const CLOSE_PRODUCT_REQUEST_MODAL = 'CLOSE_PRODUCT_REQUEST_MODAL'
@@ -101,3 +106,16 @@ export const DELETE_ROLE_BRAND ="DELETE_ROLE_BRAND"
 
 // entities and pages loaded data
 export const GET_BRAND_DATA = 'GET_BRAND_DATA'
+
+export const LOAD_HOMEPAGE_DATA= 'LOAD_HOMEPAGE_DATA'
+
+// comonent state actions constatns
+export const SET_SIDE_NAVE_MENU= 'SET_SIDE_NAVE_MENU'
+
+
+
+
+
+// functional constatnts
+
+export const regionNames = new Intl.DisplayNames(["en"], { type: "region" });

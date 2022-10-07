@@ -1,0 +1,221 @@
+
+
+
+.only-mobile{
+    display: none;
+
+}
+.only-wide{
+    display: block;
+}
+.custom-slide-thumbs{
+        display: grid;
+            grid-template-columns: repeat(6, 90px);
+            height: 58.5px;
+            grid-gap: 20px;
+            margin: 15px 20px;
+            justify-content: center;
+}
+.yarl__thumbnails_thumbnail{
+    transform:scale(0.9);
+}
+.custom-slide-thumbs > div{
+    border:2px solid rgba(68, 68, 68, 0.404);
+    background-size: contain ;
+    cursor:pointer;
+}
+.image-gallery-play-button {
+    display:none;
+}
+.image-gallery-bullets {
+  display: none;
+}
+.design-by{
+    display: inline-block;
+}
+.yarl__thumbnails_thumbnail_active{
+    border:3px solid #fff !important;
+    transform:scale(1)
+}
+.active-slide{
+    border: 2px solid rgb(0, 0, 0) !important;
+}
+#cpm{
+    grid-template-columns: repeat(3, auto);
+    grid-gap: 5px;
+    justify-content: left;
+}
+@media screen and (max-width:768px){
+
+    #product-page .ant-tabs-content{
+        padding-top: 5px;
+
+    }
+ .ant-select-item-option-content{
+    display: grid !important;
+        grid-template-columns: 40px auto !important;
+        align-items: center !important;
+        grid-gap: 14px;
+        font-weight: 500;
+        font-size: 12px;
+}
+p.label-select{
+font-size: 12px;
+font-weight: 600;
+}
+.material-option{
+        height: 40px;
+}
+    .code-mobile{
+        font-size:12px;
+        font-weight:600;
+        text-decoration: underline;
+        display: inline-block;
+        margin-right: 10px;
+    }
+    .image-gallery-left-nav, .image-gallery-right-nav{
+        display: none;
+    }
+
+    .custom-slide-thumbs{
+     display:none;
+    }
+   #swiper{
+    /* top:-71px; */
+    margin:0;
+     }
+          .image-gallery-bullets {
+              display: inline-block;
+              bottom: -26px !important;
+          }
+
+
+         #swiper .fullscreen .image-gallery-bullets {
+            bottom:33px !important;
+          }
+
+    .image-gallery-fullscreen-button{
+        bottom: 0;
+     }
+    .image-gallery-slide .image-gallery-image{
+            height:260px !important;
+            object-fit:containe;
+            /* zoom:.8; */
+            background-color:transparent;
+
+     }
+         .image-gallery-bullets .image-gallery-bullet.active{
+                border: 1px solid #707070  !important;
+                background: #707070 !important;
+         }
+         .image-gallery-bullets .image-gallery-bullet{
+            box-shadow:none !important;
+            border: 1px solid #707070  !important;
+            background-color:transparent !important;
+            padding:3.7px !important;
+
+         }
+        .fullscreen .image-gallery-fullscreen-button{
+            top: 40px;
+                bottom: unset;
+                right: 5px
+        }
+   
+         .only-wide{
+            display:none;
+
+         }
+         .only-mobile{
+            display: block;
+         }
+
+                 .ant-tabs-nav-more{
+display: none;
+                 }
+                 #product-page  .container-fluidner.sized-container{
+                    padding-right: 0;
+                    padding-left: 0;
+                 }
+                
+.right-side {
+    min-height: 375px;
+    background: #f7f8fa;
+    border: 0px solid #dedede;
+    border-radius: 0px;
+}
+#product-page .product-info{
+    margin-top: 40px;
+}
+#product-page .right-side,  #product-page .product-info,  #product-page .product-price{
+    padding:0 12px ;
+}
+.only-mobile .right-side{
+    padding-top: 15px !important;
+        padding-bottom: 40px !important;
+}
+#product-page .only-mobile .product-info{
+    position: relative;
+} 
+
+.only-mobile .save-btn.action-btn.bg-white{
+display: none;
+}
+.only-mobile .sv-mobile{
+    width: 43px;
+        height: 45px;
+        position: fixed;
+        border-radius: 6px;
+        right: 28px;
+        color: #fff;
+        font-size: 2.4rem;
+        border-radius: 50;
+        z-index: 5;
+        bottom: 42px;
+        background: #000;
+        text-align: center;
+}
+
+#materials button{
+    height:52px;
+}
+#materials{
+grid-template-columns: repeat(6, 52px);
+}
+
+.chats{
+    display: grid;
+    grid-template-columns: repeat(4, 52px);
+    grid-gap: 18px;
+}
+.chats .socialbtn{
+  height: 52px;
+    border-radius: 50%;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    font-size: 18px;
+    background-color: #fff;
+    border: 1px solid #838383;
+
+}
+.socialbtn.wechat, .socialbtn.whattsapp a {
+ color:#43D854  !important;
+ font-size: 26px;
+}
+.socialbtn.mail{
+    font-size: 26px;
+}
+.socialbtn.phone{
+    font-size: 24px;
+}
+.socialbtn p {
+    position: absolute;
+    bottom: -25px;
+    text-align: center;
+    font-size: 11.5px;
+    left: 0px;
+    right:0px;
+    color: #000;
+}
+}

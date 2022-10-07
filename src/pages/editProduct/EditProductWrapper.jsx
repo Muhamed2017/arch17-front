@@ -8,31 +8,19 @@ import {
  gotoTap,
 } from "../../redux/actions/addProductActions";
 import { useParams } from "react-router-dom";
-import ReactNotification, { store } from "react-notifications-component";
 import "react-notifications-component/dist/theme.css";
 import axios from "axios";
 import { API } from "./../../utitlties";
-import { SET_ROWS, ADD_MATERIAL } from "../../redux/constants";
+import { SET_ROWS } from "../../redux/constants";
 import EditIdentity from "./EditIdentity";
-import OptionsPrice from "./../addProduct/OptionsPrice";
+// import OptionsPrice from "./../addProduct/OptionsPrice";
 import Preview from "./../addProduct/Preview";
-import TableStep from "./../TableStep";
+// import TableStep from "./../TableStep";
+import OptionsStep from "./../addProduct/OptionsStep";
 import ProductFiles from "./../addProduct/ProductFiles";
 import FilesUpload from "./../addProduct/FilesUpload";
 const _rows = [];
-const dataURLtoFile = (dataurl, filename) => {
- var arr = dataurl.split(","),
-  mime = arr[0].match(/:(.*?);/)[1],
-  bstr = atob(arr[1]),
-  n = bstr.length,
-  u8arr = new Uint8Array(n);
 
- while (n--) {
-  u8arr[n] = bstr.charCodeAt(n);
- }
-
- return new File([u8arr], filename, { type: mime });
-};
 const EditProductWrapper = (props) => {
  const [tabIndex, setTabIndex] = useState(props.tabIndex);
  const [rows, setRows] = useState([]);
@@ -64,7 +52,7 @@ const EditProductWrapper = (props) => {
     size: option.size,
    });
   });
-  // setinitialRows(_rows);
+  setinitialRows(_rows);
   if (loaded) {
    return;
   }
@@ -86,7 +74,7 @@ const EditProductWrapper = (props) => {
  };
  return (
   <React.Fragment>
-   <ReactNotification />
+   {/* <ReactNotification /> */}
    <div id="add-product-wrapper">
     <Tabs OnSelect={(index) => setTabIndex(index)}>
      <div id="tabs-wrapper">
@@ -135,12 +123,13 @@ const EditProductWrapper = (props) => {
        collections={props?.location?.state?.product?.store?.collections}
        store={props?.location?.state?.product?.store}
        category={props?.location?.state?.category}
-       //  selected_collections={props.location.state?.product?.collections}
+       selected_designers={props?.location?.state?.product?.designers}
        selected_collections={props.location.state?.selected_collections ?? []}
       />
      </TabPanel>
      <TabPanel forceRender>
-      <TableStep
+      {/* <TableStep */}
+      <OptionsStep
        id={props?.location?.state?.product?.id}
        rows={props?.location?.state?.product?.options}
        edit={true}

@@ -34,8 +34,8 @@ import { API } from "./../../utitlties";
 export const END_POINT = `${API}option-price/`;
 export const compressImage = async (imageFile) => {
  const options = {
-  maxSizeMB: 1,
-  maxWidthOrHeight: 850,
+  maxSizeMB: 1.5,
+  maxWidthOrHeight: 1000,
   useWebWorker: true,
  };
  try {

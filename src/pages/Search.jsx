@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import HashLoader from "react-spinners/HashLoader";
 import { setSearchTerm } from "./../redux/actions/addProductActions";
 import { LoadingOutlined } from "@ant-design/icons";
-
+import "./Search.css";
 import {
  vanillaSigninEmailPassword,
  signupFacebook,
@@ -13,6 +13,7 @@ import {
  signupEmailPassword,
 } from "../redux/actions/authActions";
 import { Link } from "react-router-dom";
+import { HiAdjustments } from "react-icons/hi";
 import {
  kind_options,
  lighting_kinds as lighting_kind_optios,
@@ -94,6 +95,7 @@ import {
  Tag,
  Modal as AntModal,
  Skeleton,
+ Drawer,
 } from "antd";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebookF } from "react-icons/fa";
@@ -181,9 +183,11 @@ const bases = {
 class Search extends Component {
  constructor(props) {
   super(props);
+  this.urlString = new URLSearchParams(window.location.search);
   this.state = {
    pageLoaded: false,
    signinPassword: "",
+   loadMoreButtonShow: false,
    signingEmail: "",
    signupEmail: "",
    signupPassword: "",
@@ -268,6 +272,9 @@ class Search extends Component {
    colorTempraturs: [],
    bulbTypes: [],
    installations: [],
+   visible: false,
+   page: 1,
+   loadmore: false,
   };
  }
 
@@ -310,11 +317,13 @@ class Search extends Component {
 
  onItemClick = () => {};
 
- fetchProducts = () => {
-  this.setState({ fetching: true });
-
-  // &filter[files]=${this.state.fileChecked ? "yes" : ""}`
-  axios
+ fetchProducts = (loadmore = false) => {
+  this.setState({
+   fetching: true,
+   loadmore,
+   page: loadmore ? this.state.page + 1 : 1,
+  }, ()=>{
+     axios
    .get(
     `${API}search?filter[category]=${this.state.categories}
     &filter[kind]=${this.state.kinds}
@@ -328,12 +337,23 @@ class Search extends Component {
     &filter[applied_on]=${this.state.applied_on}
     &filter[is_for_kids]=${this.state.kidsChecked ? "yes" : ""}
     &filter[product_file_kind]=${this.state.fileChecked ? "yes" : ""}
-    &filter[is_outdoor]=${this.state.outdoorChecked ? "yes" : ""}`
+    &filter[is_outdoor]=${this.state.outdoorChecked ? "yes" : ""}&page=${
+     this.state.page
+    }`
    )
    .then((response) => {
-    console.log(response);
-    this.setState({ products: response.data.products, fetching: false });
+    this.setState({
+     products: loadmore
+      ? [...this.state.products, ...response.data.products.data]
+      : response.data.products.data,
+     fetching: false,
+     pageLoaded: true,
+    //  page: loadmore ? response.data.products?.current_page + 1 : 1,
+     loadMoreButtonShow: response.data.products?.data?.length >= 24,
+    });
    });
+  });
+ 
  };
 
  onCollapse = (collapsed) => {
@@ -349,55 +369,59 @@ class Search extends Component {
     tags: [items.key],
    },
    () => {
+    this.appendUrlParams();
     this.fetchProducts();
+    console.log(items.selectedKeys);
    }
   );
+  this.handleChangeKindsOptions(items.key);
+ };
 
-  if (items.key.toLowerCase() === "furniture") {
+ handleChangeKindsOptions = (key) => {
+  if (key.toLowerCase() === "furniture") {
    this.setState({
     selectedKindOptions: kind_options,
     selectedStyleOptions: furniture_styles,
     lightingTypesOptions: [],
    });
-  } else if (items.key.toLowerCase() === "lighting") {
+  } else if (key.toLowerCase() === "lighting") {
    this.setState({
     selectedKindOptions: lighting_kind_optios,
     selectedStyleOptions: lighting_styles,
     lightingTypesOptions: lighting_types,
    });
-  } else if (items.key.toLowerCase() === "decore") {
+  } else if (key.toLowerCase() === "decore") {
    this.setState({
     selectedKindOptions: decore_kind_options,
     selectedStyleOptions: furniture_styles,
    });
-  } else if (items.key.toLowerCase() === "finishes") {
+  } else if (key.toLowerCase() === "finishes") {
    this.setState({
     selectedKindOptions: finishes_kind_options,
     selectedStyleOptions: furniture_styles,
    });
-  } else if (items.key.toLowerCase() === "kitchen") {
+  } else if (key.toLowerCase() === "kitchen") {
    this.setState({
     selectedKindOptions: kitchen_kind_options,
     selectedStyleOptions: furniture_styles,
    });
-  } else if (items.key.toLowerCase() === "wellness") {
+  } else if (key.toLowerCase() === "wellness") {
    this.setState({
     selectedKindOptions: wellness_kind_options,
     selectedStyleOptions: furniture_styles,
    });
-  } else if (items.key.toLowerCase() === "construction") {
+  } else if (key.toLowerCase() === "construction") {
    this.setState({
     selectedKindOptions: constructions_kind_options,
     selectedStyleOptions: furniture_styles,
    });
-  } else if (items.key.toLowerCase() === "bathroom") {
+  } else if (key.toLowerCase() === "bathroom") {
    this.setState({
     selectedKindOptions: bathroom_kind_options,
     selectedStyleOptions: furniture_styles,
    });
   }
  };
-
  onCategoriesDeselect = (items) => {
   this.setState(
    {
@@ -407,7 +431,9 @@ class Search extends Component {
     category_tags: ["All Categories"],
    },
    () => {
+    this.appendUrlParams();
     this.fetchProducts();
+    window.history.pushState({}, null, "/products");
    }
   );
  };
@@ -417,6 +443,7 @@ class Search extends Component {
   let kinds = items.selectedKeys.filter((item) => {
    return typeof item === "string";
   });
+
   this.setState(
    {
     kinds,
@@ -433,6 +460,7 @@ class Search extends Component {
       kind_types: this.state.test_types.flat(1),
      },
      () => {
+      this.appendUrlParams();
       this.fetchProducts();
      }
     );
@@ -444,6 +472,7 @@ class Search extends Component {
   this.setState(
    { materials: items.selectedKeys, material_tags: [...items.selectedKeys] },
    () => {
+    this.appendUrlParams();
     this.fetchProducts();
    }
   );
@@ -453,6 +482,7 @@ class Search extends Component {
   this.setState(
    { styles: items.selectedKeys, style_tags: [...items.selectedKeys] },
    () => {
+    this.appendUrlParams();
     this.fetchProducts();
    }
   );
@@ -467,6 +497,7 @@ class Search extends Component {
     kind_shapes: [...this.state.kind_shapes],
    });
   }
+
   this.setState(
    {
     kinds,
@@ -479,16 +510,35 @@ class Search extends Component {
     kind_bases: [...this.state.kind_bases, ...(bases[`${items.key}`] ?? [])],
    },
    () => {
-    // console.log(this.state.selected_kind);
+    console.log(this.state.selected_kind);
+    console.log(this.state.kinds);
+    this.appendUrlParams();
     this.fetchProducts();
    }
   );
  };
 
+ appendUrlParams = () => {
+  const {
+   kinds,
+   selectedKindTitle,
+   types,
+   materials,
+   //  shapes,
+   styles,
+  } = this.state;
+  const _cats = selectedKindTitle ? `category=${selectedKindTitle}` : ``;
+  const _kinds = kinds.length > 0 ? `&kinds=${kinds}` : ``;
+  const _types = types?.length > 0 ? `&types=${types}` : ``;
+  const _styles = styles?.length > 0 ? `&styles=${styles}` : ``;
+  const _materials = materials?.length > 0 ? `&materials=${materials}` : ``;
+  window.history.pushState(
+   {},
+   null,
+   `/products?${_cats}${_kinds}${_types}${_materials}${_styles}`
+  );
+ };
  onTypeSelect = (items) => {
-  if (this.state.types.includes("Saunas")) {
-   window.alert("Saunas");
-  }
   if (items.selectedKeys.includes("Revolving entrance doors")) {
    this.setState({
     finishesDoorTypes: revolving_door_types,
@@ -509,12 +559,12 @@ class Search extends Component {
      ...this.state.kinds,
      ...items.selectedKeys,
     ],
-    // doorTypes:
-    //  items.selectedKeys.includes("Revolving entrance doors") &&
-    //  revolving_door_types,
    },
    () => {
+    this.appendUrlParams();
     this.fetchProducts();
+    console.log(this.state.selected_type);
+    console.log(this.state.types);
    }
   );
  };
@@ -548,11 +598,9 @@ class Search extends Component {
   this.setState(
    {
     lighting_types: items.selectedKeys,
-    // selected_lighting_type: items.key,
    },
    () => {
     this.fetchProducts();
-    // console.log(this.state.selected_base);
    }
   );
  };
@@ -611,13 +659,11 @@ class Search extends Component {
    }
   );
  };
- // installation_tags: [...items.selectedKeys],
 
  onBulbTypeSelect = (items) => {
   this.setState(
    {
     bulbTypes: items.selectedKeys,
-    // bulbTypes_tags: [...items.selectedKeys],
    },
    () => {
     this.fetchProducts();
@@ -626,60 +672,67 @@ class Search extends Component {
  };
 
  componentDidMount() {
-  console.log(this.state);
-  this.setState({ searched: false });
-  if (this.props.match.params.category) {
-   if (this.props.match.params.type) {
-    axios
-     .get(
-      `${API}search?filter[category]=${this.props.match.params.category}
-      &filter[kind]=${this.props.match.params.type}`
-     )
-     .then((response) => {
-      console.log(response);
-      this.setState({
-       products: response.data.products,
-       pageLoaded: true,
-      });
-      this.props.setSearchTerm(null);
+  this.setState(
+   {
+    categories: this.urlString.get("category") ?? "",
+    selectedKindTitle: this.urlString.get("category"),
+    kinds: this.urlString.get("kinds")
+     ? this.urlString.get("kinds")?.split(",")
+     : [],
+    category_tags: [this.urlString.get("category")] ?? [],
+    kind_tags: this.urlString.get("kinds")
+     ? this.urlString.get("kinds")?.split(",")
+     : [],
+    types: this.urlString.get("types")
+     ? this.urlString.get("types")?.split(",")
+     : [],
+    type_tags: this.urlString.get("types")
+     ? this.urlString.get("types")?.split(",")
+     : [],
+
+    materials: this.urlString.get("materials")
+     ? this.urlString.get("materials")?.split(",")
+     : [],
+    material_tags: this.urlString.get("materials")
+     ? this.urlString.get("materials")?.split(",")
+     : [],
+   },
+   () => {
+    this.fetchProducts();
+   }
+  );
+
+  if (this.urlString.get("category")) {
+   this.handleChangeKindsOptions(this.urlString.get("category"));
+   if (this.urlString.get("kinds")) {
+    let _types = this.urlString
+     .get("kinds")
+     ?.split(",")
+     ?.map((k) => {
+      return types[`${k}`];
      })
-     .catch((error) => {
-      console.log(error);
-     });
-   } else {
-    axios
-     .get(`${API}search?filter[category]=${this.props.match.params.category}`)
-     .then((response) => {
-      console.log(response);
-      this.setState({
-       products: response.data.products,
-       pageLoaded: true,
-      });
-      this.props.setSearchTerm(null);
+     .flat();
+    let _shapes = this.urlString
+     .get("kinds")
+     ?.split(",")
+     ?.map((k) => {
+      return shapes[`${k}`];
      })
-     .catch((error) => {
-      console.log(error);
-     });
+     .flat();
+    console.log(_types);
+    this.setState({
+     kind_types: [...this.state.kind_types, ..._types],
+     kind_shapes: [...this.state.kind_shapes, ..._shapes],
+    });
    }
   } else {
-   axios
-    .get(`${API}search`)
-    .then((response) => {
-     console.log(response);
-     this.setState({
-      products: response.data.products,
-      pageLoaded: true,
-     });
-     this.props.setSearchTerm(null);
-    })
-    .catch((error) => {
-     console.log(error);
-    });
+   this.setState({
+    selectedKindOptions: kind_options,
+    selectedStyleOptions: furniture_styles,
+    tags: ["All Categories"],
+    category_tags: ["All Categories"],
+   });
   }
-  this.setState({
-   selectedKindOptions: kind_options,
-   selectedStyleOptions: furniture_styles,
-  });
  }
  onFilterChange = (values) => {};
 
@@ -725,6 +778,7 @@ class Search extends Component {
  };
 
  onClearAll = () => {
+  window.history.pushState({}, null, "/products");
   this.setState(
    {
     categories: [],
@@ -769,6 +823,13 @@ class Search extends Component {
       selectedKindTitle: null,
      },
      () => {
+      window.history.pushState(
+       {},
+       null,
+       this.state.category_tags.length < 1
+        ? `/products`
+        : `/products?category=${this.state.selectedKindTitle}`
+      );
       this.fetchProducts();
      }
     );
@@ -780,6 +841,7 @@ class Search extends Component {
       kinds: this.state.kinds.filter((kind) => kind !== removedTag),
      },
      () => {
+      this.appendUrlParams();
       this.fetchProducts();
      }
     );
@@ -791,6 +853,7 @@ class Search extends Component {
       types: this.state.types.filter((type) => type !== removedTag),
      },
      () => {
+      this.appendUrlParams();
       this.fetchProducts();
      }
     );
@@ -804,6 +867,7 @@ class Search extends Component {
       ),
      },
      () => {
+      this.appendUrlParams();
       this.fetchProducts();
      }
     );
@@ -815,6 +879,8 @@ class Search extends Component {
       styles: this.state.styles.filter((style) => style !== removedTag),
      },
      () => {
+      this.appendUrlParams();
+
       this.fetchProducts();
      }
     );
@@ -826,6 +892,7 @@ class Search extends Component {
       doortypes: this.state.doortypes.filter((style) => style !== removedTag),
      },
      () => {
+      this.appendUrlParams();
       this.fetchProducts();
      }
     );
@@ -850,9 +917,16 @@ class Search extends Component {
  render() {
   return (
    <>
-    <div id="search-page" key={this.props.searchTerm}>
+    <div id="search-page">
      <Row span={24} style={{ position: "relative" }}>
-      <Col lg={5} md={4} sm={6} xs={24} style={{ background: "" }}>
+      <Col
+       lg={5}
+       md={4}
+       sm={6}
+       xs={0}
+       style={{ background: "" }}
+       className="only-wide"
+      >
        <Sider
         collapsed={this.state.collapsed}
         onCollapse={this.onCollapse}
@@ -1127,76 +1201,72 @@ class Search extends Component {
          )}
          {this.state.finishesDoorTypes.length > 0 && (
           <>
-           <>
-            <Menu
-             mode="inline"
-             multiple={true}
-             selectedKeys={this.state.doortypes}
-             onSelect={this.onDoorTypeSelect}
-             onDeselect={this.onDoorTypeSelect}
-            >
-             <div>
-              <SubMenu
-               key="door_types"
-               title="Door Type"
-               className="scrollable-menu"
-              >
-               {this.state.finishesDoorTypes.map((doorType, index) => {
-                if (doorType) {
-                 return (
-                  <>
-                   <Menu.Item key={doorType.value}>{doorType.value}</Menu.Item>
-                  </>
-                 );
-                }
-               })}
-              </SubMenu>
-             </div>
-            </Menu>
-           </>
+           <Menu
+            mode="inline"
+            multiple={true}
+            selectedKeys={this.state.doortypes}
+            onSelect={this.onDoorTypeSelect}
+            onDeselect={this.onDoorTypeSelect}
+           >
+            <div>
+             <SubMenu
+              key="door_types"
+              title="Door Type"
+              className="scrollable-menu"
+             >
+              {this.state.finishesDoorTypes.map((doorType, index) => {
+               if (doorType) {
+                return (
+                 <>
+                  <Menu.Item key={doorType.value}>{doorType.value}</Menu.Item>
+                 </>
+                );
+               }
+              })}
+             </SubMenu>
+            </div>
+           </Menu>
           </>
          )}
          {this.state.kind_shapes.length > 0 && (
           <>
-           <>
-            <Menu
-             mode="inline"
-             multiple={true}
-             onSelect={this.onShapeSelect}
-             onDeselect={this.onShapeSelect}
-            >
-             <div>
-              <SubMenu key="shapes" title="Shapes" className="scrollable-menu">
-               <Menu.Item
-                disabled={true}
-                style={{ height: "45px !important" }}
-                className="search shapes"
-               >
-                <Input
-                 allowClear
-                 size="large"
-                 style={{ width: "100%", margin: "10px auto" }}
-                 placeholder={`Search ${this.state.selectedKindTitle} Shapes`}
-                 onChange={this.searchShape}
-                />
-               </Menu.Item>
-               {this.state.kind_shapes.map((shape, index) => {
-                if (
-                 shape.value
-                  .toLowerCase()
-                  .includes(this.state.shape_search_term.toLowerCase())
-                ) {
-                 return (
-                  <>
-                   <Menu.Item key={shape.value}>{shape.value}</Menu.Item>
-                  </>
-                 );
-                }
-               })}
-              </SubMenu>
-             </div>
-            </Menu>
-           </>
+           <Menu
+            mode="inline"
+            multiple={true}
+            onSelect={this.onShapeSelect}
+            onDeselect={this.onShapeSelect}
+           >
+            <div>
+             <SubMenu key="shapes" title="Shapes" className="scrollable-menu">
+              <Menu.Item
+               disabled={true}
+               style={{ height: "45px !important" }}
+               className="search shapes"
+              >
+               <Input
+                allowClear
+                size="large"
+                style={{ width: "100%", margin: "10px auto" }}
+                placeholder={`Search ${this.state.selectedKindTitle} Shapes`}
+                onChange={this.searchShape}
+               />
+              </Menu.Item>
+              {this.state.kind_shapes.map((shape, index) => {
+               if (
+                shape?.value
+                 .toLowerCase()
+                 .includes(this.state.shape_search_term.toLowerCase())
+               ) {
+                return (
+                 <>
+                  <Menu.Item key={shape?.value}>{shape?.value}</Menu.Item>
+                 </>
+                );
+               }
+              })}
+             </SubMenu>
+            </div>
+           </Menu>
           </>
          )}
          <Menu
@@ -1372,95 +1442,93 @@ class Search extends Component {
          )}
          {this.state.selectedKindTitle?.toLowerCase() === "lighting" && (
           <>
-           <>
-            <Menu
-             mode="inline"
-             multiple={true}
-             onSelect={this.onLightingTypesSelect}
-             onDeselect={this.onLightingTypesSelect}
-            >
-             <div>
-              <SubMenu
-               key="lighting_types"
-               title="Lighting Types"
-               className="scrollable-menu"
-              >
-               {lighting_types.map((type, index) => {
-                return (
-                 <>
-                  <Menu.Item key={type.value}>{type.value}</Menu.Item>
-                 </>
-                );
-               })}
-              </SubMenu>
-             </div>
-            </Menu>
-            <Menu
-             mode="inline"
-             multiple={true}
-             onSelect={this.onInstallationSelect}
-             selectedKeys={this.state.installations}
-             onDeselect={this.onInstallationSelect}
-            >
-             <div>
-              <SubMenu
-               key="installation"
-               title="Installation"
-               className="scrollable-menu"
-              >
-               {lighting_installation.map((ins, index) => {
-                return (
-                 <>
-                  <Menu.Item key={ins.value}>{ins.value}</Menu.Item>
-                 </>
-                );
-               })}
-              </SubMenu>
-             </div>
-            </Menu>
-            <Menu
-             mode="inline"
-             multiple={true}
-             onSelect={this.onColorTempratrueChange}
-             onDeselect={this.onColorTempratrueChange}
-            >
-             <div>
-              <SubMenu
-               key="colortemp"
-               title="Color Temprature"
-               className="scrollable-menu"
-              >
-               {lighitng_colorTemprature.map((color, index) => {
-                return (
-                 <>
-                  <Menu.Item key={color.value}>{color.value}</Menu.Item>
-                 </>
-                );
-               })}
-              </SubMenu>
-             </div>
-            </Menu>
-            <Menu
-             mode="inline"
-             multiple={true}
-             onSelect={this.onBulbTypeSelect}
-             onDeselect={this.onBulbTypeSelect}
-            >
+           <Menu
+            mode="inline"
+            multiple={true}
+            onSelect={this.onLightingTypesSelect}
+            onDeselect={this.onLightingTypesSelect}
+           >
+            <div>
              <SubMenu
-              key="bulbtypes"
-              title="Blub Type"
+              key="lighting_types"
+              title="Lighting Types"
               className="scrollable-menu"
              >
-              {lighting_bulbTypes.map((bulb, index) => {
+              {lighting_types.map((type, index) => {
                return (
                 <>
-                 <Menu.Item key={bulb.value}>{bulb.value}</Menu.Item>
+                 <Menu.Item key={type.value}>{type.value}</Menu.Item>
                 </>
                );
               })}
              </SubMenu>
-            </Menu>
-           </>
+            </div>
+           </Menu>
+           <Menu
+            mode="inline"
+            multiple={true}
+            onSelect={this.onInstallationSelect}
+            selectedKeys={this.state.installations}
+            onDeselect={this.onInstallationSelect}
+           >
+            <div>
+             <SubMenu
+              key="installation"
+              title="Installation"
+              className="scrollable-menu"
+             >
+              {lighting_installation.map((ins, index) => {
+               return (
+                <>
+                 <Menu.Item key={ins.value}>{ins.value}</Menu.Item>
+                </>
+               );
+              })}
+             </SubMenu>
+            </div>
+           </Menu>
+           <Menu
+            mode="inline"
+            multiple={true}
+            onSelect={this.onColorTempratrueChange}
+            onDeselect={this.onColorTempratrueChange}
+           >
+            <div>
+             <SubMenu
+              key="colortemp"
+              title="Color Temprature"
+              className="scrollable-menu"
+             >
+              {lighitng_colorTemprature.map((color, index) => {
+               return (
+                <>
+                 <Menu.Item key={color.value}>{color.value}</Menu.Item>
+                </>
+               );
+              })}
+             </SubMenu>
+            </div>
+           </Menu>
+           <Menu
+            mode="inline"
+            multiple={true}
+            onSelect={this.onBulbTypeSelect}
+            onDeselect={this.onBulbTypeSelect}
+           >
+            <SubMenu
+             key="bulbtypes"
+             title="Blub Type"
+             className="scrollable-menu"
+            >
+             {lighting_bulbTypes.map((bulb, index) => {
+              return (
+               <>
+                <Menu.Item key={bulb.value}>{bulb.value}</Menu.Item>
+               </>
+              );
+             })}
+            </SubMenu>
+           </Menu>
           </>
          )}
          {this.state.selectedKindTitle?.toLowerCase() === "finishes" && (
@@ -1480,7 +1548,7 @@ class Search extends Component {
               {finishes_applied_on.map((opt, index) => {
                return (
                 <>
-                 <Menu.Item key={opt.value}>{opt.value}</Menu.Item>
+                 <Menu.Item key={opt?.value}>{opt?.value}</Menu.Item>
                 </>
                );
               })}
@@ -1492,133 +1560,151 @@ class Search extends Component {
         </Form>
        </Sider>
       </Col>
-      <Col lg={19} md={20} sm={18} xs={24} className="px-4">
-       <Row span={24}>
-        <Col md={12}>
-         <div className="checkboxes">
-          <Checkbox
-           value={this.state.kidsChecked}
-           onChange={(e) => {
-            this.setState(
-             {
-              kidsChecked: e.target.checked,
-             },
-             () => {
-              this.fetchProducts();
-             }
-            );
-           }}
-           style={{
-            lineHeight: "32px",
-            marginRight: "10px",
-            borderRadius: "15px",
-            padding: "0px 15px",
-            border: "0.5px solid #EAEAEA",
-           }}
-          >
-           For Kids
-          </Checkbox>
-          <Checkbox
-           //  value="3d-cad"
-           value={this.state.fileChecked}
-           onChange={(e) => {
-            this.setState(
-             {
-              fileChecked: e.target.checked,
-             },
-             () => {
-              this.fetchProducts();
-             }
-            );
-            console.log(e);
-           }}
-           style={{
-            lineHeight: "32px",
-            marginRight: "25px",
-            borderRadius: "25px",
-            padding: "0px 15px",
-            border: "0.5px solid #EAEAEA",
-           }}
-          >
-           3D / Cad
-          </Checkbox>
-         </div>
-        </Col>
-        <Col md={12}>
-         <div
-          style={{
-           display: "grid",
-           //  gridTemplateColumns: "100px 100px ",
-           gridTemplateColumns: "auto auto ",
-           justifyContent: "flex-end",
-           //  gridGap: "10px",
-          }}
-         >
-          <Dropdown overlay={this.menu}>
-           <Button
+      <Col lg={19} md={20} sm={18} xs={24} className="px-3">
+       {!this.state.visible && (
+        <Row span={24} className="filter-checks">
+         <Col md={12}>
+          <div className="checkboxes">
+           <Checkbox
+            value={this.state.kidsChecked}
+            onChange={(e) => {
+             this.setState(
+              {
+               kidsChecked: e.target.checked,
+              },
+              () => {
+               this.fetchProducts();
+              }
+             );
+            }}
             style={{
-             border: "none",
-             boxShadow: "none",
-             fontSize: ".9rem",
-             fontWeight: "600",
-             textAlign: "right",
+             lineHeight: "32px",
+             marginRight: "10px",
+             borderRadius: "15px",
+             padding: "0px 15px",
+             //  border: "0.5px solid #EAEAEA",
+             border: "0.5px solid #d3d3d3",
             }}
            >
-            Room /Space
-            <CaretDownOutlined />
-           </Button>
-          </Dropdown>
-          <Dropdown overlay={this.menu}>
-           <Button
+            For Kids
+           </Checkbox>
+           <Checkbox
+            value={this.state.fileChecked}
+            onChange={(e) => {
+             this.setState(
+              {
+               fileChecked: e.target.checked,
+              },
+              () => {
+               this.fetchProducts();
+              }
+             );
+             console.log(e);
+            }}
             style={{
-             border: "none",
-             boxShadow: "none",
-             fontSize: ".9rem",
-             textAlign: "right",
-             fontWeight: "600",
+             lineHeight: "32px",
+             marginRight: "25px",
+             borderRadius: "25px",
+             padding: "0px 15px",
+             border: "0.5px solid #d3d3d3",
+
+             //  border: "0.5px solid #EAEAEA",
             }}
            >
-            Sort By <CaretDownOutlined />
-           </Button>
-          </Dropdown>
-         </div>
-        </Col>
-       </Row>
-       {this.state.fetching && (
+            3D / Cad
+           </Checkbox>
+          </div>
+         </Col>
+         <Col md={12} className="sorts">
+          <div
+           style={{
+            display: "grid",
+            gridTemplateColumns: "auto auto ",
+            justifyContent: "flex-end",
+           }}
+          >
+           <Dropdown overlay={this.menu}>
+            <Button
+             style={{
+              border: "none",
+              boxShadow: "none",
+              fontSize: ".9rem",
+              fontWeight: "600",
+              textAlign: "right",
+             }}
+            >
+             Room /Space
+             <CaretDownOutlined />
+            </Button>
+           </Dropdown>
+           <Dropdown overlay={this.menu}>
+            <Button
+             style={{
+              border: "none",
+              boxShadow: "none",
+              fontSize: ".9rem",
+              textAlign: "right",
+              fontWeight: "600",
+             }}
+            >
+             Sort By <CaretDownOutlined />
+            </Button>
+           </Dropdown>
+          </div>
+         </Col>
+        </Row>
+       )}
+       {this.state.fetching && !this.state.loadmore && (
         <>
          <Spin
           size="large"
+          className="load-data-spinner"
           indicator={
            <LoadingOutlined style={{ fontSize: "36px", color: "#000" }} spin />
           }
-          style={{ position: "absolute", top: "40%", right: "50%" }}
          />
         </>
        )}
-       <Row gutter={24} className="my-3">
-        {!this.state.fetching &&
+       <Row
+        gutter={{
+         lg: 24,
+         md: 24,
+         sm: 12,
+         xs: 12,
+        }}
+        className="my-3 search-wrapper"
+       >
+        {(!this.state.fetching || this.state.loadmore) &&
+         // !this.state.loadmore &&
+
          this.state.products?.map((product, index) => {
           if (product.preview_cover) {
            return (
             <>
-             <Col className="gutter-row mb-4" lg={8} md={8} sm={12} xs={24}>
-              <a href={`/product/${product.id}`}>
-               <div className="product">
+             <Col
+              className="gutter-row mb-4"
+              lg={8}
+              md={8}
+              sm={12}
+              xs={12}
+              key={product?.id}
+             >
+              <div className="product">
+               <a href={`/product/${product?.product_id}`}>
                 <div
                  className="p-img"
                  style={{
-                  background: `url(${product.preview_cover})`,
+                  background: `url(${product?.preview_cover})`,
                  }}
                 >
                  <div className="prlayer"></div>
-
-                 <button
+                 <div
                   className="actns-btn svbtn"
                   onClick={(e) => {
                    e.preventDefault();
                    this.setState(
                     {
-                     to_save_cover: product.preview_cover,
+                     to_save_cover: product?.preview_cover,
                      to_save_productId: product,
                     },
                     () => {
@@ -1627,9 +1713,9 @@ class Search extends Component {
                    );
                   }}
                  >
-                  Save
-                 </button>
-                 {product.file.length > 0 ? (
+                  Save +
+                 </div>
+                 {product?.file?.length > 0 ? (
                   <>
                    <div className="actns-btn file-btn cad">CAD</div>
                    <div className="actns-btn file-btn threeD">3D</div>
@@ -1638,28 +1724,70 @@ class Search extends Component {
                   ""
                  )}
                 </div>
-                <a href={`/brand/${product.store_name.store_id}`}>
-                 <h5 className="product-store">
-                  {product.store_name.store_name}
-                 </h5>
-                </a>
-                <p className="product-name">{product.name}</p>
-                <div className="product-price">
-                 {product.preview_price && product.preview_price > 0 ? (
-                  <>
-                   <span>¥ {product.preview_price}</span>
-                  </>
-                 ) : (
-                  ""
-                 )}
-                </div>
+               </a>
+
+               <h5 className="product-store">
+                {product?.store_name?.store_name}
+               </h5>
+
+               {/* <p className="product-name">{product?.identity[0]?.name}</p> */}
+               {/* <p className="product-name">{product?.identity[0]?.name?.s}</p> */}
+               {product?.name?.length < 40 ? (
+                <p className="product-name">{product?.name}</p>
+               ) : (
+                <p className="product-name">{`${product?.name?.slice(
+                 0,
+                 35
+                )}...`}</p>
+               )}
+               <div className="product-price">
+                {product?.preview_price && product?.preview_price > 0 ? (
+                 <>
+                  <span>¥ {product?.preview_price}</span>
+                 </>
+                ) : (
+                 <Link
+                  to={{
+                   pathname: `/product/${product?.product_id}`,
+                   state: {
+                    request_price: true,
+                   },
+                  }}
+                 >
+                  REQUEST PRICE INFO
+                 </Link>
+                )}
                </div>
-              </a>
+              </div>
              </Col>
             </>
            );
           }
          })}
+        {this.state.loadMoreButtonShow && (
+         <Col xs={24}>
+          <button
+           className="loadmore-search"
+           onClick={() => {
+            this.fetchProducts(true);
+           }}
+          >
+           {this.state.fetching ? (
+            <Spin
+             size="large"
+             indicator={
+              <LoadingOutlined
+               style={{ fontSize: "24px", color: "#fff" }}
+               spin
+              />
+             }
+            />
+           ) : (
+            "LOAD MORE"
+           )}
+          </button>
+         </Col>
+        )}
         {this.state.products.length < 1 &&
          !this.state.fetching &&
          this.state.pageLoaded && (
@@ -1681,8 +1809,76 @@ class Search extends Component {
        </Row>
        {!this.state.pageLoaded && (
         <>
-         <Row gutter={24} className="my-3">
-          <Col className="gutter-row mb-3" lg={8} md={8} sm={12} xs={24}>
+         <Row
+          gutter={{
+           lg: 24,
+           md: 24,
+           sm: 12,
+           xs: 12,
+          }}
+          className="my-3"
+         >
+          <Col className="gutter-row mb-3" lg={8} md={8} sm={12} xs={12}>
+           <div
+            style={{
+             width: "100%",
+             overflow: "hidden",
+            }}
+           >
+            <Skeleton.Avatar
+             active={true}
+             //  size={"80%"}
+             shape={"square"}
+             block={true}
+            />
+           </div>
+          </Col>
+          <Col className="gutter-row mb-3" lg={8} md={8} sm={12} xs={12}>
+           <div
+            style={{
+             //  width: "100%",
+             overflow: "hidden",
+            }}
+           >
+            <Skeleton.Avatar
+             active={true}
+             //  size={"100%"}
+             shape={"square"}
+             block={true}
+            />
+           </div>
+          </Col>
+          <Col className="gutter-row mb-3" lg={8} md={8} sm={12} xs={12}>
+           <div
+            style={{
+             width: "100%",
+             overflow: "hidden",
+            }}
+           >
+            <Skeleton.Avatar
+             active={true}
+             //  size={350}
+             shape={"square"}
+             block={true}
+            />
+           </div>
+          </Col>
+          <Col className="gutter-row mb-3" lg={8} md={8} sm={12} xs={12}>
+           <div
+            style={{
+             width: "100%",
+             overflow: "hidden",
+            }}
+           >
+            <Skeleton.Avatar
+             active={true}
+             //  size={350}
+             shape={"square"}
+             block={true}
+            />
+           </div>
+          </Col>
+          <Col className="gutter-row mb-3" lg={8} md={8} sm={12} xs={12}>
            <div
             style={{
              width: "100%",
@@ -1697,67 +1893,7 @@ class Search extends Component {
             />
            </div>
           </Col>
-          <Col className="gutter-row mb-3" lg={8} md={8} sm={12} xs={24}>
-           <div
-            style={{
-             width: "100%",
-             overflow: "hidden",
-            }}
-           >
-            <Skeleton.Avatar
-             active={true}
-             size={350}
-             shape={"square"}
-             block={true}
-            />
-           </div>
-          </Col>
-          <Col className="gutter-row mb-3" lg={8} md={8} sm={12} xs={24}>
-           <div
-            style={{
-             width: "100%",
-             overflow: "hidden",
-            }}
-           >
-            <Skeleton.Avatar
-             active={true}
-             size={350}
-             shape={"square"}
-             block={true}
-            />
-           </div>
-          </Col>
-          <Col className="gutter-row mb-3" lg={8} md={8} sm={12} xs={24}>
-           <div
-            style={{
-             width: "100%",
-             overflow: "hidden",
-            }}
-           >
-            <Skeleton.Avatar
-             active={true}
-             size={350}
-             shape={"square"}
-             block={true}
-            />
-           </div>
-          </Col>
-          <Col className="gutter-row mb-3" lg={8} md={8} sm={12} xs={24}>
-           <div
-            style={{
-             width: "100%",
-             overflow: "hidden",
-            }}
-           >
-            <Skeleton.Avatar
-             active={true}
-             size={350}
-             shape={"square"}
-             block={true}
-            />
-           </div>
-          </Col>
-          <Col className="gutter-row mb-3" lg={8} md={8} sm={12} xs={24}>
+          <Col className="gutter-row mb-3" lg={8} md={8} sm={12} xs={12}>
            <div
             style={{
              width: "100%",
@@ -1777,6 +1913,668 @@ class Search extends Component {
        )}
       </Col>
      </Row>
+
+     <button
+      id="sticky-filter"
+      className="only-mobile"
+      onClick={() => {
+       this.setState({ visible: true });
+      }}
+     >
+      <HiAdjustments /> Filters
+     </button>
+     <Drawer
+      id="filter-mobile-drawer"
+      placement="left"
+      // closable={true}
+      closable={false}
+      onClose={() => {
+       this.setState({ visible: false });
+      }}
+      visible={this.state.visible}
+      key="left"
+      mask={false}
+      width={"100%"}
+      height={"100vw"}
+     >
+      <Sider
+       collapsed={this.state.collapsed}
+       onCollapse={this.onCollapse}
+       width={"100%"}
+       className="site-layout-background"
+       style={{ background: "#fff" }}
+      >
+       <div id="tags">
+        <div className="filter-head">
+         <p>Filters</p>
+         <p className="done" onClick={() => this.setState({ visible: false })}>
+          Done
+         </p>
+        </div>
+
+        {this.state.category_tags?.map((cat_tag) => {
+         if (cat_tag) {
+          return (
+           <>
+            <Tag
+             closable={!cat_tag == "All Categories"}
+             onClose={(e) => {
+              e.preventDefault();
+              this.onCloseTag("category_tags", cat_tag);
+             }}
+            >
+             {cat_tag}
+            </Tag>
+           </>
+          );
+         }
+        })}
+        {this.state.kind_tags.map((kind_tag) => {
+         if (kind_tag) {
+          return (
+           <>
+            <Tag
+             closable
+             onClose={(e) => {
+              e.preventDefault();
+              this.onCloseTag("kind_tags", kind_tag);
+             }}
+            >
+             {kind_tag}
+            </Tag>
+           </>
+          );
+         }
+        })}
+        {this.state.type_tags.map((type_tag) => {
+         if (type_tag) {
+          return (
+           <>
+            <Tag
+             closable
+             onClose={(e) => {
+              e.preventDefault();
+              this.onCloseTag("type_tags", type_tag);
+             }}
+            >
+             {type_tag}
+            </Tag>
+           </>
+          );
+         }
+        })}
+        {this.state.doorType_tags.map((type_tag) => {
+         if (type_tag) {
+          return (
+           <>
+            <Tag
+             closable
+             onClose={(e) => {
+              e.preventDefault();
+              this.onCloseTag("doorType", type_tag);
+             }}
+            >
+             {type_tag}
+            </Tag>
+           </>
+          );
+         }
+        })}
+        {this.state.material_tags.map((mat_tag) => {
+         if (mat_tag) {
+          return (
+           <>
+            <Tag
+             closable
+             onClose={(e) => {
+              e.preventDefault();
+              this.onCloseTag("material_tags", mat_tag);
+             }}
+            >
+             {mat_tag}
+            </Tag>
+           </>
+          );
+         }
+        })}
+        {this.state.style_tags.map((style_tag) => {
+         if (style_tag) {
+          return (
+           <>
+            <Tag
+             closable
+             onClose={(e) => {
+              e.preventDefault();
+              this.onCloseTag("style_tags", style_tag);
+             }}
+            >
+             {style_tag}
+            </Tag>
+           </>
+          );
+         }
+        })}
+        {this.state.category_tags.length + this.state.type_tags.length > 0 &&
+         this.state.category_tags[0] !== "All Categories" &&
+         (this.props?.match?.params?.category ? (
+          <>
+           <Link
+            to={{
+             pathname: `/products`,
+            }}
+            style={{
+             fontSize: ".7rem",
+             fontWeight: "600",
+             textDecoration: "underline",
+            }}
+            onClick={this.onClearAll}
+           >
+            Clear All
+           </Link>
+          </>
+         ) : (
+          <>
+           <button
+            style={{
+             fontSize: ".7rem",
+             fontWeight: "600",
+             textDecoration: "underline",
+            }}
+            onClick={this.onClearAll}
+           >
+            Clear All
+           </button>
+          </>
+         ))}
+       </div>
+       <Form onFieldsChange={this.onFilterChange}>
+        <Menu
+         mode="inline"
+         onSelect={this.onCategoriesSelect}
+         onDeselect={this.onCategoriesDeselect}
+         selectedKeys={this.state.selectedKindTitle}
+         defaultOpenKeys={["categories"]}
+         defaultSelectedKeys={[
+          this.props.match.params.category?.charAt(0).toUpperCase() +
+           this.props.match.params.category?.slice(1),
+         ]}
+         style={{ height: "100%", borderRight: 0, width: "100%" }}
+        >
+         <div>
+          <SubMenu
+           key="categories"
+           title="All Categories"
+           onTitleClick={this.onItemClick}
+          >
+           <Menu.Item key="furniture">Furniture</Menu.Item>
+           <Menu.Item key="lighting">Lighting</Menu.Item>
+           <Menu.Item key="decore">Decore</Menu.Item>
+           <Menu.Item key="kitchen">Kitchen</Menu.Item>
+           <Menu.Item key="bathroom">Bathroom</Menu.Item>
+           <Menu.Item key="wellness">Wellness</Menu.Item>
+           <Menu.Item key="finishes">Finishes</Menu.Item>
+           <Menu.Item key="construction">Construction</Menu.Item>
+          </SubMenu>
+         </div>
+        </Menu>
+        {this.state.selectedKindTitle && (
+         <>
+          <Menu
+           mode="inline"
+           multiple={true}
+           onSelect={this.onKindSelect}
+           onDeselect={this.onKindDeselct}
+           selectedKeys={this.state.kinds}
+           defaultSelectedKeys={[
+            this.props.match.params.type?.charAt(0).toUpperCase() +
+             this.props.match.params.type?.slice(1),
+           ]}
+          >
+           <div>
+            <SubMenu
+             key="kinds"
+             title={`All ${this.state.selectedKindTitle}`}
+             className="scrollable-menu"
+            >
+             <Menu.Item
+              disabled={true}
+              style={{ height: "45px !important" }}
+              className="search"
+             >
+              <Input
+               allowClear
+               size="large"
+               style={{ width: "100%", margin: "10px auto" }}
+               placeholder={`Search ${this.state.selectedKindTitle}`}
+               onChange={this.searchKind}
+              />
+             </Menu.Item>
+
+             {this.state.selectedKindOptions.map((option, index) => {
+              if (
+               option.value
+                .toLowerCase()
+                .includes(this.state.kind_search_term.toLowerCase())
+              ) {
+               return (
+                <>
+                 <Menu.Item key={option.value}>{option.value}</Menu.Item>
+                </>
+               );
+              }
+             })}
+            </SubMenu>
+           </div>
+          </Menu>
+         </>
+        )}
+        {this.state.kind_types.length > 0 && (
+         <>
+          <>
+           <Menu
+            mode="inline"
+            multiple={true}
+            selectedKeys={this.state.types}
+            onSelect={this.onTypeSelect}
+            onDeselect={this.onTypeSelect}
+           >
+            <div>
+             <SubMenu key="types" title="Types" className="scrollable-menu">
+              <Menu.Item
+               disabled={true}
+               style={{ height: "45px !important" }}
+               className="search"
+              >
+               <Input
+                allowClear
+                size="large"
+                style={{ width: "100%", margin: "10px auto" }}
+                placeholder={`Search ${this.state.selectedKindTitle} Types`}
+                onChange={this.searchType}
+               />
+              </Menu.Item>
+              {this.state.kind_types.map((type, index) => {
+               if (type) {
+                if (
+                 type.value
+                  .toLowerCase()
+                  .includes(this.state.type_search_term.toLowerCase())
+                ) {
+                 return (
+                  <>
+                   <Menu.Item key={type.value}>{type.value}</Menu.Item>
+                  </>
+                 );
+                }
+               }
+              })}
+             </SubMenu>
+            </div>
+           </Menu>
+          </>
+         </>
+        )}
+        {this.state.finishesDoorTypes.length > 0 && (
+         <>
+          <Menu
+           mode="inline"
+           multiple={true}
+           selectedKeys={this.state.doortypes}
+           onSelect={this.onDoorTypeSelect}
+           onDeselect={this.onDoorTypeSelect}
+          >
+           <div>
+            <SubMenu
+             key="door_types"
+             title="Door Type"
+             className="scrollable-menu"
+            >
+             {this.state.finishesDoorTypes.map((doorType, index) => {
+              if (doorType) {
+               return (
+                <>
+                 <Menu.Item key={doorType.value}>{doorType.value}</Menu.Item>
+                </>
+               );
+              }
+             })}
+            </SubMenu>
+           </div>
+          </Menu>
+         </>
+        )}
+        {this.state.kind_shapes.length > 0 && (
+         <>
+          <Menu
+           mode="inline"
+           multiple={true}
+           onSelect={this.onShapeSelect}
+           onDeselect={this.onShapeSelect}
+          >
+           <div>
+            <SubMenu key="shapes" title="Shapes" className="scrollable-menu">
+             <Menu.Item
+              disabled={true}
+              style={{ height: "45px !important" }}
+              className="search shapes"
+             >
+              <Input
+               allowClear
+               size="large"
+               style={{ width: "100%", margin: "10px auto" }}
+               placeholder={`Search ${this.state.selectedKindTitle} Shapes`}
+               onChange={this.searchShape}
+              />
+             </Menu.Item>
+             {this.state.kind_shapes.map((shape, index) => {
+              if (
+               shape?.value
+                .toLowerCase()
+                .includes(this.state.shape_search_term.toLowerCase())
+              ) {
+               return (
+                <>
+                 <Menu.Item key={shape?.value}>{shape?.value}</Menu.Item>
+                </>
+               );
+              }
+             })}
+            </SubMenu>
+           </div>
+          </Menu>
+         </>
+        )}
+        <Menu
+         mode="inline"
+         multiple={true}
+         selectedKeys={this.state.materials}
+         onSelect={this.onMaterialsSelect}
+         onDeselect={this.onMaterialsSelect}
+        >
+         <div>
+          <SubMenu
+           key="materials"
+           title="Materials"
+           className="scrollable-menu"
+          >
+           <Menu.Item
+            disabled={true}
+            style={{ height: "45px !important" }}
+            className="search"
+           >
+            <Input
+             allowClear
+             size="large"
+             style={{ width: "100%", margin: "10px auto" }}
+             placeholder={`Search ${this.state.selectedKindTitle} Materials`}
+             onChange={this.searchMaterial}
+            />
+           </Menu.Item>
+           {furniture_materials.map((material, index) => {
+            if (
+             material.value
+              .toLowerCase()
+              .includes(this.state.material_search_term.toLowerCase())
+            ) {
+             return (
+              <>
+               <Menu.Item key={material.value}>{material.value}</Menu.Item>
+              </>
+             );
+            }
+           })}
+          </SubMenu>
+         </div>
+        </Menu>
+        {this.state.selectedStyleOptions.length > 0 && (
+         <>
+          <Menu
+           mode="inline"
+           multiple={true}
+           selectedKeys={this.state.styles}
+           onSelect={this.onStylesSelect}
+           onDeselect={this.onStylesSelect}
+          >
+           <div>
+            <SubMenu key="styles" title="Style" className="scrollable-menu">
+             <Menu.Item
+              disabled={true}
+              style={{ height: "45px !important" }}
+              className="search"
+             >
+              <Input
+               allowClear
+               size="large"
+               style={{ width: "100%", margin: "10px auto" }}
+               placeholder={`Search ${this.state.selectedKindTitle} Styles`}
+               onChange={this.searchStyle}
+              />
+             </Menu.Item>
+             {this.state.selectedStyleOptions.map((style, index) => {
+              if (
+               style.value
+                .toLowerCase()
+                .includes(this.state.style_search_term.toLowerCase())
+              ) {
+               return (
+                <>
+                 <Menu.Item key={style.value}>{style.value}</Menu.Item>
+                </>
+               );
+              }
+             })}
+            </SubMenu>
+           </div>
+          </Menu>
+         </>
+        )}
+
+        {this.state.kind_bases.length > 0 && (
+         <>
+          <>
+           <Menu
+            mode="inline"
+            multiple={true}
+            onSelect={this.onBaseSelect}
+            onDeselect={this.onBaseSelect}
+           >
+            <div>
+             <SubMenu key="bases" title="Bases" className="scrollable-menu">
+              <Menu.Item
+               disabled={true}
+               style={{ height: "45px !important" }}
+               className="search"
+              >
+               <Input
+                allowClear
+                size="large"
+                style={{ width: "100%", margin: "10px auto" }}
+                placeholder={`Search ${this.state.selectedKindTitle} Bases`}
+                onChange={this.searchBase}
+               />
+              </Menu.Item>
+              {this.state.kind_bases.map((base, index) => {
+               if (
+                base.value
+                 .toLowerCase()
+                 .includes(this.state.base_search_term.toLowerCase())
+               ) {
+                return (
+                 <>
+                  <Menu.Item key={base.value}>{base.value}</Menu.Item>
+                 </>
+                );
+               }
+              })}
+             </SubMenu>
+            </div>
+           </Menu>
+          </>
+         </>
+        )}
+        {this.state.kind_seats.length > 0 && (
+         <>
+          <>
+           <Menu
+            mode="inline"
+            multiple={true}
+            onSelect={this.onSeatSelect}
+            onDeselect={this.onSeatSelect}
+           >
+            <div>
+             <SubMenu key="seats" title="Seats" className="scrollable-menu">
+              <Menu.Item
+               disabled={true}
+               style={{ height: "45px !important" }}
+               className="search"
+              >
+               <Input
+                allowClear
+                size="large"
+                style={{ width: "100%", margin: "10px auto" }}
+                placeholder={`Search ${this.state.selectedKindTitle} Seats`}
+                onChange={this.searchSeat}
+               />
+              </Menu.Item>
+              {this.state.kind_seats.map((seat, index) => {
+               if (
+                seat.value
+                 .toLowerCase()
+                 .includes(this.state.seat_search_term.toLowerCase())
+               ) {
+                return (
+                 <>
+                  <Menu.Item key={seat.value}>{seat.value}</Menu.Item>
+                 </>
+                );
+               }
+              })}
+             </SubMenu>
+            </div>
+           </Menu>
+          </>
+         </>
+        )}
+        {this.state.selectedKindTitle?.toLowerCase() === "lighting" && (
+         <>
+          <Menu
+           mode="inline"
+           multiple={true}
+           onSelect={this.onLightingTypesSelect}
+           onDeselect={this.onLightingTypesSelect}
+          >
+           <div>
+            <SubMenu
+             key="lighting_types"
+             title="Lighting Types"
+             className="scrollable-menu"
+            >
+             {lighting_types.map((type, index) => {
+              return (
+               <>
+                <Menu.Item key={type.value}>{type.value}</Menu.Item>
+               </>
+              );
+             })}
+            </SubMenu>
+           </div>
+          </Menu>
+          <Menu
+           mode="inline"
+           multiple={true}
+           onSelect={this.onInstallationSelect}
+           selectedKeys={this.state.installations}
+           onDeselect={this.onInstallationSelect}
+          >
+           <div>
+            <SubMenu
+             key="installation"
+             title="Installation"
+             className="scrollable-menu"
+            >
+             {lighting_installation.map((ins, index) => {
+              return (
+               <>
+                <Menu.Item key={ins.value}>{ins.value}</Menu.Item>
+               </>
+              );
+             })}
+            </SubMenu>
+           </div>
+          </Menu>
+          <Menu
+           mode="inline"
+           multiple={true}
+           onSelect={this.onColorTempratrueChange}
+           onDeselect={this.onColorTempratrueChange}
+          >
+           <div>
+            <SubMenu
+             key="colortemp"
+             title="Color Temprature"
+             className="scrollable-menu"
+            >
+             {lighitng_colorTemprature.map((color, index) => {
+              return (
+               <>
+                <Menu.Item key={color.value}>{color.value}</Menu.Item>
+               </>
+              );
+             })}
+            </SubMenu>
+           </div>
+          </Menu>
+          <Menu
+           mode="inline"
+           multiple={true}
+           onSelect={this.onBulbTypeSelect}
+           onDeselect={this.onBulbTypeSelect}
+          >
+           <SubMenu
+            key="bulbtypes"
+            title="Blub Type"
+            className="scrollable-menu"
+           >
+            {lighting_bulbTypes.map((bulb, index) => {
+             return (
+              <>
+               <Menu.Item key={bulb.value}>{bulb.value}</Menu.Item>
+              </>
+             );
+            })}
+           </SubMenu>
+          </Menu>
+         </>
+        )}
+        {this.state.selectedKindTitle?.toLowerCase() === "finishes" && (
+         <>
+          <Menu
+           mode="inline"
+           multiple={true}
+           //  onSelect={this.onSeatSelect}
+           //  onDeselect={this.onSeatSelect}
+          >
+           <div>
+            <SubMenu
+             key="finishes_applied"
+             title="Applied On"
+             className="scrollable-menu"
+            >
+             {finishes_applied_on.map((opt, index) => {
+              return (
+               <>
+                <Menu.Item key={opt?.value}>{opt?.value}</Menu.Item>
+               </>
+              );
+             })}
+            </SubMenu>
+           </div>
+          </Menu>
+         </>
+        )}
+       </Form>
+      </Sider>
+     </Drawer>
     </div>
 
     {/* signup/signin modals */}

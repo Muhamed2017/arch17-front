@@ -1,8 +1,13 @@
-import React, { Component } from "react";
+import React, { Component, createRef } from "react";
 import { Container, Col, Row } from "react-bootstrap";
 import "photoswipe/dist/photoswipe.css";
 import "photoswipe/dist/default-skin/default-skin.css";
-
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { HiFolderDownload } from "react-icons/hi";
+import "./product.css";
+import ReactPlayer from "react-player";
+import { regionNames } from "./../redux/constants";
 import {
  Row as AntRow,
  Col as AntCol,
@@ -13,11 +18,13 @@ import {
  Menu,
  Dropdown,
  Modal as AntModal,
- Badge,
+ Tabs,
+ Select,
 } from "antd";
 import pptxgen from "pptxgenjs";
 import { FaFilePdf } from "react-icons/fa";
 import { RiFilePpt2Fill } from "react-icons/ri";
+import { GrOnedrive } from "react-icons/gr";
 
 import {
  FacebookShareButton,
@@ -35,10 +42,10 @@ import {
 } from "react-share";
 
 import { SiGoogledrive, SiBaidu } from "react-icons/si";
-import { BiLinkExternal } from "react-icons/bi";
 import { AiOutlineDropbox } from "react-icons/ai";
 import Modal from "react-bootstrap/Modal";
 import { FiPhoneCall } from "react-icons/fi";
+import { GoMail } from "react-icons/go";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebookF } from "react-icons/fa";
 import "flag-icon-css/css/flag-icon.min.css";
@@ -50,11 +57,21 @@ import { AiOutlineShoppingCart, AiOutlineWhatsApp } from "react-icons/ai";
 import Carousel from "react-elastic-carousel";
 import Item from "../components/SliderComponents/slider";
 import { Flex, Square } from "../components/SliderComponents/slider";
-
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/dist/styles.css";
+import Captions from "yet-another-react-lightbox/dist/plugins/captions";
+import Fullscreen from "yet-another-react-lightbox/dist/plugins/fullscreen";
+import Slideshow from "yet-another-react-lightbox/dist/plugins/slideshow";
+import Thumbnails from "yet-another-react-lightbox/dist/plugins/thumbnails";
+import Video from "yet-another-react-lightbox/dist/plugins/video";
+import Zoom from "yet-another-react-lightbox/dist/plugins/zoom";
+import "yet-another-react-lightbox/dist/plugins/captions/captions.css";
+import "yet-another-react-lightbox/dist/plugins/thumbnails/thumbnails.css";
 import axios from "axios";
 import { GiCube } from "react-icons/gi";
-import { convertFromRaw, EditorState } from "draft-js";
-import { Editor } from "react-draft-wysiwyg";
+import { convertFromRaw } from "draft-js";
+// import { Editor } from "react-draft-wysiwyg";
+import Footer from "../components/Footer";
 import HashLoader from "react-spinners/HashLoader";
 import "photoswipe/dist/photoswipe.css";
 import "photoswipe/dist/default-skin/default-skin.css";
@@ -78,17 +95,17 @@ import {
  closeProductRequestAction,
  openProductRequestAction,
 } from "./../redux/actions/addProductActions";
+
 const breakPoints = [{ width: 1200, itemsToShow: 1 }];
 const { Panel } = Collapse;
-const text = `
-  A dog is a type of domesticated animal.
-  Known for its loyalty and faithfulness,
-  it can be found as a welcome guest in many households across the world.
-`;
+const { TabPane } = Tabs;
+const { Option } = Select;
 
 class Product extends Component {
  constructor(props) {
   super(props);
+  this.sliderRef = createRef();
+
   this.state = {
    modals: {
     price_request: false,
@@ -106,6 +123,7 @@ class Product extends Component {
    product: null,
    options: null,
    galleries: [],
+   videos: [],
    activeOption: "",
    product_files: null,
    product_desc_overview: null,
@@ -132,6 +150,11 @@ class Product extends Component {
    overviewDescExist: false,
    materialDescExist: false,
    sizeDescExist: false,
+   gallery_index: -1,
+   galleryIndex: 0,
+   gallery_slides: [],
+   advancedExampleOpen: false,
+   activeSlide: 0,
   };
  }
 
@@ -585,23 +608,48 @@ class Product extends Component {
   await axios
    .get(`${API}product/${this.state.product_id}`)
    .then((products) => {
-    this.setState({ product: products.data.product });
+    this.setState({
+     loading: false,
+     product: products.data.product,
+     galleries: products.data.product.gallery?.filter((g) => {
+      return g.desc_gallery_files !== null;
+     }),
+     gallery_slides: products.data.product.gallery?.map((g) => {
+      if (
+       g.desc_gallery_files &&
+       g?.desc_gallery_files[0] &&
+       g.desc_gallery_files[0] !== "null"
+      ) {
+       return { src: g?.desc_gallery_files[0], alt: "" };
+      }
+     }),
+     srcsss: products.data.product.gallery?.map((g) => {
+      if (g.desc_gallery_files) {
+       return g?.desc_gallery_files[0];
+      }
+     }),
+    });
     this.setState({ options: products.data.product.options });
     this.setState({
-     //  files: products.data.product.files,
      files: products.data.product.files.filter((f) => {
       return f.file_type !== "PDF";
      }),
      pdf_files: products.data.product.files.filter((f) => {
       return f.file_type === "PDF";
      }),
+     //  videos: products.data.product?.gallery[0]?.desc_gallery_files?.filter(
+     //   (g) => {
+     //    return !g.includes("cloudinary");
+     //   }
+     //  ),
+     videos: products.data.product?.vidoes,
     });
     this.setState({ collections: products.data.collections });
-    this.setState({ galleries: products.data.product.gallery });
-    this.setState({ activeOption: products.data.product.options[0] });
-    console.log(products.data.product.options[0].covers);
+    // this.setState({ galleries: products.data.product.gallery });
+    this.setState({ activeOption: products.data.product?.options[0] });
+    console.log(products.data.product.options[0]?.covers);
 
-    products.data.product.options[0].covers?.map((cover, index) => {
+    products.data.product.options[0]?.covers?.map((cover, index) => {
      if (cover.src) {
       this.setState({
        sliderImgs: [
@@ -617,54 +665,16 @@ class Product extends Component {
       });
      }
     });
-    this.loadImage(products.data.product.options[0].covers[0].src);
-    if (products.data.product.description[0]) {
-     console.log(
-      JSON.parse(products.data.product.description[0].overview_content)
-     );
-     console.log(
-      JSON.parse(products.data.product.description[0].mat_desc_content)
-     );
-     this.setState({
-      product_desc_overview: EditorState.createWithContent(
-       convertFromRaw(
-        JSON.parse(products.data.product.description[0].overview_content)
-       )
-      ),
+    this.loadImage(products.data.product.options[0]?.covers[0]?.src);
 
-      product_desc_size: EditorState.createWithContent(
-       convertFromRaw(
-        JSON.parse(products.data.product.description[0].size_content)
-       )
-      ),
-      plainOverview:
-       JSON.parse(products.data.product.description[0].overview_content)
-        .blocks[0].text?.length > 0 ||
-       JSON.parse(products.data.product.description[0].overview_content).blocks
-        ?.length > 1 ||
-       JSON.parse(products.data.product.description[0].overview_content)
-        .entityMap,
-      product_desc_mat: EditorState.createWithContent(
-       convertFromRaw(
-        JSON.parse(products.data.product.description[0].mat_desc_content)
-       )
-      ),
-      plain_desc_content:
-       JSON.parse(products.data.product.description[0].mat_desc_content)
-        .blocks[0].text.length > 0 ||
-       JSON.parse(products.data.product.description[0].mat_desc_content).blocks
-        ?.length > 1 ||
-       JSON.parse(products.data.product.description[0].mat_desc_content)
-        .entityMap,
-      plainSize:
-       JSON.parse(products.data.product.description[0].size_content).blocks[0]
-        .text.length > 0 ||
-       JSON.parse(products.data.product.description[0].size_content).blocks
-        ?.length > 1 ||
-       JSON.parse(products.data.product.description[0].size_content).entityMap,
+    if (products.data.product.description[0]) {
+     this.setState({
+      product_desc_overview:
+       products.data.product.description[0].overview_content,
+      product_desc_size: products.data.product.description[0].size_content,
+      product_desc_mat: products.data.product.description[0].mat_desc_content,
      });
     }
-
     console.log(products);
     this.setState({ loading: false });
     if (this.props.location.state?.request_price) {
@@ -679,6 +689,7 @@ class Product extends Component {
   this.setState({
    activeOption: this.state.options[index],
    acive_index: index,
+   activeSlide: 0,
   });
   let acviteCovers = [];
   this.state.options[index].covers.map((cover) => {
@@ -695,7 +706,7 @@ class Product extends Component {
   this.setState({
    sliderImgs: acviteCovers,
   });
-  console.log(this.state.activeOption.cover);
+  // console.log(this.state.activeOption.cover);
  };
 
  saveToCollection = () => {
@@ -721,507 +732,460 @@ class Product extends Component {
   this.setState({ price_request: false });
  };
 
+ gotoStep = (index) => {
+  this.sliderRef.current.slideToIndex(index);
+  this.setState({
+   activeSlide: index,
+  });
+ };
+
+ updateOptionOnSelect = (value) => {
+  const index = this.state.options?.findIndex((e) => {
+   return e.id === value;
+  });
+  console.log(index);
+  const covers = this.state.options[index]?.covers?.filter((cover) => {
+   return cover.src && cover.src !== "null";
+  });
+  this.setState({
+   activeSlide: 0,
+   activeOption: this.state.options[index],
+   sliderImgs: covers?.map((cover) => {
+    return {
+     original: cover.src,
+     thumbnail: cover.src,
+     thumbnailClass: "custom-thumb",
+     thumbnailWidth: "50",
+     thumbnailHeight: "50",
+    };
+   }),
+  });
+ };
  render() {
   const loading = this.state.loading;
-  // const loading = true;
   if (!loading) {
    return (
     <React.Fragment>
      <div id="product-page" className="bg-white py-2">
       <Container fluid className="sized-container">
-       <Row className="justify-content-md-center">
-        <Col md={{ span: 8 }} className="p-0">
-         <div id="swiper" style={{ position: "relative" }}>
-          {this.state.slider && (
-           <>
-            <Carousel
-             style={{ backgroundColor: "transparent" }}
-             breakPoints={breakPoints}
-             renderPagination={({ pages, activePage, onClick }) => {
-              return (
-               <Flex
-                direction="row"
-                className="swiper-squares"
-                style={{
-                 gridTemplateColumns: "repeat(auto-fit, 90px)",
-                 justifyContent: "center",
-                 margin: 0,
-                 width: "90%",
-                }}
-               >
-                {pages.map((page, index) => {
-                 const isActivePage = activePage === page;
-                 return (
-                  <Square
-                   key={page}
-                   onClick={() => onClick(page)}
-                   active={isActivePage}
-                   className="thumb"
-                   style={{
-                    backgroundOrigin: "inherit",
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "contain",
-                    border: "none",
-                    width: "80px",
-                   }}
-                  ></Square>
-                 );
-                })}
-               </Flex>
-              );
-             }}
-            >
-             {this.state.activeOption?.covers?.map((item, index) => {
-              return (
-               item.src !== "" &&
-               item.src !== null && (
-                <Item key={index}>
-                 <div
-                  className="item-background"
-                  style={{ backgroundImage: `url(${item.src})` }}
-                 ></div>
-                </Item>
-               )
-              );
-             })}
-            </Carousel>
-           </>
-          )}
-          {!this.state.slider && (
-           <>
-            <ImageGallery
-             showPlayButton={false}
-             full
-             items={this.state.sliderImgs}
-            />
-           </>
-          )}
-         </div>
-         <Collapse
-          expandIconPosition="right"
-          defaultActiveKey={[
-           "overview",
-           //  "collections",
-           //  "material",
-           //  "dimensions",
-           //  "gallery",
-           //  "files",
-           //  "tags",
-           //  "similars",
-          ]}
-          onChange={this.callback}
-          bordered
+       <div className="only-wide">
+        <Row className="justify-content-md-center">
+         <Col
+          md={{ span: 8 }}
+          sm={{ span: 12 }}
+          xs={{ span: 12 }}
+          className="p-0"
          >
-          {Object.keys(this.state.plainOverview).length > 0 ? (
-           <>
-            <Panel header="Overview" key="overview">
+          <div id="swiper" style={{ position: "relative" }}>
+           {!this.state.slider && (
+            <>
+             <ImageGallery
+              showBullets={true}
+              full
+              ref={this.sliderRef}
+              thumbnailPosition="bottom"
+              showThumbnails={false}
+              items={this.state.sliderImgs}
+             />
+            </>
+           )}
+           <div className="custom-slide-thumbs">
+            {this.state.sliderImgs?.map((slide, index) => {
+             return (
+              <div
+               className={
+                this.state.activeSlide === index ? "active-slide" : ""
+               }
+               onClick={() => this.gotoStep(index)}
+               style={{
+                backgroundImage: `url("${slide.original}")`,
+               }}
+              ></div>
+             );
+            })}
+           </div>
+          </div>
+          <Tabs
+           defaultActiveKey="overview"
+           defaultValue={"overview"}
+           className="mb-5"
+          >
+           {this.state.product_desc_overview?.length > 5 ? (
+            <TabPane tab="Overview" key="overview">
              <div className="overview-text">
               {this.state.product_desc_overview && (
-               <>
-                <p>
-                 <Editor
-                  editorState={this.state.product_desc_overview}
-                  wrapperClassName="rich-editor demo-wrapper"
-                  editorClassName="demo-editor cs-editor"
-                  readOnly
-                  toolbar={{
-                   options: [],
-                  }}
-                 />
-                </p>
-               </>
+               <CKEditor
+                disabled={true}
+                config={{
+                 isReadOnly: true,
+                 toolbar: [],
+                }}
+                editor={ClassicEditor}
+                data={this.state.product_desc_overview}
+               />
               )}
              </div>
-            </Panel>
-           </>
-          ) : (
-           <>
-            {this.state.plainOverview === true && (
-             <>
-              <Panel header="Overview" key="overview">
-               <div className="overview-text">
-                {this.state.product_desc_overview && (
-                 <>
-                  <p>
-                   <Editor
-                    editorState={this.state.product_desc_overview}
-                    wrapperClassName="rich-editor demo-wrapper"
-                    editorClassName="demo-editor cs-editor"
-                    readOnly
-                    toolbar={{
-                     options: [],
-                    }}
-                   />
-                  </p>
-                 </>
-                )}
-               </div>
-              </Panel>
-             </>
-            )}
-           </>
-          )}
+            </TabPane>
+           ) : (
+            <></>
+           )}
 
-          {Object.keys(this.state.plain_desc_content).length > 0 ? (
-           <>
-            <Panel key="material" header="Materials">
-             {this.state.product_desc_mat && (
-              <>
-               <p>
-                <Editor
-                 editorState={this.state.product_desc_mat}
-                 wrapperClassName="rich-editor demo-wrapper"
-                 editorClassName="demo-editor cs-editor"
-                 readOnly
-                 toolbar={{
-                  options: [],
-                 }}
-                />
-               </p>
-              </>
-             )}
-            </Panel>
-           </>
-          ) : (
-           <>
-            {this.state.plain_desc_content === true && (
-             <>
-              <Panel key="material" header="Materials">
-               {this.state.product_desc_mat && (
-                <>
-                 <p>
-                  <Editor
-                   editorState={this.state.product_desc_mat}
-                   wrapperClassName="rich-editor demo-wrapper"
-                   editorClassName="demo-editor cs-editor"
-                   readOnly
-                   toolbar={{
-                    options: [],
-                   }}
-                  />
-                 </p>
-                </>
-               )}
-              </Panel>
-             </>
-            )}
-           </>
-          )}
-
-          {Object.keys(this.state.plainSize).length > 0 ? (
-           <>
-            <Panel key="dimensions" header="Dimensions">
-             {this.state.product_desc_size && (
-              <>
-               <p>
-                <Editor
-                 editorState={this.state.product_desc_size}
-                 wrapperClassName="rich-editor demo-wrapper"
-                 editorClassName="demo-editor cs-editor"
-                 readOnly
-                 toolbar={{
-                  options: [],
-                 }}
-                />
-               </p>
-              </>
-             )}
-            </Panel>
-           </>
-          ) : (
-           <>
-            {this.state.plainSize === true && (
-             <>
-              <Panel key="dimensions" header="Dimensions">
-               {this.state.product_desc_size && (
-                <>
-                 <p>
-                  <Editor
-                   editorState={this.state.product_desc_size}
-                   wrapperClassName="rich-editor demo-wrapper"
-                   editorClassName="demo-editor cs-editor"
-                   readOnly
-                   toolbar={{
-                    options: [],
-                   }}
-                  />
-                 </p>
-                </>
-               )}
-              </Panel>
-             </>
-            )}
-           </>
-          )}
-
-          {this.state.files.length > 0 && (
-           <>
-            <Panel header="Cad & 3D Files" key="files">
-             {this.props.isLoggedIn && (
-              <>
-               {this.state.files.map((file, index) => {
-                return (
-                 <>
-                  <Badge.Ribbon
-                   size="small"
-                   text={file.software}
-                   placement="start"
-                  >
-                   <button
-                    className="product-boxs"
-                    onClick={() => this.openFileModal(file)}
-                   >
-                    <div className="file-box">{file.file_type}</div>
-                    <p>{file.file_name}</p>
-                   </button>
-                  </Badge.Ribbon>
-                 </>
-                );
-               })}
-              </>
-             )}
-             {!this.props.isLoggedIn && (
-              <>
-               {this.state.files.map((file, index) => {
-                return (
-                 <>
-                  <button
-                   className="product-boxs"
-                   onClick={this.openAuthenticationModal}
-                  >
-                   <div className="file-box">{file.file_type}</div>
-                   <p>{file.file_name}</p>
-                  </button>
-                 </>
-                );
-               })}
-              </>
-             )}
-            </Panel>
-           </>
-          )}
-          {this.state.pdf_files.length > 0 && (
-           <>
-            <Panel header="PDF Catalogues" key="pdf">
-             {this.props.isLoggedIn && (
-              <>
-               {this.state.pdf_files.map((file, index) => {
-                return (
-                 <>
-                  <button
-                   className="product-boxs"
-                   onClick={() => this.openFileModal(file)}
-                  >
-                   <div className="pdf-box">
-                    <hr className="w-50 m-auto mt-3" />
-                    <p className="pdf-title">{file.file_name}</p>
-                   </div>
-                   {/* <p>{file.file_name}</p> */}
-                   <span
-                    className="link-bold"
-                    style={{
-                     fontSize: ".75rem",
-                     marginLeft: "-13px",
-                    }}
-                   >
-                    {file.software}
-                   </span>
-                  </button>
-                 </>
-                );
-               })}
-              </>
-             )}
-             {!this.props.isLoggedIn && (
-              <>
-               {this.state.pdf_files.map((file, index) => {
-                return (
-                 <>
-                  <button
-                   className="product-boxs"
-                   onClick={this.openAuthenticationModal}
-                  >
-                   <div className="pdf-box">{/* {file.file_type} */}</div>
-                   <p>{file.file_name}</p>
-                  </button>
-                 </>
-                );
-               })}
-              </>
-             )}
-            </Panel>
-           </>
-          )}
-          {this.state.galleries.length > 0 && (
-           <>
-            <Panel header="Gallery" key="gallery" forceRender>
-             <AntRow gutter={10}>
-              <Gallery
-               shareButton={false}
-               options={{
-                bgOpacity: 1,
-                counterEl: false,
-                zoomEl: false,
-                fullscreenEl: false,
-                captionEl: true,
-                barsSize: { top: 50, bottom: "auto" },
-
-                addCaptionHTMLFn: function (item, captionEl, isFake) {
-                 if (!item.title) {
-                  captionEl.children[0].innerHTML = "";
-                  return false;
-                 }
-                 captionEl.children[0].innerHTML = item.title;
-                 return item;
-                },
-               }}
-              >
-               {this.state.product.gallery?.map((g, index) => {
-                const length = this.state.product.gallery.length;
-                const { innerHeight } = window;
+           {this.state.product_desc_mat?.length > 5 ? (
+            <>
+             <TabPane tab="Materials" key="material">
+              {this.state.product_desc_mat && (
+               <CKEditor
+                disabled={true}
+                config={{
+                 isReadOnly: true,
+                 toolbar: [],
+                }}
+                editor={ClassicEditor}
+                data={this.state.product_desc_mat}
+               />
+              )}
+             </TabPane>
+            </>
+           ) : (
+            <></>
+           )}
+           {this.state.product_desc_size?.length > 5 ? (
+            <>
+             <TabPane key="dimensions" tab="Dimensions">
+              {this.state.product_desc_size && (
+               <CKEditor
+                disabled={true}
+                config={{
+                 isReadOnly: true,
+                 toolbar: [],
+                }}
+                editor={ClassicEditor}
+                data={this.state.product_desc_size}
+               />
+              )}
+             </TabPane>
+            </>
+           ) : (
+            <></>
+           )}
+           {this.state.galleries?.length > 0 && (
+            <>
+             <TabPane tab="Gallery" key="gallery" forceRender>
+              <AntRow gutter={10} span={24} className="px-2">
+               {this.state.gallery_slides?.map((g, index) => {
                 return (
                  <AntCol
+                  onClick={() => {
+                   this.setState({
+                    advancedExampleOpen: true,
+                    galleryIndex: index,
+                   });
+                  }}
                   className="gallery-cover mb-4"
-                  span={6}
+                  md={6}
+                  sm={8}
+                  xs={8}
                   style={{
                    display: "grid",
                    alignItems: "center",
                   }}
                  >
-                  <SwipItem
-                   original={g.desc_gallery_files}
-                   thumbnail={g.desc_gallery_files}
-                   title={`${index + 1} Of ${length}`}
-                   height={innerHeight}
-                  >
-                   {({ ref, open }) => (
-                    <div
-                     onClick={open}
-                     ref={ref}
-                     className="product-gallery"
-                     style={{
-                      backgroundImage: `url(${g.desc_gallery_files})`,
-                     }}
-                    ></div>
-                   )}
-                  </SwipItem>
+                  <div
+                   className="product-gallery"
+                   style={{
+                    backgroundImage: `url(${g?.src})`,
+                   }}
+                  ></div>
                  </AntCol>
                 );
                })}
-              </Gallery>
-             </AntRow>
-            </Panel>
-           </>
-          )}
-          <Panel header="Product Tags" key="tags">
-           <div className="product-tags-boxs">
-            {this.state.product.identity[0].places_tags?.map((tag, index) => {
-             return <div key={index}>{tag}</div>;
-            })}
-           </div>
-          </Panel>
-          {Object.values(this.state.product?.similar).length > 0 && (
-           <>
-            <Panel
-             header={`Similar Prodycts by ${this.state?.product?.stores?.name}`}
-             key="similars"
-             forceRender
-            >
-             <div className="similar-products">
-              {/* <div className="inner-body"> */}
-              <AntRow gutter={24} className="my-3">
-               {Object.values(this.state.product?.similar)?.map(
-                (product, index) => {
-                 if (product.preview_cover && index < 3) {
+              </AntRow>
+             </TabPane>
+             {this.state.videos?.length > 0 && (
+              <>
+               <TabPane key="videos" tab="Videos">
+                <AntRow span={24} gutter={16}>
+                 {this.state.videos.map((g, index) => {
+                  return (
+                   <AntCol
+                    md={6}
+                    sm={12}
+                    xs={24}
+                    className="gallery-cover mb-3"
+                   >
+                    <ReactPlayer url={g?.src} width={"100%"} height={"100%"} />
+                   </AntCol>
+                  );
+                 })}
+                </AntRow>
+               </TabPane>
+              </>
+             )}
+            </>
+           )}
+           {this.state.files?.length > 0 && (
+            <>
+             <TabPane tab="Cad & 3D Files" key="files">
+              {this.props.isLoggedIn && (
+               <>
+                {this.state.files.map((file, index) => {
+                 return (
+                  <>
+                   <button
+                    className="product-boxs"
+                    onClick={() => this.openFileModal(file)}
+                   >
+                    <div className="file-box">
+                     <HiFolderDownload />
+                    </div>
+                    <p className="mb-0">{file.file_name}</p>
+                    <p className="mb-0"> {file.file_type}</p>
+                   </button>
+                  </>
+                 );
+                })}
+               </>
+              )}
+              {!this.props.isLoggedIn && (
+               <>
+                {this.state.files.map((file, index) => {
+                 return (
+                  <>
+                   <button
+                    className="product-boxs"
+                    onClick={this.openAuthenticationModal}
+                   >
+                    <div className="file-box">
+                     <HiFolderDownload />
+                    </div>
+                    <p className="mb-0">{file.file_name}</p>
+                    <p className="mb-0"> {file.file_type}</p>
+                   </button>
+                  </>
+                 );
+                })}
+               </>
+              )}
+             </TabPane>
+            </>
+           )}
+           {this.state.pdf_files?.length > 0 && (
+            <>
+             <TabPane tab="PDF Catalogues" key="pdf">
+              {this.props.isLoggedIn && (
+               <>
+                <AntRow span={24} gutter={36} className="px-3">
+                 {this.state.pdf_files.map((file, index) => {
                   return (
                    <>
-                    <AntCol
-                     className="gutter-row mb-4"
-                     lg={8}
-                     md={8}
-                     sm={12}
-                     xs={24}
-                    >
-                     <a href={`/product/${product.id}`}>
-                      <div className="product">
-                       <div
-                        className="p-img"
-                        style={{
-                         background: `url(${product.preview_cover})`,
-                        }}
-                       >
-                        <div className="prlayer"></div>
-
-                        <button
-                         className="actns-btn svbtn"
-                         onClick={(e) => {
-                          e.preventDefault();
-                          this.setState(
-                           {
-                            to_save_cover: product.preview_cover,
-                            to_save_productId: product,
-                           },
-                           () => {
-                            this.saveToCollection();
-                           }
-                          );
-                         }}
-                        >
-                         Save
-                        </button>
-                        {product.file.length > 0 ? (
-                         <>
-                          <div className="actns-btn file-btn cad">CAD</div>
-                          <div className="actns-btn file-btn threeD">3D</div>
-                         </>
-                        ) : (
-                         ""
-                        )}
-                       </div>
-                       <a href={`/brand/${product.store_name.store_id}`}>
-                        <h5 className="product-store">
-                         {product.store_name.store_name}
-                        </h5>
-                       </a>
-                       <p className="product-name">{product.name}</p>
-                       <div className="product-price">
-                        {product.preview_price && product.preview_price > 0 ? (
-                         <>
-                          <span>¥ {product.preview_price}</span>
-                         </>
-                        ) : (
-                         ""
-                        )}
-                       </div>
+                    <AntCol md={6} sm={12} xs={12}>
+                     <button
+                      className="product-boxs"
+                      onClick={() => this.openFileModal(file)}
+                     >
+                      <div className="pdf-box">
+                       <hr className="w-50 m-auto mt-3" />
+                       <p className="pdf-title">{file.file_name}</p>
                       </div>
-                     </a>
+                      {/* <p>{file.file_name}</p> */}
+                      <span
+                       className="link-bold"
+                       style={{
+                        fontSize: ".75rem",
+                        marginLeft: "-13px",
+                       }}
+                      >
+                       {file.software}
+                      </span>
+                     </button>
                     </AntCol>
                    </>
                   );
+                 })}
+                </AntRow>
+               </>
+              )}
+              {!this.props.isLoggedIn && (
+               <>
+                {this.state.pdf_files.map((file, index) => {
+                 return (
+                  <>
+                   <button
+                    className="product-boxs"
+                    onClick={this.openAuthenticationModal}
+                   >
+                    <div className="pdf-box"></div>
+                    <p>{file.file_name}</p>
+                   </button>
+                  </>
+                 );
+                })}
+               </>
+              )}
+             </TabPane>
+            </>
+           )}
+           {this.state.collections?.length > 0 && (
+            <>
+             <TabPane key="collections" tab="Collections" forceRender>
+              <div className="store-collection product-tabs">
+               <Container fluid>
+                <Row md={{ span: 12 }} xs={{ span: 12 }} className="px-3">
+                 {this.state.collections.map((collection, index) => {
+                  return (
+                   <>
+                    <Col lg={4} sm={6} xs={12} className="collection-col">
+                     <a href={`/collection/${collection?.id}`}>
+                      <div className="collection-box">
+                       <div
+                        className="rect rect-0"
+                        style={{
+                         backgroundImage: `url(${collection.products.products_info.pics[0]})`,
+                        }}
+                       ></div>
+                       <div
+                        className="rect rect-1"
+                        style={{
+                         backgroundImage: `url(${collection.products.products_info.pics[1]})`,
+                        }}
+                       ></div>
+                       <div
+                        className="rect rect-2"
+                        style={{
+                         backgroundImage: `url(${collection.products.products_info.pics[2]})`,
+                        }}
+                       ></div>
+                      </div>
+                      <div className="collection-text">
+                       <h5>{collection.collection_name}</h5>
+                       <p>{collection.products.count} Products</p>
+                      </div>
+                     </a>
+                    </Col>
+                   </>
+                  );
+                 })}
+                </Row>
+               </Container>
+              </div>
+             </TabPane>
+            </>
+           )}
+          </Tabs>
+
+          <Collapse
+           expandIconPosition="right"
+           defaultActiveKey={["tags", "similars"]}
+           onChange={this.callback}
+           bordered
+          >
+           <Panel header="Product Tags" key="tags">
+            <div className="product-tags-boxs">
+             {this.state.product.identity[0].places_tags?.map((tag, index) => {
+              return <div key={index}>{tag}</div>;
+             })}
+            </div>
+           </Panel>
+           {Object.values(this.state.product?.similar)?.length > 0 && (
+            <>
+             <Panel
+              header={`Similar Prodycts by ${this.state?.product?.stores?.name}`}
+              key="similars"
+              forceRender
+             >
+              <div className="similar-products">
+               <AntRow gutter={24} className="my-3">
+                {Object.values(this.state.product?.similar)?.map(
+                 (product, index) => {
+                  if (product.preview_cover && index < 3) {
+                   return (
+                    <>
+                     <AntCol
+                      className="gutter-row mb-4"
+                      lg={8}
+                      md={8}
+                      sm={12}
+                      xs={24}
+                     >
+                      <a href={`/product/${product.id}`}>
+                       <div className="product">
+                        <div
+                         className="p-img"
+                         style={{
+                          background: `url(${product.preview_cover})`,
+                         }}
+                        >
+                         <div className="prlayer"></div>
+
+                         <button
+                          className="actns-btn svbtn"
+                          onClick={(e) => {
+                           e.preventDefault();
+                           this.setState(
+                            {
+                             to_save_cover: product.preview_cover,
+                             to_save_productId: product,
+                            },
+                            () => {
+                             this.saveToCollection();
+                            }
+                           );
+                          }}
+                         >
+                          Save
+                         </button>
+                         {product.file?.length > 0 ? (
+                          <>
+                           <div className="actns-btn file-btn cad">CAD</div>
+                           <div className="actns-btn file-btn threeD">3D</div>
+                          </>
+                         ) : (
+                          ""
+                         )}
+                        </div>
+                        <a href={`/brand/${product.store_name.store_id}`}>
+                         <h5 className="product-store">
+                          {product.store_name.store_name}
+                         </h5>
+                        </a>
+                        <p className="product-name">{product.name}</p>
+                        <div className="product-price">
+                         {product.preview_price && product.preview_price > 0 ? (
+                          <>
+                           <span>¥ {product.preview_price}</span>
+                          </>
+                         ) : (
+                          ""
+                         )}
+                        </div>
+                       </div>
+                      </a>
+                     </AntCol>
+                    </>
+                   );
+                  }
                  }
-                }
-               )}
-               <AntCol md={24}>
-                {Object.values(this.state.product?.similar).length > 3 && (
-                 <>
-                  <a
-                   className="underline"
-                   href={`/types/${
-                    Object.values(this.state.product?.similar)[0].store_id
-                   }/${Object.values(this.state.product?.similar)[0].kind}`}
-                   style={{
-                    maxWidth: "350px",
-                    padding: "15px 5px",
-                    fontSize: ".85rem",
-                    display: "block",
-                    margin: "auto",
-                    textAlign: "center",
-                    minWidth: "auto",
-                    width: "auto",
-                   }}
-                  >
-                   {`
+                )}
+                <AntCol md={24}>
+                 {Object.values(this.state.product?.similar)?.length > 3 && (
+                  <>
+                   <a
+                    className="underline"
+                    href={`/types/${
+                     Object.values(this.state.product?.similar)[0].store_id
+                    }/${Object.values(this.state.product?.similar)[0].kind}`}
+                    style={{
+                     maxWidth: "350px",
+                     padding: "15px 5px",
+                     fontSize: ".85rem",
+                     display: "block",
+                     margin: "auto",
+                     textAlign: "center",
+                     minWidth: "auto",
+                     width: "auto",
+                    }}
+                   >
+                    {`
                   SEE ${
                    Object.values(this.state.product?.similar)[0].kind
                   } MORE 
@@ -1230,108 +1194,476 @@ class Product extends Component {
                     .store_name
                   }
                 `}
-                  </a>
-                 </>
-                )}
-               </AntCol>
-              </AntRow>
-             </div>
-            </Panel>
-           </>
-          )}
-          {this.state.collections.length > 0 && (
-           <>
-            <Panel key="collections" header="Collections" forceRender>
-             <div className="store-collection product-tabs">
-              <Container fluid>
-               <Row md={{ span: 12 }}>
-                {this.state.collections.map((collection, index) => {
-                 return (
-                  <>
-                   <Col lg={4} sm={6} xs={12} className="collection-col">
-                    <div className="collection-box">
-                     <div
-                      className="rect rect-0"
-                      style={{
-                       backgroundImage: `url(${collection.products.products_info.pics[0]})`,
-                      }}
-                     ></div>
-                     <div
-                      className="rect rect-1"
-                      style={{
-                       backgroundImage: `url(${collection.products.products_info.pics[1]})`,
-                      }}
-                     ></div>
-                     <div
-                      className="rect rect-2"
-                      style={{
-                       backgroundImage: `url(${collection.products.products_info.pics[2]})`,
-                      }}
-                     ></div>
-                    </div>
-                    <div className="collection-text">
-                     <h5>{collection.collection_name}</h5>
-                     <p>{collection.products.count} Products</p>
-                    </div>
-                   </Col>
+                   </a>
                   </>
-                 );
-                })}
-               </Row>
-              </Container>
-             </div>
-            </Panel>
-           </>
-          )}
-         </Collapse>
-        </Col>
-        <Col md={{ span: 4 }} className="p-3">
-         <div className="right-side p-3">
-          {this.props.isLoggedIn &&
-           this.state.product?.stores?.user_id === this.props?.uid && (
-            <>
+                 )}
+                </AntCol>
+               </AntRow>
+              </div>
+             </Panel>
+            </>
+           )}
+          </Collapse>
+         </Col>
+         <Col
+          md={{ span: 4 }}
+          sm={{ span: 12 }}
+          xs={{ span: 12 }}
+          className="p-3"
+         >
+          <div className="right-side p-3">
+           {this.props.isLoggedIn &&
+            this.state.product?.stores?.user_id === this.props?.uid && (
              <a
               href={`/edit-product/${this.state.product_id}`}
               className="cs-link"
              >
               <p>Edit</p>
              </a>
+            )}
+
+           <div className="right-row get-icons">
+            <BsPlus onClick={() => this.saveToCollection()} />
+            <Dropdown overlay={this.downloadMenu} placement="topLeft">
+             <AntButton
+              style={{
+               border: "none",
+               background: "transparent",
+               verticalAlign: "baseline",
+               padding: "4px 5px",
+              }}
+             >
+              <BsDownload
+               className="cs-link"
+               style={{ fontSize: "1.1rem", fontWeight: "700" }}
+              />
+             </AntButton>
+            </Dropdown>
+
+            <Dropdown overlay={this.menu}>
+             <AntButton
+              style={{
+               border: "none",
+               background: "transparent",
+               verticalAlign: "middle",
+               fontSize: "16px",
+               padding: "4px 5px",
+              }}
+             >
+              {/* 100,000 */}
+              <BiShareAlt className="cs-link" />
+             </AntButton>
+            </Dropdown>
+           </div>
+           <div className="right-row product-info ">
+            <div className="store-name">
+             <a
+              href={`/brand/${this.state.product.stores.id}`}
+              className="cs-link"
+             >
+              {this.state?.product?.stores?.name}
+             </a>
+            </div>
+            <div className="product-name">
+             {this.state.product.identity[0].name}
+            </div>
+
+            {this.state.product?.designers?.length > 0 && (
+             <>
+              <div className="design-by px-2">
+               Design By.
+               <>
+                {this.state.product.designers?.map((d, index) => {
+                 return (
+                  <AntRow span={24} gutter={10} className="my-3">
+                   <AntCol
+                    md={12}
+                    className="mb-0"
+                    sm={24}
+                    xs={24}
+                    key={index}
+                    style={{ fontWeight: "600" }}
+                   >
+                    <a href={`/user/${d?.uid}`}>{d?.displayName}</a>
+                   </AntCol>
+                  </AntRow>
+                 );
+                })}
+               </>
+              </div>
+             </>
+            )}
+            <div
+             className="product-country"
+             onClick={() => {
+              console.log(this.state);
+              console.log(
+               convertFromRaw(
+                JSON.parse(this.state.product.description[0].overview_content)
+               )
+              );
+             }}
+            >
+             Made in
+             <span style={{ fontWeight: "600" }} className="px-1">
+              {regionNames.of(this.state.product?.identity[0]?.country)}
+             </span>
+            </div>
+           </div>
+           {this.state.activeOption.price ? (
+            <>
+             <div className="right-row product-price">
+              <span style={{ fontWeight: "600", fontSize: "13px" }}>Price</span>
+              <div className="price-value">
+               {/* ¥ 5500.00 */}¥ {this.state.activeOption?.price}
+               <span>
+                Change Currency <BsFillCaretDownFill />
+               </span>
+              </div>
+              <div className="info-message">
+               The price is average, may change up or down depends on the
+               Requirements, Quantity and Material or Size customization.
+              </div>
+             </div>
+            </>
+           ) : (
+            ""
+           )}
+           {this.state.activeOption.code &&
+           this.state.activeOption?.code !== "null" &&
+           this.state.activeOption?.code.length > 0 ? (
+            <>
+             <div className="right-row">
+              <span>Code</span>
+              <div className="options" id="codes">
+               {this.state.options?.map((option, index) => {
+                if (option.code && option.code !== "null") {
+                 return (
+                  <button
+                   onClick={() => this.updateOption(index)}
+                   className={
+                    this.state.acive_index === index ? "active-option-btn" : ""
+                   }
+                  >
+                   {option.code}
+                  </button>
+                 );
+                }
+               })}
+              </div>
+             </div>
+            </>
+           ) : (
+            ""
+           )}
+           {this.state.activeOption?.size?.l > 0 &&
+           this.state.activeOption?.size?.h > 0 &&
+           this.state.activeOption?.size?.w > 0 ? (
+            <>
+             <div className="right-row ">
+              <span>Size</span>
+
+              <div id="sizes" className="options">
+               {this.state.options?.map((option, index) => {
+                if (option.size?.l + option.size?.w + option.size?.h > 0) {
+                 return (
+                  <button
+                   onClick={() => this.updateOption(index)}
+                   className={
+                    this.state.acive_index === index ? "active-option-btn" : ""
+                   }
+                  >
+                   {`${option.size?.l} X ${option.size?.w} X ${option.size?.h}`}
+                  </button>
+                 );
+                }
+               })}
+              </div>
+             </div>
+            </>
+           ) : (
+            ""
+           )}
+           {this.state.activeOption?.quantity?.length > 0 &&
+           this.state.activeOption?.quantity !== "null" ? (
+            <>
+             <div className="right-row">
+              <span>Package Size</span>
+
+              <div id="cpm" className="options">
+               {this.state.options?.map((option, index) => {
+                if (
+                 option?.quantity &&
+                 option?.quantity !== "null" &&
+                 option?.quantity?.length > 0
+                ) {
+                 return <button className="cpm">{`${option.quantity}`}</button>;
+                }
+               })}
+              </div>
+             </div>
+            </>
+           ) : (
+            ""
+           )}
+           {this.state.activeOption?.material?.name &&
+            this.state.activeOption?.material?.image &&
+            this.state.activeOption?.material?.name !== "null" && (
+             <>
+              <div className="right-row ">
+               <span>Material</span>
+               <div id="materials" className="options">
+                {this.state.options?.map((option, index) => {
+                 if (
+                  option.material?.name &&
+                  option.material?.name !== "null"
+                 ) {
+                  return (
+                   <>
+                    <button>
+                     <button
+                      onClick={() => this.updateOption(index)}
+                      className={
+                       this.state.acive_index === index
+                        ? "active-option-btn"
+                        : ""
+                      }
+                      style={{
+                       backgroundImage: `url(${option.material_image})`,
+                       backgroundSize: "cover",
+                       backgroundRepeat: "no-repeat",
+                       backgroundPosition: "center",
+                       width: "100%",
+                       height: "100%",
+                      }}
+                     >
+                      {/* {option.material_name} */}
+                     </button>
+                     <div>{option.material_name}</div>
+                    </button>
+                   </>
+                  );
+                 }
+                })}
+               </div>
+              </div>
+             </>
+            )}
+           <div className="right-row ">
+            <button
+             id="shop-now"
+             className="action-btn"
+             onClick={() => this.request_open("Purchase")}
+            >
+             <span className="btn-icons">
+              <AiOutlineShoppingCart />
+             </span>
+             Shop Now / Request Price Info
+            </button>
+           </div>
+           <div className="right-row ">
+            <ul id="shop-upps">
+             <li>
+              - <span>Customizable / Made-to-order</span>
+             </li>
+             <li>
+              - <span>Estimated delivery in 4 to 8 weeks</span>
+             </li>
+            </ul>
+           </div>
+           <div className="right-row">
+            <div className="request-btns">
+             <button
+              className="action-btn"
+              onClick={() => this.request_open("Price Info")}
+             >
+              <span className="btn-icons">
+               <IoPricetags />
+              </span>
+              Request Customize Quote
+             </button>
+             <button
+              className="action-btn"
+              onClick={() => this.request_open("Material Sample")}
+             >
+              <span className="btn-icons">
+               <IoLayersSharp />
+              </span>
+              Request Material Sample
+             </button>
+             <button
+              className="action-btn"
+              onClick={() => this.request_open("Cad/ 3D Files")}
+             >
+              <span className="btn-icons">
+               <GiCube />
+              </span>
+              Request Cad/ 3D Files
+             </button>
+             <button
+              className="action-btn"
+              onClick={() => this.request_open("Catalogue")}
+             >
+              <span className="btn-icons">
+               <RiBook3Fill />
+              </span>
+              Request Catalogue
+             </button>
+            </div>
+           </div>
+           <div className="right-row">
+            <button
+             className="save-btn action-btn bg-white"
+             onClick={() => this.saveToCollection()}
+            >
+             <span className="btn-icons">
+              <BsPlus />
+             </span>{" "}
+             Save To Collection
+            </button>
+           </div>
+           <div className="right-row">
+            <p className="need-info">
+             <span>Need more informations,</span> Please chat with us now from
+             the chat icon on the bottom left or message us through Whats App /
+             WeChat or e-mail us at sales@arch17.com
+            </p>
+           </div>
+           <div className="right-row chat-btns">
+            <button className="bg-white action-btn">
+             <a href="https://wa.link/1hqgdx" target="_blank" rel="noreferrer">
+              <span className="btn-icons">
+               <AiOutlineWhatsApp />
+              </span>
+              Message us Via WhatsApp
+             </a>
+            </button>
+            <button
+             className="bg-white action-btn"
+             onClick={() => {
+              this.setState({ wechatqr_modal: true });
+             }}
+            >
+             <span className="btn-icons">
+              <RiWechat2Line />
+             </span>
+             Message us Via WeChat
+            </button>
+            <button
+             //  onClick={}
+             className="bg-white action-btn"
+            >
+             <span className="btn-icons">
+              <FiPhoneCall />
+             </span>
+             {/* Message us Via Phone */}
+             <span style={{ color: "#000", fontSize: ".9rem" }}>
+              +86 185 7599 9560
+             </span>
+            </button>
+           </div>
+          </div>
+         </Col>
+        </Row>
+       </div>
+
+       <div className="only-mobile">
+        <Row className="justify-content-md-center p-0">
+         <Col
+          md={{ span: 8 }}
+          sm={{ span: 12 }}
+          xs={{ span: 12 }}
+          className="p-0"
+         >
+          <div id="swiper" style={{ position: "relative" }}>
+           {this.state.slider && (
+            <>
+             <Carousel
+              style={{ backgroundColor: "transparent" }}
+              breakPoints={breakPoints}
+              renderPagination={({ pages, activePage, onClick }) => {
+               return (
+                <Flex
+                 direction="row"
+                 className="swiper-squares"
+                 style={{
+                  gridTemplateColumns: "repeat(auto-fit, 90px)",
+                  justifyContent: "center",
+                  margin: 0,
+                  width: "90%",
+                 }}
+                >
+                 {pages.map((page, index) => {
+                  const isActivePage = activePage === page;
+                  return (
+                   <Square
+                    key={page}
+                    onClick={() => onClick(page)}
+                    active={isActivePage}
+                    className="thumb"
+                    style={{
+                     backgroundOrigin: "inherit",
+                     backgroundPosition: "center",
+                     backgroundRepeat: "no-repeat",
+                     backgroundSize: "contain",
+                     border: "none",
+                     width: "80px",
+                    }}
+                   ></Square>
+                  );
+                 })}
+                </Flex>
+               );
+              }}
+             >
+              {this.state.activeOption?.covers?.map((item, index) => {
+               return (
+                item.src !== "" &&
+                item.src !== null && (
+                 <Item key={index}>
+                  <div
+                   className="item-background"
+                   style={{ backgroundImage: `url(${item.src})` }}
+                  ></div>
+                 </Item>
+                )
+               );
+              })}
+             </Carousel>
             </>
            )}
-
-          <div className="right-row get-icons">
-           <BsPlus onClick={() => this.saveToCollection()} />
-           <Dropdown overlay={this.downloadMenu} placement="topLeft">
-            <AntButton
-             style={{
-              border: "none",
-              background: "transparent",
-              verticalAlign: "middle",
-              padding: "4px 5px",
-             }}
-            >
-             <BsDownload
-              className="cs-link"
-              style={{ fontSize: "1.1rem", fontWeight: "700" }}
+           {!this.state.slider && (
+            <>
+             <ImageGallery
+              showBullets={true}
+              full
+              thumbnailPosition="bottom"
+              showThumbnails={false}
+              items={this.state.sliderImgs}
              />
-            </AntButton>
-           </Dropdown>
-
-           <Dropdown overlay={this.menu}>
-            <AntButton
-             style={{
-              border: "none",
-              background: "transparent",
-              verticalAlign: "middle",
-              fontSize: "16px",
-              padding: "4px 5px",
-             }}
-            >
-             {/* 100,000 */}
-             <BiShareAlt className="cs-link" />
-            </AntButton>
-           </Dropdown>
+            </>
+           )}
+           <div className="custom-slide-thumbs">
+            {this.state.sliderImgs?.map((slide, index) => {
+             return (
+              <div
+               // className={this.state.step===index? "active-slide"}
+               onClick={() => this.gotoStep(index)}
+               style={{
+                backgroundImage: `url("${slide.original}")`,
+               }}
+              ></div>
+             );
+            })}
+           </div>
           </div>
+         </Col>
+         <Col
+          md={{ span: 4 }}
+          sm={{ span: 12 }}
+          xs={{ span: 12 }}
+          className="p-0"
+         >
           <div className="right-row product-info ">
            <div className="store-name">
             <a
@@ -1345,9 +1677,37 @@ class Product extends Component {
             {this.state.product.identity[0].name}
            </div>
 
-           <div className="design-by">
-            Design By. <span style={{ fontWeight: "600" }}>Muhamed Mahdy</span>
-           </div>
+           {this.state.product?.designers?.length > 0 && (
+            <>
+             Design By.
+             <div className="design-by ml-2">
+              <>
+               {this.state.product.designers?.map((d, index) => {
+                return (
+                 <AntRow span={24} gutter={10} className="my-3">
+                  <AntCol
+                   md={24}
+                   className="mb-0"
+                   sm={24}
+                   xs={24}
+                   key={index}
+                   style={{ fontWeight: "600" }}
+                  >
+                   <a href={`/user/${d?.uid}`}>{d?.displayName}</a>
+                  </AntCol>
+                 </AntRow>
+                );
+               })}
+              </>
+             </div>
+            </>
+           )}
+           <button
+            onClick={() => this.saveToCollection()}
+            className="sv-mobile"
+           >
+            +
+           </button>
            <div
             className="product-country"
             onClick={() => {
@@ -1360,8 +1720,8 @@ class Product extends Component {
             }}
            >
             Made in
-            <span style={{ fontWeight: "600" }}>
-             {/* { this.state.product.identity[0].country} */} China
+            <span style={{ fontWeight: "600" }} className="px-1">
+             {regionNames.of(this.state.product?.identity[0]?.country)}
             </span>
            </div>
           </div>
@@ -1384,247 +1744,555 @@ class Product extends Component {
           ) : (
            ""
           )}
-          {this.state.activeOption.code &&
-          this.state.activeOption.code !== "null" &&
-          this.state.activeOption.code.length > 0 ? (
-           <>
-            <div className="right-row">
-             <span>Code</span>
-             <div className="options" id="codes">
-              {this.state.options?.map((option, index) => {
-               if (option.code && option.code !== "null") {
+          <div className="right-side">
+           {this.state.activeOption?.code &&
+            this.state.activeOption?.code !== "null" && (
+             <div className="codes-options">
+              <p className="label-select mb-1">CODES</p>
+              <Select
+               style={{ width: "100%" }}
+               size="large"
+               className="select-codes"
+               optionLabelProp="label"
+               value={this.state.activeOption?.id}
+               onChange={(e) => {
+                console.log(e);
+                this.updateOptionOnSelect(e);
+               }}
+              >
+               {this.state.options?.map((option, index) => {
                 return (
-                 <button
-                  onClick={() => this.updateOption(index)}
-                  className={
-                   this.state.acive_index === index ? "active-option-btn" : ""
-                  }
-                 >
-                  {option.code}
-                 </button>
+                 <>
+                  {option?.code && option?.code !== "null" && (
+                   <Option value={option?.id} label={option?.code}>
+                    <p>{option?.code}</p>
+                   </Option>
+                  )}
+                 </>
                 );
-               }
-              })}
+               })}
+              </Select>
              </div>
-            </div>
-           </>
-          ) : (
-           ""
-          )}
-          {this.state.activeOption.size.l > 0 &&
-          this.state.activeOption.size.h > 0 &&
-          this.state.activeOption.size.w > 0 ? (
-           <>
-            <div className="right-row ">
-             <span>Size</span>
+            )}
 
-             <div id="sizes" className="options">
-              {this.state.options?.map((option, index) => {
-               if (option.size?.l + option.size?.w + option.size.h > 0) {
-                return (
-                 <button
-                  onClick={() => this.updateOption(index)}
-                  className={
-                   this.state.acive_index === index ? "active-option-btn" : ""
-                  }
-                 >
-                  {`${option.size.l} X ${option.size.w} X ${option.size.h}`}
-                 </button>
-                );
-               }
-              })}
-             </div>
-            </div>
-           </>
-          ) : (
-           ""
-          )}
-          {this.state.activeOption.quantity.length > 0 ? (
-           <>
-            <div className="right-row ">
-             <span>CBM</span>
-
-             <div id="cpm" className="options">
-              {this.state.options?.map((option, index) => {
-               if (option.quantity.length > 0) {
-                return (
-                 <button
-                  onClick={() => this.updateOption(index)}
-                  className={
-                   this.state.acive_index === index
-                    ? "active-option-btn cpm"
-                    : "cpm"
-                  }
-                 >
-                  {`${option.quantity}`}
-                 </button>
-                );
-               }
-              })}
-             </div>
-            </div>
-           </>
-          ) : (
-           ""
-          )}
-          {this.state.activeOption.material.name &&
-           this.state.activeOption.material.image &&
-           this.state.activeOption.material.name !== "null" && (
+           {this.state.activeOption.size?.l > 0 &&
+           this.state.activeOption.size?.h > 0 &&
+           this.state.activeOption.size?.w > 0 ? (
             <>
              <div className="right-row ">
-              <span>Material</span>
-              <div id="materials" className="options">
-               {this.state.options?.map((option, index) => {
-                if (option.material.name && option.material.name !== "null") {
-                 return (
-                  <>
-                   <button>
-                    <button
-                     onClick={() => this.updateOption(index)}
-                     className={
-                      this.state.acive_index === index
-                       ? "active-option-btn"
-                       : ""
-                     }
-                     style={{
-                      backgroundImage: `url(${option.material_image})`,
-                      backgroundSize: "cover",
-                      backgroundRepeat: "no-repeat",
-                      backgroundPosition: "center",
-                      width: "100%",
-                      height: "100%",
-                     }}
-                    >
-                     {/* {option.material_name} */}
-                    </button>
-                    <div>{option.material_name}</div>
-                   </button>
-                  </>
-                 );
-                }
-               })}
+              <div>
+               <p className="label-select mb-1">Size</p>
+               <Select
+                style={{ width: "100%" }}
+                showArrow={true}
+                placeholder=""
+                size="large"
+                value={this.state.activeOption?.id}
+                onChange={(e) => {
+                 console.log(e);
+                 this.updateOptionOnSelect(e);
+                }}
+                onSelect={(e) => console.log(e)}
+                optionLabelProp="label"
+               >
+                {this.state.options?.map((option, index) => {
+                 if (option.size?.l + option.size?.w + option.size?.h > 0) {
+                  return (
+                   <Option
+                    value={option?.id}
+                    label={`${option.size?.l} L  ${option.size?.w} W  ${option.size?.h} H`}
+                   >
+                    <div className="demo-option-label-item">
+                     {`${option.size?.l} L  ${option.size?.w} W  ${option.size?.h} H`}
+                    </div>
+                   </Option>
+                  );
+                 }
+                })}
+               </Select>
               </div>
              </div>
             </>
+           ) : (
+            ""
            )}
-          <div className="right-row ">
-           <button
-            id="shop-now"
-            className="action-btn"
-            onClick={() => this.request_open("Purchase")}
-           >
-            <span className="btn-icons">
-             <AiOutlineShoppingCart />
-            </span>
-            Shop Now / Request Price Info
-           </button>
-          </div>
-          <div className="right-row ">
-           <ul id="shop-upps">
-            <li>
-             - <span>Customizable / Made-to-order</span>
-            </li>
-            <li>
-             - <span>Estimated delivery in 4 to 8 weeks</span>
-            </li>
-           </ul>
-          </div>
-          <div className="right-row">
-           <div className="request-btns">
+           {this.state.activeOption?.material?.name &&
+            this.state.activeOption?.material?.name !== "null" &&
+            this.state.activeOption?.material?.image !== "null" &&
+            this.state.activeOption?.material?.image && (
+             <div className="materials-options mt-3">
+              <p className="label-select mb-1">MATERIALS</p>
+              <Select
+               style={{ width: "100%" }}
+               size="large"
+               value={this.state.activeOption?.id}
+               onChange={(e) => {
+                console.log(e);
+                this.updateOptionOnSelect(e);
+               }}
+               className="select-material"
+               optionLabelProp="label"
+              >
+               {this.state.options?.map((option, index) => {
+                return (
+                 <>
+                  {option.material?.name && option.material?.name !== "null" && (
+                   <Option value={option?.id} label={option.material?.name}>
+                    <div
+                     className="material-option"
+                     style={{
+                      backgroundImage: `url(${option.material?.image})`,
+                     }}
+                    ></div>
+                    <p>{option?.material?.name}</p>
+                   </Option>
+                  )}
+                 </>
+                );
+               })}
+              </Select>
+             </div>
+            )}
+           {this.state.activeOption?.quantity &&
+            this.state.activeOption?.quantity !== "null" && (
+             <div className="materials-options mt-3">
+              <p className="label-select mb-1">Package Size</p>
+              <Select
+               style={{ width: "100%" }}
+               size="large"
+               className="select-material"
+               optionLabelProp="label"
+               value={this.state.activeOption?.id}
+               onChange={(e) => {
+                console.log(e);
+                this.updateOptionOnSelect(e);
+               }}
+              >
+               {this.state.options?.map((option, index) => {
+                return (
+                 <>
+                  {option?.quantity && option?.quantity !== "null" && (
+                   <Option value={option?.id} label={option?.quantity}>
+                    <p>{option?.quantity}</p>
+                   </Option>
+                  )}
+                 </>
+                );
+               })}
+              </Select>
+             </div>
+            )}
+
+           <div className="right-row ">
             <button
+             id="shop-now"
              className="action-btn"
-             onClick={() => this.request_open("Price Info")}
+             onClick={() => this.request_open("Purchase")}
             >
              <span className="btn-icons">
-              <IoPricetags />
+              <AiOutlineShoppingCart />
              </span>
-             Request Customize Quote
-            </button>
-            <button
-             className="action-btn"
-             onClick={() => this.request_open("Material Sample")}
-            >
-             <span className="btn-icons">
-              <IoLayersSharp />
-             </span>
-             Request Material Sample
-            </button>
-            <button
-             className="action-btn"
-             onClick={() => this.request_open("Cad/ 3D Files")}
-            >
-             <span className="btn-icons">
-              <GiCube />
-             </span>
-             Request Cad/ 3D Files
-            </button>
-            <button
-             className="action-btn"
-             onClick={() => this.request_open("Catalogue")}
-            >
-             <span className="btn-icons">
-              <RiBook3Fill />
-             </span>
-             Request Catalogue
+             Shop Now / Request Price Info
             </button>
            </div>
-          </div>
-          <div className="right-row">
-           <button
-            className="save-btn action-btn bg-white"
-            onClick={() => this.saveToCollection()}
-           >
-            <span className="btn-icons">
-             <BsPlus />
-            </span>{" "}
-            Save To Collection
-           </button>
-          </div>
-          <div className="right-row">
-           <p className="need-info">
-            <span>Need more informations,</span> Please chat with us now from
-            the chat icon on the bottom left or message us through Whats App /
-            WeChat or e-mail us at sales@arch17.com
-           </p>
-          </div>
-          <div className="right-row chat-btns">
-           <button className="bg-white action-btn">
-            <a href="https://wa.link/1hqgdx" target="_blank" rel="noreferrer">
+           <div className="right-row ">
+            <ul id="shop-upps">
+             <li>
+              - <span>Customizable / Made-to-order</span>
+             </li>
+             <li>
+              - <span>Estimated delivery in 4 to 8 weeks</span>
+             </li>
+            </ul>
+           </div>
+           <div className="right-row">
+            <button
+             className="save-btn action-btn bg-white"
+             onClick={() => this.saveToCollection()}
+            >
              <span className="btn-icons">
-              <AiOutlineWhatsApp />
+              <BsPlus />
              </span>
-             Message us Via WhatsApp
-            </a>
-           </button>
-           <button
-            className="bg-white action-btn"
-            onClick={() => {
-             this.setState({ wechatqr_modal: true });
-            }}
-           >
-            <span className="btn-icons">
-             <RiWechat2Line />
-            </span>
-            Message us Via WeChat
-           </button>
-           <button className="bg-white action-btn">
-            <span className="btn-icons">
-             <FiPhoneCall />
-            </span>
-            {/* Message us Via Phone */}
-            <span style={{ color: "#000", fontSize: ".9rem" }}>
-             +86 185 7599 9560
-            </span>
-           </button>
-           {/* <div className="reach-us">
-            <span>Reach Us by phone, Phone Number</span> +86 185 7599 9560
+             Save To Collection
+            </button>
+           </div>
+           {/* <div className="right-row">
+            <p className="need-info">
+             <span>Need more informations,</span> Please chat with us now from
+             the chat icon on the bottom left or message us through Whats App /
+             WeChat or e-mail us at sales@arch17.com
+            </p>
            </div> */}
+           <div className="right-row">
+            {/* <button className="bg-white action-btn">
+             <a href="https://wa.link/1hqgdx" target="_blank" rel="noreferrer">
+              <span className="btn-icons">
+               <AiOutlineWhatsApp />
+              </span>
+              Message us Via WhatsApp
+             </a>
+            </button>
+            <button
+             className="bg-white action-btn"
+             onClick={() => {
+              this.setState({ wechatqr_modal: true });
+             }}
+            >
+             <span className="btn-icons">
+              <RiWechat2Line />
+             </span>
+             Message us Via WeChat
+            </button>
+            <button
+             onClick={this.gotofourindextest}
+             className="bg-white action-btn"
+            >
+             <span className="btn-icons">
+              <FiPhoneCall />
+             </span>
+             <span style={{ color: "#000", fontSize: ".9rem" }}>
+              +86 185 7599 9560
+             </span>
+            </button> */}
+
+            <p className="bold mb-1">Need to Order / More Information</p>
+            <p className="">Please Contact us</p>
+            <div className="chats">
+             <div className="socialbtn mail">
+              <button>
+               <GoMail />
+              </button>
+              <p>Email</p>
+             </div>
+             <div className="socialbtn phone">
+              <button>
+               <FiPhoneCall />
+               <p>Phone</p>
+              </button>
+             </div>
+             <div className="socialbtn whattsapp">
+              {/* <button> */}
+              <a href="https://wa.link/1hqgdx" target="_blank" rel="noreferrer">
+               <AiOutlineWhatsApp />
+              </a>
+              {/* </button> */}
+              <p>WhatsApp</p>
+             </div>
+             <div className="socialbtn wechat">
+              <button
+               onClick={() => {
+                this.setState({ wechatqr_modal: true });
+               }}
+              >
+               <RiWechat2Line />
+              </button>
+              <p>WeChat</p>
+             </div>
+            </div>
+           </div>
           </div>
-         </div>
-        </Col>
-       </Row>
+          <Tabs defaultActiveKey="overview" className="mb-5">
+           {this.state.product_desc_overview?.length > 5 ? (
+            <>
+             <TabPane tab="Overview" key="overview">
+              <div className="overview-text">
+               {this.state.product_desc_overview && (
+                <CKEditor
+                 disabled={true}
+                 config={{
+                  isReadOnly: true,
+                  toolbar: [],
+                 }}
+                 editor={ClassicEditor}
+                 data={this.state.product_desc_overview}
+                />
+               )}
+              </div>
+             </TabPane>
+            </>
+           ) : (
+            <></>
+           )}
+
+           {this.state.product_desc_mat?.length > 5 ? (
+            <>
+             <TabPane tab="Materials" key="material">
+              {this.state.product_desc_mat && (
+               <CKEditor
+                disabled={true}
+                config={{
+                 isReadOnly: true,
+                 toolbar: [],
+                }}
+                editor={ClassicEditor}
+                data={this.state.product_desc_mat}
+               />
+              )}
+             </TabPane>
+            </>
+           ) : (
+            <></>
+           )}
+           {this.state.product_desc_size?.length > 5 ? (
+            <>
+             <TabPane key="dimensions" tab="Dimensions">
+              {this.state.product_desc_size && (
+               <CKEditor
+                disabled={true}
+                config={{
+                 isReadOnly: true,
+                 toolbar: [],
+                }}
+                editor={ClassicEditor}
+                data={this.state.product_desc_size}
+               />
+              )}
+             </TabPane>
+            </>
+           ) : (
+            <></>
+           )}
+           {this.state.gallery_slides?.length > 0 && (
+            <>
+             <TabPane tab="Gallery" key="gallery" forceRender>
+              <AntRow gutter={10} span={24} className="px-2">
+               {this.state.gallery_slides?.map((g, index) => {
+                return (
+                 <AntCol
+                  onClick={() => {
+                   this.setState({
+                    advancedExampleOpen: true,
+                    galleryIndex: index,
+                   });
+                  }}
+                  className="gallery-cover mb-4"
+                  md={6}
+                  sm={8}
+                  xs={8}
+                  style={{
+                   display: "grid",
+                   alignItems: "center",
+                  }}
+                 >
+                  <div
+                   className="product-gallery"
+                   style={{
+                    backgroundImage: `url(${g?.src})`,
+                   }}
+                  ></div>
+                 </AntCol>
+                );
+               })}
+              </AntRow>
+             </TabPane>
+             {this.state.videos?.length > 0 && (
+              <>
+               <TabPane key="videos" tab="Videos">
+                <AntRow>
+                 {this.state.videos.map((g, index) => {
+                  return (
+                   <AntCol span={6} className="gallery-cover">
+                    <div className="product-gallery">
+                     <ReactPlayer url={g} width={"100%"} height={"100%"} />
+                    </div>
+                   </AntCol>
+                  );
+                 })}
+                </AntRow>
+               </TabPane>
+              </>
+             )}
+            </>
+           )}
+
+           {this.state.collections?.length > 0 && (
+            <>
+             <TabPane key="collections" tab="Collections" forceRender>
+              <div className="store-collection product-tabs">
+               <Container fluid>
+                <Row md={{ span: 12 }} xs={{ span: 12 }} className="px-3">
+                 {this.state.collections.map((collection, index) => {
+                  return (
+                   <>
+                    <Col lg={4} sm={6} xs={6} className="collection-col">
+                     <a href={`/collection/${collection?.id}`}>
+                      <div className="collection-box">
+                       <div
+                        className="rect rect-0"
+                        style={{
+                         backgroundImage: `url(${collection.products.products_info.pics[0]})`,
+                        }}
+                       ></div>
+                       <div
+                        className="rect rect-1"
+                        style={{
+                         backgroundImage: `url(${collection.products.products_info.pics[1]})`,
+                        }}
+                       ></div>
+                       <div
+                        className="rect rect-2"
+                        style={{
+                         backgroundImage: `url(${collection.products.products_info.pics[2]})`,
+                        }}
+                       ></div>
+                      </div>
+                      <div className="collection-text">
+                       <h5>{collection.collection_name}</h5>
+                       <p>{collection.products.count} Products</p>
+                      </div>
+                     </a>
+                    </Col>
+                   </>
+                  );
+                 })}
+                </Row>
+               </Container>
+              </div>
+             </TabPane>
+            </>
+           )}
+          </Tabs>
+
+          <Collapse
+           expandIconPosition="right"
+           defaultActiveKey={["tags", "similars"]}
+           onChange={this.callback}
+           bordered
+          >
+           {Object.values(this.state.product?.similar)?.length > 0 && (
+            <>
+             <Panel
+              header={`Similar Prodycts by ${this.state?.product?.stores?.name}`}
+              key="similars"
+              forceRender
+             >
+              <div className="similar-products">
+               <AntRow gutter={24} className="my-3">
+                {Object.values(this.state.product?.similar)?.map(
+                 (product, index) => {
+                  if (product.preview_cover && index < 3) {
+                   return (
+                    <>
+                     <AntCol
+                      className="gutter-row mb-4"
+                      lg={8}
+                      md={8}
+                      sm={12}
+                      xs={12}
+                     >
+                      <a href={`/product/${product.id}`}>
+                       <div className="product">
+                        <div
+                         className="p-img"
+                         style={{
+                          background: `url(${product.preview_cover})`,
+                         }}
+                        >
+                         <div className="prlayer"></div>
+
+                         <button
+                          className="actns-btn svbtn"
+                          onClick={(e) => {
+                           e.preventDefault();
+                           this.setState(
+                            {
+                             to_save_cover: product.preview_cover,
+                             to_save_productId: product,
+                            },
+                            () => {
+                             this.saveToCollection();
+                            }
+                           );
+                          }}
+                         >
+                          Save
+                         </button>
+                         {product.file?.length > 0 ? (
+                          <>
+                           <div className="actns-btn file-btn cad">CAD</div>
+                           <div className="actns-btn file-btn threeD">3D</div>
+                          </>
+                         ) : (
+                          ""
+                         )}
+                        </div>
+                        <a href={`/brand/${product.store_name.store_id}`}>
+                         <h5 className="product-store">
+                          {product.store_name.store_name}
+                         </h5>
+                        </a>
+                        <p className="product-name">{product.name}</p>
+                        <div className="product-price">
+                         {product.preview_price && product.preview_price > 0 ? (
+                          <>
+                           <span>¥ {product.preview_price}</span>
+                          </>
+                         ) : (
+                          ""
+                         )}
+                        </div>
+                       </div>
+                      </a>
+                     </AntCol>
+                    </>
+                   );
+                  }
+                 }
+                )}
+                <AntCol md={24}>
+                 {Object.values(this.state.product?.similar)?.length > 3 && (
+                  <>
+                   <a
+                    className="underline"
+                    href={`/types/${
+                     Object.values(this.state.product?.similar)[0].store_id
+                    }/${Object.values(this.state.product?.similar)[0].kind}`}
+                    style={{
+                     maxWidth: "350px",
+                     padding: "15px 5px",
+                     fontSize: ".85rem",
+                     display: "block",
+                     margin: "auto",
+                     textAlign: "center",
+                     minWidth: "auto",
+                     width: "auto",
+                    }}
+                   >
+                    {`
+                  SEE ${
+                   Object.values(this.state.product?.similar)[0].kind
+                  } MORE 
+                  ${
+                   Object.values(this.state.product?.similar)[0].store_name
+                    .store_name
+                  }`}
+                   </a>
+                  </>
+                 )}
+                </AntCol>
+               </AntRow>
+              </div>
+             </Panel>
+            </>
+           )}
+          </Collapse>
+         </Col>
+        </Row>
+       </div>
       </Container>
      </div>
+     <Lightbox
+      animation={{
+       fade: "fade-in 700",
+       swipe: false,
+      }}
+      open={this.state.advancedExampleOpen}
+      index={this.state.galleryIndex}
+      close={() => this.setState({ advancedExampleOpen: false })}
+      slides={this.state.gallery_slides}
+      plugins={[Captions, Fullscreen, Slideshow, Thumbnails, Video, Zoom]}
+     />
+     <Footer />
 
      {/* signup/signin modal */}
      <>
@@ -1876,9 +2544,9 @@ class Product extends Component {
       >
        <PriceRequestModal
         product={this.state.product}
-        cover={this.state.sliderImgs[0].original}
-        name={this.state.product.identity[0].name}
-        store={this.state.product.stores.name}
+        cover={this.state.sliderImgs[0]?.original}
+        name={this.state.product.identity[0]?.name}
+        store={this.state.product?.stores?.name}
         type={this.state.request_modal_type}
        />
       </AntModal>
@@ -1905,9 +2573,9 @@ class Product extends Component {
       >
        <SaveToCollection
         product={this.state.product}
-        cover={this.state.sliderImgs[0].original}
-        name={this.state.product.identity[0].name}
-        store={this.state.product.stores.name}
+        cover={this.state.sliderImgs[0]?.original}
+        name={this.state.product?.identity[0]?.name}
+        store={this.state.product?.stores?.name}
         type={this.state.request_modal_type}
        />
       </AntModal>
@@ -1945,69 +2613,97 @@ class Product extends Component {
            </AntRow>
 
            <AntRow gutter={16} className="mb-3 mt-3">
-            <AntCol className="gutter-row" span={12}>
-             <AntButton
-              type="primary"
-              className="drivebtn"
-              icon={<SiGoogledrive />}
-              style={{ width: "100%" }}
-              size="large"
-             >
-              OneDrive
-              <a
-               href={this.state.activeFile?.onedrive}
-               target="_blank"
-               rel="noreferrer"
-              >
-               <BiLinkExternal />
-              </a>
-             </AntButton>
-            </AntCol>
-            <AntCol className="gutter-row" span={12}>
-             <AntButton
-              type="primary"
-              style={{ width: "100%" }}
-              size="large"
-              className="drivebtn"
-              icon={<SiGoogledrive />}
-             >
-              Google Drive
-              <a
-               href={this.state.activeFile?.ggldrive}
-               target="_blank"
-               rel="noreferrer"
-              >
-               <BiLinkExternal />
-              </a>
-             </AntButton>
-            </AntCol>
+            {this.state.activeFile?.onedrive &&
+             this.state.activeFile?.onedrive?.length > 7 && (
+              <AntCol className="gutter-row mb-3" span={12}>
+               <a
+                href={this.state.activeFile?.onedrive}
+                target="_blank"
+                rel="noreferrer"
+                className="drivebtn"
+               >
+                <AntButton
+                 type="primary"
+                 className="drivebtn"
+                 icon={<GrOnedrive />}
+                 style={{ width: "100%" }}
+                 size="large"
+                >
+                 OneDrive
+                </AntButton>
+               </a>
+              </AntCol>
+             )}
+
+            {this.state.activeFile?.ggldrive &&
+             this.state.activeFile?.ggldrive?.length > 7 && (
+              <AntCol className="gutter-row mb-3" span={12}>
+               <a
+                href={this.state.activeFile?.ggldrive}
+                target="_blank"
+                rel="noreferrer"
+                className="drivebtn"
+               >
+                <AntButton
+                 type="primary"
+                 className="drivebtn"
+                 icon={<SiGoogledrive />}
+                 style={{ width: "100%" }}
+                 size="large"
+                >
+                 Google Drive
+                </AntButton>
+               </a>
+              </AntCol>
+             )}
+
+            {this.state.activeFile?.dropbox &&
+             this.state.activeFile?.dropbox?.length > 7 && (
+              <AntCol className="gutter-row mb-3" span={12}>
+               <a
+                href={this.state.activeFile?.dropbox}
+                target="_blank"
+                rel="noreferrer"
+                className="drivebtn"
+               >
+                <AntButton
+                 type="primary"
+                 className="drivebtn"
+                 icon={<AiOutlineDropbox />}
+                 style={{ width: "100%" }}
+                 size="large"
+                >
+                 Dropbox
+                </AntButton>
+               </a>
+              </AntCol>
+             )}
+
+            {this.state.activeFile?.baidu &&
+             this.state.activeFile?.baidu?.length > 7 && (
+              <AntCol className="gutter-row mb-3" span={12}>
+               <a
+                href={this.state.activeFile?.baidu}
+                target="_blank"
+                rel="noreferrer"
+                className="drivebtn"
+               >
+                <AntButton
+                 type="primary"
+                 className="drivebtn"
+                 icon={<SiBaidu />}
+                 style={{ width: "100%" }}
+                 size="large"
+                >
+                 Baidu
+                </AntButton>
+               </a>
+              </AntCol>
+             )}
            </AntRow>
           </>
          )}
-         <AntRow gutter={16} className="mb-3">
-          <AntCol className="gutter-row" span={12}>
-           <AntButton
-            type="primary"
-            style={{ width: "100%" }}
-            icon={<AiOutlineDropbox />}
-            size="large"
-            className="drivebtn"
-           >
-            Dropbox
-           </AntButton>
-          </AntCol>
-          <AntCol className="gutter-row" span={12}>
-           <AntButton
-            type="primary"
-            style={{ width: "100%" }}
-            icon={<SiBaidu />}
-            size="large"
-            className="drivebtn"
-           >
-            Baidu Drive
-           </AntButton>
-          </AntCol>
-         </AntRow>
+
          <AntRow gutter={16} className="my-4">
           <AntCol>
            <p className="gray-text">

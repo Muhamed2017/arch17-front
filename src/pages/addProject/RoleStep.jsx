@@ -56,13 +56,13 @@ class RoleStep extends Component {
  showModal = () => {
   this.setState({
    designesModal: true,
-   filteredDesigners: this.state.designers,
+   //  filteredDesigners: this.state.designers,
   });
  };
  showBrandModal = () => {
   this.setState({
    brandsModal: true,
-   filteredBrands: this.state.brands,
+   //  filteredBrands: this.state.brands,
   });
  };
  handleOk = (e) => {
@@ -114,6 +114,9 @@ class RoleStep extends Component {
   );
  };
  componentDidMount() {
+  window.scrollTo({
+   top: 0,
+  });
   axios
    .get(`${API}rolestepdata`)
    .then((response) => {
@@ -161,21 +164,21 @@ class RoleStep extends Component {
               <div
                className="d-img inline-block"
                style={{
-                backgroundImage: `url(${d.avatar})`,
+                backgroundImage: `url(${d.photoURL})`,
                }}
               >
-               {d?.avatar?.length < 10 && <>{d?.displayName[0]}</>}
+               {d?.photoURL?.length < 10 && <>{d?.displayName[0]}</>}
               </div>
              </div>
             </Col>
             <Col md={20}>
              <div className="d-info">
               <span className="inline-block">{d?.displayName}</span>
-              <div className="d-professions">
+              {/* <div className="d-professions">
                {d.professions.map((p, index) => {
                 return <p key={index}>{p}</p>;
                })}
-              </div>
+              </div> */}
 
               <p className="d-loc">
                {d.country && (
@@ -333,14 +336,31 @@ class RoleStep extends Component {
        </Col>
       </Row>
      </div>
-     <button
-      className="next-btn"
-      onClick={() => {
-       this.props.dispatchGoStep(3);
-      }}
-     >
-      Save & Continue
-     </button>
+
+     <div className="next-wrapper">
+      <div className="next-inner">
+       <button
+        className="prev-btn"
+        style={{ margin: "0 0px", position: "relative" }}
+        onClick={() => this.props.dispatchGoStep(1)}
+       >
+        Previous
+       </button>
+       <button
+        className="next-btn"
+        onClick={() => {
+         //  this.props.dispatchGoStep(3);
+         if (this.props.brands?.length > 0) {
+          this.props.dispatchGoStep(3);
+         } else {
+          this.props.dispatchGoStep(4);
+         }
+        }}
+       >
+        Save & Continue
+       </button>
+      </div>
+     </div>
     </div>
 
     <Modal
@@ -388,11 +408,14 @@ class RoleStep extends Component {
       onChange={(e) => {
        console.log(e);
        this.setState({
-        filteredDesigners: this.state.designers?.filter((d) => {
-         return d.displayName
-          .toLowerCase()
-          ?.includes(e.target.value.toLowerCase());
-        }),
+        filteredDesigners:
+         e.target.value.length > 0
+          ? this.state.designers?.filter((d) => {
+             return d.displayName
+              .toLowerCase()
+              ?.includes(e.target.value.toLowerCase());
+            })
+          : [],
        });
       }}
      />
@@ -406,10 +429,10 @@ class RoleStep extends Component {
           onClick={() => this.handleAddDesigner(d)}
          >
           <div
-           style={{ background: `url(${d.avatar})` }}
+           style={{ background: `url(${d.photoURL})` }}
            className="d-img inline-block middle"
           >
-           {d?.avatar?.length < 10 && <>{d?.displayName?.slice(0, 1)} </>}
+           {d?.photoURL?.length < 10 && <>{d?.displayName?.slice(0, 1)} </>}
            {/* {d?.displayName?.slice(0, 1)} */}
           </div>
           <span className="inline-block middle">{d?.displayName}</span>
@@ -464,9 +487,14 @@ class RoleStep extends Component {
       onChange={(e) => {
        console.log(e);
        this.setState({
-        filteredBrands: this.state.brands?.filter((d) => {
-         return d.name.toLowerCase()?.includes(e.target.value.toLowerCase());
-        }),
+        filteredBrands:
+         e.target.value.length > 0
+          ? this.state.brands?.filter((d) => {
+             return d.name
+              .toLowerCase()
+              ?.includes(e.target.value.toLowerCase());
+            })
+          : [],
        });
       }}
      />

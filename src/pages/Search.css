@@ -1,0 +1,96 @@
+.load-data-spinner{
+      position: absolute;
+        top: 40%;
+        right: 50%;
+}
+@media screen and (max-width:768px) {
+ #search-page .load-data-spinner {
+    position: absolute;
+      top: 45vh;
+      right: 45%;
+      display: none;
+  }
+  #search-page{
+    padding:unset;
+ }
+ #search-page .search-wrapper{
+  margin-top: 55px !important;
+ }
+ #search-page .filter-checks{
+      row-gap: 0px;
+    position: fixed;
+    top: 70px;
+    z-index: 10;
+    background: #fff;
+    width: 100vw;
+    padding: 7px 0;
+ }
+ #search-page  .product-name{
+min-height: 37px;
+max-height: 37px;
+ }
+ #search-page .ant-skeleton-avatar {
+  width: 100vw !important;
+  height: 45vw !important;
+}
+ #search-page .product .product-name{
+   margin-bottom: 10px !important;
+ }
+ #search-page .product .file-btn.threeD{
+   right:34px !important
+ }
+ #search-page .product .file-btn{
+   width: 21px !important;
+   height: 21px !important;
+   font-size: .46rem !important;
+ }
+ .sorts{
+  display: none;
+ }
+
+ #search-page .ant-menu-submenu-expand-icon,
+.ant-menu-submenu-arrow {
+  right: 0px !important;
+}
+#search-page .ant-menu-inline .ant-menu-submenu-title{
+  width: calc(100% + 7px);
+}
+ .filter-head{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+.filter-head p.done{
+      position: fixed ;
+        right: 35px;
+  text-align: right;
+    color: #ef5959;
+    text-decoration: underline;
+    cursor:pointer;
+}
+.ant-menu-inline,
+ .ant-menu-vertical,
+ .ant-menu-vertical-left{
+  border-right: 0px solid #fff !important;
+}
+ #search-page button#sticky-filter {
+position: fixed;
+  bottom: 25px;
+  right: 30px;
+  background-color: red;
+  color: #fff;
+  padding: 6px 10px;
+  font-weight: 600;
+  border-radius: 4px;
+ }
+ #search-page button#sticky-filter svg{
+  transform: rotate(90deg);
+    font-size: 1.6rem;
+ }
+ .ant-menu-light .ant-menu-item:hover,
+ .ant-menu-light .ant-menu-item-active,
+ .ant-menu-light .ant-menu:not(.ant-menu-inline) .ant-menu-submenu-open,
+ .ant-menu-light .ant-menu-submenu-active,
+ .ant-menu-light .ant-menu-submenu-title:hover{
+    color: #000 !important;
+ }
+}

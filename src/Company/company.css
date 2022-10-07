@@ -1,0 +1,267 @@
+.company-form{
+    max-width: 530px;
+    padding: 30px;
+    background: #fff;
+    margin: 24px auto;
+    padding-top: 60px;
+}
+.grid{
+    display: grid;
+}
+.grid-center{
+align-items: center;
+justify-content: center;
+}
+.companies-tab{
+    min-height: 500px;
+}
+.member-box{
+    width: 110px;
+    height: 110px;
+    background-color: rgb(173 173 173 / 21%);
+    border-radius: 50%;
+    margin: auto;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.company-box{
+    width: 160px !important;
+    height: 160px !important;
+}
+.member-name,
+.member-title {
+    text-align: center;
+    margin: 5px auto;
+}
+.member-name{
+    font-size: 14px;
+    font-weight: 600;
+    margin: 10px auto;
+}
+
+.member-box{
+    font-size: 4.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 400;
+}
+.member-box.add{
+    font-size: 5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 300;
+}
+
+.member-title{
+    color: #6e6e6eb2;
+    font-weight: 500;
+}
+
+.user-row{
+    display: grid;
+    grid-template-columns: 50px auto 20px;
+    align-items: center;
+    justify-content: left;
+    cursor: pointer;
+    grid-gap: 20px;
+    margin-bottom: 15px;
+}
+.member-name.add{
+    font-weight: 400;
+    font-size: 12px;
+    text-decoration: underline;
+}
+.user-row .user-img{
+    height: 50px;
+    border-radius: 5px;
+    background-color: whitesmoke;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    font-size: 2rem;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    border: 1px solid #cecece;
+}
+.user-img > p {
+    line-height: unset !important;
+    font-weight: 900;
+}
+.user-row .user-name p{
+
+    font-size: 16px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.invite-btn, .invite-btn:hover{
+    background-color:red;
+    border: none;
+    outline: none;
+    color: #fff;
+    padding: 5px 20px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    max-width: 100px;
+    margin-right: auto;
+
+}
+.company-page .profile-section{
+    justify-content: start;
+    grid-gap: 50px;
+    margin: 58px auto 30px;
+}
+#user-profile.company-page svg{
+    vertical-align: initial;
+}
+.company-page .profile-heading{
+    height: auto;
+}
+
+.company-tab{
+    max-width: 740px;
+    margin: auto;
+}
+p.form-underline{
+    text-decoration: underline;
+    font-size: 22px;
+}
+.company-page .company-tab .ReactFlagsSelect-module_flagsSelect__2pfa2{
+padding-bottom: 0 !important;
+}
+p.lbl{
+    margin-bottom: 9px !important;
+    font-weight:500;
+}
+p.lbl span{
+    font-size: 11px;
+    color: #999
+}
+.company-page  .ant-select-multiple .ant-select-selection-item{
+    color: #000;
+    font-weight: 500;
+    background: #9393932e;
+    border: none;
+    border-radius: 3px;
+}
+
+.company-page .ant-select-selection-overflow {
+padding: 4px;
+}
+.upprof{
+    text-decoration: underline;
+    cursor: pointer;
+}
+.company-logo{
+    width: 150px;
+    padding-top: 150px;
+    border-radius: 50%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-color: #dddddd3d;
+}
+.company-form .ReactFlagsSelect-module_flagsSelect__2pfa2 {
+    margin-bottom: 15px !important;
+}
+
+.company-form .heading h6 {
+    font-size: 1.3rem;
+    width: 86%;
+    margin: auto;
+    text-align: center;
+    color: #6e6e6e;
+}
+.company-form .heading h2 {
+    font-size: 2.7rem;
+    text-align: center;
+}
+.teams{
+    max-width:800px;
+    margin: auto;
+    padding: 50px 100px;
+}
+.cat-img{
+    width: 100%;
+    padding-top: 65%;
+    background-color: #cecece;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+.cat-name{
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    display: block;
+}
+.overview-block{
+    margin: 50px 0;
+}
+.overview-head{
+    font-size: 28px;
+    color: #000;
+    font-weight: 500;
+    margin-bottom: 30px;
+    margin-top: 30px
+}
+.overview-content{
+    font-size: 18px;
+    color: #000;
+    font-weight: 300
+}
+.ctype{
+    padding: 5px 0 4px;
+    font-weight: 500;
+    color: #000000b3;
+    vertical-align: middle;
+    }
+
+    .loc{
+        color: #424242;
+        font-size: 13px;
+    }
+.bio{
+    color: #000;
+    font-weight: 500;
+    font-size: 13px;
+    }
+
+    .contacts{
+        max-width: 720px;
+    margin: 50px auto
+    }
+    
+    .contacts p{
+        font-weight: 500;
+        font-size: 18px
+    }
+    
+    .contacts p span{
+        font-weight: 400;
+        text-decoration: underline;
+        padding: 0 10px;
+    }
+
+    .deletecompany{
+        display: none;
+        text-align: center;
+        color: #f00;
+        font-weight: 900;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    .member-col:hover .deletecompany{
+        display: block ;
+        text-align: center;
+    }
+    .transfer{
+        color: #f00;
+        text-decoration: underline;
+        font-weight: 600;
+        text-align: right;
+        cursor: pointer;
+    }

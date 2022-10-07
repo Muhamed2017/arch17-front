@@ -111,11 +111,10 @@ class UploadFiles extends Component {
   }
  };
  render() {
-
   return (
    <>
     <div className="step-form">
-     <button className="product-skip-btn" onClick={this.skip}>
+     {/* <button className="product-skip-btn" onClick={this.skip}>
       Skip
      </button>
      <button
@@ -137,7 +136,43 @@ class UploadFiles extends Component {
       ) : (
        "Save & Continue"
       )}
-     </button>
+     </button> */}
+     <div className="next-wrapper">
+      <div
+       className="next-inner"
+       style={{
+        maxWidth: "1000px",
+       }}
+      >
+       <button
+        onClick={this.skip}
+        className="prev-btn"
+        style={{ margin: "0 0px", position: "relative" }}
+       >
+        Skip
+       </button>
+       <button
+        className="next-btn"
+        style={{
+         top: "-110px",
+
+         background: this.state.loading ? "#898989" : "",
+        }}
+        onClick={this.handleNextStep}
+       >
+        {this.state.loading ? (
+         <ClipLoader
+          style={{ height: "20px" }}
+          color="#ffffff"
+          loading={this.state.loading}
+          size={20}
+         />
+        ) : (
+         "Save & Continue"
+        )}
+       </button>
+      </div>
+     </div>
      <div className="step-head">
       <h2>Upload Product Files</h2>
       <p>CAD / 3D, and PDF files</p>

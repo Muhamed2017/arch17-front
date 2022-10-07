@@ -4,9 +4,10 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { IoMdSettings } from "react-icons/io";
 import { AiOutlinePlus } from "react-icons/ai";
 import CollectionsTab from "./user_profile_tabs/CollectionsTab";
+import CompaniesTab from "./user_profile_tabs/CompaniesTab.jsx";
 import FollwingTab from "./user_profile_tabs/FollwingTab";
 import { connect } from "react-redux";
-import { Redirect } from "react-router";
+// import { Redirect } from "react-router";
 import { auth } from "./../firebase";
 import { setUserInfoAction } from "../redux/actions/authActions";
 import { Link } from "react-router-dom";
@@ -14,6 +15,9 @@ import axios from "axios";
 import { API } from "../utitlties";
 import ClipLoader from "react-spinners/ClipLoader";
 import { IoWarning } from "react-icons/io5";
+import SaveToBoard from "./../components/Modals/SaveToBoard";
+import "./user_profile_tabs/profile.css";
+
 import {
  LoadingOutlined,
  CopyOutlined,
@@ -21,7 +25,17 @@ import {
  ShareAltOutlined,
 } from "@ant-design/icons";
 
-import { Spin, Tooltip, Button, Col as AntCol, Row as AntRow } from "antd";
+import {
+ Spin,
+ Tooltip,
+ Button,
+ Col as AntCol,
+ Row as AntRow,
+ Modal as AntModal,
+} from "antd";
+import { regionNames } from "./../redux/constants";
+import AuthModalContent from "./../components/AuthModalContent";
+import UserNotificationsTab from "./user_profile_tabs/UserNotificationsTab";
 
 class UserProfile extends Component {
  constructor(props) {
@@ -31,7 +45,12 @@ class UserProfile extends Component {
    collections: [],
    boards: [],
    projects: [],
+   removing_project: false,
+   save_to_board_modal: false,
    delete_project_modal: false,
+   authModal: false,
+   to_save_project_cover: null,
+   to_save_projectId: null,
    copied: false,
    followed_stores: [],
    is_designer: false,
@@ -40,10 +59,14 @@ class UserProfile extends Component {
    visited_uid: this.props?.match?.params?.uid,
    fetched: false,
    shared: [],
+   taggedProjects: [],
    to_delete_project: null,
    uid: this.props?.match?.params?.uid
     ? this.props.match?.params?.uid
-    : this.props.info.uid,
+    : this.props.info?.uid,
+   user: null,
+   hasNotifications: false,
+   hasCompanies: false,
   };
  }
 
@@ -65,10 +88,10 @@ class UserProfile extends Component {
   });
  };
  componentDidMount() {
-  console.log(`visitor is ${this.state.visitor}`);
-  console.log(auth.currentUser);
-  console.log(this.state.uid);
-  if (this.props.info.uid) {
+  // console.log(`visitor is ${this.state.visitor}`);
+  // console.log(auth.currentUser);
+  // console.log(this.state.uid);
+  if (this.state?.uid) {
    axios
     .get(`${API}user/folders/${this.state.uid}`)
     .then((response) => {
@@ -80,16 +103,21 @@ class UserProfile extends Component {
       projects,
       boards,
       products,
+      hasNotifications,
+      hasCompanies,
      } = response.data;
      this.setState({
       collections,
       boards,
       followed_stores,
       user,
-      is_designer: user?.is_designer,
+      is_designer: parseInt(user?.is_designer),
       fetched: true,
       projects,
       products,
+      hasNotifications,
+      hasCompanies,
+      taggedProjects: user?.tagged,
       shared: user?.shared,
      });
     })
@@ -106,8 +134,40 @@ class UserProfile extends Component {
    return document.execCommand("copy", true, text);
   }
  };
+ handleRemoveTaggedProject = (project_id, user_id) => {
+  this.setState({
+   removing_project: true,
+  });
+  const fd = new FormData();
+  fd.append("project_id", project_id);
+  fd.append("user_id", user_id);
+  axios
+   .post(`${API}designerremoverole`, fd)
+   .then((response) => {
+    console.log(response);
+    this.setState({
+     removing_project: false,
+     taggedProjects: this.state.taggedProjects?.filter((p) => {
+      return p.id !== project_id;
+     }),
+    });
+   })
+   .catch((err) => {
+    console.log(err);
+   });
+ };
+ saveToBoard = () => {
+  if (!this.props.isLoggedIn) {
+   this.setState({ authModal: true });
+  } else {
+   console.log("OPEN SAVE MODAL");
+   this.setState({
+    save_to_board_modal: true,
+   });
+  }
+ };
  render() {
-  if (!this.props.isLoggedIn || !this.props.info) return <Redirect to="/" />;
+  // if (!this.props.isLoggedIn || !this.props.info) return <Redirect to="/" />;
   if (!this.state.fetched)
    return (
     <>
@@ -130,50 +190,23 @@ class UserProfile extends Component {
          <div
           className="profile-img"
           style={{
-           backgroundImage: `url(${this.state.user?.avatar})`,
+           backgroundImage: `url(${this.state.user?.photoURL})`,
            backgroundColor: "#ddd",
           }}
          >
-          {/* {this.state.is_designer === 1 && (
-           <>
-            <Tooltip placement="top" title="Verified Designer">
-             <svg
-              className="VZmsM"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 32 32"
-              width="32"
-              height="32"
-             >
-              <path
-               d="M29.8954 13.2925L29.8954 13.2925L29.9017 13.2987C31.3613 14.7317 31.3642 17.2192 29.9218 18.6838L29.9079 18.6979L29.9056 18.7004L29.9028 18.7032C29.8975 18.7083 29.889 18.7165 29.8794 18.7261L28.7426 19.8622C28.1085 20.4958 27.7449 21.3575 27.7449 22.2672V23.9136C27.7449 26.0173 26.0313 27.7315 23.9254 27.7315H22.2762C21.3695 27.7315 20.5071 28.092 19.8721 28.7265L18.7193 29.8786L18.7187 29.8792C17.2246 31.3748 14.8134 31.3677 13.3091 29.8933L12.1437 28.727L12.1432 28.7265C11.5082 28.092 10.6459 27.7315 9.73911 27.7315H8.08991C5.98405 27.7315 4.2704 26.0173 4.2704 23.9136V22.2672C4.2704 21.3546 3.90521 20.5005 3.28506 19.8587L3.27653 19.8498L3.26779 19.8412L2.11962 18.7098C2.11892 18.7091 2.11822 18.7084 2.11753 18.7077C0.635192 17.2254 0.623838 14.8017 2.10553 13.3085C2.10589 13.3081 2.10625 13.3078 2.10661 13.3074L3.27276 12.1405C3.90906 11.5046 4.2704 10.642 4.2704 9.72103V8.08896C4.2704 5.9862 5.98318 4.27435 8.08991 4.27435H9.73911C10.6493 4.27435 11.5106 3.90819 12.1432 3.27607L13.296 2.12402L13.2987 2.1213C14.7794 0.630261 17.2041 0.625524 18.7051 2.11139C18.7055 2.1118 18.7059 2.11221 18.7063 2.11262L19.8721 3.27607C20.5047 3.90819 21.3661 4.27435 22.2762 4.27435H23.9254C26.0321 4.27435 27.7449 5.9862 27.7449 8.08896V9.73863C27.7449 10.6459 28.109 11.5073 28.7426 12.1405L29.8954 13.2925ZM29.9125 18.6938L29.9124 18.6938L29.9125 18.6938Z"
-               // fill="#007fff"
-               fill="#1c1c1c"
-               stroke="white"
-               stroke-width="2"
-              ></path>
-              <path
-               d="M14 20.9829L9.71716 16.7001L11.4 15.0172L14 17.6172L20.6 11.0172L22.2828 12.7001L14 20.9829Z"
-               fill="white"
-              ></path>
-             </svg>
-            </Tooltip>
-           </>
-          )} */}
-          {this.state.user?.avatar && this.state.user.avatar?.length < 10 && (
-           <>{this.state.user?.displayName[0].toUpperCase()}</>
+          {!this.state.user?.photoURL && (
+           //  this.state.user?.photoURL?.length < 10 && (
+           <span>{this.state.user?.displayName[0].toUpperCase()}</span>
           )}
-          {/* <img src={this.state.user?.avatar ?? blank} alt="profile" /> */}
          </div>
          <div className="profile-heading">
           <h2 className="name">{this.state.user?.displayName}</h2>
-          {!this.state.is_designer ? (
-           <>
-            <a href="/designeraccount" className="arch-link">
-             {!this.state.visitor && (
-              <p className="join-design">Join 17Designclub</p>
-             )}
-            </a>
-           </>
+          {!parseInt(this.state.is_designer) ? (
+           <a href="/designeraccount" className="arch-link">
+            {!this.state.visitor && (
+             <p className="join-design">Join 17Designclub</p>
+            )}
+           </a>
           ) : (
            <>
             <p className="dc mb-0">
@@ -194,14 +227,14 @@ class UserProfile extends Component {
               </Tooltip>
              </span>
             </p>
-            {this.state.user.country && (
+            {this.state.user?.country && this.state.user?.country?.length > 0 && (
              <p className="loc">
               <EnvironmentFilled />
-              {this.state.user.country},
+              {regionNames.of(this.state.user.country)},
               {this.state.user.city && <span>{this.state.user.city}</span>}
              </p>
             )}
-            <p className="mt-4 mb-1">Professions</p>
+            <p className="mt-4 mb-1 proff-head">Professions</p>
             <div className="professions">
              {this.state.user?.professions?.map((p) => {
               return (
@@ -214,7 +247,7 @@ class UserProfile extends Component {
            </>
           )}
          </div>
-         <Row>
+         <Row className="mobile-profile-btns">
           {this.state.visitor ? (
            <>
             <Col md={{ span: 4 }}>
@@ -253,7 +286,7 @@ class UserProfile extends Component {
               }}
              >
               <button className="profile-settings-btn profile-action-btn">
-               <IoMdSettings /> Settings
+               <IoMdSettings /> <span>Settings</span>
               </button>
              </Link>
             </Col>
@@ -270,51 +303,202 @@ class UserProfile extends Component {
            <Tab>Collection</Tab>
            <Tab>Following</Tab>
            {this.state.products?.length > 0 && <Tab>Products</Tab>}
+           {!this.state.visitor && this.state.hasCompanies && (
+            <Tab>
+             Company Pages <span className="tab-icon tab-icon-info">i</span>
+            </Tab>
+           )}
+           {!this.state.visitor && this.state.hasNotifications && (
+            <Tab>
+             Notifications <span className="tab-icon tab-icon-red">i</span>
+            </Tab>
+           )}
           </TabList>
           {this.state.is_designer === 1 && (
            <TabPanel forceRender>
-            <AntRow span={24} gutter={24} justify="">
-             <AntCol xs={24} sm={12} md={8} className="my-4">
-              {!this.state.visitor && (
+            <AntRow
+             span={24}
+             gutter={{ xs: 12, sm: 12, md: 24, lg: 24 }}
+             justify=""
+            >
+             {!this.state.visitor && (
+              <AntCol xs={12} sm={12} md={8} className="my-4 add-col">
+               {/* {!this.state.visitor && ( */}
                <div className="add-project-icon">
                 <a href={`/addproject/designer/${this.state.user?.id}`}>
                  <AiOutlinePlus />
                  Add Project
                 </a>
                </div>
-              )}
-             </AntCol>
-             {this.state.projects?.length > 0 && (
+               {/* )} */}
+              </AntCol>
+              // {/* )} */}
+             )}
+
+             {this.state.projects?.length + this.state.taggedProjects?.length >
+              0 && (
               <>
                {this.state.projects?.map((p, index) => {
                 return (
-                 <AntCol xs={24} sm={12} md={8} className="my-4" key={index}>
+                 <AntCol xs={12} sm={12} md={8} className="my-4" key={index}>
+                  {!this.state.visitor ? (
+                   <>
+                    <a href={`/project/${p.id}`} className="box-link">
+                     <div className="project-col bg-white">
+                      {!this.state.visitor && (
+                       <>
+                        <a
+                         href={`/editproject/${p.id}`}
+                         className="box-link project-edit-btn project-btn"
+                        >
+                         Edit
+                        </a>
+                       </>
+                      )}
+                      {!this.state.visitor && (
+                       <>
+                        <button
+                         className="project-btn project-delete-btn"
+                         onClick={(e) => {
+                          e.preventDefault();
+                          this.setState(
+                           {
+                            to_delete_project: p.id,
+                           },
+                           () => {
+                            this.setState({
+                             delete_project_modal: true,
+                            });
+                           }
+                          );
+                         }}
+                        >
+                         Delete
+                        </button>
+                       </>
+                      )}
+                      <div className="project-image-wrapper">
+                       <div
+                        className="project-image"
+                        style={{
+                         backgroundImage: `url(${p.cover})`,
+                        }}
+                       ></div>
+                      </div>
+
+                      <div className="info p-3 left">
+                       <p className="project-name left">{p.name}</p>
+
+                       <div className="project-cover-footer">
+                        <p>
+                         {p.kind?.map((k) => {
+                          return <span className="px-1">{k}</span>;
+                         })}
+                        </p>
+                        <hr className="my-1 w-20" />
+                        <p>
+                         <span className="px-1">{p.type}</span>
+                        </p>
+                       </div>
+                      </div>
+                     </div>
+                    </a>
+                   </>
+                  ) : (
+                   <>
+                    <a href={`/project/${p.id}`} className="box-link">
+                     <div className="project-col bg-white">
+                      {this.state.visitor && this.props.isLoggedIn && (
+                       <button
+                        className="project-btn project-delete-btn"
+                        onClick={(e) => {
+                         e.preventDefault();
+                         this.setState(
+                          {
+                           to_save_project_cover: p.cover,
+                           to_save_projectId: p,
+                          },
+                          () => {
+                           this.saveToBoard();
+                          }
+                         );
+                        }}
+                       >
+                        Save
+                       </button>
+                      )}
+                      <div className="project-image-wrapper">
+                       <div
+                        className="project-image"
+                        style={{
+                         backgroundImage: `url(${p.cover})`,
+                        }}
+                       ></div>
+                      </div>
+
+                      <div className="info p-3 left">
+                       <p className="project-name left">{p.name}</p>
+
+                       <div className="project-cover-footer">
+                        <p>
+                         {p.kind?.map((k) => {
+                          return <span className="px-1">{k}</span>;
+                         })}
+                        </p>
+                        <hr className="my-1 w-20" />
+                        <p>
+                         <span className="px-1">{p.type}</span>
+                        </p>
+                       </div>
+                      </div>
+                     </div>
+                    </a>
+                   </>
+                  )}
+                 </AntCol>
+                );
+               })}
+               {this.state.taggedProjects?.map((p, index) => {
+                return (
+                 <AntCol xs={12} sm={12} md={8} className="my-4" key={index}>
                   <a href={`/project/${p.id}`} className="box-link">
                    <div className="project-col bg-white">
-                    <a
-                     href={`/editproject/${p.id}`}
-                     className="box-link project-edit-btn project-btn"
-                    >
-                     Edit
-                    </a>
-                    <button
-                     className="project-btn project-delete-btn"
-                     onClick={(e) => {
-                      e.preventDefault();
-                      this.setState(
-                       {
-                        to_delete_project: p.id,
-                       },
-                       () => {
-                        this.setState({
-                         delete_project_modal: true,
-                        });
-                       }
-                      );
-                     }}
-                    >
-                     Delete
-                    </button>
+                    {!this.state.visitor ? (
+                     <Button
+                      loading={this.state.removing_project}
+                      className="project-btn project-remove-btn"
+                      onClick={(e) => {
+                       e.preventDefault();
+                       this.handleRemoveTaggedProject(
+                        p?.id,
+                        this.state.user?.id
+                       );
+                      }}
+                     >
+                      Remove
+                     </Button>
+                    ) : (
+                     <>
+                      <Button
+                       // loading={this.state.removing_project}
+                       className="project-btn project-remove-btn"
+                       onClick={(e) => {
+                        e.preventDefault();
+                        this.setState(
+                         {
+                          to_save_project_cover: p.cover,
+                          to_save_projectId: p,
+                         },
+                         () => {
+                          this.saveToBoard();
+                         }
+                        );
+                       }}
+                      >
+                       Save
+                      </Button>
+                     </>
+                    )}
                     <div className="project-image-wrapper">
                      <div
                       className="project-image"
@@ -357,7 +541,6 @@ class UserProfile extends Component {
             user_id={this.state.user?.id}
            />
           </TabPanel>
-
           <TabPanel forceRender>
            <FollwingTab followed_stores={this.state.followed_stores} />
           </TabPanel>
@@ -365,14 +548,20 @@ class UserProfile extends Component {
            <TabPanel>
             <div className="products">
              <AntRow
-              gutter={{ xs: 8, sm: 16, md: 24, lg: 24 }}
+              gutter={{ xs: 8, sm: 12, md: 24, lg: 24 }}
               className="py-3"
              >
               {this.state.products.length > 0 ? (
                <>
                 {this.state.products.map((product, index) => {
                  return (
-                  <AntCol className="gutter-row mb-3" md={6}>
+                  <AntCol
+                   className="gutter-row mb-3"
+                   lg={6}
+                   md={6}
+                   xs={12}
+                   sm={12}
+                  >
                    <a href={`/product/${product.id}`}>
                     <div className="product">
                      <div
@@ -432,13 +621,22 @@ class UserProfile extends Component {
             </div>
            </TabPanel>
           )}
+          {!this.state.visitor && this.state.hasCompanies && (
+           <TabPanel>
+            <CompaniesTab user_id={this.state.user?.id} />
+           </TabPanel>
+          )}
+          {!this.state.visitor && this.state.hasNotifications && (
+           <TabPanel>
+            <UserNotificationsTab user_id={this.state.user?.id} />
+           </TabPanel>
+          )}
          </Tabs>
         </div>
        </Col>
       </Row>
      </Container>
     </div>
-
     {/* delte project modal */}
     <Modal
      show={this.state.delete_project_modal}
@@ -517,6 +715,42 @@ class UserProfile extends Component {
       </div>
      </Modal.Body>
     </Modal>
+    <>
+     <Modal
+      size="lg"
+      className="auth-modal"
+      show={this.state.authModal && !this.props.isLoggedIn}
+      onHide={() => this.setState({ authModal: false })}
+      aria-labelledby="example-modal-sizes-title-lg"
+      centered
+     >
+      <Modal.Body>
+       <AuthModalContent />
+      </Modal.Body>
+     </Modal>
+    </>
+    <AntModal
+     title={this.state.save_to_board_modal}
+     width={700}
+     className="request-modal"
+     visible={this.state.save_to_board_modal}
+     destroyOnClose={true}
+     footer={false}
+     closeIcon={
+      <>
+       <div onClick={() => this.setState({ save_to_board_modal: false })}>
+        X
+       </div>
+      </>
+     }
+     okButtonProps={{ hidden: true }}
+     cancelButtonProps={{ hidden: true }}
+    >
+     <SaveToBoard
+      cover={this.state.to_save_project_cover}
+      project={this.state.to_save_projectId}
+     />
+    </AntModal>
    </React.Fragment>
   );
  }

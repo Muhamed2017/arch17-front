@@ -189,7 +189,14 @@ class Footer extends Component {
      <div className="px-0 container">
       <Row className="pt-2">
        <Col md={8}>
-        <p>© 2017-2019, ARCH17 TECHNOLOGY CO., LTD. SZ </p>
+        <p>{`© 2017-2022, ARCH17 TECHNOLOGY CO., LTD. SZ .    粤ICP备19015731号-1`}</p>
+       </Col>
+       <Col md={8}>
+        <div className="footer-terms">
+         <span>Privacy</span>
+         <span>Cookies</span>
+         <span>Terms and Conditions of Use</span>
+        </div>
        </Col>
       </Row>
      </div>

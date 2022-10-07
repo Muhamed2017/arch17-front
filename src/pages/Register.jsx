@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Container, Col, Row, Form, Modal } from "react-bootstrap";
-import { FaLinkedinIn, FaFacebookF } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { connect } from "react-redux";
 import axios from "axios";
@@ -9,7 +8,7 @@ import { VerificationPin } from "react-verification-pin";
 import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
 import { auth } from "./../firebase";
 import { Form as FormAnt, Input } from "antd";
-import { LinkedIn } from "react-linkedin-login-oauth2";
+import "./auth.css";
 import {
  signupEmailPassword,
  signupFacebook,
@@ -172,12 +171,9 @@ const Register = (props) => {
    });
  };
 
- const handleFailure = (error) => {
-  console.log(error);
- };
  return (
   <React.Fragment>
-   <div id="wrapper" className="auth-form">
+   <div id="wrapper" className="auth-form signup-form">
     <Container fluid>
      <Row className="justify-content-md-center">
       <Col
@@ -195,7 +191,12 @@ const Register = (props) => {
         <Form.Group style={{ marginBottom: "0" }}>
          <FormAnt>
           <Row>
-           <Col>
+           <Col
+            lg={{ span: 6 }}
+            md={{ span: 6 }}
+            sm={{ span: 12 }}
+            xs={{ span: 12 }}
+           >
             <FormAnt.Item
              name="fname"
              rules={[
@@ -220,7 +221,12 @@ const Register = (props) => {
              />
             </FormAnt.Item>
            </Col>
-           <Col>
+           <Col
+            lg={{ span: 6 }}
+            md={{ span: 6 }}
+            sm={{ span: 12 }}
+            xs={{ span: 12 }}
+           >
             <FormAnt.Item
              name="lname"
              rules={[
@@ -258,41 +264,7 @@ const Register = (props) => {
            fontFamily: "Roboto",
            marginBottom: "5px",
           }}
-         >
-          <span style={{ padding: "0px 10px 0px 0" }}>Signup By:</span>
-          <button
-           className="nav-link active"
-           id="nav-home-tab"
-           data-bs-toggle="tab"
-           data-bs-target="#nav-home"
-           type="button"
-           role="tab"
-           aria-controls="nav-home"
-           aria-selected="true"
-           onClick={() => {
-            console.log("email selected");
-            setPhoneSelected(true);
-           }}
-          >
-           E-mail
-          </button>
-          <button
-           className="nav-link"
-           id="nav-profile-tab"
-           data-bs-toggle="tab"
-           data-bs-target="#nav-profile"
-           type="button"
-           role="tab"
-           aria-controls="nav-profile"
-           aria-selected="false"
-           onClick={() => {
-            console.log("phone selected");
-            setPhoneSelected(true);
-           }}
-          >
-           Phone Number
-          </button>
-         </div>
+         ></div>
         </nav>
         <div className="tab-content" id="nav-tabContent">
          <div
@@ -425,7 +397,7 @@ const Register = (props) => {
            ) : (
             <>Creating New Account</>
            )}
-           <HashLoader color="#ffffff" loading={true} css={{}} size={35} />
+           <HashLoader color="#ffffff" loading={true} size={35} />
           </>
          ) : (
           <>Continue</>
@@ -433,7 +405,7 @@ const Register = (props) => {
         </button>
         <div id="recaptch-container"></div>
         <div className="form-separator"></div>
-        <button
+        {/* <button
          className="coninue-btn facebook-auth"
          onClick={(e) => {
           e.preventDefault();
@@ -444,39 +416,10 @@ const Register = (props) => {
           <FaFacebookF />
          </span>
          Continue With Facebook
-        </button>
-        {/* <button
-         className="coninue-btn linkedin-auth"
-         //  disabled={{ disabled: true }}
-         onClick={(e) => {
-          e.preventDefault();
-          //   props.dispatchLinkedinSignup();
-          console.log(phone);
-         }}
-        >
-         <span>
-          <FaLinkedinIn />
-         </span>{" "}
-         Continue With Linkedin
         </button> */}
-        <LinkedIn
-         clientId="78elnnx8q5k0w5"
-         onFailure={handleFailure}
-         onSuccess={handleSuccess}
-         redirectUri="http://localhost:3000/callback"
-         scope="r_emailaddress"
-         className="coninue-btn linkedin-auth"
-         redirectPath="http://localhost:3000/callback"
-        >
-         <button className="coninue-btn linkedin-auth">
-          <span>
-           <FaLinkedinIn />
-          </span>
-          Continue With Linkedin
-         </button>
-        </LinkedIn>
+
         <button
-         className="coninue-btn google-auth"
+         className="coninue-btn google-auth mb-4"
          onClick={(e) => {
           e.preventDefault();
           props.dispatchGoogleSignup();
@@ -487,22 +430,33 @@ const Register = (props) => {
          </span>
          Continue With Google {props.cout}
         </button>
-        <div className="terms">
+        <div className="terms mb-3">
          <p>
           By clicking on Continue you agreed to <span>Terms of use</span> and
           <span> Privacy</span> policy.
          </p>
         </div>
-        <div className="switch">
+        <div className="switch mb-3">
          <p>
           Already have an Arch17 ID?
-          <span> Sign in</span>
+          <a href="/signin">
+           <span> Sign in</span>
+          </a>
          </p>
         </div>
         <div></div>
         <div className="sign-footer">
-         Create a Designer Account <span>i</span>
+         <a href="/designeraccount">
+          Create a Designer Account
+          {/* <span className="undered">Learn More About Designer Account</span> */}
+          <a href="designaccountintro">
+           <span className="undered">Learn More About Designer Account</span>
+          </a>
+         </a>
         </div>
+        <a href="designaccountintro">
+         <p className="underiled-footer">Learn More About Designer Account</p>
+        </a>
        </Form>
       </Col>
      </Row>

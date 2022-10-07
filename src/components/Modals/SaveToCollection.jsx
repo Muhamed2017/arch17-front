@@ -151,12 +151,12 @@ const SaveToCollection = (props) => {
      <Divider type="horizontal" style={{ width: "100%" }} />
      <div className="collections-wrapper">
       <ul>
-       <li>
+       {/* <li>
         <span>
          <VscFolderActive /> Wishlist
         </span>
         <button>Save</button>
-       </li>
+       </li> */}
        {fetching ? (
         <>
          <Spin

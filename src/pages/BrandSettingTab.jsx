@@ -4,7 +4,7 @@ import blank from "../../src/blank.jpg";
 import { Link } from "react-router-dom";
 
 import { auth } from "../firebase";
-import firebase from "firebase/app";
+// import firebase from "firebase/app";
 import { connect } from "react-redux";
 import { Modal } from "react-bootstrap";
 import { toast, Flip } from "react-toastify";
@@ -14,8 +14,9 @@ import { IoMdCloudUpload } from "react-icons/io";
 import "cropperjs/dist/cropper.css";
 import { compressImage } from "./addProduct/OptionsPrice";
 import axios from "axios";
+// BOTTOM_LEFT
 // import { Link } from "react-router-dom";
-import { Redirect } from "react-router";
+// import { Redirect } from "react-router";
 import { logginOut } from "../redux/actions/authActions";
 import { updateInfo, presistInfo } from "../redux/actions/authActions";
 import { API } from "./../utitlties";

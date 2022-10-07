@@ -14,9 +14,7 @@ img {
  background-color: #fff;
  margin: auto;
  min-height: 100vh;
- /* padding: 0 60px; */
  border-top: 0;
- /* min-height: 1300px; */
 }
 #brand-container .ant-tabs-tabpane{
     min-height: 1000px;
@@ -113,11 +111,12 @@ overflow: hidden;
 }
 .entity,
 .location {
- padding: 0 4px;
+ /* padding: 0 4px; */
+ text-transform: capitalize;
 }
 .brand-info .entity {
- font-weight: 600;
- color: #747474;
+ font-weight: 400;
+ /* color: #747474; */
  font-size: 1rem;
 }
 .actions-btns {
@@ -144,6 +143,7 @@ overflow: hidden;
 }
 .followed{
     background-color: #999898 !important; 
+
 }
 .actions-btns span {
  display: inline-block;
@@ -174,14 +174,16 @@ font-weight: 300 !important;
     color:#000 !important;
 }
 .overview-tab h6 {
- font-size: 2rem;
- color: #000;
- margin-bottom: 10px;
+        font-size: 28px;
+            color: #000;
+            font-weight: 500;
+            margin-bottom: 30px;
+            margin-top: 30px;
 }
 .overview-tab p {
- font-size: 1rem;
- color: #000000;
- font-weight: 500;
+    font-size: 18px;
+        color: #000000;
+        font-weight: 300
 }
 
 .product-types .box{
@@ -288,15 +290,20 @@ font-weight: 300 !important;
     padding: 0 7px;
 }
 
+.react-multi-carousel-list{
+    width: 100%;
+    height: auto;
+}
 .type-item {
-    width: 175px;
+width: 175px;
     height: 175px;
-    cursor:grab;
- background: #eaeaea;
-     border-radius: 10px;
- background-position: center;
- background-size: contain;
- background-repeat: no-repeat;   
+    cursor: grab;
+    background: #eaeaea80;
+    border-radius: 10px;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: brightness(.97)
 }
 .section {
     padding:0 60px
@@ -359,3 +366,267 @@ font-weight: 400;
     font-weight: 400;
     font-size: 14px;
 }
+.modal-p{
+    font-size: .9rem;
+        margin-top: 0;
+        margin-bottom: 1rem;
+        font-weight: 400;
+        color: #242424
+}
+
+.modal-form-wrapper{
+  position: relative;  
+}
+.modal-form-wrapper ul{
+    position: absolute;
+        right: -24px;
+        left: -24px;
+        top: 45px;
+        min-height: 135px;
+        background: #ffff;
+        color: #000;
+        list-style: none;
+        list-style: none;
+        list-style-position: inside;
+        padding-left: 24px;
+        padding-top: 14px;
+        z-index: 1;
+    /* /* border-top: none; */
+}
+.modal-form-wrapper ul li, .user-row{
+    font-weight: 500;
+        margin-bottom: 16px;
+        font-size: 16px;
+        cursor: pointer;
+}
+.modal-form-wrapper ul li div:first-child, .row-avatar{
+    text-align: center;
+        margin-right: 15px;
+        width: 40px;
+        height: 40px;
+        border-radius: 10%;
+        font-size: 1.95rem;
+        color: #fff;
+        background: #afafaf;
+                background-position: center;
+                background-size: contain
+}
+.transfer-modal .ant-modal-footer{
+    padding: 0px 25px 22px;
+    text-align: left;
+}
+
+.modal-form-wrapper li > div, .user-row > div {
+display: inline-block;
+vertical-align: middle;
+}
+.transfer-modal .ant-modal-header, .transfer-modal .ant-modal-footer{
+    border-color: transparent;
+
+}
+p.modal-footer-p{
+    font-size: .75rem;
+        color: #0e0e0e;
+}
+.transfer-modal .ant-modal-header{
+    border-radius: 6px 6px 0 0;
+}
+.transfer-modal .ant-input-search-button{
+border-left-color: transparent;
+}
+
+.transfer-modal .ant-input-search .ant-input:hover,
+.ant-input-search .ant-input:focus {
+    border-color: #59748a5e !important;
+    box-shadow: none;
+    border-right: none !important;
+    border-right: 0 !important;
+}
+.transfer-modal .ant-btn-primary, .transfer-modal.ant-btn-primary:hover,
+.ant-btn-primary:focus{
+    border-color: #f80505 !important;
+    background: #f80505 !important;
+}
+.transfer-modal .ant-modal-footer .ant-btn-default{
+    background: #8d8989;
+        color: #fff;
+        border-color: #8d8989
+}
+.transfer-modal .ant-modal-content {
+    border-radius: 6px;
+}
+
+span.user-email{
+    font-size: 0.85rem;
+    color: #727272;
+    font-weight: 500;
+    display: block
+}
+
+.brand-type, .brand-city{
+    text-transform: capitalize;
+    padding-top: 5px;
+}
+ .loc-icon{
+ font-size: .85rem;
+    vertical-align: text-bottom;
+    padding: 0px 0px;
+    margin-right: 5px;
+    padding-bottom: 2px;
+
+}
+
+/* .collection-box::after{ */
+.rect::after{
+    position: absolute;
+    content: "";
+    width: 100%;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    /* background-color: rgba(0, 0, 0, 0.027); */
+    background-color: rgb(70 70 70 / 5%);
+}
+@media screen and (min-width:768px){
+.mobile-view {
+        display: none !important;
+    }
+.wide-view {
+        display: block !important;
+    }
+}
+
+/* brand page in mobile view */
+@media screen and (max-width:768px) {
+    .designer-text{
+        grid-template-columns:40px auto;
+        grid-gap:0;
+    }
+    .designer-text .d-avatar{
+    height: 35px;
+        width: 35px;
+    }
+    .d-info > p{
+        margin-bottom: -4px !important;
+    }
+    .designer-text .d-info .d-name{
+    font-size: 14px;
+    margin-right: 3px;
+    }
+    .designer-text .d-info .d-loc{
+        font-size:10px;
+    }
+    .designer-text .d-count{
+
+        font-size: 10px;
+    }
+    .add-col{
+        display: none;
+    }
+.wide-view {
+        display: none !important;
+    }
+.mobile-view{
+        display: block !important;
+    }
+ 
+    #brand-container .mobile-view {
+        margin-top: 10px;
+    }
+    .section{
+    padding: 0;
+ }
+ #brand-container .count{
+    display: none;
+ }
+ .brand-cover{
+    min-height: auto !important;
+ }
+    .brand-profile{
+        width: 115px;
+            height: 115px;
+            margin: auto;
+            top: -62px;
+            border: 1px solid #dddddd82;
+            font-weight: 500;
+            font-size: 5rem;
+    }
+        .brand-info{
+            text-align: center;
+        }
+        .info-col{
+            margin-top: -58px;
+        }
+        .actions-btns .follow, .actions-btns .followed  {
+                    width: 76px;
+                    height:29px;
+        }
+        #brand-container .ant-tabs-nav{
+            width: auto !important;
+        }
+        #brand-container .actions-btns button {
+            padding: 5px;
+                    padding: 5px;
+                    height: 29px;
+                    vertical-align: bottom;
+        }
+        .mobile-view.actions-btns{
+            text-align: center;
+        }
+
+       #brand-container .type-item {
+        width: 120px;
+        height: 120px;
+       }
+
+           .overview-tab h6{
+            font-size: 20px;
+                color: #000;
+                font-weight: 500;
+                margin-bottom: 15px;
+                margin-top: 30px;
+           }
+
+           .overview-tab p {
+            font-size:15px;
+           }
+
+           #brand-container .file-btn{
+                        height: 19px;
+                        width: 19px;
+                        padding-top: 4.5px;
+                        font-size: 7px;
+           }
+           #brand-container .file-btn.threeD{
+            right: 33px !important;
+           }
+           #brand-container .arrow-btn{
+            display: none !important;
+           }
+            .uplpoadbrandcover,
+            .changebrandcover {
+                display: none;
+        }
+        
+        #brand-container .actions-btns span {
+    display: inline-block;
+    font-size: 18px;
+        margin: -4px 4px;
+        }
+
+        #brand-container .actions-btns .shr.owner{
+            margin-right: 16px;
+            
+        }
+
+
+
+        .product .product-name{
+            min-height: 38px;
+        }
+     
+}
+        
+        

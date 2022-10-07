@@ -32,6 +32,7 @@ import Settings from './pages/user_profile_tabs/Settings';
 import { Home } from './pages/Home';
 
 import 'antd-country-phone-input/dist/index.css'
+
 import Search from './pages/Search';
 import TableStep from './pages/TableStep';
 import EditKind from './pages/editProduct/EditKind';
@@ -40,8 +41,13 @@ import { ParallaxProvider } from "react-scroll-parallax";
 import "semantic-ui-css/semantic.min.css";
 import EditProjectWrapper from './pages/addProject/EditProjectWrapper';
 import Magazine from './pages/Magazine';
+import AllBrands from './pages/AllBrands';
+import CreateDesignerAccountHelp from './pages/static_pages/CreateDesignerAccountHelp'
 import DesignerProducts from './pages/DesignerProducts';
 import BoardProjects from './pages/BoardProjects';
+import Procurement from './pages/helpPages/Procurement';
+import CreateDesigneCompanyWrapper from './Company/CreateDesigneCompanyWrapper';
+import Company from './Company/Company'
 class App extends Component {
    constructor(props){
      super(props)
@@ -50,8 +56,6 @@ class App extends Component {
    }
   render(){
   return (
-    // <ChakraProvider>
-
     <AuthProvider>
     <React.Fragment>
     <ParallaxProvider>
@@ -75,8 +79,14 @@ class App extends Component {
               <Route path='/product/:id' component={Product} exact/>
               <Route path='/project/:id' component={Project} exact/>
               <Route path='/magazine' component={Magazine} exact/>
+              <Route path='/brands' component={AllBrands} exact/>
 
-              {/* <Route path="/search" component={Search} exact /> */}
+
+              {/* static pages */}
+              <Route path='/procurementservice' component={Procurement} exact/>
+              <Route path='/designaccountintro' component={CreateDesignerAccountHelp} exact/>
+
+
               <Route path='/products' 
               render={(state)=> <Search {...state}/>}
               exact />
@@ -112,6 +122,7 @@ class App extends Component {
              <Route path="/add-product/:id" exact component={Kind}/>
              <Route path="/edit-product/:id" exact component={EditKind}/>
               <Route path='/designeraccount' component={DesignerAccount} exact />
+              <Route path='/createdesigncompany' component={CreateDesigneCompanyWrapper} exact />
              
               <Route path="/editor" exact><TextEditor />
               </Route>
@@ -127,6 +138,7 @@ class App extends Component {
               <Route path='/brand/:id' component={Brand} exact />
               <Route path='/collection/:id' component={Collection} exact />
               <Route path='/profile' component={UserProfile} exact />
+              <Route path='/company/:id' component={Company} exact />
               <Route path='/usercollection/:id' component={UserCollection} exact />
               <Route path='/designerproducts/:id' component={DesignerProducts} exact />
               <Route path='/projectcollection/:id' component={BoardProjects} exact />

@@ -10,9 +10,12 @@ import * as utility from "../utitlties";
 import ReactFlagsSelect from "react-flags-select";
 import { Redirect } from "react-router-dom";
 import en from "world_countries_lists/data/countries/en/world.json";
-
 const { Option } = Select;
-
+export const customLabels = {
+ TW: { primary: "China Taiwan" },
+ MO: { primary: "China Macao" },
+ HK: { primary: "China Hong Kong" },
+};
 class CreateBrandFinish extends Component {
  constructor(props) {
   super(props);
@@ -144,34 +147,6 @@ class CreateBrandFinish extends Component {
             </Select>
            </Col>
           </Row>
-          {/* <Row>
-           <Col>
-            <Select
-             listHeight={350}
-             mode="multiple"
-             style={{ width: "100%" }}
-             allowClear={true}
-             showArrow={true}
-             placeholder="products types"
-             size="large"
-             onChange={this.handleProductTypesChange}
-             optionLabelProp="label"
-            >
-             {utility.BRAND_TYPES.map((type, index) => {
-              return (
-               <>
-                <Option value={type} label={type} key={index}>
-                 <div className="demo-option-label-item">
-                  <span role="img" aria-label={type}></span>
-                  {type}
-                 </div>
-                </Option>
-               </>
-              );
-             })}
-            </Select>
-           </Col>
-          </Row> */}
          </Form.Group>
          <Form.Group>
           <Row>
@@ -218,11 +193,14 @@ class CreateBrandFinish extends Component {
             <ReactFlagsSelect
              selected={this.state.country}
              selectedSize={20}
+             showOptionLabel
+             customLabels={customLabels}
              optionsSize={20}
              searchable
-             onSelect={(code, value) => {
-              this.setState({ country: code });
-              console.log(code, value);
+             onSelect={(code) => {
+              this.setState({ country: code }, () => {
+               console.log(this.state.country);
+              });
              }}
             />
            </Col>

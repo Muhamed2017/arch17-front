@@ -4,9 +4,8 @@ import { connect } from "react-redux";
 import Cropper from "react-cropper";
 import slide from "../../../src/slide1.jpg";
 import "cropperjs/dist/cropper.css";
-// import { ImLocation } from "react-icons/im";
 import axios from "axios";
-// import { convertToRaw } from "draft-js";
+import { goToProjectStep } from "../../redux/actions/addProjectActions";
 import { LoadingOutlined } from "@ant-design/icons";
 import { API } from "../../utitlties";
 import { compressImage } from "../addProduct/OptionsPrice";
@@ -68,12 +67,11 @@ class CoverStep extends Component {
   } = this.props?.project.project_info;
   const fd = new FormData();
   fd.append("name", this.state.displayName);
-  fd.append("article_type", blogType[0]);
+  fd.append("article_type", blogType);
 
-  category.map((c) => {
+  category.forEach((c) => {
    fd.append("kind[]", c);
   });
-
 
   fd.append("type", type);
 
@@ -85,16 +83,16 @@ class CoverStep extends Component {
    await compressImage(this.dataURLtoFile(this.state.cropped_cover, "file"))
   );
   fd.append("content", this.props.project?.project_content);
-  this.props.project.role_designers?.map((p) => {
+  this.props.project.role_designers?.forEach((p) => {
    fd.append("users[]", p.id);
   });
-  this.props.project.project_covers?.map((c) => {
+  this.props.project.project_covers?.forEach((c) => {
    fd.append("images[]", c);
   });
-  this.props.project.role_brands?.map((s) => {
+  this.props.project.role_brands?.forEach((s) => {
    fd.append("stores[]", s.id);
   });
-  this.props.project.project_tags?.map((p) => {
+  this.props.project.project_tags?.forEach((p) => {
    fd.append("products[]", p);
   });
 
@@ -227,7 +225,8 @@ class CoverStep extends Component {
       </Col>
      </Row>
     </div>
-    <button
+
+    {/* <button
      className="next-btn"
      onClick={this.handleSubmitAddPrject}
      style={{
@@ -247,12 +246,46 @@ class CoverStep extends Component {
      ) : (
       "Save & Continue"
      )}
-    </button>
+    </button> */}
+    <div className="next-wrapper">
+     <div className="next-inner">
+      <button
+       className="prev-btn"
+       style={{ margin: "0 0px", position: "relative" }}
+       onClick={() => this.props.dispatchGoStep(3)}
+      >
+       Previous
+      </button>
+      <button
+       className="next-btn"
+       onClick={this.handleSubmitAddPrject}
+       style={{
+        background: this.state.creating ? "#ddd" : "",
+       }}
+      >
+       {this.state.creating ? (
+        <Spin
+         style={{
+          minWidth: "120px",
+         }}
+         size="large"
+         indicator={
+          <LoadingOutlined style={{ fontSize: "25px", color: "#fff" }} spin />
+         }
+        />
+       ) : (
+        "Save & Continue"
+       )}
+      </button>
+     </div>
+    </div>
    </>
   );
  }
 }
-
+const mapDispatchToProps = (dispatch) => ({
+ dispatchGoStep: (step) => dispatch(goToProjectStep(step)),
+});
 const mapStateToProps = (state) => {
  return {
   covers: state.project.project_covers,
@@ -263,4 +296,4 @@ const mapStateToProps = (state) => {
   projectId: state.project?.projectId,
  };
 };
-export default connect(mapStateToProps)(CoverStep);
+export default connect(mapStateToProps, mapDispatchToProps)(CoverStep);

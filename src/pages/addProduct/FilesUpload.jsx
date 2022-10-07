@@ -1,20 +1,19 @@
 import React, { Component } from "react";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import { connect } from "react-redux";
-import { RiFilePdfFill } from "react-icons/ri";
-import { IoIosCube } from "react-icons/io";
-import { FaFilePdf } from "react-icons/fa";
-import { Redirect } from "react-router-dom";
+
 import { Modal, Button } from "react-bootstrap";
 import {
  nextTab,
- productDescription,
+ //  productDescription,
+ productFiles,
 } from "../../redux/actions/addProductActions";
 import axios from "axios";
 import ClipLoader from "react-spinners/ClipLoader";
-import { Row, Col, Form, Input, Button as AntButton } from "antd";
+import { Row, Col, Input, Button as AntButton } from "antd";
 import { API } from "./../../utitlties";
 import { SiGoogledrive, SiBaidu } from "react-icons/si";
+import { HiFolderDownload } from "react-icons/hi";
 import { GrOnedrive } from "react-icons/gr";
 import { AiOutlineDropbox } from "react-icons/ai";
 import { Select, Space, Typography, Divider } from "antd";
@@ -38,8 +37,10 @@ class FilesUpload extends Component {
    edit_file_modal: false,
    pdfModal: false,
    file_name: null,
-   file_type: null,
-   file_software: null,
+   //  file_type: null,
+   file_type: [],
+   file_software: [],
+   //  file_software: null,
    ggldrive: "",
    onedrive: "",
    drpbox: "",
@@ -49,11 +50,19 @@ class FilesUpload extends Component {
    pdf_files:
     this.props?.files?.filter((file) => {
      return file.file_type === "PDF";
-    }) ?? [],
+    }) ??
+    this.props.product_files?.filter((file) => {
+     return file.file_type === "PDF";
+    }) ??
+    [],
    files:
     this.props?.files?.filter((file) => {
      return file.file_type !== "PDF";
-    }) ?? [],
+    }) ??
+    this.props.product_files?.filter((file) => {
+     return file.file_type !== "PDF";
+    }) ??
+    [],
    file: {},
    file_id: null,
    name: "",
@@ -96,7 +105,6 @@ class FilesUpload extends Component {
    }
   );
  };
- //  dataSource: dataSource.filter((item) => item.key !== key),
 
  handleAddFile = (kind) => {
   if (kind === "PDF") {
@@ -205,15 +213,14 @@ class FilesUpload extends Component {
   this.setState({ skip_modal: false });
  };
  handleNextStep = (e) => {
-  if (
-   this.state.files.length + this.state.pdf_files?.length < 1 &&
-   !this.props.edit
-  ) {
+  const { files, pdf_files } = this.state;
+  if (files.length + pdf_files?.length < 1 && !this.props.edit) {
    this.setState({ skip_modal: true });
    return;
   } else {
    this.setState({ loading: true });
    setTimeout(() => {
+    this.props.dispatchAddFilesStep([...files, ...pdf_files]);
     this.props.dispatchNextStep();
    }, 2000);
   }
@@ -222,29 +229,42 @@ class FilesUpload extends Component {
   return (
    <>
     <div className="step-form">
-     <button className="product-skip-btn" onClick={this.skip}>
-      Skip
-     </button>
-     <button
-      className="save-product-step-btn"
-      style={{
-       top: "-110px",
-       height: "20px",
-       background: this.state.loading ? "#898989" : "",
-      }}
-      onClick={this.handleNextStep}
-     >
-      {this.state.loading ? (
-       <ClipLoader
-        style={{ height: "20px" }}
-        color="#ffffff"
-        loading={this.state.loading}
-        size={20}
-       />
-      ) : (
-       "Save & Continue"
-      )}
-     </button>
+     <div className="next-wrapper">
+      <div
+       className="next-inner"
+       style={{
+        maxWidth: "1000px",
+       }}
+      >
+       <button
+        onClick={this.skip}
+        className="prev-btn"
+        style={{ margin: "0 0px", position: "relative" }}
+       >
+        Skip
+       </button>
+       <button
+        className="next-btn"
+        style={{
+         top: "-110px",
+
+         background: this.state.loading ? "#898989" : "",
+        }}
+        onClick={this.handleNextStep}
+       >
+        {this.state.loading ? (
+         <ClipLoader
+          style={{ height: "20px" }}
+          color="#ffffff"
+          loading={this.state.loading}
+          size={20}
+         />
+        ) : (
+         "Save & Continue"
+        )}
+       </button>
+      </div>
+     </div>
      <div className="step-head">
       <h2>Upload Product Files</h2>
       <p>CAD / 3D, and PDF files</p>
@@ -260,12 +280,14 @@ class FilesUpload extends Component {
           <>
            <div className="upload-action">
             <div
-             className="upload-icon"
+             className="upload-icon uploaded"
              style={{
               borderRadius: "0",
               border: "1px dashed #b7b7b7",
               fontWeight: "900",
-              color: "#000",
+              // color: "#000",
+              // fontSize: "3.5rem",
+              paddingTop: 15,
              }}
              onClick={() =>
               this.setState(
@@ -285,10 +307,27 @@ class FilesUpload extends Component {
               )
              }
             >
-             {file?.file_type}
+             {/* {file?.file_type} */}
+             <HiFolderDownload
+              style={{
+               fontSize: "3.5rem",
+              }}
+             />
             </div>
+
+            <span
+             style={{
+              width: "10px 0px 0px 0px",
+             }}
+            >
+             {file?.file_type}
+            </span>
             <p>{file?.file_name}</p>
-            <button onClick={() => this.deleteFile(file.id, "CAD|3D")}>
+
+            <button
+             className="delbtn"
+             onClick={() => this.deleteFile(file.id, "CAD|3D")}
+            >
              Delete
             </button>
            </div>
@@ -356,7 +395,12 @@ class FilesUpload extends Component {
              {file?.file_type}
             </div>
             <p>{file?.file_name}</p>
-            <button onClick={() => this.deleteFile(file?.id, "PDF")}>
+            <span>{file?.software}</span>
+
+            <button
+             className="delbtn"
+             onClick={() => this.deleteFile(file?.id, "PDF")}
+            >
              Delete
             </button>
            </div>
@@ -391,10 +435,11 @@ class FilesUpload extends Component {
          Add Product Files
         </p>
 
-        <Row gutter={16} className="my-4">
-         <Col className="gutter-row" span={12}>
+        <Row gutter={16} className="my-4" span={24}>
+         <Col className="gutter-row" md={8}>
           <Select
-           style={{ width: 300 }}
+           style={{ width: "100%" }}
+           //  style={{ width: 300 }}
            size="large"
            onSelect={(e) => this.setState({ file_name: e })}
            placeholder="Select or Add Modal Code"
@@ -427,31 +472,36 @@ class FilesUpload extends Component {
            ))}
           </Select>
          </Col>
-         <Col className="gutter-row" span={6}>
+         <Col className="gutter-row" md={8}>
           <Select
            getPopupContainer={(triggerNode) => {
             return triggerNode.parentNode;
            }}
            dropdownClassName="antd-select-dropdown"
            size="large"
+           mode="multiple"
            placeholder="File Type"
            style={{ width: "100%" }}
-           onSelect={(e) => this.setState({ file_type: e })}
+           onChange={(e) => this.setState({ file_type: e })}
+           //  onSelect={(e) => this.setState({ file_type: e })}
            defaultOpen={true}
           >
            <Option value="2D">2D</Option>
            <Option value="3D">3D</Option>
           </Select>
          </Col>
-         <Col className="gutter-row" span={6}>
+         <Col className="gutter-row" md={8}>
           <Select
            getPopupContainer={(triggerNode) => {
             return triggerNode.parentNode;
            }}
            size="large"
            placeholder="Software"
+           mode="multiple"
            style={{ width: "100%" }}
-           onSelect={(e) => this.setState({ file_software: e })}
+           onChange={(e) => this.setState({ file_software: e })}
+
+           //  onSelect={(e) => this.setState({ file_software: e })}
           >
            <Option value="AutoCad">AutoCad</Option>
            <Option value="Rivet">Rivet</Option>
@@ -471,7 +521,7 @@ class FilesUpload extends Component {
           <AntButton
            type="primary"
            className="drivebtn"
-           icon={<SiGoogledrive />}
+           icon={<GrOnedrive />}
            style={{ width: "100%" }}
            size="large"
           >
@@ -563,20 +613,6 @@ class FilesUpload extends Component {
         >
          <Button
           onClick={() => this.handleAddFile("CAD|3D")}
-          // onClick={() =>
-          //  this.setState(
-          //   {
-          //    file_adding: true,
-          //    ggldrive: "",
-          //    drpbox: "",
-          //    baidu: "",
-          //    onedrive: "",
-          //   },
-          //   () => {
-          //    this.handleAddFile("CAD|3D");
-          //   }
-          //  )
-          // }
           style={{ width: "60px", padding: "8px 5px", textAlign: "center" }}
          >
           Add
@@ -655,12 +691,6 @@ class FilesUpload extends Component {
 
         <Row gutter={16} className="my-4">
          <Col className="gutter-row" span={12}>
-          {/* <Input
-           placeholder="Input Modal Code"
-           onChange={(e) => this.setState({ file_name: e.target.value })}
-           size="large"
-           value={this.state.file_name}
-          /> */}
           <Select
            style={{ width: 300 }}
            size="large"
@@ -703,17 +733,26 @@ class FilesUpload extends Component {
            }}
            dropdownClassName="antd-select-dropdown"
            size="large"
+           mode="multiple"
            placeholder="File Type"
            style={{ width: "100%" }}
-           onSelect={(e) => this.setState({ file_type: e })}
+           onChange={(e) => console.log(e)}
+           //  onChange={(e) => this.setState({ file_type: e })}
+           //  onSelect={(e) => this.setState({ file_type: e })}
            defaultValue={this.state.file_type}
+           //  optionLabelProp="label"
           >
-           <Option value="2D">2D</Option>
-           <Option value="3D">3D</Option>
+           <Option value="2D" label="2D">
+            2D
+           </Option>
+           <Option value="3D" label="3D">
+            3D
+           </Option>
           </Select>
          </Col>
          <Col className="gutter-row" span={6}>
           <Select
+           mode="multiple"
            defaultValue={this.state.file_software}
            getPopupContainer={(triggerNode) => {
             return triggerNode.parentNode;
@@ -741,14 +780,14 @@ class FilesUpload extends Component {
           <AntButton
            type="primary"
            className="drivebtn"
-           icon={<SiGoogledrive />}
+           icon={<GrOnedrive />}
            style={{ width: "100%" }}
            size="large"
           >
            OneDrive
           </AntButton>
          </Col>
-         <Col className="gutter-row" span={17} style={{ background: "" }}>
+         <Col className="gutter-row" span={17}>
           <Input
            value={this.state.onedrive}
            placeholder=""
@@ -897,6 +936,7 @@ class FilesUpload extends Component {
            }}
            dropdownClassName="antd-select-dropdown"
            size="large"
+           //  mode="multiple"
            placeholder="File Type"
            style={{ width: "100%" }}
            onSelect={(e) => this.setState({ file_type: e })}
@@ -1028,11 +1068,12 @@ class FilesUpload extends Component {
  }
 }
 const mapDispatchToProps = (dispatch) => ({
- dispatchDescriptionStep: (data, id) => dispatch(productDescription(data, id)),
+ dispatchAddFilesStep: (files) => dispatch(productFiles(files)),
  dispatchNextStep: () => dispatch(nextTab()),
 });
 const mapStateToProps = (state) => ({
  OptionsPrice: state.optionsPrice,
  modal_codes: state.addProduct.modal_codes,
+ product_files: state.addProduct.files,
 });
 export default connect(mapStateToProps, mapDispatchToProps)(FilesUpload);

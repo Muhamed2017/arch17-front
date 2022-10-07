@@ -4,6 +4,8 @@ import axios from "axios";
 import ClipLoader from "react-spinners/ClipLoader";
 import { API } from "./../../utitlties";
 import { Link } from "react-router-dom";
+import { resetAddProduct } from "./../../redux/actions/addProductActions";
+import { connect } from "react-redux";
 class EditKind extends Component {
  constructor(props) {
   super(props);
@@ -17,6 +19,7 @@ class EditKind extends Component {
   };
  }
  componentDidMount() {
+  this.props.resetAddPRoduct();
   axios
    .get(`${API}product/${this.state.product_id}`)
    .then((res) => {
@@ -225,4 +228,9 @@ class EditKind extends Component {
  }
 }
 
-export default EditKind;
+// export default EditKind;
+const mapDispatchToProps = (dispatch) => ({
+ resetAddPRoduct: () => dispatch(resetAddProduct()),
+});
+// export default Kind;
+export default connect(null, mapDispatchToProps)(EditKind);

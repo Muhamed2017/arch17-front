@@ -7,7 +7,8 @@ const userDefaultState ={
     info:null,
     displayName:null,
     photoURL:null,
-    brandStep:0
+    brandStep:0,
+    homepage:null,
 }
 
 const userInfo = JSON.parse(localStorage.getItem("user")) ?? userDefaultState;
@@ -143,6 +144,11 @@ export const firebaseEmailPasswordReducer = (state = userInfo, action)=>{
             return {
                 ...state,
                 brandStep: 2
+            }
+            case actions.LOAD_HOMEPAGE_DATA:
+            return {
+                ...state,
+                homepage: action.payload,
             }
         default:
             return state;

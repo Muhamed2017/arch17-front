@@ -11,6 +11,10 @@ a{
     background-color: #f8f8f8;
     min-height: 180px;
 }
+.head-wrapper{
+max-width: 1350px;
+margin: auto;
+}
 .head-container p{
     display: block;
     max-width: 1350px;
@@ -154,4 +158,34 @@ cursor: pointer;
     font-size: 1.2rem !important;
     margin-left: 0 !important;
     width: 100px;
+}
+.creator, span.anticon-edit{
+    display: inline-block !important;
+}
+@media screen and (max-width:768px){
+    .products{
+        padding: 15px;
+    }
+
+    .head-container{
+        padding-top: 31px;
+        text-align: center;
+    }
+    .head-container p{
+        padding: 0;
+    }
+    .head-container p.creator, p.col-name{
+        padding: 0;
+    }
+    .delete-p, .share-btn{
+        width:100%;
+    }
+
+    .head-wrapper  p , .head-wrapper span{
+        margin-bottom:10px;
+    }
+    
+
+    
+
 }

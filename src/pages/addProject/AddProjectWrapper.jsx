@@ -23,7 +23,6 @@ export const steps = [
    <div
     onClick={() => {
      console.log("info");
-     //  this.props.dispatch({})
     }}
    >
     1.Project Info
@@ -33,7 +32,6 @@ export const steps = [
  },
  {
   title: "2.Content",
-  //   content: <ContentStep />,
   content: <TextEditor />,
  },
  {
@@ -87,7 +85,7 @@ class AddProjectWrapper extends Component {
  };
  render() {
   const current = this.props.step;
-  //   const current = 1;
+  //   const current = 3;
   return (
    <>
     <div className="addprojectwrapper">
@@ -113,30 +111,6 @@ class AddProjectWrapper extends Component {
         className={`steps-content custom-content wrapper-inner step${current}`}
        >
         {steps[current].content}
-
-        <div className="steps-action">
-         {current > 0 && (
-          <button
-           className="prev-btn"
-           style={{ margin: "0 0px", position: "relative" }}
-           onClick={() => this.prev()}
-          >
-           Previous
-          </button>
-         )}
-
-         {current < steps.length - 1 && (
-          <Button
-           type="primary"
-           onClick={() => this.next()}
-           style={{
-            display: "none",
-           }}
-          >
-           Next
-          </Button>
-         )}
-        </div>
        </div>
       </Col>
      </Row>

@@ -1,0 +1,84 @@
+
+*{
+    font-family: "Roboto";
+}
+
+.notifications-list .dropdown-menu{
+    padding: 13px;
+    border-radius: 5px;
+    min-width: 300px;
+    max-width: 390px;
+    height: 600px;
+overflow-y: auto;
+right: 0;
+}
+
+
+.notifications-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.notifications-header p{
+font-size: 18px;
+    font-weight: 600;
+    color: #000;
+}
+.notifications-header span{
+    font-size: 12px;
+        font-weight: 500;
+        color: #000;
+        text-decoration: underline;
+        cursor: pointer;
+}
+
+.notifications-list .dropdown-item{
+min-height: 60px;
+}
+.notifications-list .n-img{
+      
+            width: 55px;
+                height: 55px;
+                padding-top: 8px;
+                background-color: #f6f6f6f6;
+                border-radius: 4px;
+                margin-right: 11px;
+                font-size: 26px !important;
+                font-weight: 600;
+                text-align: center;
+                background-repeat: no-repeat;
+                background-size: contain;
+                background-position: center;
+
+}
+.notification-item{
+    margin-bottom: 10px;
+}
+.notifications-list .dropdown-item.active{
+    background-color: transparent !important;
+}
+.notifications-list .n-img, .n-content{
+    display: inline-block;
+        vertical-align: middle;
+        font-size: 14px
+}
+.notifications-list .n-content p{
+    margin-bottom: 0;
+
+}
+.notification-item .decorated{
+    font-weight: 500;
+        text-decoration: underline;
+        font-size: 12px;
+}
+.notifications-list .n-content > span{
+        color: #a5a0a0;
+            font-size: 12px
+}
+
+.notifications-list .dropdown-toggle::after{
+    display: none;
+}
+.notifications-list > a >svg{
+fill: rgba(0, 0, 0, .55) !important;
+}

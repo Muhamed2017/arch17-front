@@ -68,7 +68,12 @@ class CreateBrandRegister extends Component {
          <Form.Group style={{ marginBottom: "0" }}>
           <FormAnt>
            <Row>
-            <Col>
+            <Col
+             lg={{ span: 6 }}
+             md={{ span: 6 }}
+             sm={{ span: 12 }}
+             xs={{ span: 12 }}
+            >
              <FormAnt.Item
               name="fname"
               rules={[
@@ -93,7 +98,12 @@ class CreateBrandRegister extends Component {
               />
              </FormAnt.Item>
             </Col>
-            <Col>
+            <Col
+             lg={{ span: 6 }}
+             md={{ span: 6 }}
+             sm={{ span: 12 }}
+             xs={{ span: 12 }}
+            >
              <FormAnt.Item
               name="lname"
               rules={[
@@ -292,12 +302,14 @@ class CreateBrandRegister extends Component {
          <div className="switch">
           <p>
            Already have an Arch17 ID?
-           <span> Sign in</span>
+           <a href="/signin">
+            <span> Sign in</span>
+           </a>
           </p>
          </div>
          <div></div>
          <div className="sign-footer">
-          Create a Designer Account <span>i</span>
+          <a href="designeraccount">Create a Designer Account</a>
          </div>
         </Form>
        </Col>

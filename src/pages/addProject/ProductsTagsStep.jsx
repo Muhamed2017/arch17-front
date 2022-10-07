@@ -3,7 +3,10 @@ import { Row, Col, Checkbox, Select, Spin } from "antd";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { API } from "./../../utitlties";
-import { addProjectTags } from "../../redux/actions/addProjectActions";
+import {
+ addProjectTags,
+ goToProjectStep,
+} from "../../redux/actions/addProjectActions";
 import { connect } from "react-redux";
 import { LoadingOutlined } from "@ant-design/icons";
 import {
@@ -16,16 +19,13 @@ import {
  bathroom_kind_options,
  kind_options,
 } from "../addProduct/ProductClassifications";
-// export const constructions_kind_options= [
-// import {}
-// export const constructions_kind_options= [
-// constructions_kind_options
 const { Option } = Select;
 class ProductsTagsStep extends Component {
  constructor(props) {
   super(props);
   this.state = {
    products: [],
+   noTypes: false,
    ids: this.props.tags ?? [],
    selectedBrand: "",
    selectedCategory: "",
@@ -59,6 +59,9 @@ class ProductsTagsStep extends Component {
  rightType = (type) => {
   let right = [];
   switch (type) {
+   case "":
+    right = [];
+    break;
    case "Furniture":
     right = kind_options;
     break;
@@ -97,6 +100,41 @@ class ProductsTagsStep extends Component {
 
   return right;
  };
+ handleBrandChange = (selectedBrand) => {
+  this.setState(
+   {
+    selectedBrand,
+    selectedType: "",
+    selectedCategory: "",
+   },
+   () => {
+    this.getProducts();
+   }
+  );
+ };
+
+ handleCategoryChange = (selectedCategory) => {
+  this.setState(
+   {
+    selectedCategory,
+    selectedType: "",
+    typeOptions: this.rightType(selectedCategory),
+   },
+   () => {
+    this.getProducts();
+   }
+  );
+ };
+ handleTypeChange = (selectedType) => {
+  this.setState(
+   {
+    selectedType,
+   },
+   () => {
+    this.getProducts();
+   }
+  );
+ };
  componentDidMount() {
   axios
    .get(`${API}tags`)
@@ -119,121 +157,87 @@ class ProductsTagsStep extends Component {
      <Row span={24} gutter={12} className="mt-3 mb-5">
       <Col md={5}>
        <Select
-        labelInValue
         className="w-100"
         size="large"
         showSearch
-        onChange={(e) => {
-         this.setState(
-          {
-           selectedBrand: e.key,
-          },
-          () => {
-           this.getProducts();
-          }
-         );
-         console.log(e);
-        }}
-        allowClear
-        defaultValue=""
+        value={this.state.selectedBrand}
+        onChange={this.handleBrandChange}
        >
-        <Option value="" key="" label="">
-         <div className="demo-option-label-item">All Brands</div>
+        <Option value="" key="All">
+         All Brands
         </Option>
 
         {this.state.brandsOptions?.map((brand) => {
          return (
-          <Option value={brand.name} key={brand.id} label={brand.id}>
-           <div className="demo-option-label-item">{brand.name}</div>
+          <Option value={brand.id} key={brand.id}>
+           {brand.name}
           </Option>
          );
         })}
        </Select>
       </Col>
-      <Col md={5}>
-       <Select
-        labelInValue
-        className="w-100"
-        size="large"
-        onChange={(e) => {
-         this.setState(
-          {
-           selectedCategory: e.value,
-           typeOptions: this.rightType(e.value),
-          },
-          () => {
-           this.getProducts();
-           console.log(this.state.typeOptions);
-          }
-         );
-         console.log(e);
-        }}
-        // allowClear
-        defaultValue=""
-       >
-        <Option value="" label="All Categories">
-         <div className="demo-option-label-item">All Categories</div>
-        </Option>
-        <Option value="Furniture" label="Furniture">
-         <div className="demo-option-label-item">Furniture</div>
-        </Option>
-        <Option value="Lighting" label="Lighting">
-         <div className="demo-option-label-item">Lighting</div>
-        </Option>
-        <Option value="Decore" label="Decore">
-         <div className="demo-option-label-item">Decore</div>
-        </Option>
-        <Option value="Bathroom" label="Bathroom">
-         <div className="demo-option-label-item">Bathroom</div>
-        </Option>
-        <Option value="Wellness" label="Wellness">
-         <div className="demo-option-label-item">Wellness</div>
-        </Option>
-        <Option value="Kitchen" label="Kitchen">
-         <div className="demo-option-label-item">Kitchen</div>
-        </Option>
-        <Option value="Finishes" label="Finishes">
-         <div className="demo-option-label-item">Finishes</div>
-        </Option>
-        <Option value="Constructions" label="Constructions">
-         <div className="demo-option-label-item">Construction</div>
-        </Option>
-       </Select>
-      </Col>
-      <Col md={5}>
-       {this.state.typeOptions.length > 0 && (
+      <>
+       <Col md={5}>
         <Select
-         labelInValue
          className="w-100"
          size="large"
-         showSearch
-         allowClear
-         onChange={(e) =>
-          this.setState(
-           {
-            selectedType: e.value,
-           },
-           () => {
-            this.getProducts();
-           }
-          )
-         }
-         defaultValue=""
+         value={this.state.selectedCategory}
+         onChange={this.handleCategoryChange}
         >
-         <Option value="" label="All Types">
-          <div className="demo-option-label-item">All Types</div>
+         <Option value="" key="">
+          All Categories
          </Option>
-
-         {this.state.typeOptions?.map((t) => {
-          return (
-           <Option value={t.value} label={t.value}>
-            <div className="demo-option-label-item">{t.value}</div>
-           </Option>
-          );
-         })}
+         <Option value="Furniture" key="Furniture">
+          Furniture
+         </Option>
+         <Option value="Lighting" key="Lighting">
+          Lighting
+         </Option>
+         <Option value="Decore" key="Decore">
+          Decore
+         </Option>
+         <Option value="Bathroom" key="Bathroom">
+          Bathroom
+         </Option>
+         <Option value="Wellness" key="Wellness">
+          Wellness
+         </Option>
+         <Option value="Kitchen" key="Kitchen">
+          Kitchen
+         </Option>
+         <Option value="Finishes" key="Finishes">
+          Finishes
+         </Option>
+         <Option value="Constructions" key="Constructions"></Option>
         </Select>
-       )}
-      </Col>
+       </Col>
+      </>
+      <>
+       <Col md={5}>
+        {this.state.typeOptions.length > 0 &&
+         this.state.selectedCategory?.length > 0 && (
+          <Select
+           className="w-100"
+           size="large"
+           showSearch
+           value={this.state.selectedType}
+           onChange={this.handleTypeChange}
+          >
+           <Option value="" key="All">
+            All Types
+           </Option>
+
+           {this.state.typeOptions?.map((t) => {
+            return (
+             <Option value={t.value} key={t.value}>
+              {t.value}
+             </Option>
+            );
+           })}
+          </Select>
+         )}
+       </Col>
+      </>
       <Col md={9}>
        <p className="text-right">{`${this.state.ids.length} Selected`} </p>
       </Col>
@@ -265,7 +269,6 @@ class ProductsTagsStep extends Component {
               <Checkbox
                value={product.product_id}
                checked={this.state?.ids?.includes(product.product_id)}
-               // checked={this.state.tags?.includes(product.product_id)}
                onChange={(e) => {
                 this.setState(
                  {
@@ -331,14 +334,35 @@ class ProductsTagsStep extends Component {
       </p>
      )}
     </div>
-    <button
+    {/* <button
      className="next-btn"
      onClick={() => {
       this.props.dispatchProjectTags(this.state.ids);
      }}
     >
      Save & Continue
-    </button>
+    </button> */}
+    <div className="next-wrapper">
+     <div className="next-inner">
+      <button
+       className="prev-btn"
+       style={{ margin: "0 0px", position: "relative" }}
+       onClick={() => this.props.dispatchGoStep(2)}
+      >
+       Previous
+      </button>
+      <button
+       className="next-btn"
+       onClick={() => {
+        this.props.dispatchProjectTags(this.state.ids);
+
+        //  this.props.dispatchGoStep(2);
+       }}
+      >
+       Save & Continue
+      </button>
+     </div>
+    </div>
    </>
   );
  }
@@ -346,6 +370,7 @@ class ProductsTagsStep extends Component {
 
 const mapDispatchToProps = (dispatch) => ({
  dispatchProjectTags: (tags) => dispatch(addProjectTags(tags)),
+ dispatchGoStep: (step) => dispatch(goToProjectStep(step)),
 });
 const mapStateToProps = (state) => {
  return {

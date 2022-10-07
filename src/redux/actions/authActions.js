@@ -2,7 +2,7 @@
 import * as actions from '../constants'
 import { auth, googleProvider, facebookProvider} from './../../firebase';
 import axios from 'axios'
-import {toast, Flip, Bounce } from 'react-toastify';
+import {toast, Flip } from 'react-toastify';
 export const emailPasswordSignup = ()=>({
     type:actions.SIGNUP_EMAIL_PASSWORD_REQUEST
 })
@@ -78,11 +78,16 @@ export const createBrandBrandNext = () => ({
     type: actions.CREATE_BRAND_BRAND_NEXT,
 })
 
+ const loadHomepageData = (homepage) => ({
+    type: actions.LOAD_HOMEPAGE_DATA,
+    payload:homepage
+})
 export const logout = ()=>{
     return {
         type: actions.LOGOUT
     }
 }
+
 export const updateInfo = (information)=>{
     return {
         type:actions.UPDATE_INFO,
@@ -90,43 +95,30 @@ export const updateInfo = (information)=>{
     }
 }
 
+export const loadHomepage = (homepage)=>{
+return (dispatch)=>{
+    dispatch(loadHomepageData(homepage))
+}
+}
 export const signupEmailPassword= (fname,lname, email, password, method)=>{
 const displayName=`${fname} ${lname}`
     return (dispatch)=>{
         dispatch(emailPasswordSignup());
-       if(method==='firebase'){
-            auth.createUserWithEmailAndPassword(email, password).then((userCredential) => {
-            userCredential.user.updateProfile({
-                displayName: displayName,
-            }).then(()=>{
-                const providerId = userCredential.user.providerData[0].providerId
-                const {displayName, email, uid, photoURL} = userCredential.user
-                registerUser(displayName, email, uid, providerId, photoURL ).then(()=>{
-                dispatch(emailPasswordSignupSuccess(userCredential.user))
-                presistInfo(userCredential.user, true)     
-                })               
-            })
-        })
-       }
-        if(method==='regular'){
-              const formData = new FormData();
-              formData.append("fname", fname);
-              formData.append("lname", lname);
-              formData.append("email", email);
-              formData.append("password", password);
-              axios
-              .post(`${actions.ENDPOINT}user/register`, formData)
-                    .then((response) => {
-                        console.log(response.data.user);
-                        dispatch(emailPasswordSignupSuccess(response.data.user))
-                        presistInfo(response.data.user, true);
-                    })
-                    .catch((error) => {
-                    console.log(error);
-                    });
-        }  
+    
+const fd = new FormData();
+fd.append('password', password)
+fd.append('password_confirmation',password)
+fd.append('displayName', displayName)
+fd.append('email', email)
+    axios.post(`${actions.ENDPOINT}user/registration/signup`, fd).then((response)=>{
+        const {user} = response.data
+        console.log(response)
+           dispatch(emailPasswordSignupSuccess(user))
+                presistInfo(user, true)  
+
+    })
+            }
     }
-}
 
 export const normalSignupRequest= (fname, lname, email, password)=>{
 const fd = new FormData();
@@ -161,49 +153,41 @@ return (dispatch)=>{
 }
 }
 
-export const vanillaSigninEmailPassword = (email, password)=>{
-return (dispatch)=>{
-    dispatch(emailPasswordSignin())
-    auth.signInWithEmailAndPassword(email, password).then((userCredential)=>{
-        dispatch(emailPasswordSigninSuccess(userCredential.user))
-        dispatch(emailPasswordSignupSuccess(userCredential.user))
-        presistInfo(userCredential.user, true)
-        console.log(userCredential);
-    })
-}
-}
 export const signinEmailPassword = (email, password, newName, newEmail, phone) => {
+    const fd = new FormData()
+    fd.append('email', email)
+    fd.append('password', password)
     return (dispatch) => {
         dispatch(emailPasswordSignin())
-        auth.signInWithEmailAndPassword(email, password).then((userCredential) => {
-            if(newName!=="" ){
-                userCredential.user.updateProfile({
-                    displayName: newName,
-                }).then(()=>{
-                    console.log("Name updated")
-                    // setUserInfo(userCredential.user)
-                    dispatch(setNavActionCreator(userCredential.user))
-                })
-            } if (newEmail != "") {
-                userCredential.user.updateEmail(newEmail).then(() => {
-                    console.log("email updated")
-                    console.log(newEmail, auth.currentUser)
-                })
-            }
-            if (phone != "") {
-                userCredential.user.updatePhoneNumber(phone).then(() => {
-                    console.log("phone updated")
-                    setUserInfoAction(userCredential.user)
-                })
-            }
-            dispatch(emailPasswordSigninSuccess(userCredential.user))
-            // setUserInfo(userCredential.user)
-            setUserInfoAction(userCredential.user)
-            console.log(userCredential);
+        axios.post(`${actions.ENDPOINT}user/registration/signin`, fd).then((response)=>{
+            const {user}= response.data
+             dispatch(emailPasswordSigninSuccess(user))
+            setUserInfoAction(user)
+            console.log(user);
         })
 
     }
 }
+
+export const vanillaSigninEmailPassword = (email, password)=>{
+return (dispatch)=>{
+    const fd = new FormData()
+    fd.append('email', email)
+    fd.append('password', password)
+    // return (dispatch) => {
+        dispatch(emailPasswordSignin())
+        axios.post(`${actions.ENDPOINT}user/registration/signin`, fd).then((response)=>{
+            const {user}= response.data
+             dispatch(emailPasswordSigninSuccess(user))
+            setUserInfoAction(user)
+        presistInfo(user, true)
+
+        })
+        
+// }
+}
+}
+// end of new login api without firebase
 
 export const setUserInfoAction = (userData)=>{
     return (dispatch)=>{
@@ -255,6 +239,30 @@ export const signupGoogle = () => {
     }
 }
 
+export const signupFacebook= ()=>{
+  return (dispatch) =>{
+      dispatch(facebookSignupRequest());
+      auth.signInWithPopup(facebookProvider).then((userCredential)=>{
+        if(userCredential.additionalUserInfo.isNewUser){
+                const providerId = userCredential.user.providerData[0].providerId
+                const {displayName, email, uid, photoURL} = userCredential.user
+                registerUser(displayName, email, uid, providerId, photoURL ).then(()=>{
+                dispatch(facebookSignupSuccess(userCredential.user))
+                dispatch(updateInfo(userCredential.user))
+                presistInfo(userCredential.user, true)  
+                })
+            }else{
+                dispatch(facebookSignupSuccess(userCredential.user))
+                dispatch(updateInfo(userCredential.user))
+                presistInfo(userCredential.user, true)
+            }
+      }).catch(error=>{
+          console.log(error.message)
+      })
+  }  
+}
+
+
 const registerUser= async (displayName, email, uid, providerId, avatar)=>{
     const fd = new FormData()
     fd.append('displayName', displayName);
@@ -277,33 +285,10 @@ export const phoneSignupSuccess = (user)=>{
         dispatch(phoneSignupSuccessCreator(user))        
     }
 }
-export const signupFacebook= ()=>{
-  return (dispatch) =>{
-      dispatch(facebookSignupRequest());
-      auth.signInWithPopup(facebookProvider).then((userCredential)=>{
-          console.log(userCredential.user)
-          dispatch(facebookSignupSuccess(userCredential.user))
-          dispatch(updateInfo(userCredential.user))
-          presistInfo(userCredential.user, true)
-      }).catch(error=>{
-          console.log(error.message)
-      })
-  }  
-}
+
 export const logginOut = () => {
     localStorage.removeItem('user');
     return (dispatch) => {
         dispatch(logout())
     }
 }
-
-// export const brandNext = ()=>{
-//     return (dispatch)=>{
-//         dispatch(createBrandNext())
-//     }  
-// }
-// export const brandPrevious = () => {
-//     return (dispatch) => {
-//         dispatch(createBrandPrevious())
-//     }
-// }
