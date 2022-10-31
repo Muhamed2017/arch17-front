@@ -2,15 +2,12 @@ import React, { Component } from "react";
 import { Form, Select, Input, Spin } from "antd";
 import ReactFlagsSelect from "react-flags-select";
 import { customLabels } from "../pages/CreateBrandFinish";
-import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
-import en from "world_countries_lists/data/countries/en/world.json";
 import "./company.css";
 import { API } from "./../utitlties";
 import axios from "axios";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import { company_services } from "../pages/addProduct/ProductClassifications";
-
 import { LoadingOutlined } from "@ant-design/icons";
 const { Option } = Select;
 
@@ -27,6 +24,7 @@ class CreateCompanyStep extends Component {
    missed_phone: false,
    saving_company: false,
    company_id: null,
+   email: "",
   };
  }
  onFinish = (values) => {
@@ -35,16 +33,8 @@ class CreateCompanyStep extends Component {
   values.phone = this.state.phone;
   if (!values.country) {
    this.setState({ missed_country: true });
-  }
-  if (!values.phone) {
-   this.setState({ missed_phone: true });
-  }
-  if (!values.phone_code) {
-   this.setState({ missed_code: true });
   } else {
    this.setState({
-    missed_phone: false,
-    missed_code: false,
     missed_country: false,
    });
    console.log("Success:", values);
@@ -59,12 +49,12 @@ class CreateCompanyStep extends Component {
     fd.append("services[]", s);
    });
    fd.append("country", this.state.country);
-   fd.append("code", values.phone_code);
-   fd.append("phone", values.phone);
-   fd.append("email", values.email);
-   fd.append("user_id", this.props.info?.id);
+
+   if (this.state.email && this.state.email?.length > 0) {
+    fd.append("email", this.state.email);
+   }
+   //  fd.append("user_id", this.props.info?.id);
    fd.append("user_uid", this.props.info?.uid);
-   fd.append("email", values.email);
    axios
     .post(`${API}comapny`, fd)
     .then((response) => {
@@ -96,14 +86,7 @@ class CreateCompanyStep extends Component {
   });
  };
  render() {
-  const {
-   country,
-   phone,
-   phone_code,
-   missed_code,
-   missed_country,
-   missed_phone,
-  } = this.state;
+  const { country, missed_country } = this.state;
 
   return (
    <>
@@ -182,23 +165,19 @@ class CreateCompanyStep extends Component {
       <Form.Item
        name="email"
        rules={[
-        { required: true, message: "Valid email is required", type: "email" },
+        {
+         message: "Valid email is required",
+         type: "email",
+        },
        ]}
       >
-       <Input placeholder="Email *" />
-      </Form.Item>
-      <ConfigProvider locale={en}>
-       <CountryPhoneInput
-        onChange={(e) =>
-         this.setState({ phone: e.phone, phone_code: e.code }, () =>
-          console.log(this.state)
-         )
-        }
+       <Input
+        placeholder="Email"
+        onChange={(e) => {
+         this.setState({ email: e.target.value });
+        }}
        />
-       {(missed_code || missed_phone || !phone || !phone_code) && (
-        <p style={{ color: "red" }}>phone is required</p>
-       )}
-      </ConfigProvider>
+      </Form.Item>
 
       <button className="coninue-btn regular-auth my-3" htmlType="submit">
        {!this.state.saving_company ? (

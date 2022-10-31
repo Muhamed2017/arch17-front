@@ -5,12 +5,15 @@ import { DeleteOutlined } from "@ant-design/icons";
 import { IoLocation } from "react-icons/io5";
 import { connect } from "react-redux";
 import axios from "axios";
+
 import {
  addProjectRoles,
  addProjectRoleDesigner,
+ addProjectRoleCompany,
  addProjectRoleBrand,
  deleteProjectRoleBrand,
  deleteProjectRoleDesigner,
+ deleteProjectRoleCompany,
  goToProjectStep,
 } from "./../../redux/actions/addProjectActions";
 import { API } from "../../utitlties";
@@ -21,10 +24,15 @@ class RoleStep extends Component {
    designesModal: false,
    brandsModal: false,
    designers: [],
+   companies: [],
    brands: [],
    addedDesigners: this.props.designers ?? [],
+   addedCompanies: this.props.companies ?? [],
    addedBrands: this.props.brands ?? [],
    addedDesIDs: this.props.designers?.map((des) => {
+    return des.id;
+   }),
+   addedComIDs: this.props.companies?.map((des) => {
     return des.id;
    }),
    addedBraIDs: this.props.brands?.map((b) => {
@@ -56,13 +64,11 @@ class RoleStep extends Component {
  showModal = () => {
   this.setState({
    designesModal: true,
-   //  filteredDesigners: this.state.designers,
   });
  };
  showBrandModal = () => {
   this.setState({
    brandsModal: true,
-   //  filteredBrands: this.state.brands,
   });
  };
  handleOk = (e) => {
@@ -89,17 +95,32 @@ class RoleStep extends Component {
    brandsModal: false,
   });
  };
- handleAddDesigner = (d) => {
-  this.setState(
-   {
-    designesModal: false,
-    addedDesIDs: [...this.state.addedDesIDs, d.id],
-    addedDesigners: [...this.state.addedDesigners, d],
-   },
-   () => {
-    this.props.dispatchAddDesigner(d);
-   }
-  );
+
+ handleAddDesigner = (d, type) => {
+  if (type === "designer") {
+   this.setState(
+    {
+     designesModal: false,
+     addedDesIDs: [...this.state.addedDesIDs, d.id],
+     addedDesigners: [...this.state.addedDesigners, d],
+    },
+    () => {
+     this.props.dispatchAddDesigner(d);
+    }
+   );
+  }
+  if (type === "company") {
+   this.setState(
+    {
+     designesModal: false,
+     addedComIDs: [...this.state.addedComIDs, d.id],
+     addedCompanies: [...this.state.addedCompanies, d],
+    },
+    () => {
+     this.props.dispatchAddCompany(d);
+    }
+   );
+  }
  };
  handleAddBrand = (d) => {
   this.setState(
@@ -114,6 +135,38 @@ class RoleStep extends Component {
   );
  };
  componentDidMount() {
+  console.log(this.props.match);
+  // if (this.props.match.params.type && this.props.match.params.id) {
+  //  axios
+  //   .get(`${API}${this.props.match.params.type}${this.props.match.params.id}`)
+  //   .then((response) => {
+  //    console.log(response);
+  //    if (this.props.match.params.type === "company") {
+  //     this.setState(
+  //      {
+  //       designesModal: false,
+  //       addedComIDs: [...this.state.addedComIDs, response.data.company?.id],
+  //       addedCompanies: [...this.state.addedCompanies, response.data.company],
+  //      },
+  //      () => {
+  //       this.props.dispatchAddCompany(response.data.company);
+  //      }
+  //     );
+  //    }
+  //    if (this.props.match.params.type === "designer") {
+  //     this.setState(
+  //      {
+  //       designesModal: false,
+  //       addedDesIDs: [...this.state.addedDesIDs, response.data.designer?.id],
+  //       addedDesigners: [...this.state.addedDesigners, response.data.designer],
+  //      },
+  //      () => {
+  //       this.props.dispatchAddDesigner(response.data.designer);
+  //      }
+  //     );
+  //    }
+  //   });
+  // }
   window.scrollTo({
    top: 0,
   });
@@ -122,7 +175,6 @@ class RoleStep extends Component {
    .then((response) => {
     this.setState({
      brands: response.data.brands,
-     designers: Object.values(response.data.users),
     });
     console.log(response);
    })
@@ -130,9 +182,17 @@ class RoleStep extends Component {
     console.log(e);
    });
  }
+ handleSearchDesignerCompanies = (keyword) => {
+  axios.get(`${API}designers/${keyword}`).then((response) => {
+   console.log(response);
+   this.setState({
+    designers: response.data.designers?.data,
+    companies: response.data.companies?.data,
+   });
+  });
+ };
  render() {
   const { designesModal, disabled, bounds, brandsModal } = this.state;
-
   return (
    <>
     <div id="rolestep">
@@ -174,12 +234,6 @@ class RoleStep extends Component {
             <Col md={20}>
              <div className="d-info">
               <span className="inline-block">{d?.displayName}</span>
-              {/* <div className="d-professions">
-               {d.professions.map((p, index) => {
-                return <p key={index}>{p}</p>;
-               })}
-              </div> */}
-
               <p className="d-loc">
                {d.country && (
                 <>
@@ -221,6 +275,67 @@ class RoleStep extends Component {
          </>
         );
        })}
+       {this.state.addedCompanies?.map((c) => {
+        return (
+         <>
+          <Col md={20} className="my-3">
+           <Row span={24} align="middle" gutter={70}>
+            <Col md={4}>
+             <div className="wraprow">
+              <div
+               className="d-img inline-block"
+               style={{
+                backgroundImage: `url(${c?.profile})`,
+               }}
+              >
+               {c?.profile?.length < 10 && <>{c?.name[0]}</>}
+              </div>
+             </div>
+            </Col>
+            <Col md={20}>
+             <div className="d-info">
+              <span className="inline-block">{c?.name}</span>
+              <p className="d-loc">
+               {c.country && (
+                <>
+                 <IoLocation />
+                 {c.country}
+                 {c.city && <>, {c.city}</>}
+                </>
+               )}
+              </p>
+             </div>
+            </Col>
+           </Row>
+          </Col>
+          <Col md={4} className="my-3 text-right pr-70">
+           <p
+            className="pointer"
+            onClick={() => {
+             this.setState(
+              {
+               addedCompanies: this.state.addedCompanies?.filter((com) => {
+                return com.id !== c.id;
+               }),
+               addedComIDs: this.state.addedComIDs?.filter((id) => {
+                return id !== c.id;
+               }),
+              },
+              () => {
+               this.props.dispatchDeleteCompany(c);
+              }
+             );
+            }}
+           >
+            <DeleteOutlined />
+           </p>
+          </Col>
+          <Col md={24}>
+           <hr className="w-90 m-auto block" />
+          </Col>
+         </>
+        );
+       })}
       </Row>
       <Row className="text-center my-3 mt-5">
        <Col md={24}>
@@ -236,8 +351,6 @@ class RoleStep extends Component {
        </Col>
       </Row>
      </div>
-     {/* <hr className="w-50 text-center m-auto mb-5" /> */}
-
      <div className="brands-sections section">
       <Row span={24} gutter={10}>
        <Col md={24} className="mt-3 mb-5 bold">
@@ -336,7 +449,6 @@ class RoleStep extends Component {
        </Col>
       </Row>
      </div>
-
      <div className="next-wrapper">
       <div className="next-inner">
        <button
@@ -385,7 +497,7 @@ class RoleStep extends Component {
         });
        }}
       >
-       Designers
+       Designers / Design Companies
       </div>
      }
      visible={designesModal}
@@ -403,39 +515,61 @@ class RoleStep extends Component {
      )}
     >
      <Input
-      placeholder="Search Desigers"
+      placeholder="Search Desigers / Design company"
       size="large"
-      onChange={(e) => {
-       console.log(e);
-       this.setState({
-        filteredDesigners:
-         e.target.value.length > 0
-          ? this.state.designers?.filter((d) => {
-             return d.displayName
-              .toLowerCase()
-              ?.includes(e.target.value.toLowerCase());
-            })
-          : [],
-       });
-      }}
+      // onChange={(e) => {
+      //  console.log(e);
+      //  this.setState({
+      //   filteredDesigners:
+      //    e.target.value.length > 0
+      //     ? this.state.designers?.filter((d) => {
+      //        return d.displayName
+      //         .toLowerCase()
+      //         ?.includes(e.target.value.toLowerCase());
+      //       })
+      //     : [],
+      //  });
+      // }}
+
+      onChange={(e) => this.handleSearchDesignerCompanies(e.target.value)}
      />
-     {this.state?.filteredDesigners?.map((d, key) => {
+     {this.state.designers?.map((d, key) => {
       if (!this.state.addedDesIDs?.includes(d.id)) {
        return (
         <Row span={24} key={key}>
          <Col
           md={24}
           className="designers-row"
-          onClick={() => this.handleAddDesigner(d)}
+          onClick={() => this.handleAddDesigner(d, "designer")}
          >
           <div
            style={{ background: `url(${d.photoURL})` }}
            className="d-img inline-block middle"
           >
            {d?.photoURL?.length < 10 && <>{d?.displayName?.slice(0, 1)} </>}
-           {/* {d?.displayName?.slice(0, 1)} */}
           </div>
           <span className="inline-block middle">{d?.displayName}</span>
+         </Col>
+        </Row>
+       );
+      }
+     })}
+     {this.state.companies?.map((company) => {
+      if (!this.state.addedComIDs?.includes(company.id)) {
+       return (
+        <Row span={24} key={company.id}>
+         <Col
+          md={24}
+          className="designers-row"
+          onClick={() => this.handleAddDesigner(company, "company")}
+         >
+          <div
+           style={{ background: `url(${company.profile})` }}
+           className="d-img inline-block middle"
+          >
+           {company?.profile?.length < 10 && <>{company?.name?.slice(0, 1)} </>}
+          </div>
+          <span className="inline-block middle">{company?.name}</span>
          </Col>
         </Row>
        );
@@ -525,17 +659,20 @@ class RoleStep extends Component {
 const mapDispatchToProps = (dispatch) => ({
  dispatchProjectRole: (roles) => dispatch(addProjectRoles(roles)),
  dispatchAddDesigner: (designer) => dispatch(addProjectRoleDesigner(designer)),
+ dispatchAddCompany: (company) => dispatch(addProjectRoleCompany(company)),
  dispatchAddBrand: (brand) => dispatch(addProjectRoleBrand(brand)),
  dispatchDeleteBrand: (brand) => dispatch(deleteProjectRoleBrand(brand)),
  dispatchGoStep: (step) => dispatch(goToProjectStep(step)),
-
  dispatchDeleteDesigner: (designer) =>
   dispatch(deleteProjectRoleDesigner(designer)),
+ dispatchDeleteCompany: (company) =>
+  dispatch(deleteProjectRoleCompany(company)),
 });
 const mapStateToProps = (state) => {
  return {
   roles: state.project.project_roles,
   designers: state.project.role_designers,
+  companies: state.project.role_companies,
   brands: state.project.role_brands,
  };
 };

@@ -92,6 +92,9 @@ class CoverStep extends Component {
   this.props.project.role_brands?.forEach((s) => {
    fd.append("stores[]", s.id);
   });
+  this.props.project.role_companies?.forEach((s) => {
+   fd.append("companies[]", s.id);
+  });
   this.props.project.project_tags?.forEach((p) => {
    fd.append("products[]", p);
   });
@@ -201,7 +204,7 @@ class CoverStep extends Component {
             this.changeImg(index);
            }}
            style={{
-            backgroundImage: `url(${c})`,
+            backgroundImage: `url("${c}")`,
            }}
           ></div>
          );
@@ -225,28 +228,6 @@ class CoverStep extends Component {
       </Col>
      </Row>
     </div>
-
-    {/* <button
-     className="next-btn"
-     onClick={this.handleSubmitAddPrject}
-     style={{
-      background: this.state.creating ? "#ddd" : "",
-     }}
-    >
-     {this.state.creating ? (
-      <Spin
-       style={{
-        minWidth: "120px",
-       }}
-       size="large"
-       indicator={
-        <LoadingOutlined style={{ fontSize: "25px", color: "#fff" }} spin />
-       }
-      />
-     ) : (
-      "Save & Continue"
-     )}
-    </button> */}
     <div className="next-wrapper">
      <div className="next-inner">
       <button

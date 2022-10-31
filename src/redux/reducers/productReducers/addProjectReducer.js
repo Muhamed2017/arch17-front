@@ -2,6 +2,8 @@ import {
   ADD_PROJECT_INFO,
   ADD_PROJECT_ROLE,
   ADD_PROJECT_ROLE_DESIGNER,
+  ADD_PROJECT_ROLE_COMPANY,
+  DELETE_ROLE_COMPANY,
   ADD_PROJECT_ROLE_BRAND,
   ADD_PROJECT_CONTENT,
   ADD_PROJECT_TAGS,
@@ -21,6 +23,7 @@ const defaultState ={
    project_content:null,
    project_roles:{},
    role_designers:[],
+   role_companies:[],
    role_brands:[],
    project_tags:[],
    project_covers:[],
@@ -77,6 +80,12 @@ export default function projectReducer(state = defaultState, action) {
             ...state,
             role_designers:[...state.role_designers, action.payload] 
       }
+
+       case ADD_PROJECT_ROLE_COMPANY:
+          return {
+            ...state,
+            role_companies:[...state.role_companies, action.payload] 
+      }
          case ADD_PROJECT_ROLE_BRAND:
           return {
             ...state, 
@@ -86,6 +95,13 @@ export default function projectReducer(state = defaultState, action) {
           return {
             ...state, 
             role_designers:state.role_designers.filter((d)=>{
+              return d.id!==action.payload.id
+            }) ,
+      }
+       case DELETE_ROLE_COMPANY:
+          return {
+            ...state, 
+            role_companies:state.role_companies.filter((d)=>{
               return d.id!==action.payload.id
             }) ,
       }
@@ -118,6 +134,7 @@ export default function projectReducer(state = defaultState, action) {
             project_tags:action.payload.project_tags,
             role_brands:action.payload.role_brands,
             role_designers:action.payload.role_designers,
+            role_companies:action.payload.role_companies,
             project_covers:action.payload.project_covers,
             cycle_type:"EDIT"
       }

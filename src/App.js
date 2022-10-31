@@ -78,7 +78,7 @@ class App extends Component {
               
               <Route path='/product/:id' component={Product} exact/>
               <Route path='/project/:id' component={Project} exact/>
-              <Route path='/magazine' component={Magazine} exact/>
+              <Route path='/design-selected' component={Magazine} exact/>
               <Route path='/brands' component={AllBrands} exact/>
 
 
@@ -90,12 +90,12 @@ class App extends Component {
               <Route path='/products' 
               render={(state)=> <Search {...state}/>}
               exact />
-               <Route path='/products/:category' 
+               {/* <Route path='/products/:category' 
               render={(state)=> <Search {...state}/>}
               exact />
                <Route path='/products/:category/:type' 
               render={(state)=> <Search {...state}/>}
-               exact />
+               exact /> */}
               <Route path='/identity/:id' 
               render={(state)=><AddProductWrapper {...state}/>}
               exact />

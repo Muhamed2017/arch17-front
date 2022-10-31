@@ -1,5 +1,5 @@
 import React, { Component, createRef } from "react";
-import { Container, Col, Row } from "react-bootstrap";
+import { Container, Col, Row, Button, Form } from "react-bootstrap";
 import "photoswipe/dist/photoswipe.css";
 import "photoswipe/dist/default-skin/default-skin.css";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
@@ -7,6 +7,10 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { HiFolderDownload } from "react-icons/hi";
 import "./product.css";
 import ReactPlayer from "react-player";
+import { Helmet } from "react-helmet";
+import ClipLoader from "react-spinners/ClipLoader";
+import { IoWarning } from "react-icons/io5";
+
 import { regionNames } from "./../redux/constants";
 import {
  Row as AntRow,
@@ -90,6 +94,7 @@ import { connect } from "react-redux";
 import qrcode from "../../src/qrcode.jpeg";
 import PriceRequestModal from "./../components/Modals/PriceRequestModal";
 import SaveToCollection from "./../components/Modals/SaveToCollection";
+import { Redirect } from "react-router-dom";
 
 import {
  closeProductRequestAction,
@@ -110,6 +115,11 @@ class Product extends Component {
    modals: {
     price_request: false,
    },
+   delete_product_modal: false,
+   deletingProduct: false,
+   isDeleted: false,
+   active_tab_wide: "overview-wide",
+   active_tab_mobile: "overview-mobile",
    signinPassword: "",
    signingEmail: "",
    acive_index: 0,
@@ -168,6 +178,26 @@ class Product extends Component {
    };
   });
  };
+ // async function getUrFromService(): Promise<string> {
+ //   await new Promise((resolve) => setTimeout(resolve, 1000));
+ //   return "https://via.placeholder.com/150";
+ // }
+
+ //  getUrlForShare = async () => {
+ //   await Promise.resolve("https://via.placeholder.com/150");
+ //  };
+
+ //  myPromise = new Promise((resolve, reject) => {
+ //   return setTimeout(() => {
+ //    resolve("https://via.placeholder.com/150");
+ //   }, 300);
+ //  });
+
+ getUrFromService = async () => {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  return "https://via.placeholder.com/150";
+ };
+
  loadImage = (imageUrl) => {
   const img = document.createElement("img");
   img.src = imageUrl;
@@ -176,7 +206,7 @@ class Product extends Component {
    console.log(`${img.width} ${img.height}`);
   };
  };
- shareUrl = `https://www.arch17test.live/product/155`;
+ shareUrl = `https://www.arch17.com/product/${this.props.match.params.id}`;
  product_id = this.props.match.params.id;
  shareMedia = this.state?.sliderImgs[0].original;
  shareQoute = this.state?.product.identity[0].name;
@@ -200,8 +230,10 @@ class Product extends Component {
   <Menu>
    <Menu.Item key="1">
     <FacebookShareButton
-     url="https://www.arch17test.live/product/155"
-     hashtag={"#Arch17"}
+     url={this.shareUrl}
+     quote={"SEMATRIC"}
+     hashtag="#Furniture"
+     description={"aiueo"}
     >
      <FacebookIcon size={25} />
     </FacebookShareButton>
@@ -221,7 +253,11 @@ class Product extends Component {
     </PinterestShareButton>
    </Menu.Item>
    <Menu.Item key="4">
-    <TwitterShareButton url={this.shareUrl} title="Share">
+    <TwitterShareButton
+     hashtags={["Arch17", "Furnitre"]}
+     url={this.shareUrl}
+     title="Share"
+    >
      <TwitterIcon size={25} />
     </TwitterShareButton>
    </Menu.Item>
@@ -616,7 +652,7 @@ class Product extends Component {
      }),
      gallery_slides: products.data.product.gallery?.map((g) => {
       if (
-       g.desc_gallery_files &&
+       g?.desc_gallery_files &&
        g?.desc_gallery_files[0] &&
        g.desc_gallery_files[0] !== "null"
       ) {
@@ -761,12 +797,53 @@ class Product extends Component {
    }),
   });
  };
+ openDeleteModal = () => {
+  this.setState({
+   delete_product_modal: true,
+  });
+ };
+ handleDeleteSubmit = () => {
+  this.setState({
+   deletingProduct: true,
+  });
+  axios
+   .post(`${API}product/delete/${this.state.product?.id}`)
+   .then((response) => {
+    console.log(response);
+    this.setState({
+     deletingProduct: false,
+     isDeleted: true,
+    });
+   })
+   .catch((err) => {
+    console.log(err);
+    this.setState({
+     deletingProduct: false,
+     isDeleted: false,
+    });
+   });
+ };
+
  render() {
   const loading = this.state.loading;
   if (!loading) {
    return (
     <React.Fragment>
      <div id="product-page" className="bg-white py-2">
+      <Helmet>
+       <meta charSet="utf-8" />
+       <meta
+        property="og:url"
+        content={`https://www.arch17.com/product/${this.state.product?.id}}`}
+       />
+       <link
+        rel="canonical"
+        href={`https://www.arch17.com/product/${this.state.product?.id}`}
+       />
+       <title>
+        {`${this.state.product?.identity[0]?.name} | ${this.state.product?.identity[0]?.kind}`}
+       </title>
+      </Helmet>
       <Container fluid className="sized-container">
        <div className="only-wide">
         <Row className="justify-content-md-center">
@@ -806,12 +883,13 @@ class Product extends Component {
            </div>
           </div>
           <Tabs
-           defaultActiveKey="overview"
-           defaultValue={"overview"}
+           onTabClick={(key) => this.setState({ active_tab_wide: key })}
+           // activeKey="overview-wide"
+           activeKey={this.state.active_tab_wide}
            className="mb-5"
           >
            {this.state.product_desc_overview?.length > 5 ? (
-            <TabPane tab="Overview" key="overview">
+            <TabPane tab="Overview" key="overview-wide" forceRender>
              <div className="overview-text">
               {this.state.product_desc_overview && (
                <CKEditor
@@ -832,7 +910,7 @@ class Product extends Component {
 
            {this.state.product_desc_mat?.length > 5 ? (
             <>
-             <TabPane tab="Materials" key="material">
+             <TabPane tab="Materials" key="material" forceRender>
               {this.state.product_desc_mat && (
                <CKEditor
                 disabled={true}
@@ -851,7 +929,7 @@ class Product extends Component {
            )}
            {this.state.product_desc_size?.length > 5 ? (
             <>
-             <TabPane key="dimensions" tab="Dimensions">
+             <TabPane key="dimensions" tab="Dimensions" forceRender>
               {this.state.product_desc_size && (
                <CKEditor
                 disabled={true}
@@ -870,7 +948,7 @@ class Product extends Component {
            )}
            {this.state.galleries?.length > 0 && (
             <>
-             <TabPane tab="Gallery" key="gallery" forceRender>
+             <TabPane tab="Gallery" key="gallery">
               <AntRow gutter={10} span={24} className="px-2">
                {this.state.gallery_slides?.map((g, index) => {
                 return (
@@ -893,7 +971,7 @@ class Product extends Component {
                   <div
                    className="product-gallery"
                    style={{
-                    backgroundImage: `url(${g?.src})`,
+                    backgroundImage: `url("${g?.src}")`,
                    }}
                   ></div>
                  </AntCol>
@@ -1214,12 +1292,15 @@ class Product extends Component {
           <div className="right-side p-3">
            {this.props.isLoggedIn &&
             this.state.product?.stores?.user_id === this.props?.uid && (
-             <a
-              href={`/edit-product/${this.state.product_id}`}
-              className="cs-link"
-             >
-              <p>Edit</p>
-             </a>
+             <>
+              <a
+               href={`/edit-product/${this.state.product_id}`}
+               className="cs-link"
+              >
+               <p>Edit</p>
+              </a>
+              <p onClick={this.openDeleteModal}>delete</p>
+             </>
             )}
 
            <div className="right-row get-icons">
@@ -1265,10 +1346,12 @@ class Product extends Component {
              </a>
             </div>
             <div className="product-name">
-             {this.state.product.identity[0].name}
+             {this.state.product.identity[0]?.name}
             </div>
 
-            {this.state.product?.designers?.length > 0 && (
+            {this.state.product?.designers?.length +
+             this.state.product?.companies?.length >
+             0 && (
              <>
               <div className="design-by px-2">
                Design By.
@@ -1289,6 +1372,26 @@ class Product extends Component {
                   </AntRow>
                  );
                 })}
+                {this.state.product?.companies?.length > 0 && (
+                 <>
+                  {this.state.product?.companies?.map((company, index) => {
+                   return (
+                    <AntRow span={24} gutter={10} className="my-3">
+                     <AntCol
+                      md={24}
+                      className="mb-0"
+                      sm={24}
+                      xs={24}
+                      key={index}
+                      style={{ fontWeight: "600" }}
+                     >
+                      <a href={`/company/${company?.id}`}>{company?.name}</a>
+                     </AntCol>
+                    </AntRow>
+                   );
+                  })}
+                 </>
+                )}
                </>
               </div>
              </>
@@ -1306,7 +1409,9 @@ class Product extends Component {
             >
              Made in
              <span style={{ fontWeight: "600" }} className="px-1">
-              {regionNames.of(this.state.product?.identity[0]?.country)}
+              {regionNames
+               .of(this.state.product?.identity[0]?.country)
+               .replace(/mainland/gi, "")}
              </span>
             </div>
            </div>
@@ -1315,7 +1420,7 @@ class Product extends Component {
              <div className="right-row product-price">
               <span style={{ fontWeight: "600", fontSize: "13px" }}>Price</span>
               <div className="price-value">
-               {/* ¥ 5500.00 */}¥ {this.state.activeOption?.price}
+               ¥ {this.state.activeOption?.price}
                <span>
                 Change Currency <BsFillCaretDownFill />
                </span>
@@ -1721,7 +1826,9 @@ class Product extends Component {
            >
             Made in
             <span style={{ fontWeight: "600" }} className="px-1">
-             {regionNames.of(this.state.product?.identity[0]?.country)}
+             {regionNames
+              .of(this.state.product?.identity[0]?.country)
+              .replace(/mainland/gi, "")}
             </span>
            </div>
           </div>
@@ -1916,45 +2023,8 @@ class Product extends Component {
              Save To Collection
             </button>
            </div>
-           {/* <div className="right-row">
-            <p className="need-info">
-             <span>Need more informations,</span> Please chat with us now from
-             the chat icon on the bottom left or message us through Whats App /
-             WeChat or e-mail us at sales@arch17.com
-            </p>
-           </div> */}
-           <div className="right-row">
-            {/* <button className="bg-white action-btn">
-             <a href="https://wa.link/1hqgdx" target="_blank" rel="noreferrer">
-              <span className="btn-icons">
-               <AiOutlineWhatsApp />
-              </span>
-              Message us Via WhatsApp
-             </a>
-            </button>
-            <button
-             className="bg-white action-btn"
-             onClick={() => {
-              this.setState({ wechatqr_modal: true });
-             }}
-            >
-             <span className="btn-icons">
-              <RiWechat2Line />
-             </span>
-             Message us Via WeChat
-            </button>
-            <button
-             onClick={this.gotofourindextest}
-             className="bg-white action-btn"
-            >
-             <span className="btn-icons">
-              <FiPhoneCall />
-             </span>
-             <span style={{ color: "#000", fontSize: ".9rem" }}>
-              +86 185 7599 9560
-             </span>
-            </button> */}
 
+           <div className="right-row">
             <p className="bold mb-1">Need to Order / More Information</p>
             <p className="">Please Contact us</p>
             <div className="chats">
@@ -1991,64 +2061,65 @@ class Product extends Component {
             </div>
            </div>
           </div>
-          <Tabs defaultActiveKey="overview" className="mb-5">
+          <Tabs
+           onTabClick={(key) => this.setState({ active_tab_mobile: key })}
+           // activeKey="overview-wide"
+           activeKey={this.state.active_tab_mobile}
+           // activeKey="overview"
+
+           className="mb-5"
+          >
            {this.state.product_desc_overview?.length > 5 ? (
-            <>
-             <TabPane tab="Overview" key="overview">
-              <div className="overview-text">
-               {this.state.product_desc_overview && (
-                <CKEditor
-                 disabled={true}
-                 config={{
-                  isReadOnly: true,
-                  toolbar: [],
-                 }}
-                 editor={ClassicEditor}
-                 data={this.state.product_desc_overview}
-                />
-               )}
-              </div>
-             </TabPane>
-            </>
+            <TabPane tab="Overview" key="overview-mobile">
+             <div className="overview-text">
+              {this.state.product_desc_overview && (
+               <CKEditor
+                disabled={true}
+                config={{
+                 isReadOnly: true,
+                 toolbar: [],
+                }}
+                editor={ClassicEditor}
+                data={this.state.product_desc_overview}
+               />
+              )}
+             </div>
+            </TabPane>
            ) : (
             <></>
            )}
 
            {this.state.product_desc_mat?.length > 5 ? (
-            <>
-             <TabPane tab="Materials" key="material">
-              {this.state.product_desc_mat && (
-               <CKEditor
-                disabled={true}
-                config={{
-                 isReadOnly: true,
-                 toolbar: [],
-                }}
-                editor={ClassicEditor}
-                data={this.state.product_desc_mat}
-               />
-              )}
-             </TabPane>
-            </>
+            <TabPane tab="Materials" key="material">
+             {this.state.product_desc_mat && (
+              <CKEditor
+               disabled={true}
+               config={{
+                isReadOnly: true,
+                toolbar: [],
+               }}
+               editor={ClassicEditor}
+               data={this.state.product_desc_mat}
+              />
+             )}
+            </TabPane>
            ) : (
             <></>
            )}
            {this.state.product_desc_size?.length > 5 ? (
-            <>
-             <TabPane key="dimensions" tab="Dimensions">
-              {this.state.product_desc_size && (
-               <CKEditor
-                disabled={true}
-                config={{
-                 isReadOnly: true,
-                 toolbar: [],
-                }}
-                editor={ClassicEditor}
-                data={this.state.product_desc_size}
-               />
-              )}
-             </TabPane>
-            </>
+            <TabPane key="dimensions" tab="Dimensions">
+             {this.state.product_desc_size && (
+              <CKEditor
+               disabled={true}
+               config={{
+                isReadOnly: true,
+                toolbar: [],
+               }}
+               editor={ClassicEditor}
+               data={this.state.product_desc_size}
+              />
+             )}
+            </TabPane>
            ) : (
             <></>
            )}
@@ -2077,7 +2148,7 @@ class Product extends Component {
                   <div
                    className="product-gallery"
                    style={{
-                    backgroundImage: `url(${g?.src})`,
+                    backgroundImage: `url("${g?.src}")`,
                    }}
                   ></div>
                  </AntCol>
@@ -2280,6 +2351,15 @@ class Product extends Component {
         </Row>
        </div>
       </Container>
+
+      <FacebookShareButton
+       url={`https://www.arch17.com/product/${571}`}
+       quote={"SEMATRIC"}
+       hashtag="#Furniture"
+       description={"aiueo"}
+      >
+       <FacebookIcon size={25} />
+      </FacebookShareButton>
      </div>
      <Lightbox
       animation={{
@@ -2292,6 +2372,7 @@ class Product extends Component {
       slides={this.state.gallery_slides}
       plugins={[Captions, Fullscreen, Slideshow, Thumbnails, Video, Zoom]}
      />
+
      <Footer />
 
      {/* signup/signin modal */}
@@ -2525,6 +2606,86 @@ class Product extends Component {
       </Modal>
      </>
 
+     {/* delete product modal */}
+     <Modal
+      show={this.state.delete_product_modal}
+      onHide={() => {
+       this.setState({
+        delete_product_modal: false,
+       });
+      }}
+      closeButton
+      keyboard={false}
+      size="md"
+     >
+      <Modal.Body>
+       <div className="modal-wrapper" style={{ padding: "15px", margin: "" }}>
+        <Row as={Row} style={{ margin: "0px 0" }}>
+         <p style={{ fontSize: "1.4rem", fontWeight: "600" }}>Delete Product</p>
+         <Col md={8}></Col>
+        </Row>
+        <Row as={Row} style={{ margin: "30px 0" }}>
+         <Col md={12}>
+          <div
+           className="warning-danger"
+           style={{
+            background: "#fbe9e7",
+            padding: "15px",
+            color: "#E41E15",
+           }}
+          >
+           <span
+            style={{
+             display: "inline-block",
+             fontSize: "2.5rem",
+             verticalAlign: "center",
+             padding: "0 10px",
+            }}
+           >
+            <IoWarning />
+           </span>
+           <p
+            style={{
+             color: "#c62828",
+             fontWeight: "600",
+             width: "80%",
+             fontSize: ".9rem",
+             display: "inline-block",
+            }}
+           >
+            Are your sure that you want delete the{" "}
+            <span style={{ textDecoration: "underline" }}>
+             {this.state.product?.identity[0]?.name}
+            </span>
+           </p>
+          </div>
+         </Col>
+        </Row>
+
+        <Button
+         variant="danger"
+         onClick={this.handleDeleteSubmit}
+         type="submit"
+         style={{
+          textAlign: "right",
+          background: "#E41E15",
+          display: "block",
+          float: "right",
+          marginRight: "12px",
+         }}
+        >
+         {this.state.deletingProduct && !this.state.isDeleted ? (
+          <>
+           <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
+          </>
+         ) : (
+          <>Delete</>
+         )}
+        </Button>
+       </div>
+      </Modal.Body>
+     </Modal>
+
      <>
       <AntModal
        title={this.state.request_modal_type}
@@ -2757,6 +2918,10 @@ class Product extends Component {
        </Image.PreviewGroup>
       </div>
      </>
+
+     {this.state.isDeleted && (
+      <Redirect to={`/brand/${this.state.product.stores.id}`} />
+     )}
     </React.Fragment>
    );
   } else {

@@ -374,7 +374,7 @@ class NavigationBar extends Component {
   return (
    <>
     {this.state.value === "Products" && <Redirect to="/products" />}
-    {this.state.value === "Projects" && <Redirect to="/magazine" />}
+    {this.state.value === "Projects" && <Redirect to="/design-selected" />}
     {this.state.value === "Brands" && <Redirect to="/brands" />}
     <div
      id="navigation-component"
@@ -1300,7 +1300,7 @@ class NavigationBar extends Component {
     </div>
 
     {this.state.searchDataLoaded && (
-      <SearchMobileSideMenu data={this.state.searchData} />
+     <SearchMobileSideMenu data={this.state.searchData} />
     )}
    </>
   );

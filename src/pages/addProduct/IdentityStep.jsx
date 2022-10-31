@@ -85,6 +85,7 @@ class IdentityStep extends Component {
    dess: [],
    comps: [],
    comps_ids: [],
+   search_designer_company: "",
   };
  }
  places_tags_label = [];
@@ -397,7 +398,7 @@ class IdentityStep extends Component {
   collection_ids.push({ label: name, value: name });
   this.setState({
    collection_ids,
-   //  selected_collections: collection_ids,
+   selected_collections: collection_ids,
   });
   fd.append("collection_name", name);
   fd.append("product_id", this.props.id);
@@ -763,6 +764,9 @@ class IdentityStep extends Component {
    fd.append("user_id", entity?.id);
    axios.post(`${API}adddesignerproduct`, fd).then((response) => {
     console.log(response);
+    this.setState({
+     search_designer_company: "",
+    });
    });
   }
   if (type === "company") {
@@ -782,11 +786,17 @@ class IdentityStep extends Component {
     .post(`${API}company/addtoproduct/${entity.id}`, fd)
     .then((response) => {
      console.log(response);
+     this.setState({
+      search_designer_company: "",
+     });
     });
   }
  };
 
  handleSearchDesignesAndCompanies = (keyword) => {
+  this.setState({
+   search_designer_company: keyword,
+  });
   if (keyword?.length < 2) {
    return;
   } else {
@@ -799,6 +809,38 @@ class IdentityStep extends Component {
   }
  };
 
+ removeCompany = (c) => {
+  const fd = new FormData();
+  fd.append("company_id", c?.id);
+  fd.append("product_id", this.state.product_id);
+  axios.post(`${API}company/remove-product`, fd).then((response) => {
+   console.log(response);
+   this.setState({
+    comps: this.state.comps?.filter((co) => {
+     return co.id !== c.id;
+    }),
+    companies: this.state.companies?.filter((com) => {
+     return com.id !== c?.id;
+    }),
+   });
+  });
+ };
+ removeDesigner = (d) => {
+  const fd = new FormData();
+  fd.append("user_id", d?.id);
+  fd.append("product_id", this.state.product_id);
+  axios.post(`${API}removedesignerproduct`, fd).then((response) => {
+   console.log(response);
+   this.setState({
+    dess: this.state.dess?.filter((des) => {
+     return des.id !== d?.id;
+    }),
+    designers: this.state.designers?.filter((des) => {
+     return des.id !== d?.id;
+    }),
+   });
+  });
+ };
  render() {
   return (
    <div className="step-form identity">
@@ -1271,13 +1313,14 @@ class IdentityStep extends Component {
          isMulti
          backspaceRemovesValue={false}
          closeMenuOnSelect={true}
+         onChange={this.onChangeCollections}
          defaultValue={this.state.collection_ids}
-         //  selected={this.state.selected_collections}
+         selected={this.state.selected_collections}
          styles={collectionSelectStyles}
          createOptionPosition={"first"}
-         onCreateOption={(e) => {
-          this.createStoreCollectionAttach(e);
-         }}
+         //  onCreateOption={(e) => {
+         //   this.createStoreCollectionAttach(e);
+         //  }}
          formatCreateLabel={(input) => {
           return (
            <>
@@ -1330,77 +1373,11 @@ class IdentityStep extends Component {
       <Form.Group as={Row}>
        <Col md={7} className="designerselect">
         <Form.Label>Designer / Design Company</Form.Label>
-        {/* <Select
-          showSearch
-          mode="tags"
-          style={{ width: "100%" }}
-          size="large"
-          defaultValue={this.state.selected_designers}
-          onChange={this.onDesignersChange}
-          // optionLabelProp="label"
-          onSelect={this.handleAddDesigner}
-          onDeselect={(e) => {
-           //  console.log(e);
-           this.deattachDesigner(e);
-          }}
-         >
-          {this.state?.designers?.map((d) => {
-           return (
-            <Option value={d?.id} label={d?.displayName} type="designer">
-             <div className="designer-option-item">
-              <div
-               className="desimg"
-               style={{
-                backgroundImage: `url(${d?.photoURL})`,
-               }}
-              ></div>
-              <p>{d?.displayName}</p>
-             </div>
-            </Option>
-           );
-          })}
-          {this.state?.companies?.map((c) => {
-           return (
-            <Option value={c.id} type="company">
-             <div className="designer-option-item">
-              <div
-               className="desimg"
-               style={{
-                backgroundImage: `url(${c?.profile})`,
-               }}
-              ></div>
-              <p>{c?.name}</p>
-             </div>
-            </Option>
-           );
-          })}
-         </Select> */}
-
-        {/* <Select
-          size="large"
-          showSearch
-          onClick={(e) => console.log(e)}
-          mode="tags"
-          defaultValue={this.state.selected_designers}
-          onChange={this.onDesignersChange}
-          s
-          placeholder="Please Select Designer / Company"
-          style={{ width: "100%" }}
-          //  fontSize: "13px",
-          //  width: "50%",
-         >
-          {this.state?.designers?.map((d) => {
-           return (
-            <>
-             <Option  value={d.id}>{d.displayName}</Option>
-            </>
-           );
-          })}
-         </Select> */}
         <Input
          placeholder="Select Designer or design company"
          onChange={(e) => this.handleSearchDesignesAndCompanies(e.target.value)}
          size="large"
+         value={this.state.search_designer_company}
         />
         {this.state.companies?.length + this.state.designers?.length > 0 && (
          <div className="designer-list">
@@ -1459,7 +1436,9 @@ class IdentityStep extends Component {
               <p>{d?.displayName[0]}</p>
              )}
             </div>
-            <div className="xbtn">X</div>
+            <div onClick={() => this.removeDesigner(d)} className="xbtn">
+             X
+            </div>
            </div>
           );
          })}
@@ -1475,7 +1454,9 @@ class IdentityStep extends Component {
             >
              {(!c?.profile || c?.profile?.length < 4) && <p>{c?.name[0]}</p>}
             </div>
-            <div className="xbtn">X</div>
+            <div onClick={() => this.removeCompany(c)} className="xbtn">
+             X
+            </div>
            </div>
           );
          })}

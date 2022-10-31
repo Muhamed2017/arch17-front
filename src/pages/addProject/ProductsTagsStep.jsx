@@ -27,7 +27,11 @@ class ProductsTagsStep extends Component {
    products: [],
    noTypes: false,
    ids: this.props.tags ?? [],
-   selectedBrand: "",
+   //  selectedBrand: "",
+   selectedBrand: this.props.brands[0]?.id ?? [0],
+   brands: this.props.brands?.map((b) => {
+    return b.id;
+   }),
    selectedCategory: "",
    selectedType: "",
    fetching: true,
@@ -105,7 +109,7 @@ class ProductsTagsStep extends Component {
    {
     selectedBrand,
     selectedType: "",
-    selectedCategory: "",
+    selectedCategory: [selectedBrand],
    },
    () => {
     this.getProducts();
@@ -136,18 +140,20 @@ class ProductsTagsStep extends Component {
   );
  };
  componentDidMount() {
-  axios
-   .get(`${API}tags`)
-   .then((response) => {
-    console.log(response);
-    this.setState({
-     products: response.data.products,
-     fetching: false,
+  if (this.state.brands?.length > 0) {
+   axios
+    .get(`${API}tags?filter[store_id]=${this.state.brands}`)
+    .then((response) => {
+     console.log(response);
+     this.setState({
+      products: response.data.products,
+      fetching: false,
+     });
+    })
+    .catch((error) => {
+     console.log(error);
     });
-   })
-   .catch((error) => {
-    console.log(error);
-   });
+  }
   console.log(this.state.brands);
  }
  render() {
@@ -160,7 +166,7 @@ class ProductsTagsStep extends Component {
         className="w-100"
         size="large"
         showSearch
-        value={this.state.selectedBrand}
+        value={this.state.selectedBrand[0]}
         onChange={this.handleBrandChange}
        >
         <Option value="" key="All">
@@ -375,7 +381,8 @@ const mapDispatchToProps = (dispatch) => ({
 const mapStateToProps = (state) => {
  return {
   tags: state.project.project_tags,
-  brands: state.addProduct.brands,
+  // brands: state.addProduct.brands,
+  brands: state.project.role_brands,
  };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(ProductsTagsStep);

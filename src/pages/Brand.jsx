@@ -3,17 +3,18 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { Row, Col, Tabs, Spin, Input, Select, Modal as AntModal } from "antd";
 import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
 import en from "world_countries_lists/data/countries/en/world.json";
+import { Helmet } from "react-helmet";
 
+import { Redirect } from "react-router-dom";
 import "../../src/pages/Brand.css";
 import axios from "axios";
 import * as utility from "../utitlties";
 import { connect } from "react-redux";
 import { AiOutlinePlus } from "react-icons/ai";
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, Modal } from "react-bootstrap";
 import blank from "../../src/blank.jpg";
-// import { auth } from "../firebase";
 import toast, { Toaster } from "react-hot-toast";
-import { IoEarthSharp, IoShareSocial } from "react-icons/io5";
+import { IoEarthSharp, IoShareSocial, IoWarning } from "react-icons/io5";
 import { API } from "./../utitlties";
 import ReactFlagsSelect from "react-flags-select";
 import { Link } from "react-router-dom";
@@ -26,7 +27,6 @@ import {
 import { EnvironmentFilled } from "@ant-design/icons";
 
 import { toast as toastifing, Flip } from "react-toastify";
-import { Modal } from "react-bootstrap";
 import ClipLoader from "react-spinners/ClipLoader";
 import Cropper from "react-cropper";
 import { IoMdCloudUpload } from "react-icons/io";
@@ -69,6 +69,9 @@ class Brand extends Component {
   this.cropperRef = React.createRef();
 
   this.state = {
+   delete_brand_modal: false,
+   isDeleted: false,
+   deletingBrand: false,
    signinPassword: "",
    signingEmail: "",
    signupEmail: "",
@@ -232,7 +235,14 @@ class Brand extends Component {
      cover,
      about,
     } = response.data.store[0];
-    const { store, types, collections, products, followers } = response.data;
+    const {
+     store,
+     types,
+     collections,
+     products,
+     followers,
+     categories,
+    } = response.data;
     this.setState(
      {
       brand: store[0],
@@ -244,6 +254,7 @@ class Brand extends Component {
       email,
       products,
       country,
+      categories,
       city,
       official_website,
       phone_code: Number(phone_code),
@@ -287,13 +298,13 @@ class Brand extends Component {
     projects: response.data.projects,
    });
   });
-  axios
-   .get(`${API}store-designers/${this.state.brand_id}}`)
-   .then((response) => {
-    this.setState({
-     designers: response.data.designers,
-    });
-   });
+  // axios
+  //  .get(`${API}store-designers/${this.state.brand_id}}`)
+  //  .then((response) => {
+  //   this.setState({
+  //    designers: response.data.designers,
+  //   });
+  //  });
  }
  handleFilterChange = () => {
   this.setState({ productLoading: true });
@@ -554,6 +565,31 @@ class Brand extends Component {
    });
   }
  };
+ openDeleteBrandModal = () => {
+  this.setState({
+   delete_brand_modal: true,
+  });
+ };
+ handleDeleteBrandSubmit = () => {
+  this.setState({
+   deletingBrand: true,
+  });
+  axios
+   .post(`${API}brand/delete/${this.state.brand_id}`)
+   .then((response) => {
+    console.log(response);
+    this.setState({
+     isDeleted: true,
+     deletingBrand: false,
+    });
+   })
+   .catch((err) => {
+    this.setState({
+     isDeleted: false,
+     deletingBrand: false,
+    });
+   });
+ };
  render() {
   const { brand } = this.state;
   const categories = [...new Set(this.state.addedCategories)];
@@ -562,6 +598,10 @@ class Brand extends Component {
 
   return this.state.brand ? (
    <React.Fragment>
+    <Helmet>
+     <meta charSet="utf-8" />
+     <title>{`${this.state.name} | ${this.state.brand?.type}`}</title>
+    </Helmet>
     <Toaster
      containerStyle={{
       top: 100,
@@ -569,6 +609,8 @@ class Brand extends Component {
      position="top-center"
      duration={1}
     />
+    {this.state.isDeleted && <Redirect to={`/`} />}
+
     <div id="brand-container">
      <div className="section">
       <Row className="brand-cover-border-loader glowing">
@@ -952,6 +994,30 @@ class Brand extends Component {
            ) : (
             ""
            )}
+
+           {this.state.categories?.length > 0 && (
+            <div className="overview-block">
+             <h6 className="">Categories</h6>
+             <Row span={24} gutter={16}>
+              {this.state.categories?.map((cat) => {
+               return (
+                <Col md={6}>
+                 <div className="cat">
+                  <div
+                   className="cat-img"
+                   style={{
+                    backgroundImage: `url("${cat?.cover}")`,
+                   }}
+                  ></div>
+                  <p className="cat-name">{cat.name}</p>
+                 </div>
+                </Col>
+               );
+              })}
+             </Row>
+            </div>
+           )}
+
            {this.state.types.length > 0 && (
             <TypesSection
              types={this.state.types}
@@ -1628,7 +1694,7 @@ class Brand extends Component {
          <TabPane tab="Designers" key="7" className="section" forceRender>
           <BrandDesignersTab
            store_id={this.state.brand_id}
-           designers={this.state.designers}
+           //  designers={this.state.designers}
           />
          </TabPane>
          {this.state.isOwner && this.props.isLoggedIn ? (
@@ -1865,6 +1931,10 @@ class Brand extends Component {
                </Col>
 
                <SearchUsersModal store_id={this.state.brand_id} />
+
+               <span className="dbtn" onClick={this.openDeleteBrandModal}>
+                Delete Brand
+               </span>
               </Row>
              </div>
             </>
@@ -2215,6 +2285,87 @@ class Brand extends Component {
       product={this.state.to_save_productId}
      />
     </AntModal>
+
+    {/* delete product modal */}
+    <Modal
+     show={this.state.delete_brand_modal}
+     onHide={() => {
+      this.setState({
+       delete_brand_modal: false,
+      });
+     }}
+     closeButton
+     keyboard={false}
+     size="md"
+    >
+     <Modal.Body>
+      <div className="modal-wrapper" style={{ padding: "15px", margin: "" }}>
+       <Row as={Row} style={{ margin: "0px 0" }}>
+        <p style={{ fontSize: "1.4rem", fontWeight: "600" }}>Delete Brand</p>
+        <Col md={8}></Col>
+       </Row>
+       <Row as={Row} style={{ margin: "30px 0" }}>
+        <Col md={12}>
+         <div
+          className="warning-danger"
+          style={{
+           background: "#fbe9e7",
+           padding: "15px",
+           color: "#E41E15",
+          }}
+         >
+          <span
+           style={{
+            display: "inline-block",
+            fontSize: "2.5rem",
+            verticalAlign: "center",
+            padding: "0 10px",
+           }}
+          >
+           <IoWarning />
+          </span>
+          <p
+           style={{
+            color: "#c62828",
+            fontWeight: "600",
+            width: "80%",
+            fontSize: ".9rem",
+            display: "inline-block",
+           }}
+          >
+           Are your sure that you want delete the{" "}
+           <span style={{ textDecoration: "underline" }}>
+            {this.state?.name}
+           </span>{" "}
+           Brand
+          </p>
+         </div>
+        </Col>
+       </Row>
+
+       <Button
+        variant="danger"
+        onClick={this.handleDeleteBrandSubmit}
+        type="submit"
+        style={{
+         textAlign: "right",
+         background: "#E41E15",
+         display: "block",
+         float: "right",
+         marginRight: "12px",
+        }}
+       >
+        {this.state.deletingBrand && !this.state.isDeleted ? (
+         <>
+          <ClipLoader style={{ height: "20px" }} color="#ffffff" size={20} />
+         </>
+        ) : (
+         <>Delete</>
+        )}
+       </Button>
+      </div>
+     </Modal.Body>
+    </Modal>
    </React.Fragment>
   ) : (
    <Spin

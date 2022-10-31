@@ -21,10 +21,10 @@ class CompanyOverviewTab extends Component {
      <div className="overview-block">
       <p className="overview-head">Solutions</p>
 
-      <Row span={24} gutter={16}>
+      <Row span={24} gutter={{ sm: 8, lg: 16, md: 16, xs: 8 }}>
        {this.state.categories?.map((cat) => {
         return (
-         <Col md={6}>
+         <Col md={6} xs={12} sm={12} lg={6}>
           <div className="cat">
            <div
             className="cat-img"

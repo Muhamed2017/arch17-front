@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Row, Col, Spin } from "antd";
+import { Row, Col, Spin, Select } from "antd";
 import axios from "axios";
 import { API } from "./../utitlties";
 import ReactFlagsSelect from "react-flags-select";
@@ -14,16 +14,21 @@ class AllBrands extends Component {
    fetching: false,
    brands: [],
    country: this.urlString.get("country"),
+   category: this.urlString.get("category"),
+
+   categoryOptions: [],
+   //  category: [],
   };
  }
  componentDidMount() {
   this.getBrands();
  }
  setURL = () => {
-  const { country } = this.state;
+  const { country, category } = this.state;
   const countryParam = country ? `?country=${country}` : ``;
+  const categoryParam = category ? `&category=${category}` : `&category=`;
 
-  window.history.pushState({}, null, `/brands${countryParam}`);
+  window.history.pushState({}, null, `/brands${countryParam}${categoryParam}`);
  };
  getBrands = () => {
   this.setState({
@@ -31,17 +36,25 @@ class AllBrands extends Component {
   });
   this.setURL();
   const country = this.state.country ? `/${this.state.country}` : ``;
-  axios.get(`${API}brands${country}`).then((response) => {
+  const category = this.state.category ? `/${this.state.category}` : ``;
+  axios.get(`${API}brands${country}${category}`).then((response) => {
    console.log(response);
    this.setState(
     {
      brands: Object.values(response.data.brands),
      fetching: false,
+     categoryOptions: response.data.categoryOptions,
     },
     () => {
      console.log(this.state.brands);
     }
    );
+  });
+ };
+ selectCategory = (category) => {
+  console.log(category);
+  this.setState({ category }, () => {
+   this.getBrands();
   });
  };
  render() {
@@ -81,6 +94,25 @@ class AllBrands extends Component {
          RESET
         </p>
        )}
+       <Select
+        //  mode="multiple"
+        clearIcon
+        size="large"
+        //  bordered={false}
+        showArrow
+        placeholder="select project type"
+        //  value={this.state.selectedTypes}
+        onChange={this.selectCategory}
+        style={{
+         width: "100%",
+        }}
+       >
+        {this.state.categoryOptions?.map((item) => (
+         <Select.Option key={item.name} value={item.name}>
+          {item.name}
+         </Select.Option>
+        ))}
+       </Select>
       </Col>
       <Col md={19}>
        <div className="brands-wrapper">

@@ -9,12 +9,14 @@ class BrandDesignersTab extends Component {
   super(props);
   this.state = {
    designers: [],
+   companies: [],
   };
  }
  componentDidMount() {
   axios.get(`${API}store-designers/${this.props.store_id}`).then((response) => {
    this.setState({
     designers: response.data.designers,
+    companies: response.data.companies,
    });
   });
  }
@@ -103,6 +105,64 @@ class BrandDesignersTab extends Component {
         </a>
        </Col>
       </>
+     );
+    })}
+    {this.state.companies?.map((company) => {
+     return (
+      <Col
+       md={8}
+       sm={12}
+       xs={12}
+       lg={8}
+       className="collection-col"
+       key={company.id}
+      >
+       <a href={`/company/${company?.id}`}>
+        <div className="collection-box">
+         <div
+          className="rect rect-0"
+          style={{
+           backgroundColor: "rgb(237 237 237 / 70%)",
+          }}
+         ></div>
+         <div
+          className="rect rect-1"
+          style={{
+           backgroundColor: "rgb(237 237 237 / 70%)",
+          }}
+         ></div>
+         <div
+          className="rect rect-2"
+          style={{
+           backgroundColor: "rgb(237 237 237 / 70%)",
+          }}
+         ></div>
+        </div>
+        <div className="designer-text">
+         <div
+          className="d-avatar"
+          style={{
+           backgroundImage: `url(${company?.profile})`,
+          }}
+         >
+          {(!company?.profile || company.profile?.length < 5) &&
+           `${company?.name[0]}`}
+         </div>
+         <div className="d-info">
+          <p style={{ marginBottom: "3px" }}>
+           <span className="d-name">{company?.name}</span>
+           <span className="d-loc">{`| ${regionNames.of(
+            company?.country
+           )}`}</span>
+          </p>
+          <p>
+           {" "}
+           <span className="d-count">Design Compeny</span>
+          </p>
+         </div>
+        </div>
+       </a>
+      </Col>
      );
     })}
    </Row>

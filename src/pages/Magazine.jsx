@@ -122,7 +122,7 @@ class Magazine extends Component {
   window.history.pushState(
    {},
    null,
-   `/magazine${params}${catParam}${kindParam}${countryParam}${yearParam}${typeParam}`
+   `/design-selected${params}${catParam}${kindParam}${countryParam}${yearParam}${typeParam}`
   );
  };
 

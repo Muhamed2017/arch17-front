@@ -85,9 +85,20 @@ const addProjectRoleDesignerCreator = (designer)=>{
     }
 }
 
+const addProjectRoleCompanyCreator = (company)=>{
+    return {
+        type:actions.ADD_PROJECT_ROLE_COMPANY,
+        payload:company
+    }
+}
 export const addProjectRoleDesigner= (designer)=>{
     return (dispatch)=>{
         dispatch(addProjectRoleDesignerCreator(designer))
+    }
+}
+export const addProjectRoleCompany= (company)=>{
+    return (dispatch)=>{
+        dispatch(addProjectRoleCompanyCreator(company))
     }
 }
 const addProjectRoleBrandCreator = (brand)=>{
@@ -126,6 +137,17 @@ const deleteProjectRoleDesignerCreator = (designer)=>{
 export const deleteProjectRoleDesigner= (designer)=>{
     return (dispatch)=>{
         dispatch(deleteProjectRoleDesignerCreator(designer))
+    }
+}
+const deleteProjectRoleCompanyCreator = (company)=>{
+    return {
+        type:actions.DELETE_ROLE_COMPANY,
+        payload:company
+    }
+}
+export const deleteProjectRoleCompany= (company)=>{
+    return (dispatch)=>{
+        dispatch(deleteProjectRoleCompanyCreator(company))
     }
 }
 const editProjectCreator = (project)=>{

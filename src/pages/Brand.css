@@ -347,6 +347,11 @@ width: 175px;
     background-size: contain;
     background-color: #999898;
     border-radius: 5px;
+    font-size: 2rem;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
 }
 .designer-text .d-info .d-name{
     font-weight: 700;
@@ -488,6 +493,17 @@ span.user-email{
     left: 0;
     /* background-color: rgba(0, 0, 0, 0.027); */
     background-color: rgb(70 70 70 / 5%);
+}
+
+.dbtn{
+color: red;
+font-weight: 600;
+cursor: pointer;
+text-decoration: underline;
+padding: 0 25px;
+vertical-align:bottom;
+display: inline-block;
+margin-top: 5px;
 }
 @media screen and (min-width:768px){
 .mobile-view {

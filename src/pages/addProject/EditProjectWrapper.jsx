@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 // import { steps } from "./AddProjectWrapper";
-import { Steps, Button, Row, Col, Spin } from "antd";
+import { Steps, Row, Col, Spin } from "antd";
 import { connect } from "react-redux";
 import axios from "axios";
 import { API } from "./../../utitlties";
@@ -26,6 +26,7 @@ class EditProjectWrapper extends Component {
   this.state = {
    projectId: this.props.match.params.id,
    fetched: false,
+   brands: this.props.brands,
   };
  }
  next = () => {
@@ -48,6 +49,9 @@ class EditProjectWrapper extends Component {
    .then((response) => {
     const { name, country, type, year, city } = response.data.project;
     console.log(response);
+    this.setState({
+     brands: response.data.brands,
+    });
     this.props.dispatch({
      type: SET_INTITIAL_PROJECT_FOR_EDIT,
      payload: {
@@ -65,6 +69,7 @@ class EditProjectWrapper extends Component {
       role_brands: response.data.brands,
       project_covers: response.data.project.images,
       role_designers: response.data.designers,
+      role_companies: response.data.project?.company_roles,
       project_tags: response.data.products_tags?.map((p) => {
        return p.id;
       }),
@@ -148,6 +153,7 @@ class EditProjectWrapper extends Component {
     </div>
    ),
    content: <ProductsTagsStep />,
+   step_key: 3,
   },
   {
    title: (
@@ -191,6 +197,7 @@ class EditProjectWrapper extends Component {
         <Steps current={current} icon="">
          {steps.map((item) => (
           <Step
+           disabled={this.state.brands?.length < 1 && item.step_key === 3}
            key={item.title}
            title={item.title}
            icon={() => {
@@ -202,7 +209,7 @@ class EditProjectWrapper extends Component {
        </div>
       </Col>
 
-      <Col md={24}>
+      {/* <Col md={24}>
        <div className="steps-content custom-content wrapper-inner">
         {steps[current].content}
 
@@ -218,7 +225,7 @@ class EditProjectWrapper extends Component {
          )}
         </div>
        </div>
-      </Col>
+      </Col> */}
      </Row>
     </div>
    </>
@@ -232,6 +239,7 @@ const mapStateToProps = (state) => {
  return {
   step: state.project.step,
   project: state.project,
+  brands: state.project?.role_brands,
  };
 };
 export default connect(mapStateToProps, null)(EditProjectWrapper);

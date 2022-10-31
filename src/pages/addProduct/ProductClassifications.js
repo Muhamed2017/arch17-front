@@ -648,6 +648,7 @@ export const poufs = {
         { value: "Storage", label: "Storage" },
         { value: "Pouf beds", label: "Pouf beds" },
         { value: "Bean bag poufs", label: "Bean bag poufs" },
+        { value: "Full upholastry", label: "Full upholastry" },
     ],
     shapes:[
         { value: "Square", label: "Square" },
@@ -1892,7 +1893,7 @@ export const project_cats=[
     "Loft Appartment", "Lighting Design", "Material Design", "Master Plan", "Monastery", "Mosque", "Motel",
     "Mueseum", "Night Club", "Office", "Opera House", "Pavilion", "Penthouse","Parmacy", "Port", "Praying Room", "Residence", "Sales Center",
     "Schoole", "Shopping Mall", "Show Room","Spa & Sauna", "Store", "Super Market", "Swimming Pool", "Synagogue",
-    "Tea House", "Tea Shop", "Temple", "Temporary Store", "Theater", "University & Institute"
+    "Tea House", "Tea Shop", "Temple", "Temporary Store", "Theater", "University & Institute", "People"
 ]
 
 

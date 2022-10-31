@@ -383,8 +383,8 @@ class EditIdentity extends Component {
   const fd = new FormData();
   fd.append("collection_name", name);
   fd.append("product_id", this.props.id);
-  fd.append("store_id", this.props.store.id);
-  //   console.log(this.props.store.id);
+  fd.append("store_id", this.props.store?.id);
+  // console.log(this.props.store.id);
   axios.post(`${API}brandcollection`, fd).then((response) => {
    console.log(response);
   });
@@ -440,7 +440,7 @@ class EditIdentity extends Component {
   });
  };
  componentDidMount() {
-  console.log(this.props);
+  console.log(this.props.store2);
   axios.get(`${API}designers`).then((res) => {
    const des = res.data.designers;
    console.log(res.data.designers);

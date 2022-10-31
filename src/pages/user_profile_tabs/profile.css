@@ -90,6 +90,10 @@ width: 16px;
             grid-template-columns: repeat(3, auto);
             grid-gap: 12px;
         }
+        .professions p{
+            font-size: 13px;
+
+        }
         .profile-heading .loc span{
             margin-right: 9px;
         }

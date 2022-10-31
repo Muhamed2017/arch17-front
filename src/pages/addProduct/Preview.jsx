@@ -142,8 +142,10 @@ class Preview extends Component {
    fd.append("display_name", this.state.displayName);
    fd.append(
     "preview_cover",
-    // await compressImage(this.dataURLtoFile(this.state.cropped_cover, "file"))
-    this.dataURLtoFile(this.state.cropped_cover, "preview_cover")
+    await compressImage(
+     this.dataURLtoFile(this.state.cropped_cover, "preview_cover")
+    )
+    // this.dataURLtoFile(this.state.cropped_cover, "preview_cover")
    );
 
    axios

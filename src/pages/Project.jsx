@@ -33,9 +33,9 @@ import { MdLocationOn } from "react-icons/md";
 import {
  FaPinterestP,
  FaFacebookF,
- FaVimeoV,
  FaTwitter,
  FaThumbsUp,
+ FaLinkedin,
 } from "react-icons/fa";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
@@ -54,6 +54,7 @@ class Project extends Component {
   this.contextRef = createRef();
   this.brandCarousel = createRef();
   this.designerCarousel = createRef();
+  this.companiesCarousel = createRef();
 
   this.state = {
    products: [],
@@ -79,8 +80,8 @@ class Project extends Component {
    nextMoreProductsPage: true,
    currentSlide: 1,
    designersToShow: 2,
+   compainesToShow: 2,
    owner: [],
-   //  country: regionNames()
   };
  }
 
@@ -164,6 +165,12 @@ class Project extends Component {
  designer_prev = () => {
   this.designerCarousel.current.prev();
  };
+ company_next = () => {
+  this.companiesCarousel.current.next();
+ };
+ company_prev = () => {
+  this.companiesCarousel.current.prev();
+ };
  menu = (
   <Menu>
    <Menu.Item key="1">
@@ -226,9 +233,7 @@ class Project extends Component {
   }
  };
  render() {
-  // const country = this.state.fetched
-  //  ? regionNames(this.state.project?.country)
-  //  : "";
+  const shareUrl = `https://www.arch17.com/project/${this.state.project_id}`;
   if (!this.state.fetched)
    return (
     <>
@@ -263,22 +268,58 @@ class Project extends Component {
           <Sticky context={this.contextRef} offset={65} bottomOffset={0}>
            <div className="socials">
             <div>
-             <FaFacebookF />
+             {/* <FaFacebookF /> */}
+             <FacebookShareButton
+              hashtag={this.state.project?.type}
+              url={shareUrl}
+             >
+              <FaFacebookF />
+             </FacebookShareButton>
             </div>
             <div>
-             <FaTwitter />
+             <TwitterShareButton
+              url={shareUrl}
+              hashtags={this.state.project?.kind}
+             >
+              <FaTwitter />
+             </TwitterShareButton>
             </div>
             <div>
-             <FaPinterestP />
+             <PinterestShareButton
+              url={shareUrl}
+              media={this.state.project?.cover}
+             >
+              <FaPinterestP />
+             </PinterestShareButton>
+             {/* */}
             </div>
             <div>
-             <FaVimeoV />
+             <LinkedinShareButton
+              url={shareUrl}
+              source="Arch17"
+              title={this.state.project?.name}
+             >
+              <FaLinkedin />
+             </LinkedinShareButton>
             </div>
             <div>
              <FaThumbsUp />
             </div>
             <div>
-             <AiOutlinePlus />
+             <AiOutlinePlus
+              onClick={(e) => {
+               e.preventDefault();
+               this.setState(
+                {
+                 to_save_project_cover: this.state.project?.cover,
+                 to_save_projectId: this.state.project,
+                },
+                () => {
+                 this.saveToBoard();
+                }
+               );
+              }}
+             />
             </div>
            </div>
           </Sticky>
@@ -321,6 +362,14 @@ class Project extends Component {
                {this.state.owner[0]?.name}
               </a>
              )}
+             {this.state.project?.ownerable_type?.includes("Company") && (
+              <a
+               href={`/company/${this.state.owner[0]?.id}`}
+               className="owner_link"
+              >
+               {this.state.owner[0]?.name}
+              </a>
+             )}
             </p>
             {this.state.designers?.length > 0 && (
              <p className="designers-mobile">
@@ -351,76 +400,160 @@ class Project extends Component {
           </Column>
          </Ref>
          <Column mobile={16} tablet={7} computer={4}>
-          {this.state.designers?.length + this.state.brands?.length > 0 && (
+          {this.state.designers?.length +
+           this.state.brands?.length +
+           this.state.project?.company_roles?.length >
+           0 && (
            <>
             <Sticky context={this.contextRef} offset={62}>
              <div className="project-right-side">
-              <div className="designers p-3">
-               <p className="via">Designers</p>
-               <AntCarousel
-                ref={this.designerCarousel}
-                autoplay
-                dots={false}
-                swipe
-                slidesPerRow={this.state.designersToShow}
-                swipeToSlide
-                autoplaySpeed={7000}
-                effect="fade"
-               >
-                {this.state.designers?.map((d, index) => {
-                 return (
-                  <>
-                   <Row gutter={50} key={index} className="my-4" align="middle">
-                    <Col md={7}>
-                     <div
-                      className="brand-slide-logo"
-                      style={{
-                       backgroundImage: `url(${d.photoURL})`,
-                      }}
+              {this.state.designers?.length > 0 && (
+               <>
+                <div className="designers p-3">
+                 <p className="via">Designers</p>
+                 <AntCarousel
+                  ref={this.designerCarousel}
+                  autoplay
+                  dots={false}
+                  swipe
+                  slidesPerRow={this.state.designersToShow}
+                  swipeToSlide
+                  autoplaySpeed={7000}
+                  effect="fade"
+                 >
+                  {this.state.designers?.map((d, index) => {
+                   return (
+                    <>
+                     <Row
+                      gutter={50}
+                      key={index}
+                      className="my-4"
+                      align="middle"
                      >
-                      {d.photoURL && d.photoURL?.length > 10 ? (
-                       ""
-                      ) : (
-                       <p>{d.displayName[0]}</p>
-                      )}
-                     </div>
-                    </Col>
-                    <Col md={17}>
-                     <a href={`/user/${d?.uid}`}>
-                      <p className="name my-0">{d.displayName}</p>
-                     </a>
-                     <p className="title my-0">{d.professions[0]}</p>
-                     <div className="des-btns">
-                      <button disabled>
-                       <IoIosMail />
-                      </button>
-                      <button disabled>
-                       <AiOutlinePlus /> Follow
-                      </button>
-                     </div>
-                    </Col>
-                   </Row>
-                  </>
-                 );
-                })}
-               </AntCarousel>
+                      <Col md={7}>
+                       <div
+                        className="brand-slide-logo"
+                        style={{
+                         backgroundImage: `url(${d.photoURL})`,
+                        }}
+                       >
+                        {d.photoURL && d.photoURL?.length > 10 ? (
+                         ""
+                        ) : (
+                         <p>{d.displayName[0]}</p>
+                        )}
+                       </div>
+                      </Col>
+                      <Col md={17}>
+                       <a href={`/user/${d?.uid}`}>
+                        <p className="name my-0">{d.displayName}</p>
+                       </a>
+                       {/* <p className="title my-0">{d.professions[0]}</p> */}
+                       <div className="des-btns">
+                        <button disabled>
+                         <IoIosMail />
+                        </button>
+                        <button disabled>
+                         <AiOutlinePlus /> Follow
+                        </button>
+                       </div>
+                      </Col>
+                     </Row>
+                    </>
+                   );
+                  })}
+                 </AntCarousel>
 
-               {this.state.designers?.length > 2 && (
-                <p
-                 className="text-right bold p-3 pointer"
-                 onClick={() => {
-                  this.setState({
-                   designersToShow:
-                    this.state.designersToShow > 2
-                     ? 2
-                     : this.state.designers.length,
-                  });
-                 }}
+                 {this.state.designers?.length > 2 && (
+                  <p
+                   className="text-right bold p-3 pointer"
+                   onClick={() => {
+                    this.setState({
+                     designersToShow:
+                      this.state.designersToShow > 2
+                       ? 2
+                       : this.state.designers.length,
+                    });
+                   }}
+                  >
+                   {this.state.designersToShow > 2 ? "See Less" : "See All"}
+                  </p>
+                 )}
+                </div>
+               </>
+              )}
+              {this.state.project?.company_roles?.length > 0 && (
+               <div className="designers p-3">
+                <p className="via">Design Companies</p>
+                <AntCarousel
+                 ref={this.companiesCarousel}
+                 autoplay
+                 dots={false}
+                 swipe
+                 slidesPerRow={this.state.compainesToShow}
+                 swipeToSlide
+                 autoplaySpeed={7000}
+                 effect="fade"
                 >
-                 {this.state.designersToShow > 2 ? "See Less" : "See All"}
-                </p>
-               )}
-              </div>
+                 {this.state.project?.company_roles?.map((c, index) => {
+                  return (
+                   <>
+                    <Row
+                     gutter={50}
+                     key={index}
+                     className="my-4"
+                     align="middle"
+                    >
+                     <Col md={7}>
+                      <div
+                       className="brand-slide-logo"
+                       style={{
+                        backgroundImage: `url(${c?.profile})`,
+                       }}
+                      >
+                       {c.profile && c.profile?.length > 10 ? (
+                        ""
+                       ) : (
+                        <p>{c?.name[0]}</p>
+                       )}
+                      </div>
+                     </Col>
+                     <Col md={17}>
+                      <a href={`/company/${c?.id}`}>
+                       <p className="name my-0">{c?.name}</p>
+                      </a>
+                      <div className="des-btns">
+                       <button disabled>
+                        <IoIosMail />
+                       </button>
+                       <button disabled>
+                        <AiOutlinePlus /> Follow
+                       </button>
+                      </div>
+                     </Col>
+                    </Row>
+                   </>
+                  );
+                 })}
+                </AntCarousel>
+
+                {this.state.project?.company_roles?.length > 2 && (
+                 <p
+                  className="text-right bold p-3 pointer"
+                  onClick={() => {
+                   this.setState({
+                    compainesToShow:
+                     this.state.compainesToShow > 2
+                      ? 2
+                      : this.state.project?.company_roles?.length,
+                   });
+                  }}
+                 >
+                  {this.state.compainesToShow > 2 ? "See Less" : "See All"}
+                 </p>
+                )}
+               </div>
+              )}
               {this.state.brands?.length > 0 && (
                <>
                 <div className="brands p-4">

@@ -29,6 +29,9 @@ justify-content: center;
     width: 160px !important;
     height: 160px !important;
 }
+.company-page .profile-img{
+    background-color: rgb(221 221 221 / 62%);
+}
 .member-name,
 .member-title {
     text-align: center;
@@ -59,7 +62,9 @@ justify-content: center;
     color: #6e6e6eb2;
     font-weight: 500;
 }
-
+.company-page .profile-heading h2.name{
+font-size: 31px;
+}
 .user-row{
     display: grid;
     grid-template-columns: 50px auto 20px;
@@ -136,6 +141,7 @@ padding-bottom: 0 !important;
 p.lbl{
     margin-bottom: 9px !important;
     font-weight:500;
+    margin: 15px 0
 }
 p.lbl span{
     font-size: 11px;
@@ -157,13 +163,15 @@ padding: 4px;
     cursor: pointer;
 }
 .company-logo{
-    width: 150px;
-    padding-top: 150px;
+    width: 160px;
+    height: 160px;
+    /* padding-top: 150px; */
     border-radius: 50%;
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
     background-color: #dddddd3d;
+    margin: 10px 0
 }
 .company-form .ReactFlagsSelect-module_flagsSelect__2pfa2 {
     margin-bottom: 15px !important;
@@ -208,6 +216,7 @@ padding: 4px;
     margin-bottom: 30px;
     margin-top: 30px
 }
+
 .overview-content{
     font-size: 18px;
     color: #000;
@@ -265,3 +274,71 @@ padding: 4px;
         text-align: right;
         cursor: pointer;
     }
+    .social-icons{
+        display: grid;
+        grid-template-columns: repeat(auto-fit, 30px);
+        grid-gap: 10px;
+    }
+    .social-icons > a , .social-icons > p {
+        height: 30px;
+        font-size: 24px;
+        display:grid;
+        justify-content:center;
+        align-items: center;
+    }
+    .social-icons svg{
+        color: #6e6e6eb0;
+    }
+    .social-icons svg:hover{
+        color: #000;
+    }
+
+     .company-setting-tab .company-logo{
+         display: grid ;
+         justify-content: center;
+         align-items: center;
+         font-size: 5rem;
+     }
+
+   .ant-popover-inner-content {
+       font-weight: 600;
+       padding: 12px 16px;
+       color: rgba(0, 0, 0, 0.85);
+       font-size: 1.3rem;
+   }
+
+   .select-setting{
+    width: 50%;
+   }
+   @media screen and (max-width:768px) {
+    .social-icons{
+        justify-content: center;
+        margin: 10px auto;
+    }
+    .company-logo{
+        margin: auto;
+    }
+    .company-page .profile-section {
+            grid-gap: 5px;
+    }
+    .bio{
+        margin-top: 20px;
+    }
+     
+    .select-setting{    
+        width: 100%;
+    }
+
+    #company-setting{
+        padding: 0 5px;
+    }
+
+    .upprof{
+        text-align: center;
+    }
+
+    .teams{
+        padding: 50px 10px;
+    }
+
+}

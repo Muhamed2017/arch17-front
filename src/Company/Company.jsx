@@ -7,8 +7,14 @@ import {
  Button,
  Spin,
  Select,
+ Popover,
 } from "antd";
 import { Link } from "react-router-dom";
+import ClipLoader from "react-spinners/ClipLoader";
+import { IoWarning } from "react-icons/io5";
+import { Helmet } from "react-helmet";
+
+import { compressImage } from "./../pages/addProduct/OptionsPrice";
 
 import { Container, Row, Col, Modal } from "react-bootstrap";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
@@ -25,24 +31,35 @@ import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
 import en from "world_countries_lists/data/countries/en/world.json";
 import Cropper from "react-cropper";
 import { IoMdCloudUpload } from "react-icons/io";
-import ClipLoader from "react-spinners/ClipLoader";
 import { company_services } from "../pages/addProduct/ProductClassifications";
 import { Redirect } from "react-router-dom";
 
-// import CompanySettingTab from "./CompanySettingTab";
+import {
+ AiOutlineGlobal,
+ AiOutlineInstagram,
+ AiOutlineLinkedin,
+ AiOutlineWhatsApp,
+ AiOutlineMail,
+} from "react-icons/ai";
+import { FaPinterestP } from "react-icons/fa";
+import { RiWechatLine } from "react-icons/ri";
 import CompanyOverviewTab from "./CompanyOverviewTab";
 import { LoadingOutlined } from "@ant-design/icons";
+import CompanyNotificationaTab from "./CompanyNotificationsTab";
 const { Option } = Select;
 
 const { TextArea } = Input;
-const src =
- "https://cdn.pixabay.com/photo/2016/09/28/02/14/user-1699635_960_720.png";
 
 class Company extends Component {
  constructor(props) {
   super(props);
+  this.cropperRef = React.createRef();
+
   this.state = {
    team_modal: false,
+   delete_modal: false,
+   isDeleted: false,
+   deletingCo: false,
    adding_member: false,
    transfer_modal: false,
    transfered: false,
@@ -54,7 +71,7 @@ class Company extends Component {
    selectedUser: null,
    member_position: "",
    addingMember: false,
-   isOwner: false,
+   isOwner: this.props.isLoggedIn,
    members: [],
    loading: true,
    products: [],
@@ -69,9 +86,15 @@ class Company extends Component {
    city: "",
    phone_code: 86,
    phone: "",
+   linkedin: "",
+   whatsapp: "",
+   wechat: "",
+   piterest: "",
+   instagram: "",
    bio: "",
    about: "",
    profile: null,
+   taggedProjects: [],
   };
  }
  //  }
@@ -116,6 +139,11 @@ class Company extends Component {
    bio,
    about,
    website,
+   wechat,
+   whatsapp,
+   instagram,
+   linkedin,
+   pinterest,
    selectedServices,
    phone,
    phone_code,
@@ -128,6 +156,11 @@ class Company extends Component {
   fd.append("bio", bio);
   fd.append("about", about);
   fd.append("website", website);
+  fd.append("wechat", wechat);
+  fd.append("whatsapp", whatsapp);
+  fd.append("linkedin", linkedin);
+  fd.append("instagram", instagram.replace("https://www.instagram.com/", ""));
+  fd.append("pinterest", pinterest);
   fd.append("phone", phone);
   fd.append("phone_code", phone_code);
   selectedServices?.forEach((s) => {
@@ -141,6 +174,7 @@ class Company extends Component {
     this.setState({
      saving: false,
      company: response.data.company,
+     profile: response.data.company?.profile,
     });
    })
    .catch((error) => {
@@ -160,13 +194,16 @@ class Company extends Component {
   const fd = new FormData();
   fd.append(
    "company_profile",
-   this.dataURLtoFile(this.state.cropped_profile, "company_profile")
+   await compressImage(
+    this.dataURLtoFile(this.state.cropped_profile, "company_profile")
+   )
   );
   axios
    .post(`${API}company/logo/${this.state.company_id}`, fd)
    .then((response) => {
     this.setState({
      logo: response.data.company_profile,
+     profile: response.data.company_profile,
      profile_modal: false,
     });
    });
@@ -185,12 +222,30 @@ class Company extends Component {
      projects: company.projects?.filter((p) => {
       return p.article_type === "project";
      }),
+     taggedProjects: company?.roles?.filter((p) => {
+      return (
+       !(
+        p.ownerable_type === "App\\Models\\Company" &&
+        p.ownerable_id === parseInt(this.state.company_id)
+       ) && p.article_type === "project"
+      );
+     }),
+     taggedBlogs: company?.roles?.filter((p) => {
+      return (
+       !(
+        p.ownerable_type === "App\\Models\\Company" &&
+        p.ownerable_id === parseInt(this.state.company_id)
+       ) && p.article_type === "blog"
+      );
+     }),
+     // taggedProjects: company?.roles?.filter
      loading: false,
      members: company.members,
      products: company?.products,
      isOwner:
-      this.props.info?.uid === company?.user_uid &&
-      this.props.info?.id === company?.user_id,
+      this.props.isLoggedIn &&
+      (this.props.info?.uid === company?.user_uid ||
+       this.props.info?.id === company?.user_id),
      selectedServices:
       company?.services && company?.services !== "null"
        ? company?.services
@@ -198,6 +253,24 @@ class Company extends Component {
      website:
       company?.website && company?.website !== "null" ? company?.website : "",
      email: company?.email && company?.email !== "null" ? company?.email : "",
+     wechat:
+      company?.wechat && company?.wechat !== "null" ? company?.wechat : "",
+     whatsapp:
+      company?.whatsapp && company?.whatsapp !== "null"
+       ? company?.whatsapp
+       : "",
+     linkedin:
+      company?.linkedin && company?.linkedin !== "null"
+       ? company?.linkedin
+       : "",
+     pinterest:
+      company?.pinterest && company?.pinterest !== "null"
+       ? company?.pinterest
+       : "",
+     instagram:
+      company?.instagram && company?.instagram !== "null"
+       ? company?.instagram
+       : "",
      name: company?.name && company?.name !== "null" ? company?.name : "",
      country:
       company?.country && company?.country !== "null" ? company?.country : "",
@@ -304,6 +377,26 @@ class Company extends Component {
     });
    });
  };
+
+ handleDeleteCompany = () => {
+  this.setState({
+   deletingCo: true,
+  });
+  axios
+   .post(`${API}company/delete/${this.state.company_id}`)
+   .then((response) => {
+    this.setState({
+     deletingCo: false,
+     isDeleted: true,
+    });
+   })
+   .catch((err) => {
+    this.setState({
+     deletingCo: false,
+     isDeleted: false,
+    });
+   });
+ };
  render() {
   const {
    users,
@@ -312,11 +405,14 @@ class Company extends Component {
    member_position,
    addingMember,
    selectedUser,
+   company,
   } = this.state;
 
   return (
    <React.Fragment>
-    {this.state.transfered && <Redirect to={"/profile"} />}
+    {(this.state.transfered || this.state.isDeleted) && (
+     <Redirect to={"/profile"} />
+    )}
     {this.state.loading ? (
      <Spin
       size="large"
@@ -326,362 +422,168 @@ class Company extends Component {
       style={{ position: "absolute", top: "40%", right: "50%" }}
      />
     ) : (
-     <div id="user-profile" className="bg-white company-page">
-      <Container fluid>
-       <Row className="justify-content-md-center">
-        <Col md={{ span: 12 }}>
-         <div className="profile-section">
-          <div
-           className="profile-img"
-           style={{
-            backgroundImage: `url(${this.state.company?.profile})`,
-            backgroundColor: "#ddd",
-           }}
-          >
-           <span>
-            {(!this.state.company?.profile ||
-             this.state.company?.profile?.length <= 4) &&
-             `${this.state.company?.name[0]}`}
-           </span>
-          </div>
-          <div className="profile-heading">
-           <h2 className="name mb-0">{this.state.company?.name}</h2>
-           <p className="ctype mb-2 pt-0">Design Company</p>
+     <>
+      <Helmet>
+       <meta charSet="utf-8" />
 
-           {this.state.company?.country &&
-            this.state.company?.country !== "null" && (
-             <p className="loc">
-              <EnvironmentFilled />
-              <span>{regionNames.of(this.state.company?.country)}</span>
-              <span className="mx-2">{this.state.company?.city}</span>
-             </p>
+       <title>{`${this.state.company?.name} | Design Company`}</title>
+      </Helmet>
+      <div id="user-profile" className="bg-white company-page">
+       <Container fluid>
+        <Row className="justify-content-md-center">
+         <Col md={{ span: 12 }}>
+          <div className="profile-section">
+           <div
+            className="profile-img"
+            style={{
+             backgroundImage: `url(${this.state?.profile})`,
+            }}
+           >
+            <span>
+             {(!this.state?.profile || this.state?.profile?.length <= 4) &&
+              `${this.state.company?.name[0]}`}
+            </span>
+           </div>
+           <div className="profile-heading">
+            <h2 className="name mb-0">{this.state.company?.name}</h2>
+            <p className="ctype mb-2 pt-0">Design Company</p>
+
+            {this.state.company?.country &&
+             this.state.company?.country !== "null" && (
+              <p className="loc">
+               <EnvironmentFilled />
+               <span>{regionNames.of(this.state.company?.country)}</span>
+               <span className="mx-2">{this.state.company?.city}</span>
+              </p>
+             )}
+            {this.state.company?.bio && this.state.company?.bio !== "null" && (
+             <p className="bio">{this.state.company?.bio}</p>
             )}
-           {this.state.company?.bio && this.state.company?.bio !== "null" && (
-            <p className="bio">{this.state.company?.bio}</p>
-           )}
-           <p className="mt-4 mb-1 proff-head">Services</p>
-           <div className="professions">
-            {this.state.company?.services?.map((p) => {
-             return (
-              <div>
-               <p>{p}</p>
-              </div>
-             );
-            })}
+            {(company?.linkedin?.length > 0 ||
+             company?.website?.length > 0 ||
+             company?.instagram?.length > 0 ||
+             company?.wechat?.length > 0 ||
+             company?.phone?.length > 0 ||
+             company?.email?.length > 0) && (
+             <div className="social-icons">
+              {company?.email?.length > 0 && (
+               <a className="email" href={`mailto:${company?.email}`}>
+                <AiOutlineMail />
+               </a>
+              )}
+              {company?.website?.length > 0 && (
+               <a rel="noreferrer" target="_blank" href={company?.website}>
+                <AiOutlineGlobal />
+               </a>
+              )}
+              {company?.instagram?.length > 0 && (
+               <a
+                rel="noreferrer"
+                href={`https://www.instagram.com/${company?.instagram}`}
+                target="_blank"
+               >
+                <AiOutlineInstagram />
+               </a>
+              )}
+              {company?.pinterest?.length > 0 && (
+               <a rel="noreferrer" href={company?.pinterest}>
+                <FaPinterestP />
+               </a>
+              )}
+
+              {company?.linkedin?.length > 0 && (
+               <a target="_blank" rel="noreferrer" href={company?.linkedin}>
+                <AiOutlineLinkedin />
+               </a>
+              )}
+              {company?.phone?.length > 0 && (
+               <a
+                target="_blank"
+                rel="noreferrer"
+                href={`https://wa.me/+${company?.code}${company.phone}`}
+               >
+                <AiOutlineWhatsApp />
+               </a>
+              )}
+              {company?.wechat?.length > 0 && (
+               <p>
+                <Popover content={<>{company?.wechat}</>} title="WeChat ID">
+                 <RiWechatLine />
+                </Popover>
+               </p>
+              )}
+             </div>
+            )}
+            <p className="mt-4 mb-1 proff-head">Services</p>
+            <div className="professions">
+             {this.state.company?.services?.map((p) => {
+              return (
+               <div>
+                <p>{p}</p>
+               </div>
+              );
+             })}
+            </div>
            </div>
           </div>
-         </div>
-        </Col>
-        <Col md={{ span: 12 }}>
-         <div className="profile-tabs">
-          <Tabs>
-           <TabList>
-            {(this.state.company?.about?.length > 4 ||
-             this.state.company?.categories?.length > 0) && <Tab>Overview</Tab>}
-            {this.state.isOwner ? (
-             <Tab>Projects</Tab>
-            ) : (
-             <>{this.state.projects?.length > 0 && <Tab>Projects</Tab>}</>
-            )}
-            {this.state.isOwner ? (
-             <Tab>Blogs</Tab>
-            ) : (
-             <>{this.state.blogs?.length > 0 && <Tab>Blogs</Tab>}</>
-            )}
-            <Tab>Team</Tab>
-            {this.state.products?.length > 0 && <Tab>Products</Tab>}
-            {this.state.isOwner && this.props.isLoggedIn ? (
-             <Tab>Settings</Tab>
-            ) : (
-             <Tab>Contacts</Tab>
-            )}
-           </TabList>
-           {(this.state.company?.about?.length > 4 ||
-            this.state.company?.categories?.length > 0) && (
-            <TabPanel>
-             <CompanyOverviewTab
-              categories={this.state.company?.categories}
-              about={this.state.company?.about}
-             />
-            </TabPanel>
-           )}
-           {this.state.isOwner ? (
-            <TabPanel forceRender>
-             <AntRow span={24} gutter={{ xs: 12, sm: 12, md: 24, lg: 24 }}>
-              {this.state.isOwner && this.props.isLoggedIn && (
-               <AntCol xs={12} sm={12} md={8} className="my-4 add-col">
-                <div className="add-project-icon">
-                 <a href={`/addproject/company/${this.state.company?.id}`}>
-                  <AiOutlinePlus />
-                  Add Project
-                 </a>
-                </div>
-               </AntCol>
-              )}
-              {this.state?.projects?.map((p, index) => {
-               return (
-                <AntCol xs={12} sm={12} md={8} className="my-4" key={index}>
-                 {this.state.isOwner ? (
-                  <>
-                   <a href={`/project/${p.id}`} className="box-link">
-                    <div className="project-col bg-white">
-                     {this.state.isOwner && (
-                      <>
-                       <a
-                        href={`/editproject/${p.id}`}
-                        className="box-link project-edit-btn project-btn"
-                       >
-                        Edit
-                       </a>
-                      </>
-                     )}
-                     {this.state.isOwner && (
-                      <>
-                       <button
-                        className="project-btn project-delete-btn"
-                        onClick={(e) => {
-                         e.preventDefault();
-                         this.setState(
-                          {
-                           to_delete_project: p.id,
-                          },
-                          () => {
-                           this.setState({
-                            delete_project_modal: true,
-                           });
-                          }
-                         );
-                        }}
-                       >
-                        Delete
-                       </button>
-                      </>
-                     )}
-                     <div className="project-image-wrapper">
-                      <div
-                       className="project-image"
-                       style={{
-                        backgroundImage: `url(${p.cover})`,
-                       }}
-                      ></div>
-                     </div>
-
-                     <div className="info p-3 left">
-                      <p className="project-name left">{p.name}</p>
-
-                      <div className="project-cover-footer">
-                       <p>
-                        {p.kind?.map((k) => {
-                         return <span className="px-1">{k}</span>;
-                        })}
-                       </p>
-                       <hr className="my-1 w-20" />
-                       <p>
-                        <span className="px-1">{p.type}</span>
-                       </p>
-                      </div>
-                     </div>
-                    </div>
-                   </a>
-                  </>
-                 ) : (
-                  <>
-                   <a href={`/project/${p.id}`} className="box-link">
-                    <div className="project-col bg-white">
-                     {!this.state.isOwner && this.props.isLoggedIn && (
-                      <button
-                       className="project-btn project-delete-btn"
-                       onClick={(e) => {
-                        e.preventDefault();
-                        this.setState(
-                         {
-                          to_save_project_cover: p.cover,
-                          to_save_projectId: p,
-                         },
-                         () => {
-                          this.saveToBoard();
-                         }
-                        );
-                       }}
-                      >
-                       Save
-                      </button>
-                     )}
-                     <div className="project-image-wrapper">
-                      <div
-                       className="project-image"
-                       style={{
-                        backgroundImage: `url(${p.cover})`,
-                       }}
-                      ></div>
-                     </div>
-
-                     <div className="info p-3 left">
-                      <p className="project-name left">{p.name}</p>
-
-                      <div className="project-cover-footer">
-                       <p>
-                        {p.kind?.map((k) => {
-                         return <span className="px-1">{k}</span>;
-                        })}
-                       </p>
-                       <hr className="my-1 w-20" />
-                       <p>
-                        <span className="px-1">{p.type}</span>
-                       </p>
-                      </div>
-                     </div>
-                    </div>
-                   </a>
-                  </>
-                 )}
-                </AntCol>
-               );
-              })}
-             </AntRow>
-            </TabPanel>
-           ) : (
-            <>
-             {this.state.projects?.length > 0 && (
-              <TabPanel forceRender>
-               <AntRow span={24} gutter={{ xs: 12, sm: 12, md: 24, lg: 24 }}>
-                {this.state.isOwner && this.props.isLoggedIn && (
-                 <AntCol xs={12} sm={12} md={8} className="my-4 add-col">
-                  <div className="add-project-icon">
-                   <a href={`/addproject/company/${this.state.company?.id}`}>
-                    <AiOutlinePlus />
-                    Add Project
-                   </a>
-                  </div>
-                 </AntCol>
-                )}
-                {this.state?.projects?.map((p, index) => {
-                 return (
-                  <AntCol xs={12} sm={12} md={8} className="my-4" key={index}>
-                   {this.state.isOwner ? (
-                    <>
-                     <a href={`/project/${p.id}`} className="box-link">
-                      <div className="project-col bg-white">
-                       {this.state.isOwner && (
-                        <>
-                         <a
-                          href={`/editproject/${p.id}`}
-                          className="box-link project-edit-btn project-btn"
-                         >
-                          Edit
-                         </a>
-                        </>
-                       )}
-                       {this.state.isOwner && (
-                        <>
-                         <button
-                          className="project-btn project-delete-btn"
-                          onClick={(e) => {
-                           e.preventDefault();
-                           this.setState(
-                            {
-                             to_delete_project: p.id,
-                            },
-                            () => {
-                             this.setState({
-                              delete_project_modal: true,
-                             });
-                            }
-                           );
-                          }}
-                         >
-                          Delete
-                         </button>
-                        </>
-                       )}
-                       <div className="project-image-wrapper">
-                        <div
-                         className="project-image"
-                         style={{
-                          backgroundImage: `url(${p.cover})`,
-                         }}
-                        ></div>
-                       </div>
-
-                       <div className="info p-3 left">
-                        <p className="project-name left">{p.name}</p>
-
-                        <div className="project-cover-footer">
-                         <p>
-                          {p.kind?.map((k) => {
-                           return <span className="px-1">{k}</span>;
-                          })}
-                         </p>
-                         <hr className="my-1 w-20" />
-                         <p>
-                          <span className="px-1">{p.type}</span>
-                         </p>
-                        </div>
-                       </div>
-                      </div>
-                     </a>
-                    </>
-                   ) : (
-                    <>
-                     <a href={`/project/${p.id}`} className="box-link">
-                      <div className="project-col bg-white">
-                       {!this.state.isOwner && this.props.isLoggedIn && (
-                        <button
-                         className="project-btn project-delete-btn"
-                         onClick={(e) => {
-                          e.preventDefault();
-                          this.setState(
-                           {
-                            to_save_project_cover: p.cover,
-                            to_save_projectId: p,
-                           },
-                           () => {
-                            this.saveToBoard();
-                           }
-                          );
-                         }}
-                        >
-                         Save
-                        </button>
-                       )}
-                       <div className="project-image-wrapper">
-                        <div
-                         className="project-image"
-                         style={{
-                          backgroundImage: `url(${p.cover})`,
-                         }}
-                        ></div>
-                       </div>
-
-                       <div className="info p-3 left">
-                        <p className="project-name left">{p.name}</p>
-
-                        <div className="project-cover-footer">
-                         <p>
-                          {p.kind?.map((k) => {
-                           return <span className="px-1">{k}</span>;
-                          })}
-                         </p>
-                         <hr className="my-1 w-20" />
-                         <p>
-                          <span className="px-1">{p.type}</span>
-                         </p>
-                        </div>
-                       </div>
-                      </div>
-                     </a>
-                    </>
-                   )}
-                  </AntCol>
-                 );
-                })}
-               </AntRow>
-              </TabPanel>
+         </Col>
+         <Col md={{ span: 12 }}>
+          <div className="profile-tabs">
+           <Tabs>
+            <TabList>
+             {(this.state.company?.about?.length > 4 ||
+              this.state.company?.categories?.length > 0) && (
+              <Tab>Overview</Tab>
              )}
-            </>
-           )}
-           {this.state.isOwner ? (
-            <>
+             {this.state.isOwner ? (
+              <Tab>Projects</Tab>
+             ) : (
+              <>{this.state.projects?.length > 0 && <Tab>Projects</Tab>}</>
+             )}
+             {this.state.isOwner ? (
+              <Tab>Blogs</Tab>
+             ) : (
+              <>{this.state.blogs?.length > 0 && <Tab>Blogs</Tab>}</>
+             )}
+             {this.state.isOwner ? (
+              <>
+               <Tab>Team</Tab>
+              </>
+             ) : (
+              <>
+               {this.state.company?.members?.length > 0 && (
+                <>
+                 <Tab>Team</Tab>
+                </>
+               )}
+              </>
+             )}
+             {this.state.products?.length > 0 && <Tab>Products</Tab>}
+             {this.state.isOwner &&
+              this.state.company?.hasnotifications &&
+              this.props.isLoggedIn && (
+               <Tab>
+                Notifications
+                <span className="tab-icon tab-icon-red">i</span>
+               </Tab>
+              )}
+             {this.state.isOwner && this.props.isLoggedIn ? (
+              <Tab>Settings</Tab>
+             ) : (
+              ""
+              //  <Tab>Contacts</Tab>
+             )}
+            </TabList>
+            {(this.state.company?.about?.length > 4 ||
+             this.state.company?.categories?.length > 0) && (
+             <TabPanel>
+              <CompanyOverviewTab
+               categories={this.state.company?.categories}
+               about={this.state.company?.about}
+              />
+             </TabPanel>
+            )}
+            {this.state.isOwner ? (
              <TabPanel forceRender>
               <AntRow span={24} gutter={{ xs: 12, sm: 12, md: 24, lg: 24 }}>
                {this.state.isOwner && this.props.isLoggedIn && (
@@ -689,12 +591,132 @@ class Company extends Component {
                  <div className="add-project-icon">
                   <a href={`/addproject/company/${this.state.company?.id}`}>
                    <AiOutlinePlus />
-                   Add Blog
+                   Add Project
                   </a>
                  </div>
                 </AntCol>
                )}
-               {this.state?.blogs?.map((p, index) => {
+               {this.state?.projects?.map((p, index) => {
+                return (
+                 <AntCol xs={12} sm={12} md={8} className="my-4" key={index}>
+                  {this.state.isOwner ? (
+                   <>
+                    <a href={`/project/${p.id}`} className="box-link">
+                     <div className="project-col bg-white">
+                      {this.state.isOwner && (
+                       <>
+                        <a
+                         href={`/editproject/${p.id}`}
+                         className="box-link project-edit-btn project-btn"
+                        >
+                         Edit
+                        </a>
+                       </>
+                      )}
+                      {this.state.isOwner && (
+                       <>
+                        <button
+                         className="project-btn project-delete-btn"
+                         onClick={(e) => {
+                          e.preventDefault();
+                          this.setState(
+                           {
+                            to_delete_project: p.id,
+                           },
+                           () => {
+                            this.setState({
+                             delete_project_modal: true,
+                            });
+                           }
+                          );
+                         }}
+                        >
+                         Delete
+                        </button>
+                       </>
+                      )}
+                      <div className="project-image-wrapper">
+                       <div
+                        className="project-image"
+                        style={{
+                         backgroundImage: `url(${p.cover})`,
+                        }}
+                       ></div>
+                      </div>
+
+                      <div className="info p-3 left">
+                       <p className="project-name left">{p.name}</p>
+
+                       <div className="project-cover-footer">
+                        <p>
+                         {p.kind?.map((k) => {
+                          return <span className="px-1">{k}</span>;
+                         })}
+                        </p>
+                        <hr className="my-1 w-20" />
+                        <p>
+                         <span className="px-1">{p.type}</span>
+                        </p>
+                       </div>
+                      </div>
+                     </div>
+                    </a>
+                   </>
+                  ) : (
+                   <>
+                    <a href={`/project/${p.id}`} className="box-link">
+                     <div className="project-col bg-white">
+                      {!this.state.isOwner && this.props.isLoggedIn && (
+                       <button
+                        className="project-btn project-delete-btn"
+                        onClick={(e) => {
+                         e.preventDefault();
+                         this.setState(
+                          {
+                           to_save_project_cover: p.cover,
+                           to_save_projectId: p,
+                          },
+                          () => {
+                           this.saveToBoard();
+                          }
+                         );
+                        }}
+                       >
+                        Save
+                       </button>
+                      )}
+                      <div className="project-image-wrapper">
+                       <div
+                        className="project-image"
+                        style={{
+                         backgroundImage: `url(${p.cover})`,
+                        }}
+                       ></div>
+                      </div>
+
+                      <div className="info p-3 left">
+                       <p className="project-name left">{p.name}</p>
+
+                       <div className="project-cover-footer">
+                        <p>
+                         {p.kind?.map((k) => {
+                          return <span className="px-1">{k}</span>;
+                         })}
+                        </p>
+                        <hr className="my-1 w-20" />
+                        <p>
+                         <span className="px-1">{p.type}</span>
+                        </p>
+                       </div>
+                      </div>
+                     </div>
+                    </a>
+                   </>
+                  )}
+                 </AntCol>
+                );
+               })}
+               {this.state.taggedProjects?.map((p, index) => {
                 return (
                  <AntCol xs={12} sm={12} md={8} className="my-4" key={index}>
                   {this.state.isOwner ? (
@@ -816,10 +838,268 @@ class Company extends Component {
                })}
               </AntRow>
              </TabPanel>
-            </>
-           ) : (
-            <>
-             {this.state.blogs?.length > 0 && (
+            ) : (
+             <>
+              {this.state.projects?.length > 0 && (
+               <TabPanel forceRender>
+                <AntRow span={24} gutter={{ xs: 12, sm: 12, md: 24, lg: 24 }}>
+                 {this.state.isOwner && this.props.isLoggedIn && (
+                  <AntCol xs={12} sm={12} md={8} className="my-4 add-col">
+                   <div className="add-project-icon">
+                    <a href={`/addproject/company/${this.state.company?.id}`}>
+                     <AiOutlinePlus />
+                     Add Project
+                    </a>
+                   </div>
+                  </AntCol>
+                 )}
+                 {this.state?.projects?.map((p, index) => {
+                  return (
+                   <AntCol xs={12} sm={12} md={8} className="my-4" key={index}>
+                    {this.state.isOwner ? (
+                     <>
+                      <a href={`/project/${p.id}`} className="box-link">
+                       <div className="project-col bg-white">
+                        {this.state.isOwner && (
+                         <>
+                          <a
+                           href={`/editproject/${p.id}`}
+                           className="box-link project-edit-btn project-btn"
+                          >
+                           Edit
+                          </a>
+                         </>
+                        )}
+                        {this.state.isOwner && (
+                         <>
+                          <button
+                           className="project-btn project-delete-btn"
+                           onClick={(e) => {
+                            e.preventDefault();
+                            this.setState(
+                             {
+                              to_delete_project: p.id,
+                             },
+                             () => {
+                              this.setState({
+                               delete_project_modal: true,
+                              });
+                             }
+                            );
+                           }}
+                          >
+                           Delete
+                          </button>
+                         </>
+                        )}
+                        <div className="project-image-wrapper">
+                         <div
+                          className="project-image"
+                          style={{
+                           backgroundImage: `url(${p.cover})`,
+                          }}
+                         ></div>
+                        </div>
+
+                        <div className="info p-3 left">
+                         <p className="project-name left">{p.name}</p>
+
+                         <div className="project-cover-footer">
+                          <p>
+                           {p.kind?.map((k) => {
+                            return <span className="px-1">{k}</span>;
+                           })}
+                          </p>
+                          <hr className="my-1 w-20" />
+                          <p>
+                           <span className="px-1">{p.type}</span>
+                          </p>
+                         </div>
+                        </div>
+                       </div>
+                      </a>
+                     </>
+                    ) : (
+                     <>
+                      <a href={`/project/${p.id}`} className="box-link">
+                       <div className="project-col bg-white">
+                        {!this.state.isOwner && this.props.isLoggedIn && (
+                         <button
+                          className="project-btn project-delete-btn"
+                          onClick={(e) => {
+                           e.preventDefault();
+                           this.setState(
+                            {
+                             to_save_project_cover: p.cover,
+                             to_save_projectId: p,
+                            },
+                            () => {
+                             this.saveToBoard();
+                            }
+                           );
+                          }}
+                         >
+                          Save
+                         </button>
+                        )}
+                        <div className="project-image-wrapper">
+                         <div
+                          className="project-image"
+                          style={{
+                           backgroundImage: `url(${p.cover})`,
+                          }}
+                         ></div>
+                        </div>
+
+                        <div className="info p-3 left">
+                         <p className="project-name left">{p.name}</p>
+
+                         <div className="project-cover-footer">
+                          <p>
+                           {p.kind?.map((k) => {
+                            return <span className="px-1">{k}</span>;
+                           })}
+                          </p>
+                          <hr className="my-1 w-20" />
+                          <p>
+                           <span className="px-1">{p.type}</span>
+                          </p>
+                         </div>
+                        </div>
+                       </div>
+                      </a>
+                     </>
+                    )}
+                   </AntCol>
+                  );
+                 })}
+                 {this.state.taggedProjects?.map((p, index) => {
+                  return (
+                   <AntCol xs={12} sm={12} md={8} className="my-4" key={index}>
+                    {this.state.isOwner ? (
+                     <>
+                      <a href={`/project/${p.id}`} className="box-link">
+                       <div className="project-col bg-white">
+                        {this.state.isOwner && (
+                         <>
+                          <a
+                           href={`/editproject/${p.id}`}
+                           className="box-link project-edit-btn project-btn"
+                          >
+                           Edit
+                          </a>
+                         </>
+                        )}
+                        {this.state.isOwner && (
+                         <>
+                          <button
+                           className="project-btn project-delete-btn"
+                           onClick={(e) => {
+                            e.preventDefault();
+                            this.setState(
+                             {
+                              to_delete_project: p.id,
+                             },
+                             () => {
+                              this.setState({
+                               delete_project_modal: true,
+                              });
+                             }
+                            );
+                           }}
+                          >
+                           Delete
+                          </button>
+                         </>
+                        )}
+                        <div className="project-image-wrapper">
+                         <div
+                          className="project-image"
+                          style={{
+                           backgroundImage: `url(${p.cover})`,
+                          }}
+                         ></div>
+                        </div>
+
+                        <div className="info p-3 left">
+                         <p className="project-name left">{p.name}</p>
+
+                         <div className="project-cover-footer">
+                          <p>
+                           {p.kind?.map((k) => {
+                            return <span className="px-1">{k}</span>;
+                           })}
+                          </p>
+                          <hr className="my-1 w-20" />
+                          <p>
+                           <span className="px-1">{p.type}</span>
+                          </p>
+                         </div>
+                        </div>
+                       </div>
+                      </a>
+                     </>
+                    ) : (
+                     <>
+                      <a href={`/project/${p.id}`} className="box-link">
+                       <div className="project-col bg-white">
+                        {!this.state.isOwner && this.props.isLoggedIn && (
+                         <button
+                          className="project-btn project-delete-btn"
+                          onClick={(e) => {
+                           e.preventDefault();
+                           this.setState(
+                            {
+                             to_save_project_cover: p.cover,
+                             to_save_projectId: p,
+                            },
+                            () => {
+                             this.saveToBoard();
+                            }
+                           );
+                          }}
+                         >
+                          Save
+                         </button>
+                        )}
+                        <div className="project-image-wrapper">
+                         <div
+                          className="project-image"
+                          style={{
+                           backgroundImage: `url(${p.cover})`,
+                          }}
+                         ></div>
+                        </div>
+
+                        <div className="info p-3 left">
+                         <p className="project-name left">{p.name}</p>
+
+                         <div className="project-cover-footer">
+                          <p>
+                           {p.kind?.map((k) => {
+                            return <span className="px-1">{k}</span>;
+                           })}
+                          </p>
+                          <hr className="my-1 w-20" />
+                          <p>
+                           <span className="px-1">{p.type}</span>
+                          </p>
+                         </div>
+                        </div>
+                       </div>
+                      </a>
+                     </>
+                    )}
+                   </AntCol>
+                  );
+                 })}
+                </AntRow>
+               </TabPanel>
+              )}
+             </>
+            )}
+            {this.state.isOwner ? (
+             <>
               <TabPanel forceRender>
                <AntRow span={24} gutter={{ xs: 12, sm: 12, md: 24, lg: 24 }}>
                 {this.state.isOwner && this.props.isLoggedIn && (
@@ -952,485 +1232,1090 @@ class Company extends Component {
                   </AntCol>
                  );
                 })}
+                {this.state?.taggedBlogs?.map((p, index) => {
+                 return (
+                  <AntCol xs={12} sm={12} md={8} className="my-4" key={index}>
+                   {this.state.isOwner ? (
+                    <>
+                     <a href={`/project/${p.id}`} className="box-link">
+                      <div className="project-col bg-white">
+                       {this.state.isOwner && (
+                        <>
+                         <a
+                          href={`/editproject/${p.id}`}
+                          className="box-link project-edit-btn project-btn"
+                         >
+                          Edit
+                         </a>
+                        </>
+                       )}
+                       {this.state.isOwner && (
+                        <>
+                         <button
+                          className="project-btn project-delete-btn"
+                          onClick={(e) => {
+                           e.preventDefault();
+                           this.setState(
+                            {
+                             to_delete_project: p.id,
+                            },
+                            () => {
+                             this.setState({
+                              delete_project_modal: true,
+                             });
+                            }
+                           );
+                          }}
+                         >
+                          Delete
+                         </button>
+                        </>
+                       )}
+                       <div className="project-image-wrapper">
+                        <div
+                         className="project-image"
+                         style={{
+                          backgroundImage: `url(${p.cover})`,
+                         }}
+                        ></div>
+                       </div>
+
+                       <div className="info p-3 left">
+                        <p className="project-name left">{p.name}</p>
+
+                        <div className="project-cover-footer">
+                         <p>
+                          {p.kind?.map((k) => {
+                           return <span className="px-1">{k}</span>;
+                          })}
+                         </p>
+                         <hr className="my-1 w-20" />
+                         <p>
+                          <span className="px-1">{p.type}</span>
+                         </p>
+                        </div>
+                       </div>
+                      </div>
+                     </a>
+                    </>
+                   ) : (
+                    <>
+                     <a href={`/project/${p.id}`} className="box-link">
+                      <div className="project-col bg-white">
+                       {!this.state.isOwner && this.props.isLoggedIn && (
+                        <button
+                         className="project-btn project-delete-btn"
+                         onClick={(e) => {
+                          e.preventDefault();
+                          this.setState(
+                           {
+                            to_save_project_cover: p.cover,
+                            to_save_projectId: p,
+                           },
+                           () => {
+                            this.saveToBoard();
+                           }
+                          );
+                         }}
+                        >
+                         Save
+                        </button>
+                       )}
+                       <div className="project-image-wrapper">
+                        <div
+                         className="project-image"
+                         style={{
+                          backgroundImage: `url(${p.cover})`,
+                         }}
+                        ></div>
+                       </div>
+
+                       <div className="info p-3 left">
+                        <p className="project-name left">{p.name}</p>
+
+                        <div className="project-cover-footer">
+                         <p>
+                          {p.kind?.map((k) => {
+                           return <span className="px-1">{k}</span>;
+                          })}
+                         </p>
+                         <hr className="my-1 w-20" />
+                         <p>
+                          <span className="px-1">{p.type}</span>
+                         </p>
+                        </div>
+                       </div>
+                      </div>
+                     </a>
+                    </>
+                   )}
+                  </AntCol>
+                 );
+                })}
                </AntRow>
               </TabPanel>
-             )}
-            </>
-           )}
-           <TabPanel forceRender>
-            <div className="teams">
-             <AntRow gutter={{ lg: 50, md: 16, sm: 12, xs: 24 }} span={24}>
-              {this.state?.members?.map((user) => {
-               return (
-                <AntCol
-                 lg={6}
-                 md={6}
-                 sm={8}
-                 xs={12}
-                 key={user.id}
-                 className="mb-5 member-col"
-                >
-                 <div
-                  className="member-box pointer"
-                  style={{ backgroundImage: `url("${user.photoURL}")` }}
-                 >
-                  {(!user.photoURL || user.photoURL?.length < 4) &&
-                   `${user.displayName[0]}`}
-                 </div>
-                 <div className="member-name">{user.displayName}</div>
-                 <div className="member-title">
-                  {user?.professions?.slice(0, 1)}
-                 </div>
+             </>
+            ) : (
+             <>
+              {this.state.blogs?.length > 0 && (
+               <TabPanel forceRender>
+                <AntRow span={24} gutter={{ xs: 12, sm: 12, md: 24, lg: 24 }}>
                  {this.state.isOwner && this.props.isLoggedIn && (
-                  <p
-                   onClick={() => {
-                    this.handleReject(this.state.company_id, user?.id);
-                   }}
-                   className="deletecompany"
-                  >
-                   Remove
-                  </p>
+                  <AntCol xs={12} sm={12} md={8} className="my-4 add-col">
+                   <div className="add-project-icon">
+                    <a href={`/addproject/company/${this.state.company?.id}`}>
+                     <AiOutlinePlus />
+                     Add Blog
+                    </a>
+                   </div>
+                  </AntCol>
+                 )}
+                 {this.state?.blogs?.map((p, index) => {
+                  return (
+                   <AntCol xs={12} sm={12} md={8} className="my-4" key={index}>
+                    {this.state.isOwner ? (
+                     <>
+                      <a href={`/project/${p.id}`} className="box-link">
+                       <div className="project-col bg-white">
+                        {this.state.isOwner && (
+                         <>
+                          <a
+                           href={`/editproject/${p.id}`}
+                           className="box-link project-edit-btn project-btn"
+                          >
+                           Edit
+                          </a>
+                         </>
+                        )}
+                        {this.state.isOwner && (
+                         <>
+                          <button
+                           className="project-btn project-delete-btn"
+                           onClick={(e) => {
+                            e.preventDefault();
+                            this.setState(
+                             {
+                              to_delete_project: p.id,
+                             },
+                             () => {
+                              this.setState({
+                               delete_project_modal: true,
+                              });
+                             }
+                            );
+                           }}
+                          >
+                           Delete
+                          </button>
+                         </>
+                        )}
+                        <div className="project-image-wrapper">
+                         <div
+                          className="project-image"
+                          style={{
+                           backgroundImage: `url(${p.cover})`,
+                          }}
+                         ></div>
+                        </div>
+
+                        <div className="info p-3 left">
+                         <p className="project-name left">{p.name}</p>
+
+                         <div className="project-cover-footer">
+                          <p>
+                           {p.kind?.map((k) => {
+                            return <span className="px-1">{k}</span>;
+                           })}
+                          </p>
+                          <hr className="my-1 w-20" />
+                          <p>
+                           <span className="px-1">{p.type}</span>
+                          </p>
+                         </div>
+                        </div>
+                       </div>
+                      </a>
+                     </>
+                    ) : (
+                     <>
+                      <a href={`/project/${p.id}`} className="box-link">
+                       <div className="project-col bg-white">
+                        {!this.state.isOwner && this.props.isLoggedIn && (
+                         <button
+                          className="project-btn project-delete-btn"
+                          onClick={(e) => {
+                           e.preventDefault();
+                           this.setState(
+                            {
+                             to_save_project_cover: p.cover,
+                             to_save_projectId: p,
+                            },
+                            () => {
+                             this.saveToBoard();
+                            }
+                           );
+                          }}
+                         >
+                          Save
+                         </button>
+                        )}
+                        <div className="project-image-wrapper">
+                         <div
+                          className="project-image"
+                          style={{
+                           backgroundImage: `url(${p.cover})`,
+                          }}
+                         ></div>
+                        </div>
+
+                        <div className="info p-3 left">
+                         <p className="project-name left">{p.name}</p>
+
+                         <div className="project-cover-footer">
+                          <p>
+                           {p.kind?.map((k) => {
+                            return <span className="px-1">{k}</span>;
+                           })}
+                          </p>
+                          <hr className="my-1 w-20" />
+                          <p>
+                           <span className="px-1">{p.type}</span>
+                          </p>
+                         </div>
+                        </div>
+                       </div>
+                      </a>
+                     </>
+                    )}
+                   </AntCol>
+                  );
+                 })}
+                </AntRow>
+               </TabPanel>
+              )}
+              {this.state?.taggedBlogs?.map((p, index) => {
+               return (
+                <AntCol xs={12} sm={12} md={8} className="my-4" key={index}>
+                 {this.state.isOwner ? (
+                  <>
+                   <a href={`/project/${p.id}`} className="box-link">
+                    <div className="project-col bg-white">
+                     {this.state.isOwner && (
+                      <>
+                       <a
+                        href={`/editproject/${p.id}`}
+                        className="box-link project-edit-btn project-btn"
+                       >
+                        Edit
+                       </a>
+                      </>
+                     )}
+                     {this.state.isOwner && (
+                      <>
+                       <button
+                        className="project-btn project-delete-btn"
+                        onClick={(e) => {
+                         e.preventDefault();
+                         this.setState(
+                          {
+                           to_delete_project: p.id,
+                          },
+                          () => {
+                           this.setState({
+                            delete_project_modal: true,
+                           });
+                          }
+                         );
+                        }}
+                       >
+                        Delete
+                       </button>
+                      </>
+                     )}
+                     <div className="project-image-wrapper">
+                      <div
+                       className="project-image"
+                       style={{
+                        backgroundImage: `url(${p.cover})`,
+                       }}
+                      ></div>
+                     </div>
+
+                     <div className="info p-3 left">
+                      <p className="project-name left">{p.name}</p>
+
+                      <div className="project-cover-footer">
+                       <p>
+                        {p.kind?.map((k) => {
+                         return <span className="px-1">{k}</span>;
+                        })}
+                       </p>
+                       <hr className="my-1 w-20" />
+                       <p>
+                        <span className="px-1">{p.type}</span>
+                       </p>
+                      </div>
+                     </div>
+                    </div>
+                   </a>
+                  </>
+                 ) : (
+                  <>
+                   <a href={`/project/${p.id}`} className="box-link">
+                    <div className="project-col bg-white">
+                     {!this.state.isOwner && this.props.isLoggedIn && (
+                      <button
+                       className="project-btn project-delete-btn"
+                       onClick={(e) => {
+                        e.preventDefault();
+                        this.setState(
+                         {
+                          to_save_project_cover: p.cover,
+                          to_save_projectId: p,
+                         },
+                         () => {
+                          this.saveToBoard();
+                         }
+                        );
+                       }}
+                      >
+                       Save
+                      </button>
+                     )}
+                     <div className="project-image-wrapper">
+                      <div
+                       className="project-image"
+                       style={{
+                        backgroundImage: `url(${p.cover})`,
+                       }}
+                      ></div>
+                     </div>
+
+                     <div className="info p-3 left">
+                      <p className="project-name left">{p.name}</p>
+
+                      <div className="project-cover-footer">
+                       <p>
+                        {p.kind?.map((k) => {
+                         return <span className="px-1">{k}</span>;
+                        })}
+                       </p>
+                       <hr className="my-1 w-20" />
+                       <p>
+                        <span className="px-1">{p.type}</span>
+                       </p>
+                      </div>
+                     </div>
+                    </div>
+                   </a>
+                  </>
                  )}
                 </AntCol>
                );
               })}
-              {this.state.isOwner && (
-               <AntCol
-                lg={6}
-                className="mb-5"
-                md={6}
-                sm={8}
-                xs={12}
-                onClick={() => {
-                 this.setState(
-                  {
-                   userName: "",
-                   selectedUser: null,
-                  },
-                  () => {
-                   this.setState({
-                    team_modal: true,
-                   });
-                  }
-                 );
-                }}
-               >
-                <div className="member-box pointer add">+</div>
-                <div className="member-name add">ADD MEMBER</div>
-               </AntCol>
-              )}
-             </AntRow>
-            </div>
-           </TabPanel>
-           {this.state.products?.length > 0 && (
-            <TabPanel>
-             <div className="products">
-              <AntRow
-               gutter={{ xs: 8, sm: 12, md: 24, lg: 24 }}
-               className="py-3"
-              >
-               {this.state.products.length > 0 ? (
-                <>
-                 {this.state.products.map((product, index) => {
+             </>
+            )}
+            {this.state.isOwner ? (
+             <>
+              <TabPanel forceRender>
+               <div className="teams">
+                <AntRow gutter={{ lg: 50, md: 16, sm: 12, xs: 24 }} span={24}>
+                 {this.state?.members?.map((user) => {
                   return (
                    <AntCol
-                    className="gutter-row mb-3"
                     lg={6}
                     md={6}
+                    sm={8}
                     xs={12}
-                    sm={12}
+                    key={user.id}
+                    className="mb-5 member-col"
                    >
-                    <a href={`/product/${product.id}`}>
-                     <div className="product">
-                      <div
-                       className="p-img"
-                       style={{
-                        background: `url(${product?.identity[0].preview_cover})`,
-                       }}
-                      >
-                       <div className="prlayer"></div>
-
-                       {product?.files?.length > 0 ? (
-                        <>
-                         <div className="actns-btn file-btn cad">CAD</div>
-                         <div className="actns-btn file-btn threeD">3D</div>
-                        </>
-                       ) : (
-                        ""
-                       )}
-                      </div>
-                      <h5 className="product-store">{product.stores?.name}</h5>
-                      <p className="product-name">
-                       {product?.identity[0].name}
-                      </p>
-                      <div className="product-price">
-                       {product.identity[0].preview_price &&
-                       product.identity[0].preview_price > 0 ? (
-                        <>
-                         <span>¥ {product.identity[0].preview_price}</span>
-                        </>
-                       ) : (
-                        <>
-                         <Link
-                          to={{
-                           pathname: `/product/${product?.identity[0].product_id}`,
-                           state: {
-                            request_price: true,
-                           },
-                          }}
-                         >
-                          REQUEST PRICE INFO
-                         </Link>
-                        </>
-                       )}
-                      </div>
-                     </div>
-                    </a>
+                    <div
+                     className="member-box pointer"
+                     style={{ backgroundImage: `url("${user.photoURL}")` }}
+                    >
+                     {(!user.photoURL || user.photoURL?.length < 4) &&
+                      `${user.displayName[0]}`}
+                    </div>
+                    <div className="member-name">{user.displayName}</div>
+                    <div className="member-title">
+                     {user?.pivot?.member_position}
+                    </div>
+                    {this.state.isOwner && this.props.isLoggedIn && (
+                     <p
+                      onClick={() => {
+                       this.handleReject(this.state.company_id, user?.id);
+                      }}
+                      className="deletecompany"
+                     >
+                      Remove
+                     </p>
+                    )}
                    </AntCol>
                   );
                  })}
-                </>
-               ) : (
-                <>
-                 <p className="indicator">
-                  You Don't have any products in the collection
-                 </p>
-                </>
-               )}
-              </AntRow>
-             </div>
-            </TabPanel>
-           )}
-           {this.state.isOwner && this.props.isLoggedIn ? (
-            <TabPanel forceRender>
-             {/* <CompanySettingTab company={this.state.company} /> */}
-             <div
-              id="company-setting"
-              className="company-setting-tab company-tab py-5"
-             >
-              <div className="mb-5">
-               <p className="bold form-underline">Edit Profile</p>
-               <div className="setting-form">
-                <AntRow span={24}>
-                 <AntCol md={6}>
-                  <div className="company-profile">
-                   <div
-                    className="company-logo"
-                    style={{
-                     backgroundImage: `url("${this.state.profile || src}")`,
-                    }}
-                   ></div>
-                   <p
-                    className="upprof"
-                    onClick={() => this.setState({ profile_modal: true })}
-                   >
-                    Update company profile
-                   </p>
-                  </div>
-                 </AntCol>
-                 <AntCol md={18}>
-                  <p className="lbl">Company Name</p>
-                  <Input
-                   size="large"
-                   className="mb-3"
-                   value={this.state.name}
-                   onChange={(e) => {
-                    this.setState({
-                     name: e.target.value,
-                    });
-                   }}
-                  />
-                  <p className="lbl mt-4 mb-3">
-                   Bio -{" "}
-                   <span>
-                    Write short intro about your company in 155 letter
-                   </span>
-                  </p>
-                  <TextArea
-                   rows={3}
-                   maxLength={155}
-                   showCount
-                   value={this.state.bio}
-                   onChange={(e) =>
-                    this.setState({
-                     bio: e.target.value,
-                    })
-                   }
-                  />
-                  <p className="lbl my-5">About</p>
-                  <TextArea
-                   rows={15}
-                   value={this.state.about}
-                   onChange={(e) =>
-                    this.setState({
-                     about: e.target.value,
-                    })
-                   }
-                  />
-                 </AntCol>
-                </AntRow>
-               </div>
-              </div>
-              <div className="mb-5">
-               <p className="bold form-underline">Edit Company</p>
-               <div className="setting-form">
-                <p className="lbl">Services</p>
-                <AntRow span={24}>
-                 <AntCol md={24}>
-                  <Select
-                   size="large"
-                   showSearch
-                   mode="tags"
-                   onChange={this.handleServicesChange}
-                   value={this.state.selectedServices}
-                   placeholder="Please select Service"
-                   style={{
-                    fontSize: "13px",
-                    width: "50%",
+                 {this.state.isOwner && (
+                  <AntCol
+                   lg={6}
+                   className="mb-5"
+                   md={6}
+                   sm={8}
+                   xs={12}
+                   onClick={() => {
+                    this.setState(
+                     {
+                      userName: "",
+                      selectedUser: null,
+                     },
+                     () => {
+                      this.setState({
+                       team_modal: true,
+                      });
+                     }
+                    );
                    }}
                   >
-                   {company_services.map((p) => {
+                   <div className="member-box pointer add">+</div>
+                   <div className="member-name add">ADD MEMBER</div>
+                  </AntCol>
+                 )}
+                </AntRow>
+               </div>
+              </TabPanel>
+             </>
+            ) : (
+             <>
+              {this.state.company?.members?.length > 0 && (
+               <>
+                <TabPanel forceRender>
+                 <div className="teams">
+                  <AntRow gutter={{ lg: 50, md: 16, sm: 12, xs: 24 }} span={24}>
+                   {this.state?.members?.map((user) => {
                     return (
-                     <>
-                      <Option value={p}>{p}</Option>
-                     </>
+                     <AntCol
+                      lg={6}
+                      md={6}
+                      sm={8}
+                      xs={12}
+                      key={user.id}
+                      className="mb-5 member-col"
+                     >
+                      <div
+                       className="member-box pointer"
+                       style={{ backgroundImage: `url("${user.photoURL}")` }}
+                      >
+                       {(!user.photoURL || user.photoURL?.length < 4) &&
+                        `${user.displayName[0]}`}
+                      </div>
+                      <div className="member-name">{user.displayName}</div>
+                      <div className="member-title">
+                       {user?.professions?.slice(0, 1)}
+                      </div>
+                      {this.state.isOwner && this.props.isLoggedIn && (
+                       <p
+                        onClick={() => {
+                         this.handleReject(this.state.company_id, user?.id);
+                        }}
+                        className="deletecompany"
+                       >
+                        Remove
+                       </p>
+                      )}
+                     </AntCol>
                     );
                    })}
-                  </Select>
-                 </AntCol>
-                </AntRow>
-                <AntRow span={24} gutter={12} align="middle" className="mt-5">
-                 <AntCol md={12}>
-                  <p className="lbl">Country</p>
-                  <ReactFlagsSelect
-                   selected={this.state.country}
-                   selectedSize={14}
-                   optionsSize={18}
-                   searchable
-                   customLabels={customLabels}
-                   placeholder="Select Country *"
-                   onSelect={(code) => {
-                    this.setState({ country: code });
-                   }}
-                  />
-                 </AntCol>
-                 <AntCol md={12}>
-                  <p className="lbl">City</p>
-                  <Input
-                   size="large"
-                   value={this.state.city}
-                   onChange={(e) => {
-                    this.setState({
-                     city: e.target.value,
-                    });
-                   }}
-                  />
-                 </AntCol>
-                </AntRow>
-               </div>
+                   {this.state.isOwner && (
+                    <AntCol
+                     lg={6}
+                     className="mb-5"
+                     md={6}
+                     sm={8}
+                     xs={12}
+                     onClick={() => {
+                      this.setState(
+                       {
+                        userName: "",
+                        selectedUser: null,
+                       },
+                       () => {
+                        this.setState({
+                         team_modal: true,
+                        });
+                       }
+                      );
+                     }}
+                    >
+                     <div className="member-box pointer add">+</div>
+                     <div className="member-name add">ADD MEMBER</div>
+                    </AntCol>
+                   )}
+                  </AntRow>
+                 </div>
+                </TabPanel>
+               </>
+              )}
+             </>
+            )}
+            {this.state.products?.length > 0 && (
+             <TabPanel>
+              <div className="products">
+               <AntRow
+                gutter={{ xs: 8, sm: 12, md: 24, lg: 24 }}
+                className="py-3"
+               >
+                {this.state.products.length > 0 ? (
+                 <>
+                  {this.state.products.map((product, index) => {
+                   return (
+                    <AntCol
+                     className="gutter-row mb-3"
+                     lg={6}
+                     md={6}
+                     xs={12}
+                     sm={12}
+                    >
+                     <a href={`/product/${product.id}`}>
+                      <div className="product">
+                       <div
+                        className="p-img"
+                        style={{
+                         background: `url(${product?.identity[0].preview_cover})`,
+                        }}
+                       >
+                        <div className="prlayer"></div>
+
+                        {product?.files?.length > 0 ? (
+                         <>
+                          <div className="actns-btn file-btn cad">CAD</div>
+                          <div className="actns-btn file-btn threeD">3D</div>
+                         </>
+                        ) : (
+                         ""
+                        )}
+                       </div>
+                       <h5 className="product-store">{product.stores?.name}</h5>
+                       <p className="product-name">
+                        {product?.identity[0].name}
+                       </p>
+                       <div className="product-price">
+                        {product.identity[0].preview_price &&
+                        product.identity[0].preview_price > 0 ? (
+                         <>
+                          <span>¥ {product.identity[0].preview_price}</span>
+                         </>
+                        ) : (
+                         <>
+                          <Link
+                           to={{
+                            pathname: `/product/${product?.identity[0].product_id}`,
+                            state: {
+                             request_price: true,
+                            },
+                           }}
+                          >
+                           REQUEST PRICE INFO
+                          </Link>
+                         </>
+                        )}
+                       </div>
+                      </div>
+                     </a>
+                    </AntCol>
+                   );
+                  })}
+                 </>
+                ) : (
+                 <>
+                  <p className="indicator">
+                   You Don't have any products in the collection
+                  </p>
+                 </>
+                )}
+               </AntRow>
               </div>
-              <div className="mb-3">
-               <p className="bold form-underline">Contacts</p>
-               <div className="setting-form">
-                <AntRow gutter={12} span={24}>
-                 <AntCol md={12}>
-                  <p className="lbl">Website</p>
-                  <Input
-                   placeholder="https://"
-                   size="large"
-                   value={this.state.website}
-                   onChange={(e) => {
-                    this.setState({
-                     website: e.target.value,
-                    });
-                   }}
-                  />
-                 </AntCol>
-                 <AntCol md={12}>
-                  <p className="lbl">Phone</p>
-                  <ConfigProvider locale={en}>
-                   <CountryPhoneInput
-                    value={{
-                     code: this.state.phone_code,
-                     phone: this.state.phone,
+             </TabPanel>
+            )}
+
+            {this.state.isOwner &&
+             this.state.company?.hasnotifications &&
+             this.props.isLoggedIn && (
+              <TabPanel forceRender>
+               <CompanyNotificationaTab company_id={this.state.company_id} />
+              </TabPanel>
+             )}
+            {this.state.isOwner && this.props.isLoggedIn ? (
+             <TabPanel forceRender>
+              {/* <CompanySettingTab company={this.state.company} /> */}
+              <div
+               id="company-setting"
+               className="company-setting-tab company-tab py-5"
+              >
+               <div className="mb-5">
+                <p className="bold form-underline">Edit Profile</p>
+                <div className="setting-form">
+                 <AntRow
+                  span={24}
+                  justify={{ sm: "center", xs: "center", lg: "start" }}
+                 >
+                  <AntCol md={6} xs={24} sm={24} lg={6}>
+                   <div className="company-profile">
+                    <div
+                     className="company-logo"
+                     style={{
+                      backgroundImage: `url("${this.state.profile}")`,
+                     }}
+                    >
+                     {(!this.state.profile ||
+                      this.state.profile?.length < 4) && (
+                      <span>{this.state.company?.name[0]}</span>
+                     )}
+                    </div>
+                    <p
+                     className="upprof"
+                     onClick={() => this.setState({ profile_modal: true })}
+                    >
+                     Update company profile
+                    </p>
+                   </div>
+                  </AntCol>
+                  <AntCol lg={18} md={18} sm={24} xs={24}>
+                   <p className="lbl">Company Name</p>
+                   <Input
+                    size="large"
+                    className="mb-3"
+                    value={this.state.name}
+                    onChange={(e) => {
+                     this.setState({
+                      name: e.target.value,
+                     });
                     }}
+                   />
+                   <p className="lbl mt-4 mb-3">
+                    Bio -{" "}
+                    <span>
+                     Write short intro about your company in 155 letter
+                    </span>
+                   </p>
+                   <TextArea
+                    rows={3}
+                    maxLength={155}
+                    showCount
+                    value={this.state.bio}
                     onChange={(e) =>
-                     this.setState({ phone: e.phone, phone_code: e.code }, () =>
-                      console.log(this.state)
-                     )
+                     this.setState({
+                      bio: e.target.value,
+                     })
                     }
                    />
-                  </ConfigProvider>
-                 </AntCol>
-                 <AntCol md={24} className="mt-4">
-                  <p className="lbl">Email</p>
-                  <Input
-                   value={this.state.email}
-                   onChange={(e) => {
-                    this.setState({ email: e.target.value });
-                   }}
-                   type="email"
-                   size="large"
-                   placeholder="Company Email"
-                   style={{
-                    width: "50%",
-                   }}
-                  />
-                 </AntCol>
-                </AntRow>
-               </div>
-              </div>
-              <AntRow justify="end">
-               <AntCol md={24}>
-                <Button
-                 className="invite-btn"
-                 onClick={this.handleSaveSetting}
-                 loading={this.state.saving}
-                >
-                 Save
-                </Button>
-               </AntCol>
-              </AntRow>
-              <AntRow span={24} className="mt-5">
-               <AntCol md={24}>
-                <p
-                 onClick={() => {
-                  this.setState(
-                   {
-                    userName: "",
-                    selectedUser: null,
-                   },
-                   () => {
-                    this.setState({
-                     transfer_modal: true,
-                    });
-                   }
-                  );
-                 }}
-                 className="transfer"
-                >
-                 Transfer Company Ownership
-                </p>
-               </AntCol>
-              </AntRow>
-             </div>
-
-             <Modal
-              id="price-request-modal"
-              className="arch-wide-modal product-modal material-modal"
-              size="lg"
-              show={this.state.profile_modal}
-              onHide={() => this.setState({ profile_modal: false })}
-              aria-labelledby="example-modal-sizes-title-lg"
-             >
-              <Modal.Header closeButton />
-              <Modal.Body>
-               <div className="option-add-label">Profile</div>
-               <div className="cropper-box">
-                <Cropper
-                 src={this.state.profile}
-                 style={{ height: "100%", width: "100%" }}
-                 ref={this.cropperRef}
-                 initialAspectRatio="free"
-                 guides={true}
-                 cropend={this._crop.bind(this)}
-                 ready={this._crop.bind(this)}
-                 crossOrigin="anonymous"
-                 preview=".image-preview"
-                 scalable={false}
-                 aspectRatio={1}
-                 autoCropArea={1}
-                 viewMode={1}
-                 dragMode="move"
-                 rotatable={false}
-                 zoomOnWheel={true}
-                 cropBoxMovable={true}
-                 cropBoxResizable={true}
-                 center={false}
-                />
-               </div>
-               <div
-                style={{
-                 position: "relative",
-                 width: "80px",
-                 height: "80px",
-                }}
-               >
-                <IoMdCloudUpload
-                 style={{
-                  position: "absolute",
-                  top: "0",
-                  left: "0",
-                  right: "0",
-                  bottom: "0",
-                  fontSize: "5rem",
-                  zIndex: 1,
-                  background: "#e8e8e84a",
-                  textAlign: "left",
-                 }}
-                />
-                <input
-                 type="file"
-                 onChange={this.onChangeProfile}
-                 style={{
-                  position: "absolute",
-                  background: "red",
-                  opacity: 0,
-                  top: "0",
-                  left: "0",
-                  right: "0",
-                  bottom: "0",
-                  width: "100%",
-                  fontSize: "5rem",
-                  zIndex: "2",
-                 }}
-                />
-               </div>
-
-               <div as={Row} className="add-btn">
-                <div column md={12}>
-                 <Button variant="danger" onClick={this.handleUpdateLogo}>
-                  {this.state.addProfileLoad ? (
-                   <ClipLoader
-                    style={{ height: "20px" }}
-                    color="#ffffff"
-                    size={20}
+                   <p className="lbl my-5">About</p>
+                   <TextArea
+                    rows={15}
+                    value={this.state.about}
+                    onChange={(e) =>
+                     this.setState({
+                      about: e.target.value,
+                     })
+                    }
                    />
+                  </AntCol>
+                 </AntRow>
+                </div>
+               </div>
+               <div className="mb-5">
+                <p className="bold form-underline">Edit Company</p>
+                <div className="setting-form">
+                 <p className="lbl">Services</p>
+                 <AntRow span={24}>
+                  <AntCol md={24}>
+                   <Select
+                    size="large"
+                    showSearch
+                    mode="tags"
+                    className="select-setting"
+                    onChange={this.handleServicesChange}
+                    value={this.state.selectedServices}
+                    placeholder="Please select Service"
+                    style={{
+                     fontSize: "13px",
+                     // width: "50%",
+                    }}
+                   >
+                    {company_services.map((p) => {
+                     return (
+                      <>
+                       <Option value={p}>{p}</Option>
+                      </>
+                     );
+                    })}
+                   </Select>
+                  </AntCol>
+                 </AntRow>
+                 <AntRow span={24} gutter={12} align="middle" className="mt-5">
+                  <AntCol md={12} xs={24} sm={24} lg={12}>
+                   <p className="lbl">Country</p>
+                   <ReactFlagsSelect
+                    selected={this.state.country}
+                    selectedSize={14}
+                    optionsSize={18}
+                    searchable
+                    customLabels={customLabels}
+                    placeholder="Select Country *"
+                    onSelect={(code) => {
+                     this.setState({ country: code });
+                    }}
+                   />
+                  </AntCol>
+                  <AntCol md={12} xs={24} sm={24} lg={12}>
+                   <p className="lbl">City</p>
+                   <Input
+                    size="large"
+                    value={this.state.city}
+                    onChange={(e) => {
+                     this.setState({
+                      city: e.target.value,
+                     });
+                    }}
+                   />
+                  </AntCol>
+                 </AntRow>
+                </div>
+               </div>
+               <div className="mb-3">
+                <p className="bold form-underline">Contacts</p>
+                <div className="setting-form">
+                 <AntRow gutter={12} span={24}>
+                  <AntCol md={12} xs={24} lg={12} sm={24}>
+                   <p className="lbl">Email</p>
+                   <Input
+                    value={this.state.email}
+                    onChange={(e) => {
+                     this.setState({ email: e.target.value });
+                    }}
+                    type="email"
+                    size="large"
+                    placeholder="Company Email"
+                   />
+                  </AntCol>
+                  <AntCol md={12} xs={24} lg={12} sm={24}>
+                   <p className="lbl">Website</p>
+                   <Input
+                    placeholder="https://"
+                    size="large"
+                    value={this.state.website}
+                    onChange={(e) => {
+                     this.setState({
+                      website: e.target.value,
+                     });
+                    }}
+                   />
+                  </AntCol>
+                  <AntCol md={12} xs={24} lg={12} sm={24}>
+                   <p className="lbl">Whatsapp</p>
+                   <ConfigProvider locale={en}>
+                    <CountryPhoneInput
+                     value={{
+                      code: this.state.phone_code,
+                      phone: this.state.phone,
+                     }}
+                     onChange={(e) =>
+                      this.setState(
+                       {
+                        phone: e.phone,
+                        phone_code: e.code,
+                        whatsapp: `+${e.code}${e.phone}`,
+                       },
+                       () => console.log(this.state)
+                       // this.setState({})
+                      )
+                     }
+                    />
+                   </ConfigProvider>
+                  </AntCol>
+
+                  <AntCol md={12} xs={24} lg={12} sm={24}>
+                   <p className="lbl">Instagram</p>
+                   <Input
+                    placeholder="instgram username"
+                    size="large"
+                    value={this.state.instagram}
+                    onChange={(e) => {
+                     this.setState({
+                      instagram: e.target.value,
+                     });
+                    }}
+                   />
+                  </AntCol>
+                  <AntCol md={12} xs={24} lg={12} sm={24}>
+                   <p className="lbl">Pinterest</p>
+                   <Input
+                    placeholder="pinterest profile link"
+                    size="large"
+                    value={this.state.pinterest}
+                    onChange={(e) => {
+                     this.setState({
+                      pinterest: e.target.value,
+                     });
+                    }}
+                   />
+                  </AntCol>
+                  <AntCol md={12} xs={24} lg={12} sm={24}>
+                   <p className="lbl">Wechat</p>
+                   <Input
+                    placeholder="Wechat ID"
+                    size="large"
+                    value={this.state.wechat}
+                    onChange={(e) => {
+                     this.setState({
+                      wechat: e.target.value,
+                     });
+                    }}
+                   />
+                  </AntCol>
+                  <AntCol md={12} xs={24} lg={12} sm={24}>
+                   <p className="lbl">Linkedin</p>
+                   <Input
+                    placeholder="Linkedin profile link"
+                    size="large"
+                    value={this.state.linkedin}
+                    onChange={(e) => {
+                     this.setState({
+                      linkedin: e.target.value,
+                     });
+                    }}
+                   />
+                  </AntCol>
+                 </AntRow>
+                </div>
+               </div>
+               <AntRow justify="end">
+                <AntCol md={24}>
+                 <Button
+                  className="invite-btn"
+                  onClick={this.handleSaveSetting}
+                  loading={this.state.saving}
+                 >
+                  Save
+                 </Button>
+                </AntCol>
+               </AntRow>
+               <AntRow span={24} className="mt-5">
+                <AntCol md={24}>
+                 <p
+                  onClick={() => {
+                   this.setState(
+                    {
+                     userName: "",
+                     selectedUser: null,
+                    },
+                    () => {
+                     this.setState({
+                      transfer_modal: true,
+                     });
+                    }
+                   );
+                  }}
+                  className="transfer"
+                 >
+                  Transfer Company Ownership
+                 </p>
+                 <p
+                  className="transfer"
+                  onClick={() => {
+                   this.setState({ delete_modal: true });
+                  }}
+                 >
+                  Delete Company
+                 </p>
+                </AntCol>
+               </AntRow>
+              </div>
+
+              <Modal
+               id="price-request-modal"
+               className="arch-wide-modal product-modal material-modal"
+               size="lg"
+               show={this.state.profile_modal}
+               onHide={() => this.setState({ profile_modal: false })}
+               aria-labelledby="example-modal-sizes-title-lg"
+              >
+               <Modal.Header closeButton />
+               <Modal.Body>
+                <div className="option-add-label">Profile</div>
+                <div className="cropper-box">
+                 <Cropper
+                  src={this.state.profile}
+                  style={{ height: "100%", width: "100%" }}
+                  ref={this.cropperRef}
+                  initialAspectRatio="free"
+                  guides={true}
+                  cropend={this._crop.bind(this)}
+                  ready={this._crop.bind(this)}
+                  crossOrigin="anonymous"
+                  preview=".image-preview"
+                  scalable={false}
+                  aspectRatio={1}
+                  autoCropArea={1}
+                  viewMode={1}
+                  dragMode="move"
+                  rotatable={false}
+                  zoomOnWheel={true}
+                  cropBoxMovable={true}
+                  cropBoxResizable={true}
+                  center={false}
+                 />
+                </div>
+                <div
+                 style={{
+                  position: "relative",
+                  width: "80px",
+                  height: "80px",
+                 }}
+                >
+                 <IoMdCloudUpload
+                  style={{
+                   position: "absolute",
+                   top: "0",
+                   left: "0",
+                   right: "0",
+                   bottom: "0",
+                   fontSize: "5rem",
+                   zIndex: 1,
+                   background: "#e8e8e84a",
+                   textAlign: "left",
+                  }}
+                 />
+                 <input
+                  type="file"
+                  onChange={this.onChangeProfile}
+                  style={{
+                   position: "absolute",
+                   background: "red",
+                   opacity: 0,
+                   top: "0",
+                   left: "0",
+                   right: "0",
+                   bottom: "0",
+                   width: "100%",
+                   fontSize: "5rem",
+                   zIndex: "2",
+                  }}
+                 />
+                </div>
+
+                <div as={Row} className="add-btn">
+                 <div column md={12}>
+                  <Button variant="danger" onClick={this.handleUpdateLogo}>
+                   {this.state.addProfileLoad ? (
+                    <ClipLoader
+                     style={{ height: "20px" }}
+                     color="#ffffff"
+                     size={20}
+                    />
+                   ) : (
+                    <>Change</>
+                   )}
+                  </Button>
+                 </div>
+                </div>
+               </Modal.Body>
+              </Modal>
+              <Modal
+               show={this.state.delete_modal}
+               onHide={() => {
+                this.setState({
+                 delete_modal: false,
+                });
+               }}
+               closeButton
+               keyboard={false}
+               size="md"
+              >
+               <Modal.Body>
+                <div
+                 className="modal-wrapper"
+                 style={{ padding: "15px", margin: "" }}
+                >
+                 <Row as={Row} style={{ margin: "0px 0" }}>
+                  <p style={{ fontSize: "1.4rem", fontWeight: "600" }}>
+                   Delete Product
+                  </p>
+                  <Col md={8}></Col>
+                 </Row>
+                 <Row as={Row} style={{ margin: "30px 0" }}>
+                  <Col md={12}>
+                   <div
+                    className="warning-danger"
+                    style={{
+                     background: "#fbe9e7",
+                     padding: "15px",
+                     color: "#E41E15",
+                    }}
+                   >
+                    <span
+                     style={{
+                      display: "inline-block",
+                      fontSize: "2.5rem",
+                      verticalAlign: "center",
+                      padding: "0 10px",
+                     }}
+                    >
+                     <IoWarning />
+                    </span>
+                    <p
+                     style={{
+                      color: "#c62828",
+                      fontWeight: "600",
+                      width: "80%",
+                      fontSize: ".9rem",
+                      display: "inline-block",
+                     }}
+                    >
+                     Are your sure that you want delete Company with it's
+                     projects?{" "}
+                     <span style={{ textDecoration: "underline" }}></span>
+                    </p>
+                   </div>
+                  </Col>
+                 </Row>
+
+                 <Button
+                  variant="danger"
+                  onClick={this.handleDeleteCompany}
+                  type="submit"
+                  style={{
+                   textAlign: "right",
+                   background: "#E41E15",
+                   display: "block",
+                   float: "right",
+                   marginRight: "12px",
+                  }}
+                 >
+                  {this.state.deletingCo && !this.state.isDeleted ? (
+                   <>
+                    <ClipLoader
+                     style={{ height: "20px" }}
+                     color="#ffffff"
+                     size={20}
+                    />
+                   </>
                   ) : (
-                   <>Change</>
+                   <>Delete</>
                   )}
                  </Button>
                 </div>
-               </div>
-              </Modal.Body>
-             </Modal>
-            </TabPanel>
-           ) : (
-            <TabPanel forceRender>
-             <div className="contacts">
-              {this.state.company?.website &&
-               this.state.company?.website?.length > 4 && (
-                <p>
-                 website: <span>{this.state.company?.website}</span>
-                </p>
-               )}
-              <p>
-               Email: <span>{this.state.company?.email ?? "-"}</span>
-              </p>
-
-              <p>
-               phone:{" "}
-               <span>{`${this.state.company?.code} ${this.state.company?.phone}`}</span>
-              </p>
-             </div>
-            </TabPanel>
-           )}
-          </Tabs>
-         </div>
-        </Col>
-       </Row>
-      </Container>
-     </div>
+               </Modal.Body>
+              </Modal>
+             </TabPanel>
+            ) : (
+             ""
+            )}
+           </Tabs>
+          </div>
+         </Col>
+        </Row>
+       </Container>
+      </div>
+     </>
     )}
 
     {/* add member to company team modal */}
@@ -1449,7 +2334,7 @@ class Company extends Component {
         <Input
          type="email"
          value={userName}
-         placeholder="Search Users"
+         placeholder="Search users or invite by e-mail"
          onChange={this.handleSearchUsers}
          size="large"
         />
@@ -1487,7 +2372,12 @@ class Company extends Component {
         })}
        </div>
       )}
-      {(this.state.selectedUser || this.state.userName.endsWith(".com")) && (
+      {(this.state.selectedUser ||
+       this.state.userName.endsWith(".com") ||
+       this.state.userName.endsWith(".co") ||
+       this.state.userName.endsWith(".eg") ||
+       this.state.userName?.endsWith("org") ||
+       this.state.userName.endsWith(".net")) && (
        <>
         <AntRow>
          <AntCol md={24} className="my-4">

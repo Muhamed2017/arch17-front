@@ -122,6 +122,7 @@ const EditProductWrapper = (props) => {
        data={props?.location?.state?.product?.identity[0]}
        collections={props?.location?.state?.product?.store?.collections}
        store={props?.location?.state?.product?.store}
+       store2={props.location?.state?.product}
        category={props?.location?.state?.category}
        selected_designers={props?.location?.state?.product?.designers}
        selected_collections={props.location.state?.selected_collections ?? []}

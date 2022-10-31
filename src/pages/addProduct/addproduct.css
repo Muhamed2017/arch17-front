@@ -12,6 +12,7 @@
     overflow-y: scroll;
 }
 
+
 .designer-list .drop-item{
     display:grid;
     grid-template-columns: 38px auto;
@@ -19,7 +20,6 @@
     align-items: center;
     grid-gap: 15px;
     margin-bottom: 10px;
-
 }
 
 .drop-item .item-img{
@@ -41,22 +41,22 @@
 }
 
 .selected-attached{
-    font-size: 16px;
+    font-size: 13px;
     display: grid;
-    grid-template-columns: repeat(4, auto);
-    grid-gap: 23px;
+    grid-template-columns: repeat(2, 192px);
+    grid-gap: 15px;
     margin-top: 9px;
     font-weight: 600;
-
 }
+
 .selected-attached .attached{
     background-color: #dddddd91;
     color: #000;
     padding: 8px 0;
     text-align: center;
     position: relative;
-
 }
+
 .xbtn{
     position: absolute;
     right: 9px;
@@ -70,7 +70,10 @@
     font-size: 15px;
     color: #000;
     font-weight: 900;
+    cursor: pointer;
 }
+
+
 .attached-img{
    position: absolute;
    left: 3px;

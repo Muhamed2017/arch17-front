@@ -318,14 +318,16 @@ class Search extends Component {
  onItemClick = () => {};
 
  fetchProducts = (loadmore = false) => {
-  this.setState({
-   fetching: true,
-   loadmore,
-   page: loadmore ? this.state.page + 1 : 1,
-  }, ()=>{
-     axios
-   .get(
-    `${API}search?filter[category]=${this.state.categories}
+  this.setState(
+   {
+    fetching: true,
+    loadmore,
+    page: loadmore ? this.state.page + 1 : 1,
+   },
+   () => {
+    axios
+     .get(
+      `${API}search?filter[category]=${this.state.categories}
     &filter[kind]=${this.state.kinds}
     &filter[type]=${this.state.types}
     &filter[style]=${this.state.styles}
@@ -338,22 +340,22 @@ class Search extends Component {
     &filter[is_for_kids]=${this.state.kidsChecked ? "yes" : ""}
     &filter[product_file_kind]=${this.state.fileChecked ? "yes" : ""}
     &filter[is_outdoor]=${this.state.outdoorChecked ? "yes" : ""}&page=${
-     this.state.page
-    }`
-   )
-   .then((response) => {
-    this.setState({
-     products: loadmore
-      ? [...this.state.products, ...response.data.products.data]
-      : response.data.products.data,
-     fetching: false,
-     pageLoaded: true,
-    //  page: loadmore ? response.data.products?.current_page + 1 : 1,
-     loadMoreButtonShow: response.data.products?.data?.length >= 24,
-    });
-   });
-  });
- 
+       this.state.page
+      }`
+     )
+     .then((response) => {
+      this.setState({
+       products: loadmore
+        ? [...this.state.products, ...response.data.products.data]
+        : response.data.products.data,
+       fetching: false,
+       pageLoaded: true,
+       //  page: loadmore ? response.data.products?.current_page + 1 : 1,
+       loadMoreButtonShow: response.data.products?.data?.length >= 24,
+      });
+     });
+   }
+  );
  };
 
  onCollapse = (collapsed) => {

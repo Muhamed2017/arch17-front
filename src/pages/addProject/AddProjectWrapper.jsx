@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import "./Porject.css";
-import { Steps, Button, Row, Col } from "antd";
+import { Steps, Row, Col } from "antd";
 import InfoStep from "./InfoStep";
-// import ContentStep from "./ContentStep";
 import RoleStep from "./RoleStep";
 import ProductsTagsStep from "./ProductsTagsStep";
 import { connect } from "react-redux";
@@ -10,10 +9,20 @@ import {
  NEXT_STEP,
  PREV_STEP,
  SET_PROJECT_PARAMS,
- //  GO_TO_PROJECT_STEP,
+ ADD_PROJECT_ROLE_DESIGNER,
+ ADD_PROJECT_ROLE_COMPANY,
 } from "./../../redux/constants";
 import CoverStep from "./CoverStep";
+// API
+// axios
 import TextEditor from "../TextEditor";
+import { API } from "../../utitlties";
+// import { API } from "./../../static/constant";
+import axios from "axios";
+import {
+ addProjectRoleCompany,
+ addProjectRoleDesigner,
+} from "../../redux/actions/addProjectActions";
 
 const { Step } = Steps;
 
@@ -56,9 +65,29 @@ class AddProjectWrapper extends Component {
    current: this.props.step,
    creatorType: this.props.match.params.type,
    creatorId: this.props.match.params.id,
+   creator: null,
   };
  }
  componentDidMount() {
+  if (this.props.match.params.type && this.props.match.params.id) {
+   axios
+    .get(`${API}${this.props.match.params.type}/${this.props.match.params.id}`)
+    .then((response) => {
+     console.log(response);
+     if (this.props.match.params.type === "company") {
+      this.props.dispatch({
+       type: ADD_PROJECT_ROLE_COMPANY,
+       payload: response.data.company,
+      });
+     }
+     if (this.props.match.params.type === "designer") {
+      this.props.dispatch({
+       type: ADD_PROJECT_ROLE_DESIGNER,
+       payload: response.data.company,
+      });
+     }
+    });
+  }
   this.props.dispatch({
    type: SET_PROJECT_PARAMS,
    payload: {
@@ -119,11 +148,14 @@ class AddProjectWrapper extends Component {
   );
  }
 }
-
+// const mapDispatchToProps = (dispatch) => ({
+//  dispatchAddDesigner: (designer) => dispatch(addProjectRoleDesigner(designer)),
+//  dispatchAddCompany: (company) => dispatch(addProjectRoleCompany(company)),
+// });
 const mapStateToProps = (state) => {
  return {
   step: state.project.step,
   project: state.project,
  };
 };
-export default connect(mapStateToProps)(AddProjectWrapper);
+export default connect(mapStateToProps, null)(AddProjectWrapper);
