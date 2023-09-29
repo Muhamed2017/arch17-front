@@ -9,10 +9,12 @@ import {
  Select,
  Popover,
 } from "antd";
+
 import { Link } from "react-router-dom";
 import ClipLoader from "react-spinners/ClipLoader";
-import { IoWarning } from "react-icons/io5";
+import { IoWarning, IoShareSocial } from "react-icons/io5";
 import { Helmet } from "react-helmet";
+import "react-tabs/style/react-tabs.css";
 
 import { compressImage } from "./../pages/addProduct/OptionsPrice";
 
@@ -24,7 +26,7 @@ import "./company.css";
 import { API } from "./../utitlties";
 import { regionNames } from "./../redux/constants";
 import { AiOutlinePlus } from "react-icons/ai";
-import { EnvironmentFilled } from "@ant-design/icons";
+import { EnvironmentFilled, ShareAltOutlined } from "@ant-design/icons";
 import ReactFlagsSelect from "react-flags-select";
 import { customLabels } from "./../pages/CreateBrandFinish";
 import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
@@ -46,6 +48,8 @@ import { RiWechatLine } from "react-icons/ri";
 import CompanyOverviewTab from "./CompanyOverviewTab";
 import { LoadingOutlined } from "@ant-design/icons";
 import CompanyNotificationaTab from "./CompanyNotificationsTab";
+import ShareSocialModal from "./../components/Modals/ShareSocialModal";
+import POM from "./POM";
 const { Option } = Select;
 
 const { TextArea } = Input;
@@ -59,6 +63,9 @@ class Company extends Component {
    team_modal: false,
    delete_modal: false,
    isDeleted: false,
+   share_modal: false,
+   is_a_follower: false,
+   followStateLoading: true,
    deletingCo: false,
    adding_member: false,
    transfer_modal: false,
@@ -230,14 +237,7 @@ class Company extends Component {
        ) && p.article_type === "project"
       );
      }),
-     taggedBlogs: company?.roles?.filter((p) => {
-      return (
-       !(
-        p.ownerable_type === "App\\Models\\Company" &&
-        p.ownerable_id === parseInt(this.state.company_id)
-       ) && p.article_type === "blog"
-      );
-     }),
+
      // taggedProjects: company?.roles?.filter
      loading: false,
      members: company.members,
@@ -283,6 +283,18 @@ class Company extends Component {
      profile:
       company?.profile && company?.profile !== "null" ? company?.profile : null,
     });
+    if (this.props.isLoggedIn && !this.state.isOwner) {
+     axios
+      .get(`${API}is-cfollower/${this.state.company_id}/${this.props.info?.id}`)
+      .then((res) => {
+       this.setState({
+        is_a_follower: res.data.is_a_follower,
+        followStateLoading: false,
+       });
+      });
+    } else {
+     this.setState({ followStateLoading: false });
+    }
    })
    .catch((error) => {
     console.log(error);
@@ -397,6 +409,37 @@ class Company extends Component {
     });
    });
  };
+ handleFollowingAction = () => {
+  const { is_a_follower } = this.state;
+  this.setState({
+   followStateLoading: true,
+  });
+  if (is_a_follower) {
+   axios
+    .post(
+     `${API}unfollow-company/${this.props.info?.id}/${this.state.company_id}`
+    )
+    .then((response) => {
+     console.log(response);
+     this.setState({
+      is_a_follower: false,
+      followStateLoading: false,
+     });
+    });
+  } else {
+   axios
+    .post(
+     `${API}follow-company/${this.props.info?.id}/${this.state.company_id}`
+    )
+    .then((response) => {
+     console.log(response);
+     this.setState({
+      is_a_follower: true,
+      followStateLoading: false,
+     });
+    });
+  }
+ };
  render() {
   const {
    users,
@@ -445,8 +488,71 @@ class Company extends Component {
             </span>
            </div>
            <div className="profile-heading">
-            <h2 className="name mb-0">{this.state.company?.name}</h2>
-            <p className="ctype mb-2 pt-0">Design Company</p>
+            <div className="head-name-actions">
+             <h2 className="name mb-0">{this.state.company?.name}</h2>
+             <div className="actns">
+              {this.props.isLoggedIn && !this.state.isOwner && (
+               <button
+                onClick={this.handleFollowingAction}
+                type="button"
+                style={{
+                 backgroundColor: this.state.is_a_follower ? "#e8e8e8" : "",
+                }}
+                title={this.state.is_a_follower ? "Unfollow" : "Follow"}
+                className="profile-follow-btn profile-action-btn mx-1"
+               >
+                {this.state.followStateLoading ? (
+                 <Spin
+                  size="small"
+                  indicator={
+                   <LoadingOutlined
+                    style={{ fontSize: "15px", color: "#000" }}
+                    spin
+                   />
+                  }
+                 />
+                ) : (
+                 <>
+                  {this.state.is_a_follower ? (
+                   <svg
+                    width="18"
+                    height="auto"
+                    class="mf_US"
+                    viewBox="0 0 32 32"
+                    version="1.1"
+                    aria-hidden="false"
+                   >
+                    <desc lang="en-US">A user with a checkmark</desc>
+                    <path d="M10.3 22.7l4-3.9c-.5-.1-.9-.1-1.3-.1-3.6 0-10.7 1.8-10.7 5.3v2.7h12l-4-4zM13 16c2.9 0 5.3-2.4 5.3-5.3S15.9 5.3 13 5.3s-5.3 2.4-5.3 5.3S10.1 16 13 16m8.6 11.3L17 22.7l1.9-1.9 2.8 2.8 6.8-6.9 1.9 1.9-8.8 8.7z"></path>
+                   </svg>
+                  ) : (
+                   <svg
+                    width="18"
+                    height="auto"
+                    class="mf_US"
+                    viewBox="0 0 32 32"
+                    version="1.1"
+                    aria-hidden="false"
+                   >
+                    <path d="M23.7 24v2.7H2.3V24c0-3.5 7.1-5.3 10.7-5.3s10.7 1.8 10.7 5.3zM13 16c2.9 0 5.3-2.4 5.3-5.3S15.9 5.3 13 5.3s-5.3 2.4-5.3 5.3S10.1 16 13 16zm14.7-2.7v-4H25v4h-4V16h4v4h2.7v-4h4v-2.7h-4z"></path>
+                   </svg>
+                  )}
+                 </>
+                )}
+               </button>
+              )}
+              <button className="profile-follow-btn profile-action-btn mx-1">
+               <ShareAltOutlined
+                onClick={() => {
+                 this.setState({
+                  share_modal: true,
+                 });
+                }}
+               />
+              </button>
+             </div>
+            </div>
+            <p className="ctype mb-2 pt-0">Design Company </p>
 
             {this.state.company?.country &&
              this.state.company?.country !== "null" && (
@@ -519,7 +625,7 @@ class Company extends Component {
              {this.state.company?.services?.map((p) => {
               return (
                <div>
-                <p>{p}</p>
+                <a href={`/designers?filterBy=company&services=${p}`}><p>{p}</p></a>
                </div>
               );
              })}
@@ -538,7 +644,11 @@ class Company extends Component {
              {this.state.isOwner ? (
               <Tab>Projects</Tab>
              ) : (
-              <>{this.state.projects?.length > 0 && <Tab>Projects</Tab>}</>
+              <>
+               {this.state.projects?.length +
+                this.state.taggedProjects?.length >
+                0 && <Tab>Projects</Tab>}
+              </>
              )}
              {this.state.isOwner ? (
               <Tab>Blogs</Tab>
@@ -558,6 +668,7 @@ class Company extends Component {
                )}
               </>
              )}
+             
              {this.state.products?.length > 0 && <Tab>Products</Tab>}
              {this.state.isOwner &&
               this.state.company?.hasnotifications &&
@@ -573,6 +684,10 @@ class Company extends Component {
               ""
               //  <Tab>Contacts</Tab>
              )}
+             
+             {this.state.isOwner &&this.props.isLoggedIn&& ( 
+             <Tab>PO Management</Tab>
+             )}  
             </TabList>
             {(this.state.company?.about?.length > 4 ||
              this.state.company?.categories?.length > 0) && (
@@ -655,7 +770,10 @@ class Company extends Component {
                         </p>
                         <hr className="my-1 w-20" />
                         <p>
-                         <span className="px-1">{p.type}</span>
+                         {/* <span className="px-1">{p.type}</span> */}
+                         {p.type && p.type !== "null" && (
+                          <span className="px-1">{p.type}</span>
+                         )}
                         </p>
                        </div>
                       </div>
@@ -668,7 +786,7 @@ class Company extends Component {
                      <div className="project-col bg-white">
                       {!this.state.isOwner && this.props.isLoggedIn && (
                        <button
-                        className="project-btn project-delete-btn"
+                        className="project-btn project-edit-btn"
                         onClick={(e) => {
                          e.preventDefault();
                          this.setState(
@@ -705,7 +823,10 @@ class Company extends Component {
                         </p>
                         <hr className="my-1 w-20" />
                         <p>
-                         <span className="px-1">{p.type}</span>
+                         {/* <span className="px-1">{p.type}</span> */}
+                         {p.type && p.type !== "null" && (
+                          <span className="px-1">{p.type}</span>
+                         )}
                         </p>
                        </div>
                       </div>
@@ -775,7 +896,10 @@ class Company extends Component {
                         </p>
                         <hr className="my-1 w-20" />
                         <p>
-                         <span className="px-1">{p.type}</span>
+                         {/* <span className="px-1">{p.type}</span> */}
+                         {p.type && p.type !== "null" && (
+                          <span className="px-1">{p.type}</span>
+                         )}
                         </p>
                        </div>
                       </div>
@@ -825,7 +949,10 @@ class Company extends Component {
                         </p>
                         <hr className="my-1 w-20" />
                         <p>
-                         <span className="px-1">{p.type}</span>
+                         {/* <span className="px-1">{p.type}</span> */}
+                         {p.type && p.type !== "null" && (
+                          <span className="px-1">{p.type}</span>
+                         )}
                         </p>
                        </div>
                       </div>
@@ -840,7 +967,8 @@ class Company extends Component {
              </TabPanel>
             ) : (
              <>
-              {this.state.projects?.length > 0 && (
+              {this.state.projects?.length + this.state.taggedProjects?.length >
+               0 && (
                <TabPanel forceRender>
                 <AntRow span={24} gutter={{ xs: 12, sm: 12, md: 24, lg: 24 }}>
                  {this.state.isOwner && this.props.isLoggedIn && (
@@ -912,7 +1040,10 @@ class Company extends Component {
                           </p>
                           <hr className="my-1 w-20" />
                           <p>
-                           <span className="px-1">{p.type}</span>
+                           {/* <span className="px-1">{p.type}</span> */}
+                           {p.type && p.type !== "null" && (
+                            <span className="px-1">{p.type}</span>
+                           )}
                           </p>
                          </div>
                         </div>
@@ -962,7 +1093,10 @@ class Company extends Component {
                           </p>
                           <hr className="my-1 w-20" />
                           <p>
-                           <span className="px-1">{p.type}</span>
+                           {/* <span className="px-1">{p.type}</span> */}
+                           {p.type && p.type !== "null" && (
+                            <span className="px-1">{p.type}</span>
+                           )}
                           </p>
                          </div>
                         </div>
@@ -1032,7 +1166,10 @@ class Company extends Component {
                           </p>
                           <hr className="my-1 w-20" />
                           <p>
-                           <span className="px-1">{p.type}</span>
+                           {/* <span className="px-1">{p.type}</span> */}
+                           {p.type && p.type !== "null" && (
+                            <span className="px-1">{p.type}</span>
+                           )}
                           </p>
                          </div>
                         </div>
@@ -1082,7 +1219,10 @@ class Company extends Component {
                           </p>
                           <hr className="my-1 w-20" />
                           <p>
-                           <span className="px-1">{p.type}</span>
+                           {/* <span className="px-1">{p.type}</span> */}
+                           {p.type && p.type !== "null" && (
+                            <span className="px-1">{p.type}</span>
+                           )}
                           </p>
                          </div>
                         </div>
@@ -1164,14 +1304,23 @@ class Company extends Component {
                         <p className="project-name left">{p.name}</p>
 
                         <div className="project-cover-footer">
-                         <p>
+                         {/* <p>
                           {p.kind?.map((k) => {
                            return <span className="px-1">{k}</span>;
                           })}
-                         </p>
+                         </p> */}
+                         {p.kind && p.kind?.length > 0 && (
+                          <>
+                           {p.kind?.map((k) => {
+                            return <span className="px-1">{k}</span>;
+                           })}
+                          </>
+                         )}
                          <hr className="my-1 w-20" />
                          <p>
-                          <span className="px-1">{p.type}</span>
+                          {p.type && p.type !== "null" && (
+                           <span className="px-1">{p.type}</span>
+                          )}
                          </p>
                         </div>
                        </div>
@@ -1221,127 +1370,10 @@ class Company extends Component {
                          </p>
                          <hr className="my-1 w-20" />
                          <p>
-                          <span className="px-1">{p.type}</span>
-                         </p>
-                        </div>
-                       </div>
-                      </div>
-                     </a>
-                    </>
-                   )}
-                  </AntCol>
-                 );
-                })}
-                {this.state?.taggedBlogs?.map((p, index) => {
-                 return (
-                  <AntCol xs={12} sm={12} md={8} className="my-4" key={index}>
-                   {this.state.isOwner ? (
-                    <>
-                     <a href={`/project/${p.id}`} className="box-link">
-                      <div className="project-col bg-white">
-                       {this.state.isOwner && (
-                        <>
-                         <a
-                          href={`/editproject/${p.id}`}
-                          className="box-link project-edit-btn project-btn"
-                         >
-                          Edit
-                         </a>
-                        </>
-                       )}
-                       {this.state.isOwner && (
-                        <>
-                         <button
-                          className="project-btn project-delete-btn"
-                          onClick={(e) => {
-                           e.preventDefault();
-                           this.setState(
-                            {
-                             to_delete_project: p.id,
-                            },
-                            () => {
-                             this.setState({
-                              delete_project_modal: true,
-                             });
-                            }
-                           );
-                          }}
-                         >
-                          Delete
-                         </button>
-                        </>
-                       )}
-                       <div className="project-image-wrapper">
-                        <div
-                         className="project-image"
-                         style={{
-                          backgroundImage: `url(${p.cover})`,
-                         }}
-                        ></div>
-                       </div>
-
-                       <div className="info p-3 left">
-                        <p className="project-name left">{p.name}</p>
-
-                        <div className="project-cover-footer">
-                         <p>
-                          {p.kind?.map((k) => {
-                           return <span className="px-1">{k}</span>;
-                          })}
-                         </p>
-                         <hr className="my-1 w-20" />
-                         <p>
-                          <span className="px-1">{p.type}</span>
-                         </p>
-                        </div>
-                       </div>
-                      </div>
-                     </a>
-                    </>
-                   ) : (
-                    <>
-                     <a href={`/project/${p.id}`} className="box-link">
-                      <div className="project-col bg-white">
-                       {!this.state.isOwner && this.props.isLoggedIn && (
-                        <button
-                         className="project-btn project-delete-btn"
-                         onClick={(e) => {
-                          e.preventDefault();
-                          this.setState(
-                           {
-                            to_save_project_cover: p.cover,
-                            to_save_projectId: p,
-                           },
-                           () => {
-                            this.saveToBoard();
-                           }
-                          );
-                         }}
-                        >
-                         Save
-                        </button>
-                       )}
-                       <div className="project-image-wrapper">
-                        <div
-                         className="project-image"
-                         style={{
-                          backgroundImage: `url(${p.cover})`,
-                         }}
-                        ></div>
-                       </div>
-
-                       <div className="info p-3 left">
-                        <p className="project-name left">{p.name}</p>
-
-                        <div className="project-cover-footer">
-                         <p>
-                          {p.kind?.map((k) => {
-                           return <span className="px-1">{k}</span>;
-                          })}
-                         </p>
-                         <hr className="my-1 w-20" />
-                         <p>
-                          <span className="px-1">{p.type}</span>
+                          {/* <span className="px-1">{p.type}</span> */}
+                          {p.type && p.type !== "null" && (
+                           <span className="px-1">{p.type}</span>
+                          )}
                          </p>
                         </div>
                        </div>
@@ -1429,7 +1461,10 @@ class Company extends Component {
                           </p>
                           <hr className="my-1 w-20" />
                           <p>
-                           <span className="px-1">{p.type}</span>
+                           {p.type && p.type !== "null" && (
+                            <span className="px-1">{p.type}</span>
+                           )}
+                           {/* <span className="px-1">{p.type}</span> */}
                           </p>
                          </div>
                         </div>
@@ -1479,7 +1514,10 @@ class Company extends Component {
                           </p>
                           <hr className="my-1 w-20" />
                           <p>
-                           <span className="px-1">{p.type}</span>
+                           {/* <span className="px-1">{p.type}</span> */}
+                           {p.type && p.type !== "null" && (
+                            <span className="px-1">{p.type}</span>
+                           )}
                           </p>
                          </div>
                         </div>
@@ -1493,133 +1531,13 @@ class Company extends Component {
                 </AntRow>
                </TabPanel>
               )}
-              {this.state?.taggedBlogs?.map((p, index) => {
-               return (
-                <AntCol xs={12} sm={12} md={8} className="my-4" key={index}>
-                 {this.state.isOwner ? (
-                  <>
-                   <a href={`/project/${p.id}`} className="box-link">
-                    <div className="project-col bg-white">
-                     {this.state.isOwner && (
-                      <>
-                       <a
-                        href={`/editproject/${p.id}`}
-                        className="box-link project-edit-btn project-btn"
-                       >
-                        Edit
-                       </a>
-                      </>
-                     )}
-                     {this.state.isOwner && (
-                      <>
-                       <button
-                        className="project-btn project-delete-btn"
-                        onClick={(e) => {
-                         e.preventDefault();
-                         this.setState(
-                          {
-                           to_delete_project: p.id,
-                          },
-                          () => {
-                           this.setState({
-                            delete_project_modal: true,
-                           });
-                          }
-                         );
-                        }}
-                       >
-                        Delete
-                       </button>
-                      </>
-                     )}
-                     <div className="project-image-wrapper">
-                      <div
-                       className="project-image"
-                       style={{
-                        backgroundImage: `url(${p.cover})`,
-                       }}
-                      ></div>
-                     </div>
-
-                     <div className="info p-3 left">
-                      <p className="project-name left">{p.name}</p>
-
-                      <div className="project-cover-footer">
-                       <p>
-                        {p.kind?.map((k) => {
-                         return <span className="px-1">{k}</span>;
-                        })}
-                       </p>
-                       <hr className="my-1 w-20" />
-                       <p>
-                        <span className="px-1">{p.type}</span>
-                       </p>
-                      </div>
-                     </div>
-                    </div>
-                   </a>
-                  </>
-                 ) : (
-                  <>
-                   <a href={`/project/${p.id}`} className="box-link">
-                    <div className="project-col bg-white">
-                     {!this.state.isOwner && this.props.isLoggedIn && (
-                      <button
-                       className="project-btn project-delete-btn"
-                       onClick={(e) => {
-                        e.preventDefault();
-                        this.setState(
-                         {
-                          to_save_project_cover: p.cover,
-                          to_save_projectId: p,
-                         },
-                         () => {
-                          this.saveToBoard();
-                         }
-                        );
-                       }}
-                      >
-                       Save
-                      </button>
-                     )}
-                     <div className="project-image-wrapper">
-                      <div
-                       className="project-image"
-                       style={{
-                        backgroundImage: `url(${p.cover})`,
-                       }}
-                      ></div>
-                     </div>
-
-                     <div className="info p-3 left">
-                      <p className="project-name left">{p.name}</p>
-
-                      <div className="project-cover-footer">
-                       <p>
-                        {p.kind?.map((k) => {
-                         return <span className="px-1">{k}</span>;
-                        })}
-                       </p>
-                       <hr className="my-1 w-20" />
-                       <p>
-                        <span className="px-1">{p.type}</span>
-                       </p>
-                      </div>
-                     </div>
-                    </div>
-                   </a>
-                  </>
-                 )}
-                </AntCol>
-               );
-              })}
              </>
             )}
             {this.state.isOwner ? (
              <>
               <TabPanel forceRender>
                <div className="teams">
-                <AntRow gutter={{ lg: 50, md: 16, sm: 12, xs: 24 }} span={24}>
+                <AntRow gutter={{ lg: 32, md: 16, sm: 12, xs: 24 }} span={24}>
                  {this.state?.members?.map((user) => {
                   return (
                    <AntCol
@@ -1654,7 +1572,7 @@ class Company extends Component {
                    </AntCol>
                   );
                  })}
-                 {this.state.isOwner && (
+                 {this.state.isOwner && this.props.isLoggedIn && (
                   <AntCol
                    lg={6}
                    className="mb-5"
@@ -1756,6 +1674,7 @@ class Company extends Component {
               )}
              </>
             )}
+           
             {this.state.products?.length > 0 && (
              <TabPanel>
               <div className="products">
@@ -2309,6 +2228,12 @@ class Company extends Component {
             ) : (
              ""
             )}
+             {this.state.isOwner && this.props.isLoggedIn &&  (
+             <TabPanel
+             className="pom-panel"
+             
+             ><POM company_id={this.state.company_id}/></TabPanel>
+               )} 
            </Tabs>
           </div>
          </Col>
@@ -2469,7 +2394,6 @@ class Company extends Component {
           <Button
            className="invite-btn"
            loading={this.state.transfering}
-           //  onClick={() => this.handleInviteMember(selectedUser)}
            onClick={() => {
             this.handleTransferOwnerShip(selectedUser);
            }}
@@ -2481,6 +2405,26 @@ class Company extends Component {
        </>
       )}
      </div>
+    </AntModal>
+
+    <AntModal
+     title={`Share ${this.state.company?.name}`}
+     width={350}
+     className="share-modal"
+     visible={this.state.share_modal}
+     destroyOnClose={true}
+     footer={false}
+     closeIcon={
+      <div onClick={() => this.setState({ share_modal: false })}>X</div>
+     }
+    >
+     <ShareSocialModal
+      page_url={`https://www.arch17.com/company/${this.state.company_id}`}
+      media={this.state.company?.profile}
+      tags={this.state.company?.services}
+      title={this.state.company?.name}
+      description={this.state.company?.bio || this.state.commpany?.about}
+     />
     </AntModal>
    </React.Fragment>
   );

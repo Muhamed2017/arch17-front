@@ -31,6 +31,7 @@ class DesignerProducts extends Component {
    deleting: false,
    deleted: false,
    fetched: false,
+   company: null,
    share_modal: false,
    copied: false,
   };
@@ -45,16 +46,31 @@ class DesignerProducts extends Component {
  };
  componentDidMount() {
   console.log(this.props.uid);
-  axios
-   .get(`${API}designerproducts/${this.state.designer?.id}`)
-   .then((response) => {
-    console.log(response);
-    this.setState((state) => ({
-     designer: response.data.designer,
-     products: response.data.products,
-     fetched: true,
-    }));
-   });
+  console.log(window.location.pathname);
+  if (window.location.pathname.includes("/designerproducts/")) {
+   axios
+    .get(`${API}designerproducts/${this.props.match.params.id}`)
+    .then((response) => {
+     console.log(response);
+     this.setState((state) => ({
+      designer: response.data.designer,
+      products: response.data.products,
+      fetched: true,
+     }));
+    });
+  }
+  if (window.location.pathname.includes("/companyproducts/")) {
+   axios
+    .get(`${API}companyproducts/${this.props.match.params.id}`)
+    .then((response) => {
+     console.log(response);
+     this.setState((state) => ({
+      company: response.data.company,
+      products: response.data.products,
+      fetched: true,
+     }));
+    });
+  }
  }
 
  render() {
@@ -74,9 +90,17 @@ class DesignerProducts extends Component {
    <>
     <div id="collection-page">
      <div className="head-container">
-      <p className="col-name">
+      <p className="col-name pt-5">
        Designed By
-       <span className="px-2 pr-5">{this.state.designer?.displayName}</span>
+       {this.state.company ? (
+        <a href={`/company/${this.state.company?.id}`}>
+         <span className="px-2 pr-5">{this.state.company?.name}</span>
+        </a>
+       ) : (
+        <a href={`/user/${this.state.designer?.uid}`}>
+         <span className="px-2 pr-5">{this.state.designer?.displayName}</span>
+        </a>
+       )}
       </p>
      </div>
 

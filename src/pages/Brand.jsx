@@ -3,7 +3,6 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { Row, Col, Tabs, Spin, Input, Select, Modal as AntModal } from "antd";
 import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
 import en from "world_countries_lists/data/countries/en/world.json";
-import { Helmet } from "react-helmet";
 
 import { Redirect } from "react-router-dom";
 import "../../src/pages/Brand.css";
@@ -18,6 +17,7 @@ import { IoEarthSharp, IoShareSocial, IoWarning } from "react-icons/io5";
 import { API } from "./../utitlties";
 import ReactFlagsSelect from "react-flags-select";
 import { Link } from "react-router-dom";
+import Footer from './../components/Footer'
 import {
  vanillaSigninEmailPassword,
  signupFacebook,
@@ -43,6 +43,9 @@ import BrandProjectsTab from "./Brand/BrandProjectsTab";
 import BrandDesignersTab from "./Brand/BrandDesignersTab";
 import { regionNames } from "../redux/constants";
 import SaveToCollection from "./../components/Modals/SaveToCollection";
+import ShareSocialModal from "./../components/Modals/ShareSocialModal";
+import SwitchesTab from "./Brand/Switches/SwitchesTab";
+
 const compressImage = async (imageFile) => {
  const options = {
   maxSizeMB: 1,
@@ -60,9 +63,7 @@ const compressImage = async (imageFile) => {
 };
 
 const { TabPane } = Tabs;
-function callback(key) {
- console.log(key);
-}
+
 class Brand extends Component {
  constructor(props) {
   super(props);
@@ -97,6 +98,7 @@ class Brand extends Component {
    addProfileLoad: false,
    status: "process",
    changing: false,
+   hasDesigners: false,
    brand_cover: "",
    brand_name: "",
    collabsed_about: "",
@@ -146,8 +148,17 @@ class Brand extends Component {
    to_save_cover: "",
    to_save_productId: null,
    designers: [],
+   activeKey: "1",
   };
  }
+
+ callback = (activeKey) => {
+  console.log(activeKey);
+
+  this.setState({
+   activeKey,
+  });
+ };
 
  onChangeProfile = (e) => {
   const file = e.target.files[0];
@@ -239,10 +250,11 @@ class Brand extends Component {
      store,
      types,
      collections,
-     products,
-     followers,
+     hasDesigners,
+
      categories,
     } = response.data;
+    // let pooducts = response.data.products?.data
     this.setState(
      {
       brand: store[0],
@@ -252,10 +264,13 @@ class Brand extends Component {
       brand_name: name[0],
       name,
       email,
-      products,
+      products: response.data?.products?.data,
       country,
+      next_page:response.data.products?.current_page+1,
       categories,
       city,
+      hasDesigners,
+
       official_website,
       phone_code: Number(phone_code),
       phone,
@@ -268,22 +283,26 @@ class Brand extends Component {
       logo,
       cover,
       brand_cover: cover,
-      followers,
-      is_A_Follower: response.data.followers?.includes(
-       this.props.userInfo?.uid
-      ),
+      followers: response.data.followers?.map((f) => {
+       return f.uid;
+      }),
       addedKinds: [],
-      addedCategories: products?.map((product) => {
+      addedCategories: response.data.products?.data.map((product) => {
        return product?.category;
       }),
-      addedTypes: products?.map((product) => {
+      addedTypes: response.data?.products?.data.map((product) => {
        return product?.type;
       }),
-      ProductsCount: products?.filter((product) => {
-       return product?.preview_cover && product.preview_cover?.length > 4;
-      }).length,
+    
+       ProductsCount: response.data.products.total,
+       loadMoreProducts:response.data.products?.last_page > response.data.products.current_page
      },
-     () => {}
+     () => {
+      this.setState({
+       is_A_Follower: this.state.followers?.includes(this.props.userInfo?.uid),
+      });
+      console.log(`LOADMORE IS ${this.state.loadMoreProducts}`)
+     }
     );
    });
  };
@@ -298,31 +317,32 @@ class Brand extends Component {
     projects: response.data.projects,
    });
   });
-  // axios
-  //  .get(`${API}store-designers/${this.state.brand_id}}`)
-  //  .then((response) => {
-  //   this.setState({
-  //    designers: response.data.designers,
-  //   });
-  //  });
+  
  }
  handleFilterChange = () => {
-  this.setState({ productLoading: true });
+  this.setState({ productLoading: true , next_page:2});
   axios
    .get(
     `${API}brandproductsfilter/${this.state.brand_id}?filter[category]=${this.state.selectedCategory}&filter[kind]=${this.state.selectedKind}&filter[type]=${this.state.selectedTypes}`
    )
    .then((response) => {
     console.log(response.data.products.data);
+
     this.setState({
      products: response.data.products.data,
-     ProductsCount: response.data.products.data?.filter((product) => {
-      return product?.preview_cover && product.preview_cover?.length > 4;
-     }).length,
+     ProductsCount: response.data.products.total,
      productLoading: false,
+     
+     loadMoreProducts:response.data.products?.last_page > response.data.products?.current_page,
      addedTypes: response.data.products?.data?.map((product) => {
       return product.type;
      }),
+     selectedCategory: response.data.products?.data[0]?.category,
+    },()=>{
+      this.setState({
+    //  filter:false
+
+      })
     });
    })
    .catch((error) => {
@@ -590,6 +610,61 @@ class Brand extends Component {
     });
    });
  };
+ handleSelectCatName = (cat_name) => {
+  console.log(cat_name);
+
+  this.setState(
+   {
+    activeKey: "2",
+    selectedCategory: cat_name,
+    selectedKind: "",
+    selectedTypes: "",
+   },
+   () => {
+    this.handleFilterChange();
+   }
+  );
+ };
+ handleSelectTypeName = (kind_name) => {
+  console.log(kind_name);
+  this.setState(
+   {
+    activeKey: "2",
+    selectedKind: kind_name,
+    selectedTypes: "",
+   },
+   () => {
+    this.handleFilterChange();
+   }
+  );
+ };
+ getMoreProducts = ()=>{
+  this.setState({ loadMore: true });
+  const {products}= this.state
+  console.log(products)
+  axios
+   .get(
+    `${API}brandproductsfilter/${this.state.brand_id}?filter[category]=${this.state.selectedCategory}&filter[kind]=${this.state.selectedKind}&filter[type]=${this.state.selectedTypes}&page=${this.state.next_page}`
+   )
+   .then((response) => {
+    console.log(response.data.products.data);
+    this.setState({
+    loadMore:false,
+     products:[...products, ...response.data.products.data],
+     next_page:response.data.products.current_page +1 ,
+     loadMoreProducts:response.data.products?.last_page > response.data.products.current_page,
+    
+     productLoading: false,
+    
+    });
+   })
+   .catch((error) => {
+    console.log(error);
+   });
+ }
+
+
+
  render() {
   const { brand } = this.state;
   const categories = [...new Set(this.state.addedCategories)];
@@ -598,10 +673,6 @@ class Brand extends Component {
 
   return this.state.brand ? (
    <React.Fragment>
-    <Helmet>
-     <meta charSet="utf-8" />
-     <title>{`${this.state.name} | ${this.state.brand?.type}`}</title>
-    </Helmet>
     <Toaster
      containerStyle={{
       top: 100,
@@ -612,7 +683,9 @@ class Brand extends Component {
     {this.state.isDeleted && <Redirect to={`/`} />}
 
     <div id="brand-container">
-     <div className="section">
+     <div className="section"
+     style={{zIndex:1}}
+     >
       <Row className="brand-cover-border-loader glowing">
        <Col span={24}>
         <div className="brand-cover">
@@ -743,7 +816,9 @@ class Brand extends Component {
            <EnvironmentFilled />
           </span>
 
-          <span>{regionNames.of(this.state.country)}</span>
+          <span>
+           {regionNames.of(this.state.country).replace(/mainland/gi, "")}
+          </span>
           {brand.city && (brand.city !== "null") & (brand.city?.length > 0) && (
            <span className="brand-city">, {brand.city}</span>
           )}
@@ -767,7 +842,14 @@ class Brand extends Component {
            </button>
           </a>
          )}
-         <button className="shr">
+         <button
+          className="shr"
+          onClick={() => {
+           this.setState({
+            share_modal: true,
+           });
+          }}
+         >
           <span>
            <IoShareSocial />
           </span>
@@ -776,10 +858,15 @@ class Brand extends Component {
          {!this.state.isOwner && (
           <>
            <button className="cnt" onClick={this.handleContact}>
-            <span>
-             <IoIosMail />
-            </span>
-            Contact
+            <a
+             href={`mailto:${brand?.email}`}
+             style={{ color: "#747474 !important" }}
+            >
+             <span>
+              <IoIosMail />
+             </span>
+             Contact
+            </a>
            </button>
            {this.state.is_A_Follower &&
             !this.state.isOwner &&
@@ -890,9 +977,14 @@ class Brand extends Component {
          {!this.state.isOwner && (
           <>
            <button className="cnt" onClick={this.handleContact}>
-            <span>
-             <IoIosMail />
-            </span>
+            <a
+             href={`mailto:${brand?.email}`}
+             style={{ color: "#747474 !important" }}
+            >
+             <span>
+              <IoIosMail />
+             </span>
+            </a>
            </button>
            {this.state.is_A_Follower &&
             !this.state.isOwner &&
@@ -941,7 +1033,11 @@ class Brand extends Component {
      <Row span={24} className="px-3">
       <Col md={24}>
        <div className="content">
-        <Tabs defaultActiveKey="1" onChange={callback}>
+        <Tabs
+         defaultActiveKey="1"
+         onChange={this.callback}
+         activeKey={this.state.activeKey}
+        >
          <TabPane tab="Overview" key="1">
           <div className="overview-tab section">
            {this.state.about && this.state.about?.length > 15 ? (
@@ -994,15 +1090,39 @@ class Brand extends Component {
            ) : (
             ""
            )}
-
+            {this.state.types.length > 0 && (
+            <TypesSection
+            handleNavigateToProductsTab={()=>{
+              this.setState({
+                activeKey: "2",
+              })
+            }}
+             handleClick={(kind_name) =>
+              this.setState(
+               {
+                activeKey: "2",
+                selectedKind: kind_name,
+               },
+               () => {
+                this.handleFilterChange();
+               }
+              )
+             }
+             types={this.state.types}
+             brand_id={this.state.brand_id}
+            />
+           )}
            {this.state.categories?.length > 0 && (
             <div className="overview-block">
-             <h6 className="">Categories</h6>
+             <h6 className="">Solutions</h6>
              <Row span={24} gutter={16}>
               {this.state.categories?.map((cat) => {
                return (
-                <Col md={6}>
-                 <div className="cat">
+                <Col md={6} xs={12} sm={12} lg={6}>
+                 <div
+                  className="cat"
+                  onClick={() => this.handleSelectCatName(cat.name)}
+                 >
                   <div
                    className="cat-img"
                    style={{
@@ -1017,13 +1137,7 @@ class Brand extends Component {
              </Row>
             </div>
            )}
-
-           {this.state.types.length > 0 && (
-            <TypesSection
-             types={this.state.types}
-             brand_id={this.state.brand_id}
-            />
-           )}
+          
            {this.state.collections?.length > 0 && (
             <CollectionsSection collections={this.state.collections} />
            )}
@@ -1071,7 +1185,7 @@ class Brand extends Component {
               md={{ span: 5 }}
               lg={{ span: 5 }}
              >
-              {this.state.selectedCategory.length > 0 && (
+              {this.state.selectedCategory?.length > 0 && (
                <>
                 <Select
                  showSearch
@@ -1095,7 +1209,6 @@ class Brand extends Component {
              </Col>
 
              <Col
-              // className="gutter-row"
               className="gutter-row mb-3"
               span={5}
               xs={{ span: 12 }}
@@ -1103,8 +1216,8 @@ class Brand extends Component {
               md={{ span: 5 }}
               lg={{ span: 5 }}
              >
-              {this.state.selectedKind.length > 0 &&
-               this.state.selectedCategory.length > 0 && (
+              {this.state.selectedKind?.length > 0 &&
+               this.state.selectedCategory?.length > 0 && (
                 <>
                  <Select
                   showSearch
@@ -1130,7 +1243,6 @@ class Brand extends Component {
                 </>
                )}
              </Col>
-
              <Col
               className="gutter-row"
               xs={{ span: 12 }}
@@ -1139,14 +1251,13 @@ class Brand extends Component {
               lg={{ span: 9 }}
              >
               <p className="count">
-               {/* <span>{this.state.products.length}</span> Products */}
                <span>{this.state.ProductsCount}</span> Products
               </p>
              </Col>
             </Row>
             <Row
              gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}
-             className="py-5 mb-5"
+             className="pm-5 mb-5 p-mobile-0"
             >
              {this.state.isOwner && this.props.isLoggedIn && (
               <>
@@ -1203,7 +1314,6 @@ class Brand extends Component {
                     product?.preview_cover !== "null" &&
                     product?.preview_cover?.length > 5 && (
                      <Col
-                      // className="mb-3"
                       className="gutter-row mb-4"
                       lg={{ span: 6 }}
                       md={{ span: 6 }}
@@ -1239,9 +1349,12 @@ class Brand extends Component {
                          {product?.product_file_kind &&
                          product?.product_file_kind === "yes" ? (
                           <>
-                           <div className="actns-btn file-btn cad">CAD</div>
-                           <div className="actns-btn file-btn threeD">3D</div>
-                          </>
+                
+                <div className="actns-btn file-btn cad">
+                  <p>CAD</p>
+                </div>
+                <div className="actns-btn file-btn threeD"><p>3D</p></div>
+               </>
                          ) : (
                           ""
                          )}
@@ -1295,7 +1408,9 @@ class Brand extends Component {
                          style={{
                           background: `url(${product.preview_cover})`,
                          }}
-                        ></div>
+                        >
+                         <div className="prlayer"></div>
+                        </div>
                         <h5 className="product-store">{brand.name}</h5>
                         <p className="product-name">{product.name}</p>
 
@@ -1328,6 +1443,22 @@ class Brand extends Component {
               </>
              )}
             </Row>
+           {this.state.loadMoreProducts && !this.state.productLoading  &&( <button className="seemore brandmore m-auto block mt-2 mb-5 pt-1"
+            onClick={this.getMoreProducts}
+            
+            >{this.state.loadMore? <>
+             <Spin
+             className="spin-icon"
+                  size="large"
+                  indicator={
+                   <LoadingOutlined
+                    style={{ fontSize: "28px"}}
+                    spin
+                   />
+                  }
+                  
+                 />
+            </>:"LOAD MORE"}</button>)}
            </TabPane>
           </>
          ) : (
@@ -1342,7 +1473,6 @@ class Brand extends Component {
              >
               <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }} className="mt-5">
                <Col
-                // className="gutter-row"
                 className="gutter-row mb-3"
                 lg={{ span: 5 }}
                 md={{ span: 5 }}
@@ -1367,14 +1497,13 @@ class Brand extends Component {
                </Col>
 
                <Col
-                // className="gutter-row"
                 className="gutter-row mb-3"
                 xs={{ span: 12 }}
                 sm={{ span: 7 }}
                 md={{ span: 5 }}
                 lg={{ span: 5 }}
                >
-                {this.state.selectedCategory.length > 0 && (
+                {this.state.selectedCategory?.length > 0 && (
                  <>
                   <Select
                    showSearch
@@ -1398,7 +1527,6 @@ class Brand extends Component {
                </Col>
 
                <Col
-                // className="gutter-row"
                 className="gutter-row mb-3"
                 span={5}
                 xs={{ span: 12 }}
@@ -1406,8 +1534,8 @@ class Brand extends Component {
                 md={{ span: 5 }}
                 lg={{ span: 5 }}
                >
-                {this.state.selectedKind.length > 0 &&
-                 this.state.selectedCategory.length > 0 && (
+                {this.state.selectedKind?.length > 0 &&
+                 this.state.selectedCategory?.length > 0 && (
                   <>
                    <Select
                     showSearch
@@ -1442,14 +1570,13 @@ class Brand extends Component {
                 lg={{ span: 9 }}
                >
                 <p className="count">
-                 {/* <span>{this.state.products.length}</span> Products */}
                  <span>{this.state.ProductsCount}</span> Products
                 </p>
                </Col>
               </Row>
               <Row
                gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}
-               className="py-5 mb-5"
+               className="pm-5 mb-5 p-mobile-0"
               >
                {this.state.isOwner && this.props.isLoggedIn && (
                 <>
@@ -1541,8 +1668,8 @@ class Brand extends Component {
                            {product?.product_file_kind &&
                            product?.product_file_kind === "yes" ? (
                             <>
-                             <div className="actns-btn file-btn cad">CAD</div>
-                             <div className="actns-btn file-btn threeD">3D</div>
+                             <div className="actns-btn file-btn cad"><p>CAD</p></div>
+                             <div className="actns-btn file-btn threeD"><p>3D</p></div>
                             </>
                            ) : (
                             ""
@@ -1597,7 +1724,9 @@ class Brand extends Component {
                            style={{
                             background: `url(${product.preview_cover})`,
                            }}
-                          ></div>
+                          >
+                           <div className="prlayer"></div>
+                          </div>
                           <h5 className="product-store">{brand.name}</h5>
                           <p className="product-name">{product.name}</p>
 
@@ -1630,6 +1759,23 @@ class Brand extends Component {
                 </>
                )}
               </Row>
+
+              {this.state.loadMoreProducts && !this.state.productLoading  &&( <button className="seemore brandmore m-auto block mt-2 mb-5 pt-1"
+            onClick={this.getMoreProducts}
+            
+            >{this.state.loadMore? <>
+             <Spin
+             className="spin-icon"
+                  size="large"
+                  indicator={
+                   <LoadingOutlined
+                    style={{ fontSize: "28px"}}
+                    spin
+                   />
+                  }
+                  
+                 />
+            </>:"LOAD MORE"}</button>)}
              </TabPane>
             </>
            )}
@@ -1667,6 +1813,7 @@ class Brand extends Component {
                 store_id={this.state.brand_id}
                 projects={this.state.projects}
                 isOwner={this.state.isOwner}
+                isLoggedIn={this.props.isLoggedIn}
                />
               </>
              )}
@@ -1683,6 +1830,7 @@ class Brand extends Component {
                 store_id={this.state.brand_id}
                 projects={this.state.projects}
                 isOwner={this.state.isOwner}
+                isLoggedIn={this.props.isLoggedIn}
                />
               </Row>
              </TabPane>
@@ -1691,10 +1839,22 @@ class Brand extends Component {
           </>
          )}
 
-         <TabPane tab="Designers" key="7" className="section" forceRender>
-          <BrandDesignersTab
+         {/* designers tab */}
+         {this.state.hasDesigners && (
+          <TabPane tab="Designers" key="7" className="section" forceRender>
+           <BrandDesignersTab store_id={this.state.brand_id} />
+          </TabPane>
+         )}
+         <TabPane tab="Switches" key="switches">
+          <SwitchesTab
+           isOwner={this.state.isOwner}
            store_id={this.state.brand_id}
-           //  designers={this.state.designers}
+           isLoggedIn={this.props.isLoggedIn}
+           googledrive={this.state.brand?.googledrive}
+           baidu={this.state.brand?.baidu}
+           dropbox={this.state.brand?.dropbox}
+           onedrive={this.state.brand?.onedrive}
+           pcloud={this.state.brand?.pcloud}
           />
          </TabPane>
          {this.state.isOwner && this.props.isLoggedIn ? (
@@ -1947,7 +2107,12 @@ class Brand extends Component {
        </div>
       </Col>
      </Row>
+
+
+   
     </div>
+    
+    <Footer/>
     {/* signup/signin modals */}
     <Modal
      size="lg"
@@ -2366,6 +2531,28 @@ class Brand extends Component {
       </div>
      </Modal.Body>
     </Modal>
+
+    <AntModal
+     title={`Share ${this.state.brand?.name}`}
+     width={350}
+     className="share-modal"
+     visible={this.state.share_modal}
+     destroyOnClose={true}
+     footer={false}
+     closeIcon={
+      <div onClick={() => this.setState({ share_modal: false })}>X</div>
+     }
+    >
+     <ShareSocialModal
+      page_url={`https://www.arch17.com/brand/${this.state.brand_id}`}
+      media={this.state.brand?.logo || this.state.brand_cover}
+      tags={this.state.addedCategories}
+      title={this.state.brand.name}
+      description={this.state.about}
+     />
+    </AntModal>
+
+   
    </React.Fragment>
   ) : (
    <Spin

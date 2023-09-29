@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import axios from "axios";
-import { Row, Col } from "antd";
+import { Row, Col, Tabs } from "antd";
 import { API } from "../../utitlties";
+// import
+const { TabPane } = Tabs;
 
 const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
 class BrandDesignersTab extends Component {
@@ -21,6 +23,7 @@ class BrandDesignersTab extends Component {
   });
  }
  render() {
+  const { designers, companies } = this.state;
   return (
    <Row span={24} gutter={25} className="mt-5">
     {this.state.designers?.brand_designers?.map((designer, index) => {
@@ -40,68 +43,49 @@ class BrandDesignersTab extends Component {
            className="rect rect-0"
            style={{
             backgroundImage: `url(${this.state.designers?.pics[index][0]?.identity[0]?.preview_cover})`,
-            backgroundColor: this.state.designers?.pics[index][0]?.identity[0]
-             ?.preview_cover
-             ? "transparent"
-             : "rgb(237 237 237 / 70%)",
-            filter: this.state.designers?.pics[index][0]?.identity[0]
-             ?.preview_cover
-             ? "brightness(.97)"
-             : "none",
            }}
           ></div>
           <div
            className="rect rect-1"
            style={{
             backgroundImage: `url(${this.state.designers?.pics[index][1]?.identity[0]?.preview_cover})`,
-            backgroundColor: this.state.designers?.pics[index][1]?.identity[0]
-             ?.preview_cover
-             ? "transparent"
-             : "rgb(237 237 237 / 70%)",
-            filter: this.state.designers?.pics[index][1]?.identity[0]
-             ?.preview_cover
-             ? "brightness(.97)"
-             : "none",
            }}
           ></div>
           <div
            className="rect rect-2"
            style={{
             backgroundImage: `url(${this.state.designers?.pics[index][2]?.identity[0]?.preview_cover})`,
-            backgroundColor: this.state.designers?.pics[index][2]?.identity[0]
-             ?.preview_cover
-             ? "transparent"
-             : "rgb(237 237 237 / 70%)",
-            filter: this.state.designers?.pics[index][2]?.identity[0]
-             ?.preview_cover
-             ? "brightness(.97)"
-             : "none",
            }}
           ></div>
          </div>
-         <div className="designer-text">
-          <div
-           className="d-avatar"
-           style={{
-            backgroundImage: `url(${designer?.photoURL})`,
-           }}
-          ></div>
-          <div className="d-info">
-           <p style={{ marginBottom: "3px" }}>
-            <span className="d-name">{designer?.displayName}</span>
-            <span className="d-loc">{`| ${regionNames.of(
-             designer?.country
-            )}`}</span>
-           </p>
-           <p>
-            {" "}
-            <span className="d-count">
-             {/* {50} Products . Designed for {this.state.name} */}
-             {designer?.professions[0]}
-            </span>
-           </p>
+         <a href={`/user/${designer?.uid}`}>
+          <div className="designer-text">
+           <div
+            className="d-avatar"
+            style={{
+             backgroundImage: `url(${designer?.photoURL})`,
+            }}
+           ></div>
+           <div className="d-info">
+            <p style={{ marginBottom: "3px" }}>
+             <span className="d-name">{designer?.displayName}</span>
+             {designer?.country && designer.country !== "null" && (
+              <span className="d-loc">{`| ${regionNames
+               .of(designer?.country)
+               .replace(/mainland/gi, "")}`}</span>
+             )}
+            </p>
+            <p>
+             {" "}
+             <span className="d-count">
+              {designer?.professions?.length > 0 && (
+               <>{designer?.professions[0]}</>
+              )}
+             </span>
+            </p>
+           </div>
           </div>
-         </div>
+         </a>
         </a>
        </Col>
       </>
@@ -117,50 +101,52 @@ class BrandDesignersTab extends Component {
        className="collection-col"
        key={company.id}
       >
-       <a href={`/company/${company?.id}`}>
+       <a href={`/companyproducts/${company?.id}`}>
         <div className="collection-box">
          <div
           className="rect rect-0"
           style={{
-           backgroundColor: "rgb(237 237 237 / 70%)",
+           backgroundImage: `url(${company?.box?.pics[0]})`,
           }}
          ></div>
          <div
           className="rect rect-1"
           style={{
-           backgroundColor: "rgb(237 237 237 / 70%)",
+           backgroundImage: `url(${company?.box?.pics[1]})`,
           }}
          ></div>
          <div
           className="rect rect-2"
           style={{
-           backgroundColor: "rgb(237 237 237 / 70%)",
+           backgroundImage: `url(${company?.box?.pics[2]})`,
           }}
          ></div>
         </div>
-        <div className="designer-text">
-         <div
-          className="d-avatar"
-          style={{
-           backgroundImage: `url(${company?.profile})`,
-          }}
-         >
-          {(!company?.profile || company.profile?.length < 5) &&
-           `${company?.name[0]}`}
+        <a href={`/company/${company?.id}`}>
+         <div className="designer-text">
+          <div
+           className="d-avatar"
+           style={{
+            backgroundImage: `url(${company?.profile})`,
+           }}
+          >
+           {(!company?.profile || company.profile?.length < 5) &&
+            `${company?.name[0]}`}
+          </div>
+          <div className="d-info">
+           <p style={{ marginBottom: "3px" }}>
+            <span className="d-name">{company?.name}</span>
+            <span className="d-loc">{`| ${regionNames.of(
+             company?.country
+            )}`}</span>
+           </p>
+           <p>
+            {" "}
+            <span className="d-count">Design Compeny</span>
+           </p>
+          </div>
          </div>
-         <div className="d-info">
-          <p style={{ marginBottom: "3px" }}>
-           <span className="d-name">{company?.name}</span>
-           <span className="d-loc">{`| ${regionNames.of(
-            company?.country
-           )}`}</span>
-          </p>
-          <p>
-           {" "}
-           <span className="d-count">Design Compeny</span>
-          </p>
-         </div>
-        </div>
+        </a>
        </a>
       </Col>
      );

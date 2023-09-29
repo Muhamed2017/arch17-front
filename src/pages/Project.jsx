@@ -139,7 +139,7 @@ class Project extends Component {
      products: response.data.products_tags,
      content_state: response.data.project.content,
      owner: response.data.owner,
-     brands: response.data.brands,
+     //  brands: response.data.brands,
      designers: response.data.designers,
      similars: response.data.similar,
      country: regionNames.of(response.data.project?.country),
@@ -149,6 +149,13 @@ class Project extends Component {
     console.log(error);
    });
 
+  axios
+   .get(`${API}project-brands/${this.state.project_id}`)
+   .then((response) => {
+    this.setState({
+     brands: response.data.brandsRoles,
+    });
+   });
   // window.addEventListener("scroll", this.handleScroll);
  }
 
@@ -450,9 +457,12 @@ class Project extends Component {
                        </a>
                        {/* <p className="title my-0">{d.professions[0]}</p> */}
                        <div className="des-btns">
-                        <button disabled>
+                        {/* <button disabled>
                          <IoIosMail />
-                        </button>
+                        </button> */}
+                        <a className="email" href={`mailto:${d?.email}`}>
+                         <IoIosMail />
+                        </a>
                         <button disabled>
                          <AiOutlinePlus /> Follow
                         </button>
@@ -523,9 +533,12 @@ class Project extends Component {
                        <p className="name my-0">{c?.name}</p>
                       </a>
                       <div className="des-btns">
-                       <button disabled>
+                       {/* <button disabled>
                         <IoIosMail />
-                       </button>
+                       </button> */}
+                       <a className="email" href={`mailto:${c?.email}`}>
+                        <IoIosMail />
+                       </a>
                        <button disabled>
                         <AiOutlinePlus /> Follow
                        </button>
@@ -584,21 +597,24 @@ class Project extends Component {
                            <></>
                           ) : (
                            <a href={`/brand/${brand.id}`}>
-                            <p>{brand.name[0]}</p>
+                            <p>{brand.brand_name[0]}</p>
                            </a>
                           )}
                          </div>
                         </Col>
                         <Col md={17}>
-                         <p className="name my-0">{brand.name}</p>
+                         <p className="name my-0">{brand.brand_name}</p>
                          <p className="title my-0">
-                          {`${brand.type} | ${brand.country}`}{" "}
+                          {`${brand.country}`}
                           {brand.city ? `, ${brand.city}` : ""}
                          </p>
                          <div className="des-btns">
-                          <button disabled>
+                          {/* <button disabled>
                            <IoIosMail disabled />
-                          </button>
+                          </button> */}
+                          <a className="email" href={`mailto:${brand?.email}`}>
+                           <IoIosMail />
+                          </a>
                           <button>
                            <AiOutlinePlus /> Follow
                           </button>
@@ -606,13 +622,13 @@ class Project extends Component {
                         </Col>
                        </Row>
                        <Row span={24} gutter={20}>
-                        {brand?.products?.map((p) => {
+                        {brand?.products?.map((p, index) => {
                          return (
-                          <Col md={8} className="mt-4">
+                          <Col md={8} className="mt-4" key={index}>
                            <div
                             className="p-box"
                             style={{
-                             backgroundImage: `url(${p.identity[0].preview_cover})`,
+                             backgroundImage: `url(${p.preview_cover})`,
                             }}
                            >
                             <div className="sky"></div>

@@ -120,6 +120,8 @@ const EditProductWrapper = (props) => {
       <EditIdentity
        id={params.id}
        data={props?.location?.state?.product?.identity[0]}
+       //  designers={props?.location?.state?.product?.designers}
+       selected_companies={props?.location?.state?.product?.companies}
        collections={props?.location?.state?.product?.store?.collections}
        store={props?.location?.state?.product?.store}
        store2={props.location?.state?.product}

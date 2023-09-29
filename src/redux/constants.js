@@ -113,6 +113,7 @@ export const LOAD_HOMEPAGE_DATA= 'LOAD_HOMEPAGE_DATA'
 
 // comonent state actions constatns
 export const SET_SIDE_NAVE_MENU= 'SET_SIDE_NAVE_MENU'
+export const SET_PROJECT_TYPE_SEARCH= 'SET_PROJECT_TYPE_SEARCH'
 
 
 

@@ -2,10 +2,14 @@ import React, { Component } from "react";
 import { Drawer, Radio, Input } from "antd";
 import { connect } from "react-redux";
 import { setMenu } from "./../redux/actions/componentActions";
-import { SearchOutlined } from "@ant-design/icons";
+import {
+ // SearchOutlined,
+ RightOutlined,
+} from "@ant-design/icons";
 
 import { furniture, lightings } from "./NavigationBar";
 import { Link } from "react-router-dom";
+import { setProjectTypeSearch } from "../redux/actions/addProjectActions";
 
 class SearchMobileSidMuen extends Component {
  constructor(props) {
@@ -19,11 +23,12 @@ class SearchMobileSidMuen extends Component {
    filterProjects: [],
    filteredLightings: [],
    lightings: [],
-   //    search_mobile: false,
    searchDataLoaded: false,
    selected: false,
    typeSelected: "",
-   selected_search: "all",
+   selected_search: window.location.pathname.includes("/design-selected")
+    ? "projects"
+    : "all",
    search_list_loading: false,
    status: "process",
    projects: [
@@ -99,6 +104,11 @@ class SearchMobileSidMuen extends Component {
  };
 
  onClose = () => {
+  if (typeof window != "undefined" && window.document) {
+   document.body.style.overflow = "unset";
+   document.body.style.height = "unset";
+   console.log("SET HIDDEN");
+  }
   this.props.dispatchSetMenu(false);
  };
 
@@ -146,6 +156,7 @@ class SearchMobileSidMuen extends Component {
 
  componentDidMount() {
   console.log(this.props.data);
+  // console.log(window.)
   this.setState(
    {
     searchDataLoaded: true,
@@ -184,30 +195,51 @@ class SearchMobileSidMuen extends Component {
    }
   );
  }
+ closeDrawer = () => {
+  this.setState({ visible: false }, () => {
+   if (typeof window != "undefined" && window.document) {
+    document.body.style.overflow = "unset";
+    document.body.style.height = "unset";
+    console.log("SET HIDDEN");
+   }
+  });
+ };
+ openDrawer = () => {
+  this.setState({ visible: true }, () => {
+   if (typeof window != "undefined" && window.document) {
+    document.body.style.overflow = "hidden";
+    document.body.style.height = "100vh";
+    console.log("SET HIDDEN");
+   }
+  });
+ };
  render() {
   return (
    <>
     <Drawer
      id="search-mobile-drawer"
      title={
-      <>
-       <Radio.Group
-        defaultValue="all"
-        buttonStyle="solid"
-        onChange={this.onChange}
-       >
-        <Radio.Button value="all">All</Radio.Button>
-        <Radio.Button value="products">Products</Radio.Button>
-        <Radio.Button value="brands">Brands</Radio.Button>
-        <Radio.Button value="projects">Magazine</Radio.Button>
-       </Radio.Group>
-       <Input
-        size="large"
-        placeholder="Search Products, Brands and Magazine"
-        onChange={(e) => this.searching(e.target.value)}
-        prefix={<SearchOutlined />}
-       />
-      </>
+      // <>
+      //  <Radio.Group
+      //   defaultValue="all"
+      //   buttonStyle="solid"
+      //   value={this.state.selected_search}
+      //   onChange={this.onChange}
+      //  >
+      //   <Radio.Button value="all">All</Radio.Button>
+      //   <Radio.Button value="products">Products</Radio.Button>
+      //   <Radio.Button value="brands">Brands</Radio.Button>
+      //   <Radio.Button value="projects">Magazine</Radio.Button>
+      //  </Radio.Group>
+      //  <Input
+      //   size="large"
+      //   placeholder="Search Products, Brands and Magazine"
+      //   onChange={(e) => this.searching(e.target.value)}
+      //   prefix={<SearchOutlined />}
+      //  />
+      // </>
+      // "Search Arch17"
+      ""
      }
      placement="left"
      closable={true}
@@ -218,7 +250,7 @@ class SearchMobileSidMuen extends Component {
      width={"100%"}
      height={"100vw"}
     >
-     {this.state.search_list && this.props.visible && (
+     {/* {this.state.search_list && this.props.visible && (
       <>
        <div
         className="col-md-5"
@@ -326,7 +358,7 @@ class SearchMobileSidMuen extends Component {
              <ul className="inner-list">
               {this.state.filterProjects.map((project, index) => {
                return (
-                <a href={`/magazine?types=${project}`}>
+                <a href={`/design-selected?types=${project}`}>
                  <li>{project}</li>
                 </a>
                );
@@ -448,7 +480,11 @@ class SearchMobileSidMuen extends Component {
             Projects
             <ul className="inner-list">
              {this.state.filterProjects?.map((project, index) => {
-              return <li key={index}>{project}</li>;
+              return (
+               <li key={index}>
+                <a href={`/design-selected?types=${project}`}>{project}</a>
+               </li>
+              );
              })}
             </ul>
            </li>
@@ -456,7 +492,45 @@ class SearchMobileSidMuen extends Component {
          )}
        </div>
       </>
-     )}
+     )} */}
+     <ul id="side-search-drawer">
+      <li onClick={() => this.onClose()}>
+       <Link
+        to={{
+         pathname: `/categories`,
+        }}
+       >
+        Products <RightOutlined />
+       </Link>
+      </li>
+      <li onClick={() => this.onClose()}>
+       <Link
+        to={{
+         pathname: `/design-selected`,
+        }}
+       >
+        Magazine <RightOutlined />
+       </Link>
+      </li>
+      <li onClick={() => this.onClose()}>
+       <Link
+        to={{
+         pathname: `/brands`,
+        }}
+       >
+        Brands <RightOutlined />
+       </Link>
+      </li>
+      <li onClick={() => this.onClose()}>
+       <Link
+        to={{
+         pathname: `/designers`,
+        }}
+       >
+        Designers & Design Companies <RightOutlined />
+       </Link>
+      </li>
+     </ul>
     </Drawer>
    </>
   );
@@ -471,6 +545,7 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = (dispatch) => ({
  dispatchSetMenu: (visible) => dispatch(setMenu(visible)),
+ dispatchSetMagazineType: (type) => setProjectTypeSearch(type),
 });
 export default connect(
  mapStateToProps,

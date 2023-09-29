@@ -86,3 +86,37 @@
    justify-content: center;
    align-items: center;
 }
+.options-dropdown{
+    border: 1px solid #bfbfbf;
+    padding: 10px 4px;
+    min-width: 205px;
+    background: #fff;
+
+}
+.options-dropdown .ant-dropdown-menu-title-content{
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content:start;
+    align-items: center;
+    grid-gap: 15px;
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+.menu-p{
+    padding: 16px;
+}
+
+.options-dropdown .ant-dropdown-menu-title-content button{
+    font-weight: 900;
+    color: red;
+    text-decoration: underline;
+    text-align: left;
+    font-size: 1.2rem;
+}
+.options-dropdown .ant-dropdown-menu-item{
+    border-bottom: 1px solid #bfbfbf;
+}
+.options-dropdown .ant-dropdown-menu-item:last-child{
+border-bottom: none;
+margin-top: 20px;
+}

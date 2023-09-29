@@ -16,7 +16,6 @@ import "antd-country-phone-input/dist/index.css";
 import "flagpack/dist/flagpack.css";
 import axios from "axios";
 import { connect } from "react-redux";
-// import {A}
 import { VscFolder, VscFolderActive } from "react-icons/vsc";
 import { AiFillPlusCircle, AiFillHeart, AiFillFolder } from "react-icons/ai";
 import {
@@ -36,7 +35,6 @@ const SaveToCollection = (props) => {
   const fetchData = async () => {
    setFetching(true);
    axios
-    // .get(`${API}allcollections/${props.user.uid}`)
     .get(`${API}folders/${props.user.uid}/${props.product.id}`)
     .then((res) => {
      console.log(res);
@@ -85,23 +83,43 @@ const SaveToCollection = (props) => {
     setSaving(false);
     updateCollections(_collections);
     notification.open({
-     message: "Notification Title",
-     description:
-      "This is the content of the notification. This is the content of the notification. This is the content of the notification.",
-     icon: (
-      <div
-       className="notoification-image"
-       style={{ backgroundImage: `url(${props.cover})` }}
-      ></div>
+     description: (
+      <div className="notification-home">
+       <div
+        className="notoification-image"
+        style={{
+         backgroundImage: `url(${props.cover})`,
+         filter: "brightness(0.95)",
+         borderRadius: "3px",
+        }}
+       ></div>
+       <p
+        style={{
+         fontSize: "16px",
+         fontWeight: "300",
+        }}
+       >
+        Saved to{" "}
+        <span className="bold decorated">{_collections[index].name}</span>{" "}
+        Collection
+       </p>
+      </div>
      ),
+
+     //  icon: (
+
+     //  ),
      style: {
-      width: 600,
+      // height: "100px",
+      // minHeight: "100px",
+      // width: 600,
      },
     });
    })
    .catch((err) => {
     setSaving(false);
    });
+   
  };
 
  const onFinish = (values) => {
@@ -115,10 +133,42 @@ const SaveToCollection = (props) => {
     .then((res) => {
      console.log(res);
      const { folder } = res.data;
-     updateCollections([
-      { name: folder.name, id: folder.id, saved: false },
-      ...collections,
-     ]);
+
+     const fd = new FormData();
+     fd.append("product_id", props.product.id);
+     fd.append("folder_id", folder.id);
+     axios.post(`${API}save`, fd).then((response)=>{
+      updateCollections([
+        { name: folder.name, id: folder.id, saved: true },
+        ...collections,
+       ]);
+       notification.open({
+        description: (
+         <div className="notification-home">
+          <div
+           className="notoification-image"
+           style={{
+            backgroundImage: `url(${props.cover})`,
+            filter: "brightness(0.95)",
+            borderRadius: "3px",
+           }}
+          ></div>
+          <p
+           style={{
+            fontSize: "16px",
+            fontWeight: "300",
+           }}
+          >
+           Saved to{" "}
+           <span className="bold decorated">{folder?.name}</span>{" "}
+           Collection
+          </p>
+         </div>
+        ),
+       });
+   })
+    
+
      form.setFieldsValue({
       collection: "",
      });
@@ -151,12 +201,6 @@ const SaveToCollection = (props) => {
      <Divider type="horizontal" style={{ width: "100%" }} />
      <div className="collections-wrapper">
       <ul>
-       {/* <li>
-        <span>
-         <VscFolderActive /> Wishlist
-        </span>
-        <button>Save</button>
-       </li> */}
        {fetching ? (
         <>
          <Spin

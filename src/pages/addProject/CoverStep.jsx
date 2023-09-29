@@ -64,17 +64,25 @@ class CoverStep extends Component {
    country,
    city,
    year,
+   product_design_category,
+   product_design_kind,
   } = this.props?.project.project_info;
   const fd = new FormData();
   fd.append("name", this.state.displayName);
   fd.append("article_type", blogType);
-
   category.forEach((c) => {
    fd.append("kind[]", c);
   });
 
-  fd.append("type", type);
+  if (category?.indexOf("Product Design") !== -1) {
+   fd.append("product_design_category", product_design_category);
+   //  fd.append("product_design_kind", product_design_kind);
+   product_design_kind?.forEach((p) => {
+    fd.append("product_design_category[]", p);
+   });
+  }
 
+  fd.append("type", type);
   fd.append("country", country);
   fd.append("city", city);
   fd.append("title", "TITLE");
@@ -82,10 +90,14 @@ class CoverStep extends Component {
    "cover",
    await compressImage(this.dataURLtoFile(this.state.cropped_cover, "file"))
   );
+
   fd.append("content", this.props.project?.project_content);
   this.props.project.role_designers?.forEach((p) => {
-   fd.append("users[]", p.id);
+   if (p?.id) {
+    fd.append("users[]", p?.id);
+   }
   });
+
   this.props.project.project_covers?.forEach((c) => {
    fd.append("images[]", c);
   });

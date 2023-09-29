@@ -83,18 +83,27 @@ const SaveToBoard = (props) => {
     setSaving(false);
     updateBoards(_boards);
     notification.open({
-     message: "Notification Title",
-     description:
-      "This is the content of the notification. This is the content of the notification. This is the content of the notification.",
-     icon: (
-      <div
-       className="notoification-image"
-       style={{ backgroundImage: `url(${props.cover})` }}
-      ></div>
+     description: (
+      <div className="notification-home">
+       <div
+        className="notoification-image"
+        style={{
+         backgroundImage: `url(${props.cover})`,
+         filter: "brightness(0.95)",
+         borderRadius: "3px",
+        }}
+       ></div>
+       <p
+        style={{
+         fontSize: "16px",
+         fontWeight: "300",
+        }}
+       >
+        Saved to <span className="bold decorated">{_boards[index].name}</span>{" "}
+        Collection
+       </p>
+      </div>
      ),
-     style: {
-      width: 600,
-     },
     });
    })
    .catch((err) => {
@@ -113,10 +122,44 @@ const SaveToBoard = (props) => {
     .then((res) => {
      console.log(res);
      const { board } = res.data;
-     updateBoards([
-      { name: board.name, id: board.id, saved: false },
+     const fd = new FormData();
+  fd.append("project_id", props?.project?.id);
+  fd.append("board_id", board?.id);
+  axios.post(`${API}saveproject`, fd).then((res)=>{
+      updateBoards([
+      { name: board.name, id: board.id, saved: true },
       ...boards,
      ]);
+    notification.open({
+      description: (
+       <div className="notification-home">
+        <div
+         className="notoification-image"
+         style={{
+          backgroundImage: `url(${props.cover})`,
+          filter: "brightness(0.95)",
+          borderRadius: "3px",
+         }}
+        ></div>
+        <p
+         style={{
+          fontSize: "16px",
+          fontWeight: "300",
+         }}
+        >
+         Saved to <span className="bold decorated">{board?.name}</span>{" "}
+         Collection
+        </p>
+       </div>
+      ),
+     });
+
+  })
+    //  updateBoards([
+    //   { name: board.name, id: board.id, saved: false },
+      // ...boards,
+    //  ]);
+
      form.setFieldsValue({
       board: "",
      });

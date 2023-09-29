@@ -11,18 +11,12 @@ import {
  SET_PROJECT_PARAMS,
  ADD_PROJECT_ROLE_DESIGNER,
  ADD_PROJECT_ROLE_COMPANY,
+ ADD_PROJECT_ROLE_BRAND,
 } from "./../../redux/constants";
 import CoverStep from "./CoverStep";
-// API
-// axios
 import TextEditor from "../TextEditor";
 import { API } from "../../utitlties";
-// import { API } from "./../../static/constant";
 import axios from "axios";
-import {
- addProjectRoleCompany,
- addProjectRoleDesigner,
-} from "../../redux/actions/addProjectActions";
 
 const { Step } = Steps;
 
@@ -83,7 +77,13 @@ class AddProjectWrapper extends Component {
      if (this.props.match.params.type === "designer") {
       this.props.dispatch({
        type: ADD_PROJECT_ROLE_DESIGNER,
-       payload: response.data.company,
+       payload: response.data.designer,
+      });
+     }
+     if (this.props.match.params.type === "store") {
+      this.props.dispatch({
+       type: ADD_PROJECT_ROLE_BRAND,
+       payload: response.data.store[0],
       });
      }
     });

@@ -1,10 +1,12 @@
-import React, { Component } from "react";
+import React, { Component ,createRef} from "react";
 import axios from "axios";
 import SaveToCollection from "./../components/Modals/SaveToCollection";
 import { connect } from "react-redux";
 import HashLoader from "react-spinners/HashLoader";
 import { setSearchTerm } from "./../redux/actions/addProductActions";
 import { LoadingOutlined } from "@ant-design/icons";
+import {Sticky, Ref } from "semantic-ui-react";
+
 import "./Search.css";
 import {
  vanillaSigninEmailPassword,
@@ -183,6 +185,7 @@ const bases = {
 class Search extends Component {
  constructor(props) {
   super(props);
+  this.contextRef = createRef();
   this.urlString = new URLSearchParams(window.location.search);
   this.state = {
    pageLoaded: false,
@@ -540,6 +543,7 @@ class Search extends Component {
    `/products?${_cats}${_kinds}${_types}${_materials}${_styles}`
   );
  };
+ 
  onTypeSelect = (items) => {
   if (items.selectedKeys.includes("Revolving entrance doors")) {
    this.setState({
@@ -916,12 +920,32 @@ class Search extends Component {
    inputValue: "",
   });
  };
+ closeDrawer = () => {
+  this.setState({ visible: false }, () => {
+   if (typeof window != "undefined" && window.document) {
+    document.body.style.overflow = "unset";
+    document.body.style.height = "unset";
+    console.log("SET HIDDEN");
+   }
+  });
+ };
+ openDrawer = () => {
+  this.setState({ visible: true }, () => {
+   if (typeof window != "undefined" && window.document) {
+    document.body.style.overflow = "hidden";
+    document.body.style.height = "100vh";
+    console.log("SET HIDDEN");
+   }
+  });
+ };
+
  render() {
   return (
    <>
     <div id="search-page">
      <Row span={24} style={{ position: "relative" }}>
-      <Col
+    
+    <Col
        lg={5}
        md={4}
        sm={6}
@@ -929,12 +953,16 @@ class Search extends Component {
        style={{ background: "" }}
        className="only-wide"
       >
-       <Sider
+
+     <Sider
         collapsed={this.state.collapsed}
         onCollapse={this.onCollapse}
         width={"100%"}
         className="site-layout-background"
-        style={{ background: "#fff" }}
+        style={{
+          background: "#fff" ,
+      
+        }}
        >
         <div id="tags">
          <p>Filters</p>
@@ -1560,8 +1588,8 @@ class Search extends Component {
           </>
          )}
         </Form>
-       </Sider>
-      </Col>
+     </Sider>
+    </Col>
       <Col lg={19} md={20} sm={18} xs={24} className="px-3">
        {!this.state.visible && (
         <Row span={24} className="filter-checks">
@@ -1620,7 +1648,8 @@ class Search extends Component {
          <Col md={12} className="sorts">
           <div
            style={{
-            display: "grid",
+            // display: "grid",
+            display: "none",
             gridTemplateColumns: "auto auto ",
             justifyContent: "flex-end",
            }}
@@ -1669,8 +1698,8 @@ class Search extends Component {
        )}
        <Row
         gutter={{
-         lg: 24,
-         md: 24,
+         lg: 18,
+         md: 18,
          sm: 12,
          xs: 12,
         }}
@@ -1719,8 +1748,8 @@ class Search extends Component {
                  </div>
                  {product?.file?.length > 0 ? (
                   <>
-                   <div className="actns-btn file-btn cad">CAD</div>
-                   <div className="actns-btn file-btn threeD">3D</div>
+                   <div className="actns-btn file-btn cad"><p>CAD</p></div>
+                   <div className="actns-btn file-btn threeD"><p>3D</p></div>
                   </>
                  ) : (
                   ""
@@ -1728,9 +1757,11 @@ class Search extends Component {
                 </div>
                </a>
 
-               <h5 className="product-store">
-                {product?.store_name?.store_name}
-               </h5>
+               <a href={`/brand/${product?.store_id}`}>
+                <h5 className="product-store">
+                 {product?.store_name?.store_name}
+                </h5>
+               </a>
 
                {/* <p className="product-name">{product?.identity[0]?.name}</p> */}
                {/* <p className="product-name">{product?.identity[0]?.name?.s}</p> */}
@@ -1766,7 +1797,7 @@ class Search extends Component {
            );
           }
          })}
-        {this.state.loadMoreButtonShow && (
+        {this.state.loadMoreButtonShow && !this.state.fetching  && (
          <Col xs={24}>
           <button
            className="loadmore-search"
@@ -1813,8 +1844,8 @@ class Search extends Component {
         <>
          <Row
           gutter={{
-           lg: 24,
-           md: 24,
+           lg: 18,
+           md: 18,
            sm: 12,
            xs: 12,
           }}
@@ -1829,7 +1860,6 @@ class Search extends Component {
            >
             <Skeleton.Avatar
              active={true}
-             //  size={"80%"}
              shape={"square"}
              block={true}
             />
@@ -1838,7 +1868,6 @@ class Search extends Component {
           <Col className="gutter-row mb-3" lg={8} md={8} sm={12} xs={12}>
            <div
             style={{
-             //  width: "100%",
              overflow: "hidden",
             }}
            >
@@ -1919,9 +1948,7 @@ class Search extends Component {
      <button
       id="sticky-filter"
       className="only-mobile"
-      onClick={() => {
-       this.setState({ visible: true });
-      }}
+      onClick={this.openDrawer}
      >
       <HiAdjustments /> Filters
      </button>
@@ -1930,9 +1957,7 @@ class Search extends Component {
       placement="left"
       // closable={true}
       closable={false}
-      onClose={() => {
-       this.setState({ visible: false });
-      }}
+      onClose={this.closeDrawer}
       visible={this.state.visible}
       key="left"
       mask={false}
@@ -1949,7 +1974,7 @@ class Search extends Component {
        <div id="tags">
         <div className="filter-head">
          <p>Filters</p>
-         <p className="done" onClick={() => this.setState({ visible: false })}>
+         <p className="done" onClick={() => this.closeDrawer()}>
           Done
          </p>
         </div>

@@ -1,0 +1,360 @@
+
+
+/* about arch17 help page */
+.about-image{
+    height: 250px;
+    background-size: contain;
+}
+.about-boxes h6, .about-boxes p{
+    text-align: center;
+
+}
+
+.about-boxes p{
+    width: 80%;
+    margin: 10px auto;
+
+}
+
+.lightbg{
+    background-color: #F7F8FA;
+    /* background-color: #f8f8f8; */
+}
+.box-content .desc{
+min-height: 55px;
+}
+.aboutarch section{
+        max-width: 1265px;
+        margin: 14px auto;
+        /* padding: 50px; */
+}
+.aboutarch #sec-head{
+    padding: 66px 0 26px 73px !important;
+}
+.aboutarch .box-content{
+padding: 25px 0;
+}
+
+.learnmore{
+    display: block;
+    width: 100%;
+    text-align: center;
+    color: red !important;
+    font-weight: 500;
+}
+.aboutarch-desc{
+    margin-top: unset;
+}
+.aboutarch-head{
+    font-size: 65px;
+    font-weight: 300;
+    color: #000;
+    margin-bottom: 20px;
+}
+.aboutarch-desc{
+    font-size: 20px;
+    font-weight: 500;
+}
+.aboutarch-desc2{
+    font-size: 18px;
+    font-weight: 300;
+    color: #7c7c7c
+}
+.aboutarch .side-head{
+    text-align: left;
+    font-size: 31px;
+    font-weight: 500;
+    color: #000;
+}
+.aboutarch .side-p{
+    text-align: left;
+    font-size: 18px;
+    font-weight: 300;
+    color: #000000b8;
+}
+.aboutarch .side-p span{
+    color: #000000e8;
+    font-weight: 400 !important;
+}
+.box-head{
+    font-size: 48px;
+    color: #000;
+    font-weight: 400;
+    letter-spacing: -1px;
+}
+.box-head span{
+    font-weight: 100;
+    letter-spacing: -3px;
+
+}
+.about-boxes p.desc{
+    padding: 0;
+    font-size: 17px;
+    font-weight: 500;
+    color: #484848;
+    display: block;
+    width: 100%;
+}
+/* end of  about arch17 help page */
+
+
+/* arch17.com help page */
+.head-help-image{
+    width: 80%;
+    display: block;
+    margin: auto;
+    
+}
+.arch17com .head-help-image{
+    width: 90%;
+}
+.main-head.com{
+    letter-spacing: -1px;
+}
+.main-head.com span{
+    letter-spacing: -6px;
+}
+.arch17com .main-desc{
+    font-size: 20px;
+    padding: 10px;
+    color: #000;
+    font-weight: 400;
+}
+
+.arch17com .box-icon{
+    width: 20px;
+    margin-top: 8px;
+}
+.arch17com .content{
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-gap: 20px;
+    align-items: start
+}
+.arch17com .content span{
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.822);
+}
+.arch17com .side-desc, .arch17com .side-head{
+    text-align: left;
+}
+.howdoes h5, .howdoes > p{
+    text-align: center;
+}
+.howdoes > p {
+    font-size: 1.2rem;
+    font-weight: 400;
+    margin-top: -11px;
+    margin-bottom: 30px;
+}
+.howdoes h5{
+    font-size: 2.5rem;
+    color: #000;
+}
+.howdoes .sqr h6{
+    font-size: 1.5rem;
+    font-weight: 500;
+    text-align: left;
+}
+.howdoes .sqr p {
+    text-align: left;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #000000c2;
+    width: 85%;
+    padding: 20px 40px 0 0 ;
+}
+.howdoes .sqr{
+padding: 5px 15px;
+}
+section.howdoes{
+    background-color: #dddddd3d;
+}
+
+.howdoes  .sqr > h6{
+    color: #000;
+}
+.howdoes .sqr{
+    background: #fff;
+    padding-top: 25px;
+    border-radius: 5px;
+    min-height: 500px;
+    border: 1px solid #e1e1e1;
+    position: relative;
+}
+.howdoes .sqr img{
+    width: 35px;
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+}
+a.text-black{
+    color: #000 !important;
+}
+.getfeatured {
+    max-width: 720px !important;
+}
+.getfeatured p {
+    text-align: left;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.589);
+}
+.getfeatured span{
+    color: rgba(0, 0, 0, 0.747);
+    font-weight: 500;
+    display: inline-block;
+    /* text-decoration: underline; */
+}
+.getfeatured h5{
+    font-size: 2rem;
+    color: #000;
+    font-weight: 500;
+    text-align: center;
+}
+.getfeatured h5 span{
+    font-weight: 300;
+}
+.getfeatured h4 {
+    color: #000;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+/* end of arch17.com help page */
+
+
+
+
+.designselected .head-help-image{
+
+    width: 100%;
+}
+.designselected .f-card{
+    padding: 20px;
+    height: 200px;
+    box-shadow: 3px 2px 16px #bfbfbf
+}
+.designselected .f-card h4{
+    font-size: 1.5rem;
+}
+.designselected .f-card p{
+    margin-top:12px;
+    font-size: 1.15rem;
+}
+
+@media screen and (max-width:768px) {
+    .howdoes .sqr p {
+        padding: 10px;
+    width: 100%;
+    }
+    .aboutarch .mobile-view{
+        padding: 10px;
+    }
+    .aboutarch section{
+        margin: 0 auto;
+    }
+    .howdoes .sqr{
+        padding: 0;
+    }
+    .arch17com #pagehead{
+        padding-top: 40px !important;
+    }
+    .arch17com h5.main-head {
+        font-size: 60px;
+}
+.arch17com .main-desc {
+font-size: 16px;
+}
+.deisgner-help .box p{
+    padding: 0;
+    
+}
+.arch17com .head-help-image{
+    width: 95%;
+}
+.arch17com .howdoes .sqr p {
+    /* text-align: left; */
+    font-size: 1rem;
+    font-weight: 400;
+    /* color: #000000c2; */
+    width: 100%;
+    padding: 11px 10px 0 10px;
+}
+.arch17com .howdoes .sqr h6{
+    font-size: 1.2rem;
+}
+.arch17com .howdoes .sqr > h6{
+    padding: 8px;
+}
+.arch17com .howdoes .sqr{
+    min-height: 390px;
+}
+    .arch17com .h5.main-head {
+    font-size: 45px;
+    }
+    .aboutarch #pagehead{
+
+        padding-top: 40px !important;
+    }
+
+    .aboutarch-head{
+        font-size: 30px;
+    }
+    .aboutarch .main-desc{
+        font-size: 15px;
+        font-weight: 500;
+        width: 90%;
+        /* text-align: center; */
+        margin: 10px auto;
+    }
+    .aboutarch-desc2 {
+        font-size: 15px;
+        padding: 0 11px
+    }
+    .aboutarch section#pagehead{
+        margin-bottom: 0;
+
+    }
+    .aboutarch #sec-head{
+        padding: 0 5px !important;
+        /* padding-top: 0 !important; */
+    }
+    .aboutarch .side-p{
+        font-size: 15px;
+    }
+    .aboutarch #sec-head > div{
+        margin: 10px auto 50px;
+    }
+    .aboutarch .side-head{
+        font-size: 24px;
+    }
+    .aboutarch .about-image {
+    height: 182px;
+    }
+    .aboutarch #tail{
+        display: block;
+        margin-top: -25px;
+    }
+    .aboutarch .about-boxes p.desc{
+        width: 88%;
+        font-size: 15px;
+    }
+
+.designselected h5.main-head {
+font-size: 50px;
+
+}
+.designselected #pagehead > div > div >a {
+
+    margin-bottom: 30px;
+    display: inline-block;
+    text-decoration: underline !important;
+}
+.designselected .getfeatured{
+    padding: 0 24px !important;
+}
+.designselected .f-card {
+    height: 180px;
+}
+
+}

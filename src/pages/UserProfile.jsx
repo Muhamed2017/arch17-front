@@ -7,7 +7,6 @@ import CollectionsTab from "./user_profile_tabs/CollectionsTab";
 import CompaniesTab from "./user_profile_tabs/CompaniesTab.jsx";
 import FollwingTab from "./user_profile_tabs/FollwingTab";
 import { connect } from "react-redux";
-// import { Redirect } from "react-router";
 import { auth } from "./../firebase";
 import { setUserInfoAction } from "../redux/actions/authActions";
 import { Link } from "react-router-dom";
@@ -16,7 +15,10 @@ import { API } from "../utitlties";
 import ClipLoader from "react-spinners/ClipLoader";
 import { IoWarning } from "react-icons/io5";
 import SaveToBoard from "./../components/Modals/SaveToBoard";
+import ShareSocialModal from "./../components/Modals/ShareSocialModal";
+import Footer from "./../components/Footer";
 import "./user_profile_tabs/profile.css";
+import "../Company/company.css";
 
 import {
  LoadingOutlined,
@@ -32,6 +34,7 @@ import {
  Col as AntCol,
  Row as AntRow,
  Modal as AntModal,
+ Select,
 } from "antd";
 import { regionNames } from "./../redux/constants";
 import AuthModalContent from "./../components/AuthModalContent";
@@ -43,8 +46,15 @@ class UserProfile extends Component {
   this.state = {
    user_uid: auth.currentUser?.uid,
    collections: [],
+   selectedIndex: 0,
+   from_filter: false,
+   share_modal: false,
+   product_solutions: [],
+   project_solutions: [],
    boards: [],
    projects: [],
+   selectedCategory: "all",
+   selectedType: "all",
    removing_project: false,
    save_to_board_modal: false,
    delete_project_modal: false,
@@ -52,6 +62,8 @@ class UserProfile extends Component {
    to_save_project_cover: null,
    to_save_projectId: null,
    copied: false,
+   followStateLoading: true,
+   is_a_follower: false,
    followed_stores: [],
    is_designer: false,
    deletingProject: false,
@@ -60,6 +72,7 @@ class UserProfile extends Component {
    fetched: false,
    shared: [],
    taggedProjects: [],
+   projectsIds: [],
    to_delete_project: null,
    uid: this.props?.match?.params?.uid
     ? this.props.match?.params?.uid
@@ -67,30 +80,30 @@ class UserProfile extends Component {
    user: null,
    hasNotifications: false,
    hasCompanies: false,
+   bio_status_full: false,
   };
  }
 
  handleDeleteSubmit = () => {
-  const fd = new FormData();
-  fd.append("project_id", this.state.to_delete_project);
+  // const fd = new FormData();
+  // fd.append("project_id", this.state.to_delete_project);
   this.setState({
    deletingProject: true,
   });
-  axios.post(`${API}deleteproject`, fd).then((response) => {
-   console.log(response);
-   this.setState({
-    deletingProject: false,
-    delete_project_modal: false,
-    projects: this.state.projects?.filter((p) => {
-     return p.id !== this.state.to_delete_project;
-    }),
+  axios
+   .post(`${API}deleteproject/${this.state.to_delete_project}`)
+   .then((response) => {
+    console.log(response);
+    this.setState({
+     deletingProject: false,
+     delete_project_modal: false,
+     projects: this.state.projects?.filter((p) => {
+      return p.id !== this.state.to_delete_project;
+     }),
+    });
    });
-  });
  };
  componentDidMount() {
-  // console.log(`visitor is ${this.state.visitor}`);
-  // console.log(auth.currentUser);
-  // console.log(this.state.uid);
   if (this.state?.uid) {
    axios
     .get(`${API}user/folders/${this.state.uid}`)
@@ -115,11 +128,29 @@ class UserProfile extends Component {
       fetched: true,
       projects,
       products,
+      projectsIds: projects?.map((p) => {
+       return p.id;
+      }),
+      product_solutions: user?.categories?.filter((c) => {
+       return c.title === "product";
+      }),
+      project_solutions: user?.categories?.filter((c) => {
+       return c.title === "project";
+      }),
       hasNotifications,
       hasCompanies,
       taggedProjects: user?.tagged,
       shared: user?.shared,
      });
+     axios
+      .get(`${API}is-dfollower/${user?.id}/${this.props.info?.id}`)
+      .then((response) => {
+       console.log(response);
+       this.setState({
+        followStateLoading: false,
+        is_a_follower: response.data.is_a_follower,
+       });
+      });
     })
     .catch((err) => {
      console.log(err);
@@ -165,6 +196,77 @@ class UserProfile extends Component {
     save_to_board_modal: true,
    });
   }
+ };
+ handleBioShow = () => {
+  const status = this.state.bio_status_full;
+  this.setState({
+   bio_status_full: !status,
+  });
+ };
+ handleFollowingAction = () => {
+  const { is_a_follower } = this.state;
+  this.setState({
+   followStateLoading: true,
+  });
+  if (is_a_follower) {
+   axios
+    .post(
+     `${API}unfollow-designer/${this.props.info?.id}/${this.state.user?.id}`
+    )
+    .then((response) => {
+     console.log(response);
+     this.setState({
+      is_a_follower: false,
+      followStateLoading: false,
+     });
+    });
+  } else {
+   axios
+    .post(`${API}follow-designer/${this.props.info?.id}/${this.state.user?.id}`)
+    .then((response) => {
+     console.log(response);
+     this.setState({
+      is_a_follower: true,
+      followStateLoading: false,
+     });
+    });
+  }
+ };
+ handleFilterChange = () => {
+  axios
+   .get(
+    `${API}user/moredesignerprojects/${this.state.user?.id}/${this.state.selectedCategory}/${this.state.selectedType}`
+   )
+   .then((response) => {
+    this.setState({
+     projects: response.data.projects,
+     taggedProjects: response.data.tagged_projects,
+     from_filter: true,
+    });
+   });
+ };
+ handleCategoryChange = (selectedCategory) => {
+  this.setState(
+   {
+    selectedCategory,
+    filter: true,
+    selectedType: "all",
+   },
+   () => {
+    this.handleFilterChange();
+   }
+  );
+ };
+ handleTypeChange = (selectedType) => {
+  this.setState(
+   {
+    selectedType,
+    filter: true,
+   },
+   () => {
+    this.handleFilterChange();
+   }
+  );
  };
  render() {
   // if (!this.props.isLoggedIn || !this.props.info) return <Redirect to="/" />;
@@ -234,12 +336,27 @@ class UserProfile extends Component {
               {this.state.user.city && <span>{this.state.user.city}</span>}
              </p>
             )}
+
+            {this.state.user?.user_description?.length > 4 && (
+             <p className="bio">
+              {!this.state.bio_status_full
+               ? this.state.user?.user_description?.slice(0, 151)
+               : this.state.user?.user_description?.slice(0)}
+              <span onClick={this.handleBioShow} className="pointer px-2">
+               {this.state.bio_status_full ? "See more" : "See less"}
+              </span>
+             </p>
+            )}
+
             <p className="mt-4 mb-1 proff-head">Professions</p>
             <div className="professions">
              {this.state.user?.professions?.map((p) => {
               return (
                <div>
+                <a href={`/designers?filterBy=designer&profession=${p}`}>
                 <p>{p}</p>
+                </a>
+               
                </div>
               );
              })}
@@ -252,31 +369,69 @@ class UserProfile extends Component {
            <>
             <Col md={{ span: 4 }}>
              <button
+              onClick={this.handleFollowingAction}
               type="button"
-              title="Follow"
-              className="profile-follow-btn profile-action-btn"
+              style={{
+               backgroundColor: this.state.is_a_follower ? "#e8e8e8" : "",
+              }}
+              title={this.state.is_a_follower ? "Unfollow" : "Follow"}
+              className="profile-follow-btn profile-action-btn mx-1"
              >
-              <svg
-               width="18"
-               height="auto"
-               class="mf_US"
-               viewBox="0 0 32 32"
-               version="1.1"
-               aria-hidden="false"
-              >
-               <path d="M23.7 24v2.7H2.3V24c0-3.5 7.1-5.3 10.7-5.3s10.7 1.8 10.7 5.3zM13 16c2.9 0 5.3-2.4 5.3-5.3S15.9 5.3 13 5.3s-5.3 2.4-5.3 5.3S10.1 16 13 16zm14.7-2.7v-4H25v4h-4V16h4v4h2.7v-4h4v-2.7h-4z"></path>
-              </svg>
+              {this.state.followStateLoading ? (
+               <Spin
+                size="small"
+                indicator={
+                 <LoadingOutlined
+                  style={{ fontSize: "15px", color: "#000" }}
+                  spin
+                 />
+                }
+               />
+              ) : (
+               <>
+                {this.state.is_a_follower ? (
+                 <svg
+                  width="18"
+                  height="auto"
+                  class="mf_US"
+                  viewBox="0 0 32 32"
+                  version="1.1"
+                  aria-hidden="false"
+                 >
+                  <desc lang="en-US">A user with a checkmark</desc>
+                  <path d="M10.3 22.7l4-3.9c-.5-.1-.9-.1-1.3-.1-3.6 0-10.7 1.8-10.7 5.3v2.7h12l-4-4zM13 16c2.9 0 5.3-2.4 5.3-5.3S15.9 5.3 13 5.3s-5.3 2.4-5.3 5.3S10.1 16 13 16m8.6 11.3L17 22.7l1.9-1.9 2.8 2.8 6.8-6.9 1.9 1.9-8.8 8.7z"></path>
+                 </svg>
+                ) : (
+                 <svg
+                  width="18"
+                  height="auto"
+                  class="mf_US"
+                  viewBox="0 0 32 32"
+                  version="1.1"
+                  aria-hidden="false"
+                 >
+                  <path d="M23.7 24v2.7H2.3V24c0-3.5 7.1-5.3 10.7-5.3s10.7 1.8 10.7 5.3zM13 16c2.9 0 5.3-2.4 5.3-5.3S15.9 5.3 13 5.3s-5.3 2.4-5.3 5.3S10.1 16 13 16zm14.7-2.7v-4H25v4h-4V16h4v4h2.7v-4h4v-2.7h-4z"></path>
+                 </svg>
+                )}
+               </>
+              )}
              </button>
             </Col>
             <Col md={{ span: 4 }}>
-             <button className="profile-follow-btn profile-action-btn">
-              <ShareAltOutlined />
+             <button className="profile-follow-btn profile-action-btn mx-1">
+              <ShareAltOutlined
+               onClick={() => {
+                this.setState({
+                 share_modal: true,
+                });
+               }}
+              />
              </button>
             </Col>
            </>
           ) : (
            <>
-            <Col>
+            <Col md={{ span: 4 }} className="mx-1">
              <Link
               to={{
                pathname: "/profile/settings",
@@ -290,6 +445,17 @@ class UserProfile extends Component {
               </button>
              </Link>
             </Col>
+            <Col md={{ span: 4 }}>
+             <button className="profile-follow-btn profile-action-btn">
+              <ShareAltOutlined
+               onClick={() => {
+                this.setState({
+                 share_modal: true,
+                });
+               }}
+              />
+             </button>
+            </Col>
            </>
           )}
          </Row>
@@ -297,13 +463,19 @@ class UserProfile extends Component {
        </Col>
        <Col md={{ span: 12 }}>
         <div className="profile-tabs">
-         <Tabs>
+         <Tabs
+          selectedIndex={this.state.selectedIndex}
+          onSelect={(selectedIndex) => this.setState({ selectedIndex })}
+         >
           <TabList>
-           {this.state.is_designer === 1 && <Tab>Projects & Blogs</Tab>}
+           {this.state.user?.categories?.length > 0 && <Tab>Solutions</Tab>}
+           {this.state.is_designer === 1 && (
+            <Tab tabIndex={1}>Projects & Blogs</Tab>
+           )}
            <Tab>Collection</Tab>
            <Tab>Following</Tab>
-           {this.state.products?.length > 0 && <Tab>Products</Tab>}
-           {!this.state.visitor && this.state.hasCompanies && (
+           {this.state.products?.length > 0 && <Tab tabIndex={4}>Products</Tab>}
+           {!this.state.visitor && (
             <Tab>
              Company Pages <span className="tab-icon tab-icon-info">i</span>
             </Tab>
@@ -314,8 +486,124 @@ class UserProfile extends Component {
             </Tab>
            )}
           </TabList>
+          {this.state.user?.categories?.length > 0 && (
+           <TabPanel>
+            {this.state.project_solutions?.length > 0 && (
+             <h6 className="mb-5 tab-heading">Projects</h6>
+            )}
+            <AntRow span={24} gutter={{ md: 24, lg: 24, xs: 12, sm: 12 }}>
+             {this.state.project_solutions?.map((cat) => {
+              return (
+               <>
+                <AntCol md={6} xs={12} sm={12} lg={6} className="mb-4">
+                 <div
+                  className="cat"
+                  onClick={() => this.setState({ selectedIndex: 1 })}
+                 >
+                  <div
+                   className="cat-img"
+                   style={{
+                    backgroundImage: `url("${cat?.cover}")`,
+                   }}
+                  ></div>
+                  <p className="cat-name">{cat.name}</p>
+                 </div>
+                </AntCol>
+               </>
+              );
+             })}
+            </AntRow>
+
+            {this.state.product_solutions?.length > 0 && (
+             <h6 className="mb-5 tab-heading">Product</h6>
+            )}
+            <AntRow span={24} gutter={{ md: 24, lg: 24, xs: 12, sm: 12 }}>
+             {this.state.product_solutions?.map((cat) => {
+              return (
+               <>
+                <AntCol md={6} xs={12} sm={12} lg={6} className="mb-4">
+                 <div
+                  className="cat"
+                  onClick={() => {
+                   this.setState({ selectedIndex: 4 });
+                  }}
+                  //  onClick={() => this.handleSelectCatName(cat.name)}
+                 >
+                  <div
+                   className="cat-img"
+                   style={{
+                    backgroundImage: `url("${cat?.cover}")`,
+                   }}
+                  ></div>
+                  <p className="cat-name">{cat.name}</p>
+                 </div>
+                </AntCol>
+               </>
+              );
+             })}
+            </AntRow>
+           </TabPanel>
+          )}
+
           {this.state.is_designer === 1 && (
            <TabPanel forceRender>
+            {(this.state.projects?.length + this.state.taggedProjects?.length >
+             0 ||
+             this.state.from_filter) && (
+             <AntRow span={24} className="mb-4" gutter={16}>
+              <AntCol md={6}>
+               <Select
+                size="large"
+                value={this.state.selectedCategory}
+                onChange={this.handleCategoryChange}
+                style={{ width: "100%" }}
+               >
+                <Select.Option key="All" value="all">
+                 All
+                </Select.Option>
+                {[
+                 "Architecture",
+                 "Interior Design",
+                 "Landscape",
+                 "Blog",
+                 "Product Design",
+                ].map((item) => (
+                 <Select.Option key={item} value={item}>
+                  {item}
+                 </Select.Option>
+                ))}
+               </Select>
+              </AntCol>
+              <AntCol md={6}>
+               <Select
+                size="large"
+                value={this.state.selectedType}
+                onChange={this.handleTypeChange}
+                style={{ width: "100%" }}
+               >
+                <Select.Option key="All" value="all">
+                 All
+                </Select.Option>
+                {/* {project_cats?.map((item) => (
+                 <Select.Option key={item} value={item}>
+                  {item}
+                 </Select.Option>
+                ))} */}
+                {this.state.project_solutions?.map((sol) => {
+                 return (
+                  <>
+                   {sol?.title === "project" && (
+                    <Select.Option key={sol?.name} value={sol?.name}>
+                     {sol?.name}
+                    </Select.Option>
+                   )}{" "}
+                  </>
+                 );
+                })}
+               </Select>
+              </AntCol>
+             </AntRow>
+            )}
             <AntRow
              span={24}
              gutter={{ xs: 12, sm: 12, md: 24, lg: 24 }}
@@ -323,16 +611,13 @@ class UserProfile extends Component {
             >
              {!this.state.visitor && (
               <AntCol xs={12} sm={12} md={8} className="my-4 add-col">
-               {/* {!this.state.visitor && ( */}
                <div className="add-project-icon">
                 <a href={`/addproject/designer/${this.state.user?.id}`}>
                  <AiOutlinePlus />
                  Add Project
                 </a>
                </div>
-               {/* )} */}
               </AntCol>
-              // {/* )} */}
              )}
 
              {this.state.projects?.length + this.state.taggedProjects?.length >
@@ -410,7 +695,7 @@ class UserProfile extends Component {
                      <div className="project-col bg-white">
                       {this.state.visitor && this.props.isLoggedIn && (
                        <button
-                        className="project-btn project-delete-btn"
+                        className="project-btn project-edit-btn"
                         onClick={(e) => {
                          e.preventDefault();
                          this.setState(
@@ -460,72 +745,76 @@ class UserProfile extends Component {
                })}
                {this.state.taggedProjects?.map((p, index) => {
                 return (
-                 <AntCol xs={12} sm={12} md={8} className="my-4" key={index}>
-                  <a href={`/project/${p.id}`} className="box-link">
-                   <div className="project-col bg-white">
-                    {!this.state.visitor ? (
-                     <Button
-                      loading={this.state.removing_project}
-                      className="project-btn project-remove-btn"
-                      onClick={(e) => {
-                       e.preventDefault();
-                       this.handleRemoveTaggedProject(
-                        p?.id,
-                        this.state.user?.id
-                       );
-                      }}
-                     >
-                      Remove
-                     </Button>
-                    ) : (
-                     <>
-                      <Button
-                       // loading={this.state.removing_project}
-                       className="project-btn project-remove-btn"
-                       onClick={(e) => {
-                        e.preventDefault();
-                        this.setState(
-                         {
-                          to_save_project_cover: p.cover,
-                          to_save_projectId: p,
-                         },
-                         () => {
-                          this.saveToBoard();
-                         }
-                        );
-                       }}
-                      >
-                       Save
-                      </Button>
-                     </>
-                    )}
-                    <div className="project-image-wrapper">
-                     <div
-                      className="project-image"
-                      style={{
-                       backgroundImage: `url(${p.cover})`,
-                      }}
-                     ></div>
-                    </div>
+                 <>
+                  {!this.state.projectsIds?.includes(p.id) && (
+                   <AntCol xs={12} sm={12} md={8} className="my-4" key={index}>
+                    <a href={`/project/${p.id}`} className="box-link">
+                     <div className="project-col bg-white">
+                      {!this.state.visitor ? (
+                       <Button
+                        loading={this.state.removing_project}
+                        className="project-btn project-remove-btn"
+                        onClick={(e) => {
+                         e.preventDefault();
+                         this.handleRemoveTaggedProject(
+                          p?.id,
+                          this.state.user?.id
+                         );
+                        }}
+                       >
+                        Remove
+                       </Button>
+                      ) : (
+                       <>
+                        <Button
+                         // loading={this.state.removing_project}
+                         className="project-btn project-remove-btn"
+                         onClick={(e) => {
+                          e.preventDefault();
+                          this.setState(
+                           {
+                            to_save_project_cover: p.cover,
+                            to_save_projectId: p,
+                           },
+                           () => {
+                            this.saveToBoard();
+                           }
+                          );
+                         }}
+                        >
+                         Save
+                        </Button>
+                       </>
+                      )}
+                      <div className="project-image-wrapper">
+                       <div
+                        className="project-image"
+                        style={{
+                         backgroundImage: `url(${p.cover})`,
+                        }}
+                       ></div>
+                      </div>
 
-                    <div className="info p-3 left">
-                     <p className="project-name left">{p.name}</p>
+                      <div className="info p-3 left">
+                       <p className="project-name left">{p.name}</p>
 
-                     <div className="project-cover-footer">
-                      <p>
-                       {p.kind?.map((k) => {
-                        return <span className="px-1">{k}</span>;
-                       })}
-                      </p>
-                      <hr className="my-1 w-20" />
-                      <p>
-                       <span className="px-1">{p.type}</span>
-                      </p>
+                       <div className="project-cover-footer">
+                        <p>
+                         {p.kind?.map((k) => {
+                          return <span className="px-1">{k}</span>;
+                         })}
+                        </p>
+                        <hr className="my-1 w-20" />
+                        <p>
+                         <span className="px-1">{p.type}</span>
+                        </p>
+                       </div>
+                      </div>
                      </div>
-                    </div>
-                   </div>
-                  </a>
-                 </AntCol>
+                    </a>
+                   </AntCol>
+                  )}
+                 </>
                 );
                })}
               </>
@@ -539,10 +828,14 @@ class UserProfile extends Component {
             boards={this.state.boards}
             shared={this.state.shared}
             user_id={this.state.user?.id}
+            creator_name={this.state.user?.displayName}
            />
           </TabPanel>
           <TabPanel forceRender>
-           <FollwingTab followed_stores={this.state.followed_stores} />
+           <FollwingTab
+            followed_stores={this.state.followed_stores}
+            user_id={this.state.user?.id}
+           />
           </TabPanel>
           {this.state.products?.length > 0 && (
            <TabPanel>
@@ -621,7 +914,7 @@ class UserProfile extends Component {
             </div>
            </TabPanel>
           )}
-          {!this.state.visitor && this.state.hasCompanies && (
+          {!this.state.visitor && (
            <TabPanel>
             <CompaniesTab user_id={this.state.user?.id} />
            </TabPanel>
@@ -637,6 +930,7 @@ class UserProfile extends Component {
       </Row>
      </Container>
     </div>
+    <Footer lightgray={false} />
     {/* delte project modal */}
     <Modal
      show={this.state.delete_project_modal}
@@ -749,6 +1043,25 @@ class UserProfile extends Component {
      <SaveToBoard
       cover={this.state.to_save_project_cover}
       project={this.state.to_save_projectId}
+     />
+    </AntModal>
+    <AntModal
+     title={`Share ${this.state.brand?.name}`}
+     width={350}
+     className="share-modal"
+     visible={this.state.share_modal}
+     destroyOnClose={true}
+     footer={false}
+     closeIcon={
+      <div onClick={() => this.setState({ share_modal: false })}>X</div>
+     }
+    >
+     <ShareSocialModal
+      page_url={`https://www.arch17.com/user/${this.state.user?.uid}`}
+      media={this.state.user?.photoURL}
+      tags={this.state.user?.professions || []}
+      title={this.state.user?.displayName}
+      description={"Arch17 Designer"}
      />
     </AntModal>
    </React.Fragment>

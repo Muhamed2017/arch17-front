@@ -7,12 +7,25 @@ const addProjectInfoCreator = (info)=>{
         payload:info
     }
 }
+
 export const addProjectInfo= (info)=>{
     return (dispatch)=>{
         dispatch(addProjectInfoCreator(info))
     }
 }
+const setProjectTypeSearchCreator = (type)=>{
 
+    return {
+        type:actions.SET_PROJECT_TYPE_SEARCH,
+        payload:type
+    }
+}
+export const setProjectTypeSearch= (lighting_bulbTypes)=>{
+    return (dispatch)=>{
+        dispatch(setProjectTypeSearchCreator(lighting_bulbTypes))
+    }
+}
+// SET_PROJECT_TYPE_SEARCH
 const addProjectContentCreator = (content)=>{
 
     return {
@@ -139,6 +152,7 @@ export const deleteProjectRoleDesigner= (designer)=>{
         dispatch(deleteProjectRoleDesignerCreator(designer))
     }
 }
+
 const deleteProjectRoleCompanyCreator = (company)=>{
     return {
         type:actions.DELETE_ROLE_COMPANY,

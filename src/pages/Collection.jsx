@@ -29,7 +29,6 @@ import {
  IoLocationSharp,
  IoEarthSharp,
 } from "react-icons/io5";
-// import { AiTwotoneEye } from "react-icons/ai";
 class Collection extends Component {
  constructor(props) {
   super(props);
@@ -103,11 +102,19 @@ class Collection extends Component {
  };
 
  componentDidMount() {
+  axios.get(`${API}col-product/${this.state.collection.id}`).then((response) => {
+    console.log(response);
+    this.setState((state) => ({
+     products: response.data.products,
+     loading: false,
+     
+    }));
+   });
   axios.get(`${API}col/${this.state.collection.id}`).then((response) => {
    console.log(response);
    this.setState((state) => ({
-    products: response.data.products,
-    loading: false,
+    // products: response.data.products,
+    // loading: false,
     brand: response.data.store[0],
     name: response.data.collection.collection_name,
     followers: response.data.store?.followers,
@@ -289,30 +296,6 @@ class Collection extends Component {
          <p className="creator">
           Products by
           <a href={`/brand/${this.state.brand?.id}`} className="bold px-2">
-           {/* <Tooltip
-         overlayInnerStyle={{
-          height: 250,
-          minWidth: 420,
-         }}
-         title={
-          <this.StoreCard
-           name={this.state.collection?.store_name.slice(0, 18)}
-           logo={this.state.brand?.logo}
-           id={this.state.brand?.id}
-           website={this.state.brand?.official_website}
-           type={this.state.brand?.type}
-           location={{
-            country: this.state.brand?.country,
-            city: this.state.brand?.city,
-           }}
-           followers={10}
-          />
-         }
-         color={"#18191a"}
-         placement="rightTop"
-        >
-         <span> {this.state.collection?.store_name}</span>
-        </Tooltip> */}
            {this.state.brand?.name}
           </a>
          </p>
@@ -353,7 +336,7 @@ class Collection extends Component {
                <div
                 className="p-img"
                 style={{
-                 background: `url(${product?.identity[0].preview_cover})`,
+                 background: `url(${product?.preview_cover})`,
                 }}
                >
                 <div className="prlayer"></div>
@@ -374,7 +357,7 @@ class Collection extends Component {
                    onClick={(e) => {
                     e.preventDefault();
                     this.handleRemoveFromCollection(
-                     product.id,
+                     product.product_id,
                      this.state.collection?.id
                     );
                    }}
@@ -404,8 +387,8 @@ class Collection extends Component {
                     e.preventDefault();
                     this.setState(
                      {
-                      to_save_cover: product?.identity[0].preview_cover,
-                      to_save_productId: product,
+                      to_save_cover: product?.preview_cover,
+                      to_save_productId: {id:product.product_id},
                      },
                      () => {
                       this.saveToCollection();
@@ -426,19 +409,19 @@ class Collection extends Component {
                  ""
                 )}
                </div>
-               <h5 className="product-store">{product.stores?.name}</h5>
-               <p className="product-name">{product?.identity[0].name}</p>
+               {/* <h5 className="product-store">{product.stores?.name}</h5> */}
+               <p className="product-name">{product?.name}</p>
                <div className="product-price">
-                {product.identity[0].preview_price &&
-                product.identity[0].preview_price > 0 ? (
+                {product?.preview_price &&
+                product?.preview_price > 0 ? (
                  <>
-                  <span>¥ {product.identity[0].preview_price}</span>
+                  <span>¥ {product?.preview_price}</span>
                  </>
                 ) : (
                  <>
                   <Link
                    to={{
-                    pathname: `/product/${product?.identity[0].product_id}`,
+                    pathname: `/product/${product?.product_id}`,
                     state: {
                      request_price: true,
                     },

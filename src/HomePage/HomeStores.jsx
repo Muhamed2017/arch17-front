@@ -2,7 +2,35 @@ import { Component, createRef } from "react";
 import { API } from "../utitlties";
 import axios from "axios";
 import { Carousel, Row } from "antd";
-// import { RightOutlined, LeftOutlined } from "@ant-design/icons";
+import DraggingCarousel from "react-multi-carousel";
+import "react-multi-carousel/lib/styles.css";
+const responsive = {
+ superLargeDesktop: {
+  breakpoint: { max: 4000, min: 3000 },
+  items: 4,
+  slidesToShow: 4,
+  slidesPerScroll: 4,
+  slidesToSlide: 4,
+ },
+ desktop: {
+  breakpoint: { max: 3000, min: 1024 },
+  items: 4,
+  slidesToShow: 4,
+  slidesPerScroll: 4,
+  slidesToSlide: 4,
+ },
+ tablet: {
+  breakpoint: { max: 1024, min: 464 },
+  items: 4,
+  slidesPerScroll: 4,
+  slidesToSlide: 4,
+ },
+ mobile: {
+  breakpoint: { max: 464, min: 0 },
+  items: 2.5,
+  slidesPerScroll: 4,
+ },
+};
 class HomeStores extends Component {
  constructor(props) {
   super(props);
@@ -36,7 +64,8 @@ class HomeStores extends Component {
        <span className="compressed bold-compressed">brands</span>
       </h2>
       <p className="right-home-text">Explore catalogues by brands</p>
-      <div className="stores-items wide-home-view">
+      {/* ------------------------------------- */}
+      {/* <div className="stores-items wide-home-view">
        {this.state.stores?.map((store, idnex) => {
         return (
          <>
@@ -60,14 +89,63 @@ class HomeStores extends Component {
          </>
         );
        })}
+      </div> */}
+      {/* ------------------------------------------- */}
+
+      <div className="store-boxes wide-home-view">
+       <DraggingCarousel
+        // swipeabl
+        // draggable
+        swipeable={false}
+        draggable={false}
+        autoPlay={this.props.deviceType !== "mobile" ? true : false}
+        autoPlaySpeed={10000}
+        keyBoardControl={true}
+        customTransition="all .5"
+        transitionDuration={500}
+        rewind={false}
+        responsive={responsive}
+        infinite={true}
+        showDots={true}
+        containerClass="carousel-container"
+        removeArrowOnDeviceType={["tablet", "mobile"]}
+        dotListClass="custom-dot-list-style"
+        itemClass="carousel-item-padding-40-px"
+       >
+        {this.state.stores?.map((store) => {
+         return (
+          <>
+           <a
+            href={`/brand/${store.id}`}
+            key={store.id}
+            className="store-wrapper"
+           >
+            <div
+             key={store.id}
+             className="store bgr-cover"
+             style={{ backgroundImage: `url("${store.home_preview}")` }}
+            ></div>
+            <div
+             className="logo-box bgr-cover"
+             style={{ backgroundImage: `url("${store.logo}")` }}
+            ></div>
+           </a>
+           <a className="store-title" href={`/brand/${store.id}`}>
+            <p>{store?.name}</p>
+           </a>
+           <a className="store-cats" href={`/brand/${store.id}`}>
+            <p>
+             {store.categories?.map((cat) => {
+              return <span key={cat.id}>{cat?.name}</span>;
+             })}
+            </p>
+           </a>
+          </>
+         );
+        })}
+       </DraggingCarousel>
       </div>
       <div className="mobile-home-view">
-       {/* <button className="custom-arrow prevarrow" onClick={this.next}>
-        <RightOutlined />
-       </button>
-       <button className="custom-arrow nextarrow" onClick={this.prev}>
-        <LeftOutlined />
-       </button> */}
        <Carousel
         ref={this.brandCarousel}
         autoplay
@@ -110,7 +188,7 @@ class HomeStores extends Component {
         className="btn mt-5 seemore mb-5 mt-2"
         style={{ paddingTop: "17px !important" }}
        >
-        See All Brands
+        SEE ALL BRANDS
        </a>
       </Row>
      </>

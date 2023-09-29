@@ -51,7 +51,6 @@ class HomeProducts extends Component {
       <Row className="mt-3" gutter={24}>
        {this.state.products?.map((product, index) => {
         return (
-         <>
           <Col key={index} className="gutter-row mb-3" md={6} sm={12} xs={12}>
            <div className="product">
             <a href={`/product/${product?.id}`}>
@@ -81,8 +80,10 @@ class HomeProducts extends Component {
               </div>
               {product?.identity[0]?.file?.length > 0 ? (
                <>
-                <div className="actns-btn file-btn cad">CAD</div>
-                <div className="actns-btn file-btn threeD">3D</div>
+                <div className="actns-btn file-btn cad">
+                  <p>CAD</p>
+                </div>
+                <div className="actns-btn file-btn threeD"><p>3D</p></div>
                </>
               ) : (
                ""
@@ -91,11 +92,10 @@ class HomeProducts extends Component {
             </a>
 
             <h5 className="product-store">
-             {product?.identity[0]?.store_name?.store_name}
+             <a href={`/brand/${product?.store_id}`}>
+              {product?.identity[0]?.store_name?.store_name}
+             </a>
             </h5>
-
-            {/* <p className="product-name">{product?.identity[0]?.name}</p> */}
-            {/* <p className="product-name">{product?.identity[0]?.name?.s}</p> */}
             {product?.identity[0]?.name?.length < 40 ? (
              <p className="product-name">{product?.identity[0]?.name}</p>
             ) : (
@@ -125,13 +125,12 @@ class HomeProducts extends Component {
             </div>
            </div>
           </Col>
-         </>
         );
        })}
       </Row>
       <Row>
        <a
-        href="/products"
+        href="/categories"
         className="btn mt-4 seemore"
         style={{ paddingTop: "17px !important" }}
        >

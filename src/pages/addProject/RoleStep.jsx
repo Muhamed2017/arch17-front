@@ -30,13 +30,13 @@ class RoleStep extends Component {
    addedCompanies: this.props.companies ?? [],
    addedBrands: this.props.brands ?? [],
    addedDesIDs: this.props.designers?.map((des) => {
-    return des.id;
+    return des?.id;
    }),
    addedComIDs: this.props.companies?.map((des) => {
-    return des.id;
+    return des?.id;
    }),
    addedBraIDs: this.props.brands?.map((b) => {
-    return b.id;
+    return b?.id;
    }),
 
    disabled: true,
@@ -108,6 +108,21 @@ class RoleStep extends Component {
      this.props.dispatchAddDesigner(d);
     }
    );
+
+   if (this.props.project_info?.category?.indexOf("Product Design") !== -1) {
+    const fd = new FormData();
+    fd.append(
+     "product_design_category",
+     this.props.project_info?.product_design_category
+    );
+    fd.append(
+     "product_design_kind",
+     this.props.project_info?.product_design_kind
+    );
+    axios.post(`${API}pd-user/${d.id}`, fd).then((response) => {
+     console.log(response);
+    });
+   }
   }
   if (type === "company") {
    this.setState(
@@ -120,6 +135,21 @@ class RoleStep extends Component {
      this.props.dispatchAddCompany(d);
     }
    );
+
+   if (this.props.project_info?.category?.indexOf("Product Design") !== -1) {
+    const fd = new FormData();
+    fd.append(
+     "product_design_category",
+     this.props.project_info?.product_design_category
+    );
+    fd.append(
+     "product_design_kind",
+     this.props.project_info?.product_design_kind
+    );
+    axios.post(`${API}pd-co/${d.id}`, fd).then((response) => {
+     console.log(response);
+    });
+   }
   }
  };
  handleAddBrand = (d) => {
@@ -136,37 +166,6 @@ class RoleStep extends Component {
  };
  componentDidMount() {
   console.log(this.props.match);
-  // if (this.props.match.params.type && this.props.match.params.id) {
-  //  axios
-  //   .get(`${API}${this.props.match.params.type}${this.props.match.params.id}`)
-  //   .then((response) => {
-  //    console.log(response);
-  //    if (this.props.match.params.type === "company") {
-  //     this.setState(
-  //      {
-  //       designesModal: false,
-  //       addedComIDs: [...this.state.addedComIDs, response.data.company?.id],
-  //       addedCompanies: [...this.state.addedCompanies, response.data.company],
-  //      },
-  //      () => {
-  //       this.props.dispatchAddCompany(response.data.company);
-  //      }
-  //     );
-  //    }
-  //    if (this.props.match.params.type === "designer") {
-  //     this.setState(
-  //      {
-  //       designesModal: false,
-  //       addedDesIDs: [...this.state.addedDesIDs, response.data.designer?.id],
-  //       addedDesigners: [...this.state.addedDesigners, response.data.designer],
-  //      },
-  //      () => {
-  //       this.props.dispatchAddDesigner(response.data.designer);
-  //      }
-  //     );
-  //    }
-  //   });
-  // }
   window.scrollTo({
    top: 0,
   });
@@ -224,7 +223,7 @@ class RoleStep extends Component {
               <div
                className="d-img inline-block"
                style={{
-                backgroundImage: `url(${d.photoURL})`,
+                backgroundImage: `url(${d?.photoURL})`,
                }}
               >
                {d?.photoURL?.length < 10 && <>{d?.displayName[0]}</>}
@@ -235,11 +234,11 @@ class RoleStep extends Component {
              <div className="d-info">
               <span className="inline-block">{d?.displayName}</span>
               <p className="d-loc">
-               {d.country && (
+               {d?.country && (
                 <>
                  <IoLocation />
-                 {d.country}
-                 {d.city && <>, {d.city}</>}
+                 {d?.country}
+                 {d?.city && <>, {d?.city}</>}
                 </>
                )}
               </p>
@@ -254,10 +253,10 @@ class RoleStep extends Component {
              this.setState(
               {
                addedDesigners: this.state.addedDesigners?.filter((des) => {
-                return des.id !== d.id;
+                return des?.id !== d?.id;
                }),
                addedDesIDs: this.state.addedDesIDs?.filter((id) => {
-                return id !== d.id;
+                return id !== d?.id;
                }),
               },
               () => {
@@ -299,8 +298,8 @@ class RoleStep extends Component {
                {c.country && (
                 <>
                  <IoLocation />
-                 {c.country}
-                 {c.city && <>, {c.city}</>}
+                 {c?.country}
+                 {c?.city && <>, {c?.city}</>}
                 </>
                )}
               </p>
@@ -379,7 +378,7 @@ class RoleStep extends Component {
               <div
                className="d-img inline-block"
                style={{
-                backgroundImage: `url(${b.cover})`,
+                backgroundImage: `url(${b?.cover})`,
                }}
               >
                {!b.cover && <>{b?.name[0]}</>}
@@ -391,13 +390,13 @@ class RoleStep extends Component {
               <span className="inline-block">{b?.name}</span>
               <p className="mb-0 b-type">Brand</p>
               <p className="mb-0 b-count">
-               <span>{b.followers?.length}</span>Followers
+               <span>{b?.followers?.length}</span>Followers
               </p>
               <p className="d-loc">
-               {b.country && (
+               {b?.country && (
                 <>
                  <IoLocation />
-                 {b.country}
+                 {b?.country}
                  {b.city && <>, {b.city}</>}
                 </>
                )}
@@ -674,6 +673,7 @@ const mapStateToProps = (state) => {
   designers: state.project.role_designers,
   companies: state.project.role_companies,
   brands: state.project.role_brands,
+  project_info: state.project.project_info,
  };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(RoleStep);

@@ -5,7 +5,18 @@ import ReactFlagsSelect from "react-flags-select";
 import { addProjectInfo } from "./../../redux/actions/addProjectActions";
 import { project_cats } from "../addProduct/ProductClassifications";
 import { customLabels } from "../CreateBrandFinish";
-
+import {
+ products_categories,
+ kind_options,
+ lighting_kind_optios,
+ decore_kind_options,
+ finishes_kind_options,
+ kitchen_kind_options,
+ wellness_kind_options,
+ constructions_kind_options,
+ bathroom_kind_options,
+} from "../addProduct/ProductClassifications";
+// import {}
 const { Option } = Select;
 const config = {
  rules: [{ required: true, message: "Please select time!" }],
@@ -16,7 +27,14 @@ class InfoStep extends Component {
   this.state = {
    country: this.props.info?.country ?? "",
    missed: false,
+   selectedProdyctType: this.props.info?.product_type ?? [],
    selectedCats: this.props.info?.category ?? [],
+   product_category: this.props.info?.product_design_category ?? "",
+   product_kind: this.props.info?.product_design_kind ?? [],
+   productSelect:
+    this.props.info?.category &&
+    this.props.info?.category?.indexOf("Product Design") !== -1,
+   product_kind_options: [],
    selectedTypes: this.props.info?.type,
    _cat: this.props.info?.blogType ?? "",
   };
@@ -39,15 +57,83 @@ class InfoStep extends Component {
   console.log("Failed:", errorInfo);
  };
  handleCatsChange = (selectedCats) => {
-  this.setState({ selectedCats }, () => {
-   console.log(this.state.selectedCats);
-  });
+  this.setState(
+   {
+    selectedCats,
+    productSelect: selectedCats?.indexOf("Product Design") !== -1,
+   },
+   () => {
+    console.log(this.state.selectedCats);
+   }
+  );
  };
  handleTypesChange = (selectedTypes) => {
   this.setState({ selectedTypes }, () => {
    console.log(this.state.selectedTypes);
   });
  };
+ setRightkindOption = (cat) => {
+  if (!cat) return;
+
+  let kind_option;
+  switch (cat) {
+   case "Furniture":
+    kind_option = kind_options;
+    break;
+
+   case "Lighting":
+    kind_option = lighting_kind_optios;
+    break;
+
+   case "Decore":
+    kind_option = decore_kind_options;
+    break;
+
+   case "Construction":
+    kind_option = constructions_kind_options;
+    break;
+
+   case "Wellness":
+    kind_option = wellness_kind_options;
+    break;
+
+   case "Kitchen":
+    kind_option = kitchen_kind_options;
+    break;
+
+   case "Bathroom":
+    kind_option = bathroom_kind_options;
+    break;
+
+   case "Finishes":
+    kind_option = finishes_kind_options;
+    break;
+
+   default:
+    kind_option = [];
+    break;
+  }
+
+  this.setState({
+   product_kind_options: kind_option,
+  });
+ };
+ handleProductCategoryChange = (seletedCategory) => {
+  this.setState(
+   {
+    product_category: seletedCategory,
+   },
+   () => this.setRightkindOption(seletedCategory)
+  );
+ };
+ handleProductTypeChange = (selectedProdyctType) => {
+  this.setState({
+   selectedProdyctType,
+  });
+ };
+ componentDidMount() {
+  this.setRightkindOption(this.state.product_category);
+ }
  render() {
   return (
    <>
@@ -97,7 +183,6 @@ class InfoStep extends Component {
        className="form-label mb-4"
        labelCol={{ span: 3, offset: 0 }}
        wrapperCol={{ span: 8, offset: 0 }}
-       //   initialValue={this.props.info?.category ?? ""}
        initialValue={this.state.selectedCats ?? []}
        rules={[
         {
@@ -111,6 +196,7 @@ class InfoStep extends Component {
         size="large"
         mode="multiple"
         value={this.state.selectedCats}
+        // onChange={this.handleProductCategoryChange}
         onChange={this.handleCatsChange}
         showArrow
         style={{
@@ -124,6 +210,7 @@ class InfoStep extends Component {
         <Option value="Blog">Blog</Option>
        </Select>
       </Form.Item>
+
       <Form.Item
        name="type"
        label="Project"
@@ -135,7 +222,8 @@ class InfoStep extends Component {
        className="form-label mb-5"
        rules={[
         {
-         required: this.state._cat === "project",
+         required: false,
+         //  required: this.state._cat === "project"  && this.state.selectedCats?.indexOf("Product Design") === -1,
          message: "Project kind is required!",
         },
        ]}
@@ -158,6 +246,77 @@ class InfoStep extends Component {
         })}
        </Select>
       </Form.Item>
+      {this.state.productSelect && (
+       <>
+        <Form.Item
+         name="product_design_category"
+         label="Product"
+         className="form-label mb-4"
+         labelCol={{ span: 3, offset: 0 }}
+         wrapperCol={{ span: 8, offset: 0 }}
+         initialValue={this.state.product_category}
+         rules={[
+          {
+           required: false,
+           //  required: this.state.selectedCats?.indexOf("Product Design") !== -1,
+           message: "Product Category is required!",
+          },
+         ]}
+        >
+         <Select
+          showSearch
+          placeholder="Please select Product"
+          size="large"
+          value={this.state.product_category}
+          onChange={this.handleProductCategoryChange}
+          showArrow
+          style={{
+           fontSize: "13px",
+          }}
+         >
+          {products_categories.map((cat) => {
+           return <Option value={cat}>{cat}</Option>;
+          })}
+         </Select>
+        </Form.Item>
+        {this.state.productSelect &&
+         this.state.product_kind_options?.length > 0 && (
+          <Form.Item
+           name="product_design_kind"
+           label="Product Kind"
+           className="form-label mb-4"
+           labelCol={{ span: 3, offset: 0 }}
+           wrapperCol={{ span: 8, offset: 0 }}
+           initialValue={this.state.product_kind}
+           rules={[
+            {
+             required: false,
+             //  required:
+             // this.state.selectedCats?.indexOf("Product Design") !== -1,
+             message: "Product Type is required!",
+            },
+           ]}
+          >
+           <Select
+            mode="multiple"
+            placeholder="Please select Product Type"
+            size="large"
+            value={this.state.selectedProdyctType}
+            onChange={this.handleProductTypeChange}
+            showArrow
+            showSearch
+            style={{
+             fontSize: "13px",
+            }}
+           >
+            {this.state.product_kind_options.map((type) => {
+             return <Option value={type.value}>{type.value}</Option>;
+            })}
+           </Select>
+          </Form.Item>
+         )}
+       </>
+      )}
       <Row span={24} gutter={15} justify="start">
        <Col md={24} className="my-3">
         <p className="form-label">Project Country & City </p>

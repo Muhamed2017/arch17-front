@@ -748,75 +748,7 @@ class TableStep extends React.Component {
   }
  };
 
- // making it mutliple
- //  handleUploadProductImg = async (e, img_index) => {
- //   let images = Object.values(e.target?.files);
 
- //   const initialLength = this.state.modal_covers.length;
- //   console.log(this.state.modal_covers);
- //   let newAdded = [];
- //   images.forEach((image) => {
- //    newAdded.push({
- //     loaded: 0,
- //     src: URL.createObjectURL(image),
- //     _src: null,
- //    });
- //   });
-
- //   this.setState({
- //    modal_covers: newAdded,
- //   });
-
- //   images.forEach((image, index) => {
- //    if (!image) return;
-
- //    if (image.size > 1048576) {
- //     console.log("Size is to Large");
- //     this.sizeExceeded();
- //     return;
- //    } else {
- //     this.setState({ cover_box_index: img_index });
- //     const tempCovers = this.state.modal_covers;
- //     // console.log(tempCovers);
- //     // console.log(initialLength);
- //     // tempCovers[index].src = URL.createObjectURL(image);
- //     const fd = new FormData();
- //     fd.append("cover", image);
- //     const options = {
- //      onUploadProgress: (progressEvent) => {
- //       const { loaded, total } = progressEvent;
- //       let percent = Math.floor((loaded * 100) / total);
- //       console.log(`${loaded} kb of ${total} | ${percent}%`);
- //       if (percent <= 100) {
- //        console.log(percent);
- //        console.log(tempCovers);
- //        tempCovers[index].loaded = percent;
- //        this.setState({ dataSource: tempDataSource });
- //       }
- //      },
- //     };
-
- //     axios.post(`${API}cover-upload-new`, fd, options).then((response) => {
- //      console.log(response.data);
- //      tempCovers[index]._src = response.data.cover.src;
- //      tempCovers[index].src = response.data.cover.src;
- //      tempCovers[index].cover_id = response.data.cover.id;
- //      this.props.dispatchAddOptionsforPreview({
- //       src: response.data.cover.src,
- //       data: response.data.cover.cropping_data,
- //      });
- //      const covers = this.props.options_covers;
- //      localStorage.setItem("covers", JSON.stringify(covers));
- //     });
-
- //     const tempDataSource = this.state.dataSource;
- //     // tempDataSource[this.state.editing_row].covers = tempCovers;
- //     this.setState({ dataSource: tempDataSource });
- //    }
- //   });
- //  };
-
- //  old upload single one by one
  handleUploadProductImg = async (e, img_index) => {
   let file = e.target.files[0];
   if (!file) {

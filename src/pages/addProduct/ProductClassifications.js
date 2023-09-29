@@ -1,3 +1,9 @@
+export const products_categories=['Furniture', 'Lighting', 'Decore', 'Wellness', 
+'Finishes', 
+'Construction', 
+'Kitchen'
+]
+
 export const kind_options = [
     { value: "Cabinets", label: "Cabinets" },
     { value: "Beds", label: "Beds" },
@@ -31,6 +37,7 @@ export const lighting_kind_optios = [
     { value: "Bollard lights", label: "Bollard lights" },
     { value: "Pendant lamps", label: "Pendant lamps" },
 ];
+
 export const furniture_styles=[
     { value: "Contemporary", label: "Contemporary" },
     { value: "Eclectic", label: "Eclectic" },
@@ -578,6 +585,7 @@ export const sofas={
         { value: "with gas lift", label: "with gas lift" },
     ],
     seats:[
+        { value: "1-Seater", label: "1-Seater" },
         { value: "2-Seater", label: "2-Seater" },
         { value: "3-Seater", label: "3-Seater" },
         { value: "4-Seater", label: "4-Seater" },
@@ -683,6 +691,7 @@ export const table = {
         { value: "dining tables", label: "dining tables" },
         { value: "Dressing tables", label: "Dressing tables" },
         { value: "coffee tables", label: "coffee tables" },
+        { value: "Meeting Table", label: "Meeting Table" },
         { value: "bar tables", label: "bar tables" },
         { value: "bedside tables", label: "bedside tables" },
         { value: "Office desk", label: "Office desk" },
@@ -1899,3 +1908,5 @@ export const project_cats=[
 
 export const company_services = ["Architecture", "Interior Design", "Product Design", "Landscape ", "Urpan Plan", "Construction", "Home Decoration", "Kitchen Design", "Kitchen Manufacturer", "3D Renders",
     "CAD Drawings"];
+
+export const pom_client_list_types=["End Client", "Designer", "Design Company", "Contractor", "Procurement agency", "Bussiness Devloper"]

@@ -26,6 +26,7 @@ class ShareModal extends Component {
  constructor(props) {
   super(props);
   this.state = {
+    search_designer_word:"",
    shsareUrl: this.props.shareUrl,
    collection: this.props.collection,
    designers: [],
@@ -103,6 +104,10 @@ class ShareModal extends Component {
    });
  }
  render() {
+  let SHARE_URL= this.props.sharable==='folder'?  `http://www.arch17.com/${this.props.creator_name}/${this.state.collection?.name?.replaceAll(" ","")}/collections/${this.state.collection?.id}`:
+  `http://www.arch17.com/${this.props.creator_name}/${this.state.collection?.name?.replaceAll(" ","")}/sets/${this.state.collection?.id}`
+  
+
   return (
    <>
     <div id="user_shares">
@@ -117,15 +122,16 @@ class ShareModal extends Component {
       onChange={(e) => {
        console.log(e);
        this.setState({
-        filteredDesigners: this.state.designers?.filter((d) => {
+        search_designer_word:e.target.value,
+        filteredDesigners: e.target.value?.length>1 ? this.state.designers?.filter((d) => {
          return d.displayName
           .toLowerCase()
           ?.includes(e.target.value.toLowerCase());
-        }),
+        }):[],
        });
       }}
      />
-     {this.state.gettingdesigners ? (
+     {this.state.gettingdesigners  && this.state.search_designer_word >1 ? (
       <div className="py-5">
        <Spin
         size="large"
@@ -141,7 +147,7 @@ class ShareModal extends Component {
      ) : (
       <>
        <div className="d-share-rows">
-        {this.state?.filteredDesigners?.map((d, key) => {
+        {this.state.search_designer_word?.length>1 && this.state?.filteredDesigners?.map((d, key) => {
          if (!this.state.addedDesIDs?.includes(d.id)) {
           return (
            <Row span={24} key={key}>
@@ -174,69 +180,85 @@ class ShareModal extends Component {
 
     <div id="social_shares">
      <p className="mb-2 sharetype">Social</p>
+     <div className="share-grids">
      <div className="share-row mt-1">
-      <FacebookShareButton url={this.state.shareUrl} hashtag={"#Arch17"}>
+      <FacebookShareButton 
+      // url={this.state.shareUrl}
+      url={SHARE_URL}
+       hashtag={"#Arch17"}>
        <FacebookIcon size={35} />
-       Facebook
+       {/* Facebook */}
       </FacebookShareButton>
      </div>
      <div className="share-row">
-      <TwitterShareButton url={this.state.shareUrl} title="Share">
+      <TwitterShareButton
+      //  url={this.state.shareUrl}
+        title="Share"
+      url={SHARE_URL}
+      
+      >
        <TwitterIcon size={35} />
-       Twitter
+       {/* Twitter */}
       </TwitterShareButton>
      </div>
      <div className="share-row">
       <PinterestShareButton
-       url={this.state.shareUrl}
+      url={SHARE_URL}
+      //  url={this.state.shareUrl}
        title="Share"
        media="https://res.cloudinary.com/azharuniversity/image/upload/v1639859531/ewhbtrqgav8xxoobzbyo.jpg"
       >
        <PinterestIcon size={35} />
-       Pinterest
+       {/* Pinterest */}
       </PinterestShareButton>
      </div>
      <div className="share-row">
       <LinkedinShareButton url={this.state.shareUrl} title="Share">
        <LinkedinIcon size={35} />
-       Linkedin
+       {/* Linkedin */}
       </LinkedinShareButton>
      </div>
      <div className="share-row">
       <TumblrShareButton
-       url={this.state.shareUrl}
+      //  url={this.state.shareUrl}
+       url={SHARE_URL}
        title="Share"
        tags={["Arch17", "Arch155"]}
        caption="Arch17 Product Name with skneknekn"
       >
        <TumblrIcon size={35} />
-       Tumblr
+       {/* Tumblr */}
       </TumblrShareButton>
      </div>
      <div className="share-row">
       <EmailShareButton
-       url={this.state.shareUrl}
+      //  url={this.state.shareUrl}
+       url={SHARE_URL}
        title="Share"
        tags={["Arch17", "Arch155"]}
        caption="Arch17 Product Name with skneknekn"
       >
        <EmailIcon size={35} />
-       Email
+       {/* Email */}
+       {" "}
       </EmailShareButton>
      </div>
      <div className="share-row">
       <Input.Group compact>
-       <Input
+       {/* <Input
         style={{ width: "calc(100% - 50px)" }}
         disabled
-        defaultValue={`https://www.arch17test.live/projectcollections/${this.state.collection?.id}`}
-       />
+        defaultValue={SHARE_URL}
+        // defaultValue={`http://wwww.arch17.com/${this.props.displayName?.replaceAll(" ","")}/${this.state.collection?.name?.replaceAll(" ","")}/collections/${this.state.collection?.id}`}
+        // defaultValue={`https://www.arch17test.live/projectcollections/${this.state.collection?.id}`}
+       /> */}
        <Tooltip title={this.state.copied ? "Copied" : "Copy Link"}>
         <Button
          icon={
           <CopyOutlined
            onClick={() =>
-            this.handleCopy(this.state.shareUrl).then(() => {
+            // this.handleCopy(this.state.shareUrl).then(() => {
+              this.handleCopy(SHARE_URL).then(() => {
              this.setState({ copied: true });
              setTimeout(() => {
               this.setState({ copied: false });
@@ -249,6 +271,7 @@ class ShareModal extends Component {
        </Tooltip>
       </Input.Group>
      </div>
+     </div>
     </div>
    </>
   );
@@ -259,6 +282,7 @@ const mapStateToProps = (state) => {
   uid: state?.regularUser?.info?.uid,
   displayName: state?.regularUser?.info?.displayName,
   share_modal: state.addProduct.share_modal,
+  // creator_name:state.addProduct.creator_name
  };
 };
 export default connect(mapStateToProps, null)(ShareModal);

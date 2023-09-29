@@ -33,6 +33,7 @@ const initialState = {
   covers:JSON.parse(localStorage.getItem('covers'))??[],
     requesting:false,
     share_modal:false,
+    creator_name:"",
     searchTerm:null,
     prices:[],
     modal_codes:[],
@@ -147,12 +148,15 @@ export const AddProductReducer = (state= initialState, action)=>{
             case actions.OPEN_SHARE_COLLECTION_MODAL:
             return {
                 ...state,
-                share_modal:true
+                share_modal:true,
+                creator_name:action.payload
             }
               case actions.CLOSE_SHARE_COLLECTION_MODAL:
             return {
                 ...state,
-                share_modal:false
+                share_modal:false,
+                creator_name:""
+
             }
             
             case actions.SET_SEARCH_TERM:

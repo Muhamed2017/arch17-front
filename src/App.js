@@ -24,13 +24,14 @@ import Product from './pages/Product'
 import Project from './pages/Project'
 import TextEditor from './pages/TextEditor';
 import TestCrop from './pages/TestCrop';
+import TestUpload from './pages/TestUpload';
 import "react-notifications-component/dist/theme.css";
 import UserProfile from './pages/UserProfile';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer} from 'react-toastify'
 import Settings from './pages/user_profile_tabs/Settings';
 import { Home } from './pages/Home';
-
+import  Categories from './pages/Categories'
 import 'antd-country-phone-input/dist/index.css'
 
 import Search from './pages/Search';
@@ -42,12 +43,27 @@ import "semantic-ui-css/semantic.min.css";
 import EditProjectWrapper from './pages/addProject/EditProjectWrapper';
 import Magazine from './pages/Magazine';
 import AllBrands from './pages/AllBrands';
+import Designers from './pages/Designers';
 import CreateDesignerAccountHelp from './pages/static_pages/CreateDesignerAccountHelp'
 import DesignerProducts from './pages/DesignerProducts';
 import BoardProjects from './pages/BoardProjects';
 import Procurement from './pages/helpPages/Procurement';
+import AboutArch17 from './pages/helpPages/AboutArch17';
+import SellProducts from './pages/helpPages/SellProducts';
+import Arch17com from './pages/helpPages/Arch17com';
+import DesignerHelp from './pages/helpPages/DesignerHelp';
+import CompanyHelp from './pages/helpPages/CompanyHelp';
+
+import DesignSelected from './pages/helpPages/DesignSelected';
+
 import CreateDesigneCompanyWrapper from './Company/CreateDesigneCompanyWrapper';
 import Company from './Company/Company'
+import ClientList from './Company/ClientList'
+import SupplierList from './Company/SupplierList'
+import ProjectList from './Company/ProjectList'
+import ProjectListItem from './Company/ProjectListItem'
+import 'react-phone-input-2/lib/style.css'
+
 class App extends Component {
    constructor(props){
      super(props)
@@ -80,10 +96,20 @@ class App extends Component {
               <Route path='/project/:id' component={Project} exact/>
               <Route path='/design-selected' component={Magazine} exact/>
               <Route path='/brands' component={AllBrands} exact/>
+              <Route path='/designers' component={Designers} exact/>
+              <Route path='/categories' component={Categories} exact/>
 
 
               {/* static pages */}
               <Route path='/procurementservice' component={Procurement} exact/>
+              <Route path='/aboutarch17' component={AboutArch17} exact/>
+              <Route path='/sellproducts' component={SellProducts} exact/>
+              <Route path='/arch17com' component={Arch17com} exact/>
+              <Route path='/companyintro' component={CompanyHelp} exact/>
+              <Route path='/designerintro' component={DesignerHelp} exact/>
+              
+              <Route path='/designselected' component={DesignSelected} exact/>
+              
               <Route path='/designaccountintro' component={CreateDesignerAccountHelp} exact/>
 
 
@@ -126,8 +152,13 @@ class App extends Component {
              
               <Route path="/editor" exact><TextEditor />
               </Route>
-               
+              <Route path="/clientlist/:entity/:id" component={ClientList} exact  />
+              <Route path="/supplierlist/:entity/:id" component={SupplierList} exact  />
+              <Route path="/projectList/:entity/:id" component={ProjectList} exact  />
+              <Route path="/plistitem/:id" component={ProjectListItem} exact  />
               <Route path="/test" exact><TestCrop />
+              </Route>
+              <Route path="/htmltoimage" exact><TestUpload />
               </Route>
               <Route path='/' exact>
                 <Home/>
@@ -139,9 +170,14 @@ class App extends Component {
               <Route path='/collection/:id' component={Collection} exact />
               <Route path='/profile' component={UserProfile} exact />
               <Route path='/company/:id' component={Company} exact />
-              <Route path='/usercollection/:id' component={UserCollection} exact />
+              {/* <Route path='/usercollection/:id' component={UserCollection} exact /> */}
+              {/* <Route path='/projectcollection/:id' component={BoardProjects} exact /> */}
+
+              <Route path='/:username/:collectionname/collections/:id' component={UserCollection} exact />
+              <Route path='/:username/:collectionname/sets/:id' component={BoardProjects} exact />
+
               <Route path='/designerproducts/:id' component={DesignerProducts} exact />
-              <Route path='/projectcollection/:id' component={BoardProjects} exact />
+              <Route path='/companyproducts/:id' component={DesignerProducts} exact />
               <Route path='/types/:store_id/:type_name' component={Type} exact />
                <Route path='/product/edit/122' exact>
                 <TableStep/>

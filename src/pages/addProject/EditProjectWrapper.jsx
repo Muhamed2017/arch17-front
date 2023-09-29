@@ -40,6 +40,21 @@ class EditProjectWrapper extends Component {
    type: PREV_STEP,
   });
  };
+ handleSearchDesignesAndCompanies = (keyword) => {
+  this.setState({
+   search_designer_company: keyword,
+  });
+  if (keyword?.length < 2) {
+   return;
+  } else {
+   axios.get(`${API}designers/${keyword}`).then((response) => {
+    this.setState({
+     companies: response.data.companies.data,
+     designers: response.data.designers.data,
+    });
+   });
+  }
+ };
 
  //  gotoStep = (step) => {};
  componentDidMount() {
@@ -64,6 +79,8 @@ class EditProjectWrapper extends Component {
        type,
        category: response.data.project.kind,
        blogType: response.data.project.article_type,
+       product_design_category: response.data.project.product_design_category,
+       product_design_kind: response.data.project.product_design_kind,
       },
       content: response.data.project?.content,
       role_brands: response.data.brands,
@@ -209,23 +226,11 @@ class EditProjectWrapper extends Component {
        </div>
       </Col>
 
-      {/* <Col md={24}>
+      <Col md={24}>
        <div className="steps-content custom-content wrapper-inner">
         {steps[current].content}
-
-        <div className="steps-action">
-         {current > 0 && (
-          <button
-           className="prev-btn"
-           style={{ margin: "0 0px", position: "relative" }}
-           onClick={() => this.prev()}
-          >
-           Previous
-          </button>
-         )}
-        </div>
        </div>
-      </Col> */}
+      </Col>
      </Row>
     </div>
    </>

@@ -14,7 +14,8 @@ import {
   NEXT_STEP,
   PREV_STEP,
   GO_TO_PROJECT_STEP,
-  SET_PROJECT_PARAMS
+  SET_PROJECT_PARAMS,
+  SET_PROJECT_TYPE_SEARCH,
 } from "../../constants.js";
 const defaultState ={
    params:null,
@@ -28,7 +29,8 @@ const defaultState ={
    project_tags:[],
    project_covers:[],
    cycle_type:"ADD",
-   step:0
+   step:0,
+   magazine_type:""
     
 }
 export default function projectReducer(state = defaultState, action) {
@@ -53,6 +55,12 @@ export default function projectReducer(state = defaultState, action) {
       return {
         ...state, 
         params:action.payload
+      };
+
+      case SET_PROJECT_TYPE_SEARCH:
+      return {
+        ...state, 
+        magazine_type:action.payload
       };
 
     case ADD_PROJECT_INFO:

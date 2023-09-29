@@ -1,0 +1,152 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+
+*{
+    font-family: 'Roboto' !important;
+}
+.help-outer{
+    background-color: #fff;
+}
+.help-wrapper{
+    max-width: 1260px;
+    margin: auto;
+}
+.help-wrapper .head-section{
+  
+    padding-top: 50px;
+    margin-bottom: 100px;
+}
+.help-wrapper .head-section h3, .help-wrapper .head-section p, .help-wrapper .head-section a{
+    max-width: 600px;
+    text-align: center;
+    margin: auto;
+    display: block;
+}
+.help-wrapper .head-section h3{
+    font-size: 50px;
+    color: black;
+    font-weight: 500;
+
+}
+.help-wrapper .head-section p{
+    font-size: 20px;
+    font-weight: 300;
+}
+.help-wrapper .head-section a{
+    color: black;
+    text-decoration:underline !important;
+    font-size: 15px;
+    font-weight: 500;
+}
+.help-wrapper .head-image{
+    max-width: 800px;
+    height: auto;
+    margin: auto;
+}
+
+.help-alternate {
+    max-width: 1050px;
+    margin: auto;
+}
+
+.help-wrapper .help-alternate .alter-row{
+    display: grid;
+    grid-template-columns:1.15fr 1.30fr  ;
+    grid-column-gap: 170px;
+    justify-content: space-between;
+    justify-items: space-between;
+}
+.help-wrapper .help-alternate .img-right.alter-row{
+    grid-template-columns:1.15fr 1.30fr  ;
+
+}
+.help-wrapper .help-alternate .alter-row .side-img{
+    display:  block;
+    width: 100%;
+}
+.alter-row > .side-img{
+    grid-column: 1 / 2;
+    grid-row: 1/5;
+
+}
+.alter-row h6{
+    grid-column: 2 / 3;
+    grid-row: 2/3;;
+    font-size: 35px;
+    color: black;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+.alter-row p{
+    grid-column: 2/3;
+    grid-row: 3/4;
+    font-weight: 300;
+    color: #000;
+    font-size: 18px;
+}
+.alter-row.img-right > .side-img{
+    grid-column: 2 / 3;
+
+}
+.alter-row.img-right h6{
+    grid-column: 1 / 2;
+}
+.alter-row.img-right p{
+    grid-column: 1/2;
+
+}
+.help-tail{
+    font-family: "helvetica neue" !important;
+    font-weight: 400;
+    font-size: 14px;
+    color: #707070;
+    display: block;
+    margin: 7px auto 100px !important;
+
+}
+
+@media screen and (max-width:768px) {
+    .help-wrapper {
+        padding: 15px;
+    }
+    .help-wrapper .head-section{
+        padding-top: 20px;
+    }
+    .help-wrapper .head-section h3{
+        font-size: 31.5px;
+        margin-bottom: 10px;
+    
+    }
+    .help-wrapper .head-section p, .help-wrapper .head-section a {
+        font-size: 18px;
+        margin-bottom: 12px;
+    
+    }
+    .help-wrapper .help-alternate .alter-row {
+        grid-template-columns: 1fr ;
+    }
+    .help-wrapper .help-alternate .img-right.alter-row{
+        grid-template-columns: 1fr ;
+        
+    }
+    .alter-row .side-img , .alter-row p, .alter-row h6{
+        grid-column: unset !important;
+        grid-row: unset !important;
+    }
+    .alter-row h6{
+        order: 1;
+        font-size: 28px;
+
+    }
+    .alter-row .side-img {
+        order: 2;
+        margin: 10px auto 15px;
+
+    }
+    .alter-row p{
+        order: 3;
+        font-size: 17px;
+        margin-bottom: 80px;
+    }
+
+}

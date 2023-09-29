@@ -2,7 +2,7 @@ import { Component } from "react";
 import { Form, Col, Row } from "react-bootstrap";
 import ReactSelect from "react-select";
 import ReactFlagsSelect from "react-flags-select";
-import { Row as AntRow, Col as AntCol, Checkbox, Select, Input } from "antd";
+import { Row as AntRow, Col as AntCol, Checkbox, Input } from "antd";
 import * as productClass from "./../addProduct/ProductClassifications";
 import ClipLoader from "react-spinners/ClipLoader";
 import * as cnst from "./../addProduct/Identity";
@@ -18,7 +18,7 @@ import { collectionSelectStyles } from "./../addProduct/Identity";
 import axios from "axios";
 import { API } from "./../../utitlties";
 import { customLabels } from "../CreateBrandFinish";
-const { Option } = Select;
+// const { Option } = Select;
 
 class IdentityStep extends Component {
  constructor(props) {
@@ -35,7 +35,7 @@ class IdentityStep extends Component {
    collectionValue: "",
    style: [],
    furniture: {},
-   selected_collections: [],
+   selected_collections: this.props?.selected_collections ?? [],
    seats_label: [],
    seats: [],
    bases: ["4-base"],
@@ -461,36 +461,9 @@ class IdentityStep extends Component {
   });
   console.log(this.state);
  };
- onDesignersChange = (value) => {
-  console.log(`selected ${value}`);
-  this.setState({
-   selected_designers: value,
-  });
- };
 
- handleAddDesigner = (e) => {
-  console.log(e);
-  // const fd = new FormData();
-  // fd.append("product_id", this.state.product_id);
-  // fd.append("user_id", e);
-  // axios.post(`${API}adddesignerproduct`, fd).then((res) => {
-  //  console.log(res);
-  // });
- };
  componentDidMount() {
   console.log(this.props.selected_col);
-
-  // axios.get(`${API}designers`).then((res) => {
-  //  const des = res.data.designers;
-  //  console.log(res.data.designers);
-  //  this.setState({
-  //   designers: Object.values(des),
-  //   companies: res.data.companies,
-  //   // selected_designers: des.map((d) => {
-  //   //  return d.id;
-  //   // }),
-  //  });
-  // });
   console.log(this.state.for_kids);
   console.log(this.state.is_for_kids);
   this.props?.pidentity?.places_tags?.map((m) => {
@@ -1314,8 +1287,9 @@ class IdentityStep extends Component {
          backspaceRemovesValue={false}
          closeMenuOnSelect={true}
          onChange={this.onChangeCollections}
-         defaultValue={this.state.collection_ids}
-         selected={this.state.selected_collections}
+         //  defaultValue={this.state.collection_ids}
+         defaultValue={this.state.selected_collections}
+         //  selected={this.state.selected_collections}
          styles={collectionSelectStyles}
          createOptionPosition={"first"}
          //  onCreateOption={(e) => {
@@ -1524,7 +1498,6 @@ const mapDispatchToProps = (dispatch) => ({
   colorTempratures,
   bulbTypes,
   applied_on,
-
   places_tags,
   is_outdoor,
   is_for_kids,

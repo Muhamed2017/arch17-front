@@ -1,6 +1,7 @@
 import React, { Component, createRef } from "react";
-import { Container, Col, Row, Button, Form } from "react-bootstrap";
+import { Container, Col, Row, Button } from "react-bootstrap";
 import "photoswipe/dist/photoswipe.css";
+import { Sticky } from "semantic-ui-react";
 import "photoswipe/dist/default-skin/default-skin.css";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
@@ -10,7 +11,6 @@ import ReactPlayer from "react-player";
 import { Helmet } from "react-helmet";
 import ClipLoader from "react-spinners/ClipLoader";
 import { IoWarning } from "react-icons/io5";
-
 import { regionNames } from "./../redux/constants";
 import {
  Row as AntRow,
@@ -29,7 +29,6 @@ import pptxgen from "pptxgenjs";
 import { FaFilePdf } from "react-icons/fa";
 import { RiFilePpt2Fill } from "react-icons/ri";
 import { GrOnedrive } from "react-icons/gr";
-
 import {
  FacebookShareButton,
  LinkedinShareButton,
@@ -46,7 +45,7 @@ import {
 } from "react-share";
 
 import { SiGoogledrive, SiBaidu } from "react-icons/si";
-import { AiOutlineDropbox } from "react-icons/ai";
+import { AiOutlineDropbox, AiFillCloud } from "react-icons/ai";
 import Modal from "react-bootstrap/Modal";
 import { FiPhoneCall } from "react-icons/fi";
 import { GoMail } from "react-icons/go";
@@ -74,12 +73,10 @@ import "yet-another-react-lightbox/dist/plugins/thumbnails/thumbnails.css";
 import axios from "axios";
 import { GiCube } from "react-icons/gi";
 import { convertFromRaw } from "draft-js";
-// import { Editor } from "react-draft-wysiwyg";
 import Footer from "../components/Footer";
 import HashLoader from "react-spinners/HashLoader";
 import "photoswipe/dist/photoswipe.css";
 import "photoswipe/dist/default-skin/default-skin.css";
-import { Gallery, Item as SwipItem } from "react-photoswipe-gallery";
 import ImageGallery from "react-image-gallery";
 import "antd/dist/antd.css";
 import "react-image-gallery/styles/css/image-gallery.css";
@@ -177,25 +174,6 @@ class Product extends Component {
     });
    };
   });
- };
- // async function getUrFromService(): Promise<string> {
- //   await new Promise((resolve) => setTimeout(resolve, 1000));
- //   return "https://via.placeholder.com/150";
- // }
-
- //  getUrlForShare = async () => {
- //   await Promise.resolve("https://via.placeholder.com/150");
- //  };
-
- //  myPromise = new Promise((resolve, reject) => {
- //   return setTimeout(() => {
- //    resolve("https://via.placeholder.com/150");
- //   }, 300);
- //  });
-
- getUrFromService = async () => {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  return "https://via.placeholder.com/150";
  };
 
  loadImage = (imageUrl) => {
@@ -648,22 +626,44 @@ class Product extends Component {
      loading: false,
      product: products.data.product,
      galleries: products.data.product.gallery?.filter((g) => {
-      return g.desc_gallery_files !== null;
+      return g?.desc_gallery_files !== null ;
      }),
-     gallery_slides: products.data.product.gallery?.map((g) => {
-      if (
-       g?.desc_gallery_files &&
-       g?.desc_gallery_files[0] &&
-       g.desc_gallery_files[0] !== "null"
-      ) {
-       return { src: g?.desc_gallery_files[0], alt: "" };
-      }
+    //  gallery_slides: products.data.product?.gallery?.map((g) => {
+    //   if (
+    //    g?.desc_gallery_files &&
+    //    g?.desc_gallery_files[0] &&
+    //    g?.desc_gallery_files[0] !== "null"
+    //   ) {
+    //    return { src: g?.desc_gallery_files[0]};
+     
+    //   }
+    //  }),
+     gallery_slides: products.data.product?.gallery?.filter((g) => {
+       return  g?.desc_gallery_files && g?.desc_gallery_files?.length>0
      }),
      srcsss: products.data.product.gallery?.map((g) => {
       if (g.desc_gallery_files) {
        return g?.desc_gallery_files[0];
       }
      }),
+    },()=>{
+      console.log(this.state.gallery_slides)
+      let srr=[]
+      this.setState({
+        gallery_slides:this.state.gallery_slides?.map((d)=>{
+      
+          d?.desc_gallery_files?.forEach((ss,index)=>{
+          srr.push({src:ss
+            //  ,description: `${index} / ${srr.length}`
+          }
+             )
+          })
+        })
+      },()=>{
+        this.setState({
+          gallery_slides:srr
+        })
+      })
     });
     this.setState({ options: products.data.product.options });
     this.setState({
@@ -673,11 +673,7 @@ class Product extends Component {
      pdf_files: products.data.product.files.filter((f) => {
       return f.file_type === "PDF";
      }),
-     //  videos: products.data.product?.gallery[0]?.desc_gallery_files?.filter(
-     //   (g) => {
-     //    return !g.includes("cloudinary");
-     //   }
-     //  ),
+    
      videos: products.data.product?.vidoes,
     });
     this.setState({ collections: products.data.collections });
@@ -859,6 +855,9 @@ class Product extends Component {
              <ImageGallery
               showBullets={true}
               full
+              // onScreenChange={(e)=>{console.log("OnScreenChange")}}
+              // onSlide={(e)=>{console.log(`On Slide ${e}`)}}
+              onSlide={(slide)=>{this.gotoStep(slide)}}
               ref={this.sliderRef}
               thumbnailPosition="bottom"
               showThumbnails={false}
@@ -1354,13 +1353,15 @@ class Product extends Component {
              0 && (
              <>
               <div className="design-by px-2">
-               Design By.
+               {/* Design By. */}
+               <span className="my-2 block">Design By.</span>
+
                <>
                 {this.state.product.designers?.map((d, index) => {
                  return (
-                  <AntRow span={24} gutter={10} className="my-3">
+                  <AntRow span={24} gutter={10} className="my-1">
                    <AntCol
-                    md={12}
+                    md={24}
                     className="mb-0"
                     sm={24}
                     xs={24}
@@ -1784,12 +1785,12 @@ class Product extends Component {
 
            {this.state.product?.designers?.length > 0 && (
             <>
-             Design By.
+             <span className="my-2 block">Design By.</span>
              <div className="design-by ml-2">
               <>
                {this.state.product.designers?.map((d, index) => {
                 return (
-                 <AntRow span={24} gutter={10} className="my-3">
+                 <AntRow span={24} gutter={10} className="my-1">
                   <AntCol
                    md={24}
                    className="mb-0"
@@ -1807,12 +1808,14 @@ class Product extends Component {
              </div>
             </>
            )}
-           <button
-            onClick={() => this.saveToCollection()}
-            className="sv-mobile"
-           >
-            +
-           </button>
+           <Sticky offset={145} bottomOffset={0}>
+            <button
+             onClick={() => this.saveToCollection()}
+             className="sv-mobile"
+            >
+             +
+            </button>
+           </Sticky>
            <div
             className="product-country"
             onClick={() => {
@@ -2351,15 +2354,6 @@ class Product extends Component {
         </Row>
        </div>
       </Container>
-
-      <FacebookShareButton
-       url={`https://www.arch17.com/product/${571}`}
-       quote={"SEMATRIC"}
-       hashtag="#Furniture"
-       description={"aiueo"}
-      >
-       <FacebookIcon size={25} />
-      </FacebookShareButton>
      </div>
      <Lightbox
       animation={{
@@ -2370,10 +2364,19 @@ class Product extends Component {
       index={this.state.galleryIndex}
       close={() => this.setState({ advancedExampleOpen: false })}
       slides={this.state.gallery_slides}
+      render={{
+        thumbnail:(()=>{
+          return ""
+        })
+    }}
       plugins={[Captions, Fullscreen, Slideshow, Thumbnails, Video, Zoom]}
+      thumbnails={{vignette:false,
+      width:50,
+    
+      }}
      />
 
-     <Footer />
+     <Footer lightgray={false} />
 
      {/* signup/signin modal */}
      <>
@@ -2690,7 +2693,7 @@ class Product extends Component {
       <AntModal
        title={this.state.request_modal_type}
        width={650}
-       className="request-modal"
+       className="request-modal mobile-request-modal"
        visible={this.props.requesting}
        destroyOnClose
        footer={false}
@@ -2757,7 +2760,11 @@ class Product extends Component {
       >
        <Modal.Body>
         <div className="modal-wrapper" style={{ padding: "10px", margin: "" }}>
-         {this.state.activeFile?.onedrive && (
+         {(this.state.activeFile?.onedrive ||
+          this.state.activeFile?.ggldrive ||
+          this.state.activeFile?.pcloud ||
+          this.state.activeFile?.dropbox ||
+          this.state.activeFile?.baidu) && (
           <>
            <AntRow gutter={16} className="mb-3">
             <AntCol>
@@ -2857,6 +2864,27 @@ class Product extends Component {
                  size="large"
                 >
                  Baidu
+                </AntButton>
+               </a>
+              </AntCol>
+             )}
+            {this.state.activeFile?.pcloud &&
+             this.state.activeFile?.pcloud?.length > 7 && (
+              <AntCol className="gutter-row mb-3" span={12}>
+               <a
+                href={this.state.activeFile?.pcloud}
+                target="_blank"
+                rel="noreferrer"
+                className="drivebtn"
+               >
+                <AntButton
+                 type="primary"
+                 className="drivebtn"
+                 icon={<AiFillCloud />}
+                 style={{ width: "100%" }}
+                 size="large"
+                >
+                 Pcloud
                 </AntButton>
                </a>
               </AntCol>

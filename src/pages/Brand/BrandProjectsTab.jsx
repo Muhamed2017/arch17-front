@@ -1,78 +1,88 @@
 import React, { Component } from "react";
 import { Col, Modal } from "antd";
 import SaveToBoard from "./../../components/Modals/SaveToBoard";
-
+import axios from "axios";
+import { API } from "../../utitlties";
 class BrandProjectsTab extends Component {
  state = {
   save_to_board_modal: false,
+  projects: this.props.projects,
  };
 
+ handleDeleteProject = (p) => {
+  axios
+   .post(`${API}deleteproject/${p.id}`)
+   .then((response) => {
+    console.log(response);
+    this.setState({
+     projects: this.state.projects?.filter((pr) => {
+      return pr.id !== p.id;
+     }),
+    });
+   })
+   .catch((err) => {
+    console.log(err);
+   });
+ };
+ saveToBoard = () => {
+  if (!this.props.isLoggedIn) {
+   this.setState({ authModal: true });
+  } else {
+   this.setState({
+    save_to_board_modal: true,
+   });
+  }
+ };
  render() {
   return (
    <>
-    {this.props.projects?.map((p, index) => {
+    {this.state.projects?.map((p, index) => {
      return (
-      //   <Col xs={12} sm={12} md={8} className="mb-4" key={index}>
-      //    <a href={`/project/${p.id}`} className="box-link">
-      //     <div className="project-col bg-white">
-      //      {this.props.isOwner && (
-      //       <>
-      //        <a
-      //         href={`/editproject/${p.id}`}
-      //         className="box-link project-edit-btn project-btn"
-      //        >
-      //         Edit
-      //        </a>
-      //        <button
-      //         className="project-btn project-delete-btn"
-      //         onClick={(e) => {
-      //          e.preventDefault();
-      //         }}
-      //        >
-      //         Delete
-      //        </button>
-      //       </>
-      //      )}
-      //      <div
-      //       className="project-image"
-      //       style={{
-      //        backgroundImage: `url(${p.cover})`,
-      //       }}
-      //      ></div>
-      //      <div className="info p-3">
-      //       <p className="project-name">{p.name}</p>
-
-      //       <div className="project-cover-footer">
-      //        <p className="m-0">{p.kind}</p>
-      //        <hr className="my-1 w-20" />
-      //        <p className="m-0">{p.type}</p>
-      //       </div>
-      //      </div>
-      //     </div>
-      //    </a>
-      //   </Col>
-
       <Col xs={12} sm={12} md={8} className="mb-4" key={index}>
        <a href={`/project/${p.id}`} className="box-link">
         <div className="project-col bg-white">
-         <button
-          className="project-btn svbtn svprojectbtn"
-          onClick={(e) => {
-           e.preventDefault();
-           this.setState(
-            {
-             to_save_project_cover: p.cover,
-             to_save_projectId: p,
-            },
-            () => {
-             this.saveToBoard();
-            }
-           );
-          }}
-         >
-          <span className="wide-view">SAVE</span>
-          <span className="mobile-view mt-0">+</span>
-         </button>
+         {this.props.isOwner && this.props.isLoggedIn ? (
+          <>
+           <a
+            href={`/editproject/${p.id}`}
+            className="box-link project-edit-btn project-btn"
+            style={{
+             right: "65px",
+             fontSize: "10px",
+            }}
+           >
+            Edit
+           </a>
+           <button
+            className="project-btn delbtn svbtn svprojectbtn"
+            onClick={(e) => {
+             e.preventDefault();
+             this.handleDeleteProject(p);
+            }}
+           >
+            Delete
+           </button>
+          </>
+         ) : (
+          <button
+           className="project-btn svbtn svprojectbtn"
+           onClick={(e) => {
+            e.preventDefault();
+            this.setState(
+             {
+              to_save_project_cover: p.cover,
+              to_save_projectId: p,
+             },
+             () => {
+              this.saveToBoard();
+             }
+            );
+           }}
+          >
+           <span className="wide-view">SAVE</span>
+           <span className="mobile-view mt-0">+</span>
+          </button>
+         )}
          <div className="project-image-wrapper">
           <div
            className="project-image"

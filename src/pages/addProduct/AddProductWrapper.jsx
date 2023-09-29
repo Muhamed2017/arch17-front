@@ -14,7 +14,7 @@ import { useParams } from "react-router-dom";
 // import ReactNotification from "react-notifications-component";
 import "react-notifications-component/dist/theme.css";
 import Preview from "./Preview";
-import TableStep from "../TableStep";
+// import TableStep from "../TableStep";
 import OptionsStep from "../addProduct/OptionsStep";
 import axios from "axios";
 import { API } from "./../../utitlties";

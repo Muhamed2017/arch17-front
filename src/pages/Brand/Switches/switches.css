@@ -1,0 +1,186 @@
+
+.switch-group-modal .ant-form-horizontal .ant-form-item-label{
+    text-align: left;
+    font-weight: 600;
+}
+
+.switch-group-modal .ant-form-item{
+    margin-bottom: 14px !important;
+}
+
+.add-switch-btn{
+    width: 100%;
+    padding-top: 100%;
+    background-color: #555;
+    color: #fff;
+    position: relative;
+}
+.add-switch-btn-plus{
+    width: 100%;
+    padding-top: 100%;
+    background-color: #a3a3a35c;
+    color: #fff;
+    position: relative;
+    margin: auto;
+    text-align: center;
+    border-radius: 50%;
+    border:2px solid #00000021;
+    
+
+    cursor: pointer;
+}
+
+.add-switch-btn > span, .add-switch-btn-plus > span{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+}
+.add-switch-btn-plus > span{
+    font-size: 6.5rem;
+}
+.upload-switch-photo{
+    text-align: center;
+    color: #000;
+    font-weight: 600;
+    font-size: 16px;
+}
+.switch-add-btn{
+    margin-right: auto;
+    text-align: right;
+    padding: 7px 10px;
+    background: red;
+    color: #fff;
+    display: block;
+    border-radius: 5px;
+}
+.add-switch-btn > input, .add-switch-btn-plus > input{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    opacity: 0;
+    z-index: 5;
+}
+.colors {
+    color : #6e6d6d;
+    font-size: 12px;
+}
+.sw-img{
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    width: 100%;
+    padding-top: 100%;   
+    border-radius:50%;
+}
+.switch-header p:first-child{
+font-size: 16px;
+text-align: left;
+}
+.switch-header p:last-child{
+    font-size: 12px;
+    text-align: left;
+
+}
+.mtrl{
+    color: #a5a5a5;
+}
+.tail{
+    color: #c4c4c4;
+    text-decoration: underline;
+    margin: 5px;
+    cursor: pointer;
+}
+/* #brand-swithes-tab .ant-collapse-content>.ant-collapse-content-box { */
+/* padding-top: 18px; */
+/* } */
+
+#brand-swithes-tab .ant-collapse-icon-position-right>.ant-collapse-item>.ant-collapse-header {
+    background: #f2f2f2 !important
+}
+#brand-swithes-tab .ant-collapse>.ant-collapse-item>.ant-collapse-header .ant-collapse-arrow{
+    font-size: 30px !important;
+}
+ #brand-swithes-tab .ant-collapse-icon-position-right>.ant-collapse-item>.ant-collapse-header{
+padding: 22px 16px !important;
+}
+.add-group-btn, .download-btn{
+    color: #fff;
+    padding: 3px 10px;
+    font-size: 14px;
+    margin: 20px 7px 15px 0px;
+    border-radius: 4px
+}
+.add-group-btn{
+    background: red;
+}
+.download-btn{
+    background-color: #555;
+    
+}
+.sw-color, .sw-code{
+text-align: center;
+}
+.sw-color{
+    color: #a9a9a9;
+    color: #a9a9a9;
+    font-size: 14px;
+}
+.sw-code{
+    font-weight: 600;
+}
+.delete-btn{
+    color: red;
+    font-weight: 500;
+    text-decoration: underline;
+    text-align: right;
+    width: 100%;
+    display: block;
+    cursor: pointer;
+}
+.switch-group-modal .ant-modal-header{
+    padding: 15px 3px 4px 28px;
+}
+
+.sw-btns{
+    position: absolute;
+    bottom: -15px;
+    right: 0px;
+    left: 0;
+    display: none;
+    grid-template-columns: 20px 20px;
+    grid-gap: 5px;
+    max-width: auto;
+    justify-content: center;
+}
+.sw-col:hover .sw-btns {
+    display: grid;
+}
+.sw-btns button{
+    background-color: #555;
+    color: #fff;
+}
+.pdf-link{
+    display: block;
+    width: 100%;
+    padding: 5px;
+    background-color: #666;
+    color: #fff !important;
+    font-size: 16px;
+    font-weight: 600;
+}
+.pdf-link:hover{
+    color: #fff !important;
+}
+.pdf-link svg{
+    margin-right: 8px;
+    vertical-align: middle;
+}
+@media screen and (max-width:768px) {
+    #brand-swithes-tab .ant-collapse-content>.ant-collapse-content-box{
+        padding: 0;
+    }
+}

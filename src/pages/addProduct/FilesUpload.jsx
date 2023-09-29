@@ -15,7 +15,7 @@ import { API } from "./../../utitlties";
 import { SiGoogledrive, SiBaidu } from "react-icons/si";
 import { HiFolderDownload } from "react-icons/hi";
 import { GrOnedrive } from "react-icons/gr";
-import { AiOutlineDropbox } from "react-icons/ai";
+import { AiOutlineDropbox, AiFillCloud } from "react-icons/ai";
 import { Select, Space, Typography, Divider } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 
@@ -37,13 +37,12 @@ class FilesUpload extends Component {
    edit_file_modal: false,
    pdfModal: false,
    file_name: null,
-   //  file_type: null,
    file_type: [],
    file_software: [],
-   //  file_software: null,
    ggldrive: "",
    onedrive: "",
    drpbox: "",
+   pcloud: "",
    baidu: "",
    file_links: [],
    file_adding: false,
@@ -94,6 +93,7 @@ class FilesUpload extends Component {
   this.setState(
    {
     ggldrive: "",
+    pcloud: "",
     onedrive: "",
     baidu: "",
     drpbox: "",
@@ -114,6 +114,7 @@ class FilesUpload extends Component {
    fd.append("file_type", "PDF");
    fd.append("software", "PDF VIEWR");
    fd.append("ggldrive", this.state.ggldrive);
+   fd.append("pcloud", this.state.pcloud);
    fd.append("dropbox", this.state.drpbox);
    fd.append("onedrive", this.state.onedrive);
    fd.append("baidu", this.state.baidu);
@@ -125,6 +126,7 @@ class FilesUpload extends Component {
        pdf_files: [...this.state.pdf_files, response.data.file],
        ggldrive: "",
        drpbox: "",
+       pcloud: "",
        baidu: "",
        onedrive: "",
       },
@@ -145,6 +147,7 @@ class FilesUpload extends Component {
    fd.append("file_type", this.state.file_type);
    fd.append("software", this.state.file_software);
    fd.append("ggldrive", this.state.ggldrive);
+   fd.append("pcloud", this.state.pcloud);
    fd.append("dropbox", this.state.drpbox);
    fd.append("onedrive", this.state.onedrive);
    fd.append("baidu", this.state.baidu);
@@ -157,6 +160,7 @@ class FilesUpload extends Component {
       {
        files: [...this.state.files, response.data.file],
        ggldrive: "",
+       pcloud: "",
        drpbox: "",
        baidu: "",
        onedrive: "",
@@ -297,6 +301,7 @@ class FilesUpload extends Component {
                 file_software: file?.software,
                 onedrive: file?.onedrive,
                 ggldrive: file?.ggldrive,
+                pcloud: file?.pcloud,
                 drpbox: file?.dropbox,
                 baidu: file?.baidu,
                },
@@ -342,6 +347,7 @@ class FilesUpload extends Component {
             {
              ggldrive: "",
              onedrive: "",
+             pcloud: "",
              baidu: "",
              drpbox: "",
             },
@@ -382,6 +388,8 @@ class FilesUpload extends Component {
                 file_software: file?.software,
                 onedrive: file?.onedrive,
                 ggldrive: file?.ggldrive,
+                pcloud: file?.pcloud,
+
                 drpbox: file?.dropbox,
                 baidu: file?.baidu,
                },
@@ -517,6 +525,27 @@ class FilesUpload extends Component {
         </p>
 
         <Row gutter={16} className="mb-3 mt-3">
+         <Col className="gutter-row" span={7}>
+          <AntButton
+           type="primary"
+           style={{ width: "100%" }}
+           icon={<AiFillCloud />}
+           size="large"
+           className="drivebtn"
+          >
+           Pcloud
+          </AntButton>
+         </Col>
+         <Col className="gutter-row" span={17} style={{ background: "" }}>
+          <Input
+           placeholder=""
+           size="large"
+           value={this.state.pcloud}
+           onChange={(e) => this.setState({ pcloud: e.target.value })}
+          />
+         </Col>
+        </Row>
+        <Row gutter={16} className="mb-3">
          <Col className="gutter-row" span={7}>
           <AntButton
            type="primary"
@@ -737,10 +766,7 @@ class FilesUpload extends Component {
            placeholder="File Type"
            style={{ width: "100%" }}
            onChange={(e) => console.log(e)}
-           //  onChange={(e) => this.setState({ file_type: e })}
-           //  onSelect={(e) => this.setState({ file_type: e })}
            defaultValue={this.state.file_type}
-           //  optionLabelProp="label"
           >
            <Option value="2D" label="2D">
             2D
@@ -779,6 +805,27 @@ class FilesUpload extends Component {
          <Col className="gutter-row" span={7}>
           <AntButton
            type="primary"
+           style={{ width: "100%" }}
+           icon={<AiFillCloud />}
+           size="large"
+           className="drivebtn"
+          >
+           Pcloud
+          </AntButton>
+         </Col>
+         <Col className="gutter-row" span={17} style={{ background: "" }}>
+          <Input
+           placeholder=""
+           size="large"
+           value={this.state.pcloud}
+           onChange={(e) => this.setState({ pcloud: e.target.value })}
+          />
+         </Col>
+        </Row>
+        <Row gutter={16} className="mb-3 ">
+         <Col className="gutter-row" span={7}>
+          <AntButton
+           type="primary"
            className="drivebtn"
            icon={<GrOnedrive />}
            style={{ width: "100%" }}
@@ -796,7 +843,6 @@ class FilesUpload extends Component {
           />
          </Col>
         </Row>
-
         <Row gutter={16} className="mb-3">
          <Col className="gutter-row" span={7}>
           <AntButton
@@ -952,6 +998,27 @@ class FilesUpload extends Component {
          Add File Download Link
         </p>
 
+        <Row gutter={16} className="mb-3 mt-3">
+         <Col className="gutter-row" span={7}>
+          <AntButton
+           type="primary"
+           style={{ width: "100%" }}
+           icon={<AiFillCloud />}
+           size="large"
+           className="drivebtn"
+          >
+           Pcloud
+          </AntButton>
+         </Col>
+         <Col className="gutter-row" span={17} style={{ background: "" }}>
+          <Input
+           placeholder=""
+           size="large"
+           value={this.state.pcloud}
+           onChange={(e) => this.setState({ pcloud: e.target.value })}
+          />
+         </Col>
+        </Row>
         <Row gutter={16} className="mb-3 mt-3">
          <Col className="gutter-row" span={7}>
           <AntButton

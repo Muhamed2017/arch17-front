@@ -26,8 +26,8 @@ justify-content: center;
     background-repeat: no-repeat;
 }
 .company-box{
-    width: 160px !important;
-    height: 160px !important;
+    width: 145px !important;
+    height: 145px !important;
 }
 .company-page .profile-img{
     background-color: rgb(221 221 221 / 62%);
@@ -49,6 +49,7 @@ justify-content: center;
     justify-content: center;
     align-items: center;
     font-weight: 400;
+    border: 1px solid #b8b8b8;
 }
 .member-box.add{
     font-size: 5rem;
@@ -102,7 +103,16 @@ font-size: 31px;
     font-weight: 500;
     text-transform: capitalize;
 }
-
+.head-name-actions{
+    display: grid;
+    grid-template-columns: auto 80px;
+    justify-content: stretch;
+}
+.head-name-actions .actns{
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-gap: 2px;
+}
 .invite-btn, .invite-btn:hover{
     background-color:red;
     border: none;
@@ -227,6 +237,13 @@ padding: 4px;
     font-weight: 500;
     color: #000000b3;
     vertical-align: middle;
+    }
+    
+.ctype .shr{
+    font-size: 12px;
+    padding: 10px;
+    vertical-align: initial;
+    cursor: pointer;
     }
 
     .loc{

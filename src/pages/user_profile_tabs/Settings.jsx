@@ -17,7 +17,7 @@ import { Link } from "react-router-dom";
 import { Redirect } from "react-router";
 import { logginOut } from "./../../redux/actions/authActions";
 import { API } from "./../../utitlties";
-import { Spin, Select, Row as AntRow, Col as AntCol } from "antd";
+import { Spin, Select, Row as AntRow, Col as AntCol, Input } from "antd";
 import ReactFlagsSelect from "react-flags-select";
 import CountryPhoneInput, { ConfigProvider } from "antd-country-phone-input";
 
@@ -28,6 +28,7 @@ import {
  updateInfo,
  presistInfo,
 } from "../../redux/actions/authActions";
+const { TextArea } = Input;
 const Proffessions = [
  "Engineer",
  "Designer",
@@ -44,6 +45,7 @@ class Settings extends Component {
    lname: "",
    //  email: "",
    phone: "",
+   bio: this.props.location.state?.user?.user_description ?? "",
    password: "",
    new_password: "",
    deletePassword: "",
@@ -213,6 +215,9 @@ class Settings extends Component {
   this.setState({ prfl_loading: true });
   const fd = new FormData();
   fd.append("displayName", `${this.state.fname} ${this.state.lname}`);
+  if (this.state.bio?.length > 4) {
+   fd.append("user_description", this.state.bio);
+  }
   fd.append("email", this.state.email);
   if (this.state.city?.length > 0) fd.append("city", this.state.city);
   if (this.state.country?.length > 0) fd.append("country", this.state.country);
@@ -541,6 +546,21 @@ class Settings extends Component {
          ) : (
           <></>
          )}
+
+         <Col md={12} className="my-3 mb-5">
+          <Form.Label>Bio</Form.Label>
+          <TextArea
+           rows={4}
+           maxLength={500}
+           showCount
+           value={this.state.bio}
+           onChange={(e) =>
+            this.setState({
+             bio: e.target.value,
+            })
+           }
+          />
+         </Col>
 
          <AntRow span={24} gutter={15} justify="space-around" align="middle">
           <AntCol md={4} className="mb-2">

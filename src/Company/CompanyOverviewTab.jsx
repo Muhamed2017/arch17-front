@@ -5,7 +5,9 @@ class CompanyOverviewTab extends Component {
   super(props);
   this.state = {
    about: this.props.about,
-   categories: this.props.categories,
+   categories: this.props.categories?.filter((c) => {
+    return c.name && c.name !== "undefined";
+   }),
   };
  }
  render() {
@@ -21,10 +23,10 @@ class CompanyOverviewTab extends Component {
      <div className="overview-block">
       <p className="overview-head">Solutions</p>
 
-      <Row span={24} gutter={{ sm: 8, lg: 16, md: 16, xs: 8 }}>
+      <Row span={24} gutter={{ sm: 16, lg: 16, md: 16, xs: 16 }}>
        {this.state.categories?.map((cat) => {
         return (
-         <Col md={6} xs={12} sm={12} lg={6}>
+         <Col md={6} xs={12} sm={12} lg={6} className="mb-4">
           <div className="cat">
            <div
             className="cat-img"

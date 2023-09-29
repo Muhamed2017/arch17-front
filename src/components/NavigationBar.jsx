@@ -3,22 +3,14 @@ import logo from "../../src/logo-gray.png";
 import { toast, Flip } from "react-toastify";
 import { auth } from "../firebase";
 import ClipLoader from "react-spinners/ClipLoader";
-
-import {
- TreeSelect,
- Spin,
- Input,
- Button,
- //  Row as AntRow,
- //  Col as AntCol,
-} from "antd";
+import { GiHamburgerMenu } from "react-icons/gi";
+import { TreeSelect, Spin, Input, Button } from "antd";
 import {
  LoadingOutlined,
- SearchOutlined,
+ //  SearchOutlined,
  CloseOutlined,
 } from "@ant-design/icons";
 import "./Nav.css";
-// import { VerificationPin } from "react-verification-pin";
 
 import { BrowserRouter as Router, Link, Redirect } from "react-router-dom";
 
@@ -30,9 +22,7 @@ import {
  FormControl,
  NavDropdown,
  Modal,
- //  Col,
  Row,
- //  Button,
 } from "react-bootstrap";
 import { connect } from "react-redux";
 import {
@@ -40,7 +30,6 @@ import {
  phoneSignupSuccess,
  setUserInfoAction,
  updateInfo,
- //  loadHomepage,
 } from "../redux/actions/authActions";
 import axios from "axios";
 import { presistInfo } from "./../redux/actions/authActions";
@@ -52,6 +41,7 @@ import {
 } from "./../redux/actions/addProductActions";
 import Notifications from "./Notifications";
 import SearchMobileSideMenu from "./SearchMobileSideMenu";
+import { setProjectTypeSearch } from "../redux/actions/addProjectActions";
 // const { Search } = Input;
 export const furniture = [
  "Cabinets",
@@ -109,6 +99,10 @@ export const treeData = [
   title: "Magazine",
   value: "Projects",
  },
+ {
+  title: "Designers",
+  value: "Designers",
+ },
 ];
 
 class NavigationBar extends Component {
@@ -129,6 +123,8 @@ class NavigationBar extends Component {
    filteredFurniture: [],
    furniture: [],
    filteredBrands: [],
+   filteredDesigners: [],
+   filteredCompanies: [],
    filterProjects: [],
    filteredLightings: [],
    lightings: [],
@@ -137,7 +133,10 @@ class NavigationBar extends Component {
    selected_search: "",
    selected: false,
    typeSelected: "",
-   value: "all",
+   //  value: "all",
+   value: window.location.pathname.includes("/design-selected")
+    ? "Projects"
+    : "all",
    search_list_loading: false,
    status: "process",
    projects: [
@@ -240,6 +239,12 @@ class NavigationBar extends Component {
      filteredBrands: this.state.searchData?.brands?.filter((brand) => {
       return brand?.name?.toLowerCase().includes(value.toLowerCase());
      }),
+     filteredDesigners: this.state.searchData?.designers?.filter((d) => {
+      return d?.displayName?.toLowerCase().includes(value.toLowerCase());
+     }),
+     filteredCompanies: this.state.searchData?.companies?.filter((c) => {
+      return c?.name?.toLowerCase().includes(value.toLowerCase());
+     }),
      filterProjects: this.state.projects?.filter((project) => {
       return project?.toLowerCase().includes(value.toLowerCase());
      }),
@@ -253,6 +258,7 @@ class NavigationBar extends Component {
 
  componentDidMount() {
   console.log(this.props);
+  console.log(window.location.pathname);
   axios
    .get(`${API}searchbar`)
    .then((response) => {
@@ -281,6 +287,16 @@ class NavigationBar extends Component {
        }),
        filteredBrands: this.state.searchData?.brands?.filter((brand) => {
         return brand?.name
+         ?.toLowerCase()
+         .includes(this.state.searchValue.toLowerCase());
+       }),
+       filteredDesigners: this.state.searchData?.designers?.filter((d) => {
+        return d?.displayName
+         ?.toLowerCase()
+         .includes(this.state.searchValue.toLowerCase());
+       }),
+       filteredCompanies: this.state.searchData?.companies?.filter((c) => {
+        return c?.name
          ?.toLowerCase()
          .includes(this.state.searchValue.toLowerCase());
        }),
@@ -371,11 +387,14 @@ class NavigationBar extends Component {
  };
  onSearch = () => {};
  render() {
+  const { page_url } = window.location.pathname;
   return (
    <>
-    {this.state.value === "Products" && <Redirect to="/products" />}
+    {/* {this.state.value === "Products" && <Redirect to="/products" />} */}
+    {this.state.value === "Products" && <Redirect to="/categories" />}
     {this.state.value === "Projects" && <Redirect to="/design-selected" />}
     {this.state.value === "Brands" && <Redirect to="/brands" />}
+    {this.state.value === "Designers" && <Redirect to="/designers" />}
     <div
      id="navigation-component"
      className="w-100 bg-white navbar-border-bottom sticky-top"
@@ -406,7 +425,12 @@ class NavigationBar extends Component {
             borderTopLeftRadius: "7px",
             borderBottomLeftRadius: "7px",
            }}
-           value={this.state.value}
+           value={
+            page_url?.includes("/design-selected")
+             ? "Projects"
+             : this.state.value
+           }
+           //  value={this.state.value}
            size={"large"}
            bordered={false}
            dropdownStyle={{
@@ -415,7 +439,9 @@ class NavigationBar extends Component {
             minWidth: 145,
            }}
            treeData={treeData}
-           defaultValue={"all"}
+           //  defaultValue={
+           //   page_url?.includes("/design-selected") ? "Projects" : "all"
+           //  }
            treeDefaultExpandAll
            onChange={this.onSearchMenuChange}
           />
@@ -429,7 +455,11 @@ class NavigationBar extends Component {
            <FormControl
             value={this.state.searchValue}
             type="text"
-            placeholder={`Search ${this.state.selected_search}`}
+            placeholder={`Search ${
+             this.state.value === "Projects"
+              ? `Office, Hotel, Cafe`
+              : `${this.state.value}`
+            }`}
             className="mr-sm-2 border-0"
             onChange={(e) => this.searching(e.target.value)}
            />
@@ -463,6 +493,8 @@ class NavigationBar extends Component {
               width: "100%",
               right: 0,
               left: 0,
+              maxHeight:'550px',
+              overflowY:'auto',
               minHeight: "250px",
               borderTopRightRadius: "2px",
               borderTopLeftRadius: "2px",
@@ -562,7 +594,7 @@ class NavigationBar extends Component {
                   <ul className="inner-list">
                    {this.state.filterProjects.map((project, index) => {
                     return (
-                     <a href={`/magazine?types=${project}`}>
+                     <a href={`/design-selected?types=${project}`}>
                       <li>{project}</li>
                      </a>
                     );
@@ -571,6 +603,44 @@ class NavigationBar extends Component {
                  </>
                 )}
                </li>
+               {this.state.filteredDesigners?.length > 0 && (
+                <>
+                 <li>
+                  Designers
+                  <ul className="inner-list">
+                   {this.state.filteredDesigners.map((designer, index) => {
+                    return (
+                     <>
+                      <li>
+                       <a href={`/user/${designer.uid}`}>
+                        {designer.displayName}
+                       </a>
+                      </li>
+                     </>
+                    );
+                   })}
+                  </ul>
+                 </li>
+                </>
+               )}
+               {this.state.filteredCompanies?.length > 0 && (
+                <>
+                 <li>
+                  Design Companies
+                  <ul className="inner-list">
+                   {this.state.filteredCompanies.map((company, index) => {
+                    return (
+                     <>
+                      <li>
+                       <a href={`/company/${company.id}`}>{company.name}</a>
+                      </li>
+                     </>
+                    );
+                   })}
+                  </ul>
+                 </li>
+                </>
+               )}
               </ul>
              )}
              {this.state.value === "Brands" && this.state.searchDataLoaded && (
@@ -675,13 +745,63 @@ class NavigationBar extends Component {
                )}
               </ul>
              )}
-             {this.state.value === "Projects" && this.state.searchDataLoaded && (
+             {this.state.value === "Projects" && (
               <ul>
                <li>
                 Projects
                 <ul className="inner-list">
                  {this.state.filterProjects?.map((project, index) => {
-                  return <li key={index}>{project}</li>;
+                  return (
+                   <li
+                    className="pointer"
+                    onClick={() => {
+                     console.log("TYPE ADDED");
+                     this.setState(
+                      {
+                       search_list: false,
+                       searchValue: "",
+                      },
+                      () => {
+                       this.props.dispatchSetMagazineType(project);
+                      }
+                     );
+                    }}
+                    key={index}
+                   >
+                    {project}
+                   </li>
+                  );
+                 })}
+                </ul>
+               </li>
+              </ul>
+             )}
+             {this.state.value === "Designers" && (
+              <ul>
+               <li>
+                Designers
+                <ul className="inner-list">
+                 {this.state.filteredDesigners?.map((designer, index) => {
+                  return (
+                   <li className="pointer" key={index}>
+                    {/* {designer?.displayName} */}
+                    <a href={`/user/${designer?.uid}`}>
+                     {designer?.displayName}
+                    </a>
+                   </li>
+                  );
+                 })}
+                </ul>
+               </li>
+               <li>
+                Design Companies
+                <ul className="inner-list">
+                 {this.state.filteredCompanies?.map((company, index) => {
+                  return (
+                   <li className="pointer" key={index}>
+                    <a href={`/company/${company?.id}`}>{company?.name}</a>
+                   </li>
+                  );
                  })}
                 </ul>
                </li>
@@ -825,14 +945,24 @@ class NavigationBar extends Component {
         </Navbar.Brand>
         <div></div>
         <Button
+         style={{
+          fontSize: "26px",
+          color: "#000000d1",
+         }}
          className="search-nav-btn"
          //  onClick={this.handleSearchMobileField}
          onClick={() => {
           this.props.dispatchSetMenu(true);
+          if (typeof window != "undefined" && window.document) {
+           document.body.style.overflow = "hidden";
+           document.body.style.height = "100vh";
+           console.log("SET HIDDEN");
+          }
           console.log("MMMMME");
          }}
         >
-         <SearchOutlined />
+         {/* <SearchOutlined /> */}
+         <GiHamburgerMenu />
         </Button>
         {this.props.isLoggedIn ? (
          <NavDropdown
@@ -980,6 +1110,9 @@ class NavigationBar extends Component {
       {this.state.search_mobile && (
        <div className="search-mobile-container">
         <Input
+         onClear={() => {
+          this.props.dispatchSetMagazineType("");
+         }}
          size="large"
          suffix={
           <CloseOutlined
@@ -1101,7 +1234,7 @@ class NavigationBar extends Component {
                 <ul className="inner-list">
                  {this.state.filterProjects.map((project, index) => {
                   return (
-                   <a href={`/magazine?types=${project}`}>
+                   <a href={`/design-selected?types=${project}`}>
                     <li>{project}</li>
                    </a>
                   );
@@ -1214,7 +1347,7 @@ class NavigationBar extends Component {
              )}
             </ul>
            )}
-           {this.state.value === "Projects" && this.state.searchDataLoaded && (
+           {this.state.value === "Projects" && (
             <ul>
              <li>
               Projects
@@ -1316,6 +1449,7 @@ const mapDispatchToProps = (dispatch) => ({
  setSearchTerm: (term) => dispatch(setSearchTerm(term)),
  setAllBrands: (brands) => dispatch(setAllBrands(brands)),
  dispatchSetMenu: (visible) => dispatch(setMenu(visible)),
+ dispatchSetMagazineType: (type) => dispatch(setProjectTypeSearch(type)),
 
  //  setHomepage: (homepage) => dispatch(loadHomepage(homepage)),
 });
@@ -1329,6 +1463,7 @@ const mapStateToProps = (state) => {
   user: state.regularUser.user,
   displayName: state.regularUser.displayName,
   photoURL: state.regularUser?.photoURL,
+  magazine_type: state.project?.magazine_type,
  };
 };
 

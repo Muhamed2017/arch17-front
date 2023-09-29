@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
-import { Table, Input, Popconfirm, Form, Tabs, Progress } from "antd";
+import "./addproduct.css";
+import { Table, Input, Popconfirm, Form, Progress, Dropdown, Menu } from "antd";
 import {
  Button as BButton,
  Form as FormB,
@@ -8,7 +9,6 @@ import {
  Modal,
 } from "react-bootstrap";
 import { toast, Flip } from "react-toastify";
-// import { CloseCircleFilled } from "@ant-design/icons";
 import {
  FaCloudUploadAlt,
  FaPlus,
@@ -33,7 +33,7 @@ import {
  resetProductModalCodes,
  addOptionAction,
 } from "../../redux/actions/addProductActions";
-const { TabPane } = Tabs;
+// const { TabPane } = Tabs;
 const EditableContext = React.createContext(null);
 
 const EditableRow = ({ index, ...props }) => {
@@ -137,11 +137,138 @@ const EditableCell = ({
  return <td {...restProps}>{childNode}</td>;
 };
 
+const style = {
+ width: "35px",
+ height: "35px",
+ borderRadius: "4px",
+};
 class OptionsStep extends React.Component {
  constructor(props) {
   super(props);
-  this.cropperRef = React.createRef();
+  this.MaterialsMenu = (props) => {
+   return (
+    <Menu>
+     <p className="menu-p">Choose from added materials</p>
+     {this.state.unique_materials?.map((row, index) => {
+      return (
+       row.name &&
+       row.image &&
+       row?.name !== null && (
+        <Menu.Item
+         key={row?.name}
+         onClick={() => {
+          this.setState(
+           {
+            material_name: row?.name,
+            material_image: row?.image,
+           },
+           () => {
+            this.AddMaterialToOption(props.row_key);
+           }
+          );
+         }}
+        >
+         <img style={style} alt="" src={row?.image} />
+         <p>{row?.name}</p>
+        </Menu.Item>
+       )
+      );
+     })}
 
+     <Menu.Item>
+      <button
+       onClick={(e) => {
+        e.preventDefault();
+        console.log(props)
+        // this.material_modal_open(props.row_key);
+       }}
+      >
+       OR ADD NEW MATERIAL
+      </button>
+     </Menu.Item>
+    </Menu>
+   );
+  };
+  this.SizesMenu = (props) => {
+   return (
+    <Menu>
+     <p className="menu-p">Choose from added sizes</p>
+     {this.state.unique_sizes?.map((size, index) => {
+      return (
+       size?.l + size?.h + size?.w > 0 && (
+        <Menu.Item
+         key={`${size.l} | ${size.w} | ${size.h}`}
+         onClick={() => {
+          this.setState(
+           {
+            size_l: size.l,
+            size_w: size.w,
+            size_h: size.h,
+           },
+           () => {
+            this.AddSizeToOption(props.row_key);
+           }
+          );
+         }}
+        >
+         <p>{`${size.l} L | ${size.w} W | ${size.h} H `}</p>
+        </Menu.Item>
+       )
+      );
+     })}
+     <Menu.Item>
+      <button
+       onClick={(e) => {
+        e.preventDefault();
+        console.log(props)
+        this.size_modal_open(props.row_key);
+       }}
+      >
+       OR ADD NEW SIZE
+      </button>
+     </Menu.Item>
+    </Menu>
+   );
+  };
+  this.PriceMenu = (props) => {
+   return (
+    <Menu>
+     <p className="menu-p">Choose from added prices</p>
+     {this.state.unique_prices?.map((price, index) => {
+      return (
+       price > 0 && (
+        <Menu.Item
+         key={price}
+         onClick={() => {
+          this.setState(
+           {
+            price,
+           },
+           () => {
+            this.AddPriceToOption(props.row_key);
+           }
+          );
+         }}
+        >
+         <p>{`${price} $`}</p>
+        </Menu.Item>
+       )
+      );
+     })}
+     <Menu.Item>
+      <button
+       onClick={(e) => {
+        e.preventDefault();
+        this.price_modal_open(props.row_key);
+       }}
+      >
+       OR ADD NEW PRICE
+      </button>
+     </Menu.Item>
+    </Menu>
+   );
+  };
+  this.cropperRef = React.createRef();
   this.columns = [
    {
     title: "Code",
@@ -242,18 +369,90 @@ class OptionsStep extends React.Component {
      return (
       <>
        {!record.material?.name && (
-        <FaPlus
-         onClick={() => {
-          this.setState(
-           {
-            editing_row: record.key,
-           },
-           () => {
-            this.material_modal_open(record.key, record.material);
-           }
-          );
-         }}
-        />
+        <>
+         {this.state.unique_materials?.length > 0 &&
+         ((this.state.unique_materials[0]?.image &&
+          this.state.unique_materials[0]?.name) ||
+          (this.state.unique_materials[1]?.image &&
+           this.state.unique_materials[1]?.name)) ? (
+          <Dropdown
+           //  className="options-dropdown"
+
+           //  overlay={<this.MaterialsMenu row_key={record.key} />}
+           overlay={() => (
+            <Menu className="options-dropdown">
+             <p className="menu-p">Choose from added materials</p>
+             {this.state.unique_materials?.map((row, index) => {
+              return (
+               row.name &&
+               row.image &&
+               row?.name !== null && (
+                <Menu.Item
+                 key={row?.name}
+                 onClick={() => {
+                  this.setState(
+                   {
+                    material_name: row?.name,
+                    material_image: row?.image,
+                   },
+                   () => {
+                    this.AddMaterialToOption(record.key);
+                   }
+                  );
+                 }}
+                >
+                 <img style={style} alt="" src={row?.image} />
+                 <p>{row?.name}</p>
+                </Menu.Item>
+               )
+              );
+             })}
+
+             <Menu.Item>
+              <button
+               onClick={(e) => {
+                e.preventDefault();
+                this.material_modal_open(record?.key);
+               }}
+              >
+               OR ADD NEW MATERIAL
+              </button>
+             </Menu.Item>
+            </Menu>
+           )}
+           placement="topLeft"
+           trigger="click"
+          >
+           <FaPlus
+            onClick={() => {
+             this.setState(
+              {
+               editing_row: record.key,
+              },
+              () => {
+               //  this.material_modal_open(record.key, record.material);
+              }
+             );
+            }}
+           />
+          </Dropdown>
+         ) : (
+          <>
+           <FaPlus
+            onClick={() => {
+             this.setState(
+              {
+               editing_row: record.key,
+              },
+              () => {
+               this.material_modal_open(record.key, record.material);
+              }
+             );
+            }}
+           />
+          </>
+         )}
+        </>
        )}
        {record.material?.image && record?.material_name !== "null" && (
         <>
@@ -285,13 +484,67 @@ class OptionsStep extends React.Component {
        {record?.size?.l === null &&
         record?.size?.w === null &&
         record?.size?.h === null && (
-         <FaPlus
-          onClick={() => {
-           this.setState({ editing_row: record.key }, () => {
-            this.size_modal_open(record.key, record.size);
-           });
-          }}
-         />
+         <>
+          {this.state.unique_sizes?.length > 0 &&
+          (this.state.unique_sizes[0]?.w > 0 ||
+           this.state.unique_sizes[1]?.w > 0) ? (
+           <Dropdown
+            // overlay={<this.SizesMenu row_key={record.key} />}
+            overlay={() => (
+             <Menu className="options-dropdown">
+              <p className="menu-p">Choose from added sizes</p>
+              {this.state.unique_sizes?.map((size, index) => {
+               return (
+                size?.l + size?.h + size?.w > 0 && (
+                 <Menu.Item
+                  key={`${size.l} | ${size.w} | ${size.h}`}
+                  onClick={() => {
+                   this.setState(
+                    {
+                     size_l: size.l,
+                     size_w: size.w,
+                     size_h: size.h,
+                    },
+                    () => {
+                     this.AddSizeToOption(record?.key);
+                    }
+                   );
+                  }}
+                 >
+                  <p>{`${size.l} L | ${size.w} W | ${size.h} H `}</p>
+                 </Menu.Item>
+                )
+               );
+              })}
+              <Menu.Item>
+               <button
+                onClick={(e) => {
+                 e.preventDefault();
+                 this.size_modal_open(record.key);
+                }}
+               >
+                OR ADD NEW SIZE
+               </button>
+              </Menu.Item>
+             </Menu>
+            )}
+            placement="topLeft"
+            trigger="click"
+           >
+            <FaPlus />
+           </Dropdown>
+          ) : (
+           <>
+            <FaPlus
+             onClick={() => {
+              this.setState({ editing_row: record.key }, () => {
+               this.size_modal_open(record.key, record.size);
+              });
+             }}
+            />
+           </>
+          )}
+         </>
         )}
        {record?.size?.l > 0 && record?.size?.w > 0 && record?.size?.h > 0 && (
         <>
@@ -315,9 +568,59 @@ class OptionsStep extends React.Component {
      return (
       <>
        {record.price < 1 && (
-        <FaPlus
-         onClick={() => this.price_modal_open(record.key, record.price)}
-        />
+        <>
+         {this.state.unique_prices?.length > 0 ? (
+          <Dropdown
+           //  overlay={<this.PriceMenu row_key={record.key} />}
+           overlay={() => (
+            <Menu className="options-dropdown">
+             <p className="menu-p">Choose from added prices</p>
+             {this.state.unique_prices?.map((price, index) => {
+              return (
+               price > 0 && (
+                <Menu.Item
+                 key={price}
+                 onClick={() => {
+                  this.setState(
+                   {
+                    price,
+                   },
+                   () => {
+                    this.AddPriceToOption(record.key);
+                   }
+                  );
+                 }}
+                >
+                 <p>{`${price} ¥`}</p>
+                </Menu.Item>
+               )
+              );
+             })}
+             <Menu.Item>
+              <button
+               onClick={(e) => {
+                e.preventDefault();
+                this.price_modal_open(record.key);
+               }}
+              >
+               OR ADD NEW PRICE
+              </button>
+             </Menu.Item>
+            </Menu>
+           )}
+           placement="topLeft"
+           trigger="click"
+          >
+           <FaPlus
+           // onClick={() => this.price_modal_open(record.key, record.price)}
+           />
+          </Dropdown>
+         ) : (
+          <FaPlus
+           onClick={() => this.price_modal_open(record.key, record.price)}
+          />
+         )}
+        </>
        )}
        {record.price > 0 && (
         <>
@@ -377,6 +680,53 @@ class OptionsStep extends React.Component {
 
   this.state = {
    modalCovers: [],
+   unique_materials: this.props?.edit
+    ? [
+       ...this.props.rows
+        .map((r) => ({ image: r.material.image, name: r.material.name }))
+        .reduce((map, { name, image }) => {
+         return map.set(`${name}-${image}`, { name, image });
+        }, new Map())
+        .values(),
+      ]
+    : [
+       ...this.props.options
+        .map((r) => ({ image: r.material.image, name: r.material.name }))
+        .reduce((map, { name, image }) => {
+         return map.set(`${name}-${image}`, { name, image });
+        }, new Map())
+        .values(),
+      ],
+
+   unique_sizes: this.props?.edit
+    ? [
+       ...this.props.rows
+        .map((r) => ({ l: r.size.l, w: r.size.w, h: r.size.h }))
+        .reduce((map, { l, w, h }) => {
+         return map.set(`${l}-${w}-${h}`, { l, w, h });
+        }, new Map())
+        .values(),
+      ]
+    : [
+       ...this.props.options
+        .map((r) => ({ l: r.size.l, w: r.size.w, h: r.size.h }))
+        .reduce((map, { l, w, h }) => {
+         return map.set(`${l}-${w}-${h}`, { l, w, h });
+        }, new Map())
+        .values(),
+      ],
+
+   unique_prices: this.props?.edit
+    ? this.props.rows
+       ?.map((r) => r.price)
+       .filter((p, index, self) => {
+        return p && p > 0 && self.indexOf(p) === index;
+       })
+    : this.props.options
+       ?.map((r) => r.price)
+       .filter((p, index, self) => {
+        return p && p > 0 && self.indexOf(p) === index;
+       }),
    modalUploadBoxes: [],
    loading: false,
    selectedRowKeys: [], // Check here to configure the default column
@@ -403,6 +753,11 @@ class OptionsStep extends React.Component {
    upload_boxes: [],
   };
  }
+
+ items = [
+  { label: "item 1", key: "item-1" }, // remember to pass the key prop
+  { label: "item 2", key: "item-2" },
+ ];
  material_modal_open = (editing_row, material) => {
   this.setState({
    material_modal: true,
@@ -416,13 +771,14 @@ class OptionsStep extends React.Component {
  size_modal_open = (editing_row, size) => {
   this.setState({
    size_modal: true,
-   size_l: size.l,
-   size_w: size.w,
-   size_h: size.h,
+   size_l: size?.l,
+   size_w: size?.w,
+   size_h: size?.h,
    editing_row,
   });
   console.log(this.state.size_modal);
  };
+
  onSizeInput = (d, e) => {
   if (d === "w") {
    this.setState({ size_w: e.target.value });
@@ -440,45 +796,212 @@ class OptionsStep extends React.Component {
   console.log(this.state.editing_row);
  };
 
+ MaterialsMenu = (props) => {
+  return (
+   <Menu>
+    <p className="menu-p">Choose from added materials</p>
+    {this.state.unique_materials?.map((row, index) => {
+     return (
+      row.name &&
+      row.image &&
+      row?.name !== null && (
+       <Menu.Item
+        key={row?.name}
+        onClick={() => {
+         this.setState(
+          {
+           material_name: row?.name,
+           material_image: row?.image,
+          },
+          () => {
+           this.AddMaterialToOption(props.row_key);
+          }
+         );
+        }}
+       >
+        <img style={style} alt="" src={row?.image} />
+        <p>{row?.name}</p>
+       </Menu.Item>
+      )
+     );
+    })}
+
+    <Menu.Item>
+     <button
+      onClick={(e) => {
+       e.preventDefault();
+       this.material_modal_open(props.row_key);
+      }}
+     >
+      OR ADD NEW MATERIAL
+     </button>
+    </Menu.Item>
+   </Menu>
+  );
+ };
+
+ SizesMenu = (props) => {
+  return (
+   <Menu>
+    <p className="menu-p">Choose from added sizes</p>
+    {this.state.unique_sizes?.map((size, index) => {
+     return (
+      size?.l + size?.h + size?.w > 0 && (
+       <Menu.Item
+        key={`${size.l} | ${size.w} | ${size.h}`}
+        onClick={() => {
+         this.setState(
+          {
+           size_l: size.l,
+           size_w: size.w,
+           size_h: size.h,
+          },
+          () => {
+           this.AddSizeToOption(props.row_key);
+          }
+         );
+        }}
+       >
+        <p>{`${size.l} L | ${size.w} W | ${size.h} H `}</p>
+       </Menu.Item>
+      )
+     );
+    })}
+    <Menu.Item>
+     <button
+      onClick={(e) => {
+       e.preventDefault();
+       this.size_modal_open(props.row_key);
+      }}
+     >
+      OR ADD NEW SIZE
+     </button>
+    </Menu.Item>
+   </Menu>
+  );
+ };
+
+ PriceMenu = (props) => {
+  return (
+   <Menu>
+    <p className="menu-p">Choose from added prices</p>
+    {this.state.unique_prices?.map((price, index) => {
+     return (
+      price > 0 && (
+       <Menu.Item
+        key={price}
+        onClick={() => {
+         this.setState(
+          {
+           price,
+          },
+          () => {
+           this.AddPriceToOption(props.row_key);
+          }
+         );
+        }}
+       >
+        <p>{`${price}  ¥`}</p>
+       </Menu.Item>
+      )
+     );
+    })}
+    <Menu.Item>
+     <button
+      onClick={(e) => {
+       e.preventDefault();
+       this.price_modal_open(props.row_key);
+      }}
+     >
+      OR ADD NEW PRICE
+     </button>
+    </Menu.Item>
+   </Menu>
+  );
+ };
+
  AddMaterialToOption = (row_index) => {
   const tempDataSource = [...this.state.dataSource];
+  let unique_materials = this.state.unique_materials;
   const index = tempDataSource.findIndex((item) => row_index === item.key);
-  const item = tempDataSource[index];
+  let item = tempDataSource[index];
+  console.log(row_index)
+  console.log(item)
+  
   item["material"].name = this.state.material_name;
   item["material"].image = this.state.material_image;
+
   const row = tempDataSource[index];
   tempDataSource.splice(index, 1, { ...item, ...row });
+  const _index = unique_materials.findIndex(
+   (mat) =>
+    mat.name === this.state.material_name &&
+    mat.image === this.state.material_image
+  );
+  if (_index === -1) {
+   unique_materials.push({
+    image: this.state.material_image,
+    name: this.state.material_name,
+   });
+  }
+
   this.setState({
    dataSource: tempDataSource,
+   unique_materials,
    material_modal: false,
   });
  };
 
  AddSizeToOption = (row_index) => {
   const tempDataSource = [...this.state.dataSource];
+  let unique_sizes = this.state.unique_sizes;
   const index = tempDataSource.findIndex((item) => row_index === item.key);
   const item = tempDataSource[index];
   item["size"].l = this.state.size_l;
   item["size"].h = this.state.size_h;
   item["size"].w = this.state.size_w;
   const row = tempDataSource[index];
+  const _index = unique_sizes.findIndex(
+   (size) =>
+    size.l === this.state.size_l &&
+    size.w === this.state.size_w &&
+    size.h === this.state.size_h
+  );
+  if (_index === -1) {
+   unique_sizes.push({
+    l: this.state.size_l,
+    w: this.state.size_w,
+    h: this.state.size_h,
+   });
+  }
   tempDataSource.splice(index, 1, { ...item, ...row });
   this.setState({
    dataSource: tempDataSource,
    size_modal: false,
+   unique_sizes,
   });
  };
 
  AddPriceToOption = (row_index) => {
   const tempDataSource = [...this.state.dataSource];
+  let unique_prices = this.state.unique_prices;
   const index = tempDataSource.findIndex((item) => row_index === item.key);
   const item = tempDataSource[index];
   item.price = this.state.price;
   const row = tempDataSource[index];
   tempDataSource.splice(index, 1, { ...item, ...row });
+
+  const _index = unique_prices.findIndex(
+   (p) => Number(p) === Number(this.state.price)
+  );
+  if (_index === -1) {
+   unique_prices.push(this.state.price);
+  }
+
   this.setState({
    dataSource: tempDataSource,
    price_modal: false,
+   unique_prices,
   });
  };
 
@@ -594,8 +1117,9 @@ class OptionsStep extends React.Component {
    () => {
     this.setState({
      modalUploadBoxes: this.state.modalUploadBoxes.slice(
-      this.state.modalCovers.length - 6
+      this.state.modalCovers.length - 6,
      ),
+     cover_preview:newUploaded[0]?.preview||newUploaded[0]._src||newUploaded[0].src
     });
     this.uploadCovers(this.state.modalCovers);
    }
@@ -649,6 +1173,7 @@ class OptionsStep extends React.Component {
      modalCovers[index].loaded = percent;
      this.setState({
       modalCovers,
+      cover_preview: modalCovers[index]?.preview ||  modalCovers[index]._src || modalCovers[index].src
      });
     }
    },
@@ -1035,10 +1560,10 @@ class OptionsStep extends React.Component {
               <div
                className="cover-box"
                style={{
-                backgroundImage: `url(${cover?.src || cover?.preview})`,
+                backgroundImage: `url("${cover?.src || cover?.preview}")`,
                }}
                onClick={() => {
-                this.setState({ cover_preview: cover?.src || cover?.preview });
+                this.setState({ cover_preview: cover.preview || cover?.src || cover?._src  });
                }}
               >
                {cover.file && cover.loaded < 100 && (

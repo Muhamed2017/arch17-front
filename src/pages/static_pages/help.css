@@ -1,120 +1,135 @@
-
-
-
 /* static pages styles  */
 
-.static-outer{
-    width: 100%;
-    background-color: #fff;
-
+.static-outer {
+  width: 100%;
+  background-color: #fff;
 }
-.static-page{
-max-width: 1320px;
-margin: auto;
-/* background-color: #fff; */
+.static-page {
+  max-width: 1320px;
+  margin: auto;
+  /* background-color: #fff; */
 }
-
 
 /* 1- create designer account help page  */
-.deisgner-help .lightgray-footer{
-    display: none !important;
+.deisgner-help .lightgray-footer {
+  display: none !important;
 }
-.deisgner-help .head-section{
-    text-align: center;
-    margin: 50px auto;
+.deisgner-help .head-section {
+  text-align: center;
+  margin: 50px auto;
 }
 .deisgner-help .head-section h5 {
-    font-size: 50px;
-    letter-spacing: -3px;
-    font-weight: 400;
-    font-family: "Roboto";
-    color: #000;
-    margin-bottom: 20px;
+  font-size: 50px;
+  letter-spacing: -3px;
+  font-weight: 400;
+  font-family: "Roboto";
+  color: #000;
+  margin-bottom: 20px;
 }
-.deisgner-help .head-section p{
-    /* font-weight: 500; */
-    font-weight: 500;
-        width: 80%;
-        margin: 0 auto 20px;
+.deisgner-help .head-section p {
+  /* font-weight: 500; */
+  font-weight: 500;
+  width: 80%;
+  margin: 0 auto 20px;
 }
 .deisgner-help .head-section h5 span {
+  font-weight: 200;
+  display: inline-block;
+}
+.desimgbox {
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  padding-top: 100%;
+  width: 100%;
+}
+
+.deisgner-help a , a.black-join{
+  background-color: #000;
+  color: #fff !important;
+  border-radius: 7px;
+  min-height: 35px;
+  margin: auto;
+  padding-top: 7px !important;
+  display: block;
+  width: 150px;
+  text-align: center;
+}
+
+@media screen and (max-width: 768px) {
+  .static-page {
+    padding: 32px;
+  }
+  .deisgner-help .head-section button {
+    border-radius: 6px;
+    min-height: 33px;
+    width: 121px;
+    padding: 0 !important;
+  }
+  .desimgbox{
+    margin: -23px auto;
+  }
+  .deisgner-help .box h6 {
+    font-size: 24px;
+  }
+
+  .deisgner-help .box p {
+    font-size: 15px;
+    line-height: 23px;
+    font-weight: 400;
+  }
+
+  .deisgner-help .box h6 {
+    font-size: 22px;
+    color: #000;
+    font-weight: 500;
+  }
+  .static-page {
+    padding: 16px;
+  }
+  .deisgner-help .head-section h5{
+    font-size: 55px;
+  }
+}
+@media screen and (min-width: 768px) {
+  .deisgner-help {
+    padding: 7rem 10rem 0;
+  }
+  .deisgner-help .head-section h5 {
+    font-size: 10rem;
+    letter-spacing: -8.5px;
+  }
+  .deisgner-help .head-section p {
+    font-size: 18px;
+    line-height: 30px;
+    color: #000000;
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: 25px;
+  }
+  .deisgner-help .head-section h5 span {
     font-weight: 200;
     display: inline-block;
-}
-.desimgbox{
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
-    padding-top: 100%;
-    width: 100%;
-}
-
-.deisgner-help  a{
-    background-color: #000;
-    color: #fff !important;
-    border-radius: 7px;
-    min-height: 35px;
-    margin: auto;
-    padding-top: 7px !important;
-    display: block;
-    width : 150px;
-    
-}
-
-@media screen and (max-width:768px){
-    .static-page{
-        padding:32px;
-    }
-    .deisgner-help .head-section button{
-            border-radius: 6px;
-            min-height: 33px;
-            width: 121px;
-            padding: 0 !important;
-    }
-         .deisgner-help .box h6 {
-             font-size: 24px;
-         }
-    
-         .deisgner-help .box p {
-            font-size: 15px;
-                line-height: 23px;
-                font-weight: 400;
-         }
-}
-@media screen and (min-width:768px) {
-    .deisgner-help{
-        padding: 7rem 10rem 0;
-    }
-        .deisgner-help .head-section h5{
-            font-size: 10rem;
-            letter-spacing: -8.5px;
-        }
-        .deisgner-help .head-section p{
-            
-                font-size: 18px;
-                line-height: 30px;
-                color: #000000;
-                font-weight: 400;
-                text-align: center;
-                margin-bottom:25px;
-        }
-        .deisgner-help .head-section h5 span{
-            font-weight: 200;
-            display: inline-block;
-        }
-        .deisgner-help .box h6{
-            font-size:32px;
-            font-weight: 500;
-        }
-        .deisgner-help .box p{
-            font-size: 17px;
-            line-height: 25px;
-            color: #000000;
-            font-weight: 300;
-                padding: 10px 0;
-                    /* font-size: 0.75rem; */
-                    font-family: "Roboto"
-                }
-
-                
+  }
+  .deisgner-help .box h6 {
+    /* font-size: 32px; */
+    /* font-weight: 500; */
+    font-size: 34px;
+    font-weight: 500;
+    color: #000
+  }
+  .deisgner-help .box p {
+    /* font-size: 17px;
+    line-height: 25px;
+    color: #000000;
+    font-weight: 300;
+    padding: 10px 0;
+    font-family: "Roboto"; */
+    font-size: 21px;
+    line-height: 33px;
+    color: #000000;
+    font-weight: 300;
+    padding: 10px 0;
+    font-family: "Roboto";
+  }
 }

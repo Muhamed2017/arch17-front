@@ -2,7 +2,7 @@ import { Component } from "react";
 import { Form, Col, Row } from "react-bootstrap";
 import ReactSelect from "react-select";
 import ReactFlagsSelect from "react-flags-select";
-import { Row as AntRow, Col as AntCol, Checkbox, Select } from "antd";
+import { Row as AntRow, Col as AntCol, Checkbox, Select, Input } from "antd";
 import * as productClass from "./../addProduct/ProductClassifications";
 import ClipLoader from "react-spinners/ClipLoader";
 import * as cnst from "./../addProduct/Identity";
@@ -78,6 +78,17 @@ class EditIdentity extends Component {
    colorTempratures: [],
    bulbTypeOptions: [],
    bulbTypes: [],
+   des_ids:
+    this.props.selected_designers?.map((d) => {
+     return d?.id;
+    }) ?? [],
+   dess: this.props?.selected_designers ?? [],
+   comps: this.props?.selected_companies ?? [],
+   comps_ids:
+    this.props.selected_companies?.map((c) => {
+     return c?.id;
+    }) ?? [],
+   search_designer_company: "",
   };
  }
  places_tags_label = [];
@@ -383,7 +394,7 @@ class EditIdentity extends Component {
   const fd = new FormData();
   fd.append("collection_name", name);
   fd.append("product_id", this.props.id);
-  fd.append("store_id", this.props.store?.id);
+  fd.append("store_id", this.props.data?.store_id);
   // console.log(this.props.store.id);
   axios.post(`${API}brandcollection`, fd).then((response) => {
    console.log(response);
@@ -439,18 +450,108 @@ class EditIdentity extends Component {
    console.log(res);
   });
  };
- componentDidMount() {
-  console.log(this.props.store2);
-  axios.get(`${API}designers`).then((res) => {
-   const des = res.data.designers;
-   console.log(res.data.designers);
+
+ deattachDesigner = (designer_id) => {
+  console.log(designer_id);
+ };
+ deattachCollection = (collection_id) => {
+  console.log(collection_id);
+ };
+
+ attachDesignerToProduct = (entity, type) => {
+  if (type === "designer") {
+   const { des_ids, dess } = this.state;
+   des_ids.push(entity?.id);
+   dess.push(entity);
    this.setState({
-    designers: Object.values(des),
-    // selected_designers: des.map((d) => {
-    //  return d.id;
-    // }),
+    des_ids,
+    dess,
+    companies: [],
+    designers: [],
+   });
+
+   const fd = new FormData();
+   fd.append("product_id", this.state.product_id);
+   fd.append("user_id", entity?.id);
+   axios.post(`${API}adddesignerproduct`, fd).then((response) => {
+    console.log(response);
+    this.setState({
+     search_designer_company: "",
+    });
+   });
+  }
+  if (type === "company") {
+   const { comps_ids, comps } = this.state;
+   comps_ids.push(entity?.id);
+   comps.push(entity);
+   this.setState({
+    comps_ids,
+    comps,
+    companies: [],
+    designers: [],
+   });
+
+   const fd = new FormData();
+   fd.append("product_id", this.state.product_id);
+   axios
+    .post(`${API}company/addtoproduct/${entity.id}`, fd)
+    .then((response) => {
+     console.log(response);
+     this.setState({
+      search_designer_company: "",
+     });
+    });
+  }
+ };
+ removeCompany = (c) => {
+  const fd = new FormData();
+  fd.append("company_id", c?.id);
+  fd.append("product_id", this.state.product_id);
+  axios.post(`${API}company/remove-product`, fd).then((response) => {
+   console.log(response);
+   this.setState({
+    comps: this.state.comps?.filter((co) => {
+     return co.id !== c.id;
+    }),
+    companies: this.state.companies?.filter((com) => {
+     return com.id !== c?.id;
+    }),
    });
   });
+ };
+ removeDesigner = (d) => {
+  const fd = new FormData();
+  fd.append("user_id", d?.id);
+  fd.append("product_id", this.state.product_id);
+  axios.post(`${API}removedesignerproduct`, fd).then((response) => {
+   console.log(response);
+   this.setState({
+    dess: this.state.dess?.filter((des) => {
+     return des.id !== d?.id;
+    }),
+    designers: this.state.designers?.filter((des) => {
+     return des.id !== d?.id;
+    }),
+   });
+  });
+ };
+ handleSearchDesignesAndCompanies = (keyword) => {
+  this.setState({
+   search_designer_company: keyword,
+  });
+  if (keyword?.length < 2) {
+   return;
+  } else {
+   axios.get(`${API}designers/${keyword}`).then((response) => {
+    this.setState({
+     companies: response.data.companies.data,
+     designers: response.data.designers.data,
+    });
+   });
+  }
+ };
+ componentDidMount() {
+  console.log(this.props.store2);
   console.log(this.state.for_kids);
   console.log(this.state.is_for_kids);
   this.props?.data?.places_tags?.map((m) => {
@@ -1190,7 +1291,7 @@ class EditIdentity extends Component {
        </p>
       </Col>
      </Form.Group>
-     {this.state.designers && this.state.designers?.length > 0 && (
+     {/* {this.state.designers && this.state.designers?.length > 0 && (
       <>
        <Form.Group as={Row}>
         <Col md={7} className="designerselect">
@@ -1228,7 +1329,104 @@ class EditIdentity extends Component {
         </Col>
        </Form.Group>
       </>
-     )}
+     )} */}
+     <Form.Group as={Row}>
+      <Col md={7} className="designerselect">
+       <Form.Label>Designer / Design Company</Form.Label>
+       <Input
+        placeholder="Select Designer or design company"
+        onChange={(e) => this.handleSearchDesignesAndCompanies(e.target.value)}
+        size="large"
+        value={this.state.search_designer_company}
+       />
+       {this.state.companies?.length + this.state.designers?.length > 0 && (
+        <div className="designer-list">
+         {this.state.designers?.map((d) => {
+          return (
+           <div
+            className="drop-item"
+            onClick={() => this.attachDesignerToProduct(d, "designer")}
+           >
+            <div
+             className="item-img"
+             style={{
+              backgroundImage: `url("${d?.photoURL}")`,
+             }}
+            >
+             {(!d?.photoURL || d?.photoURL?.length < 4) && (
+              <p>{d?.displayName[0]}</p>
+             )}
+            </div>
+            <p>{d?.displayName}</p>
+           </div>
+          );
+         })}
+         {this.state.companies?.map((c) => {
+          return (
+           <div
+            className="drop-item"
+            onClick={() => this.attachDesignerToProduct(c, "company")}
+           >
+            <div
+             className="item-img"
+             style={{
+              backgroundImage: `url("${c?.profile}")`,
+             }}
+            >
+             {(!c.profile || c.profile?.length < 4) && <p>{c?.name[0]}</p>}
+            </div>
+            <p>{c?.name}</p>
+           </div>
+          );
+         })}
+        </div>
+       )}
+       <div className="selected-attached">
+        {this.state.dess?.map((d) => {
+         return (
+          <div className="attached-designer attached">
+           {d.displayName}
+           <div
+            className="attached-img"
+            style={{
+             backgroundImage: `url("${d?.photoURL}")`,
+            }}
+           >
+            {(!d?.photoURL || d?.photoURL?.length < 4) && (
+             <p>{d?.displayName[0]}</p>
+            )}
+           </div>
+           <div onClick={() => this.removeDesigner(d)} className="xbtn">
+            X
+           </div>
+          </div>
+         );
+        })}
+        {this.state.comps?.map((c) => {
+         return (
+          <div className="attached-designer attached">
+           {c.name}
+           <div
+            className="attached-img"
+            style={{
+             backgroundImage: `url("${c?.profile}")`,
+            }}
+           >
+            {(!c?.profile || c?.profile?.length < 4) && <p>{c?.name[0]}</p>}
+           </div>
+           <div onClick={() => this.removeCompany(c)} className="xbtn">
+            X
+           </div>
+          </div>
+         );
+        })}
+       </div>
+       <p className="light">
+        Search and tag the product’s designer, If you can’t in find the designer
+        click here to invite.
+       </p>
+      </Col>
+     </Form.Group>
      <Form.Group>
       <Form.Row>
        <Col md={8}>

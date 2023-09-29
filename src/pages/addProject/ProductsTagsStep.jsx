@@ -27,9 +27,11 @@ class ProductsTagsStep extends Component {
    products: [],
    noTypes: false,
    ids: this.props.tags ?? [],
-   //  selectedBrand: "",
-   selectedBrand: this.props.brands[0]?.id ?? [0],
+   //  selectedBrand: this.props.brands[0]?.id ?? [0],
    brands: this.props.brands?.map((b) => {
+    return b.id;
+   }),
+   allBrands: this.props.brands?.map((b) => {
     return b.id;
    }),
    selectedCategory: "",
@@ -37,27 +39,44 @@ class ProductsTagsStep extends Component {
    fetching: true,
    brandsOptions: this.props.brands,
    typeOptions: [],
+   page: 1,
+   selectedBrand: "all",
+   mayMoreExist: false,
   };
  }
 
  getProducts = () => {
-  this.setState({
-   fetching: true,
-  });
-  axios
-   .get(
-    `${API}tags?filter[category]=${this.state.selectedCategory}&filter[store_id]=${this.state.selectedBrand}&filter[kind]=${this.state.selectedType}`
-   )
-   .then((response) => {
-    console.log(response);
-    this.setState({
-     products: response.data.products,
-     fetching: false,
-    });
-   })
-   .catch((error) => {
-    console.log(error);
-   });
+  // const { page } = this.state;
+  this.setState(
+   {
+    fetching: true,
+    // page: page + 1,
+   },
+   () => {
+    axios
+     .get(
+      `${API}tags?filter[category]=${this.state.selectedCategory}&filter[store_id]=${this.state.brands}&filter[kind]=${this.state.selectedType}&page=${this.state.page}`
+     )
+     .then((response) => {
+      console.log(response);
+      this.setState(
+       {
+        products: [...this.state.products, ...response.data.products.data],
+        fetching: false,
+       },
+       () => {
+        this.setState({
+         mayMoreExist:
+          this.state.products?.length < response.data.products.total,
+        });
+       }
+      );
+     })
+     .catch((error) => {
+      console.log(error);
+     });
+   }
+  );
  };
 
  rightType = (type) => {
@@ -105,11 +124,15 @@ class ProductsTagsStep extends Component {
   return right;
  };
  handleBrandChange = (selectedBrand) => {
+  // const brands = [selectedBrand];
   this.setState(
    {
-    selectedBrand,
+    selectedBrand: selectedBrand,
     selectedType: "",
-    selectedCategory: [selectedBrand],
+    brands: selectedBrand === "all" ? this.state.allBrands : [selectedBrand],
+    products: [],
+
+    // selectedCategory: [selectedBrand],
    },
    () => {
     this.getProducts();
@@ -123,6 +146,7 @@ class ProductsTagsStep extends Component {
     selectedCategory,
     selectedType: "",
     typeOptions: this.rightType(selectedCategory),
+    products: [],
    },
    () => {
     this.getProducts();
@@ -133,6 +157,7 @@ class ProductsTagsStep extends Component {
   this.setState(
    {
     selectedType,
+    products: [],
    },
    () => {
     this.getProducts();
@@ -145,10 +170,19 @@ class ProductsTagsStep extends Component {
     .get(`${API}tags?filter[store_id]=${this.state.brands}`)
     .then((response) => {
      console.log(response);
-     this.setState({
-      products: response.data.products,
-      fetching: false,
-     });
+     this.setState(
+      {
+       //  page: response.data.products.current_page,
+       products: response.data.products.data,
+       fetching: false,
+      },
+      () => {
+       this.setState({
+        mayMoreExist:
+         this.state.products?.length < response.data.products.total,
+       });
+      }
+     );
     })
     .catch((error) => {
      console.log(error);
@@ -166,10 +200,10 @@ class ProductsTagsStep extends Component {
         className="w-100"
         size="large"
         showSearch
-        value={this.state.selectedBrand[0]}
+        value={this.state.selectedBrand}
         onChange={this.handleBrandChange}
        >
-        <Option value="" key="All">
+        <Option value="all" key="all">
          All Brands
         </Option>
 
@@ -248,7 +282,7 @@ class ProductsTagsStep extends Component {
        <p className="text-right">{`${this.state.ids.length} Selected`} </p>
       </Col>
      </Row>
-     {this.state.fetching ? (
+     {this.state.fetching && this.state.products?.length < 1 ? (
       <Spin
        size="large"
        indicator={
@@ -329,6 +363,20 @@ class ProductsTagsStep extends Component {
          </>
         );
        })}
+       {this.state.mayMoreExist && (
+        <button className="loadmore-search mt-5" onClick={this.getProducts}>
+         {this.state.fetching ? (
+          "LOAD MORE"
+         ) : (
+          <Spin
+           size="large"
+           indicator={
+            <LoadingOutlined style={{ fontSize: "36px", color: "#000" }} spin />
+           }
+          />
+         )}
+        </button>
+       )}
       </Row>
      )}
      {this.state.products?.length < 1 && !this.state.fetching && (
@@ -340,14 +388,7 @@ class ProductsTagsStep extends Component {
       </p>
      )}
     </div>
-    {/* <button
-     className="next-btn"
-     onClick={() => {
-      this.props.dispatchProjectTags(this.state.ids);
-     }}
-    >
-     Save & Continue
-    </button> */}
+
     <div className="next-wrapper">
      <div className="next-inner">
       <button
@@ -361,8 +402,6 @@ class ProductsTagsStep extends Component {
        className="next-btn"
        onClick={() => {
         this.props.dispatchProjectTags(this.state.ids);
-
-        //  this.props.dispatchGoStep(2);
        }}
       >
        Save & Continue

@@ -63,7 +63,7 @@ const PriceRequestModal = (props) => {
      <div className="name">{props?.name}</div>
      <p>{props.store}</p>
     </Col>
-    <Col flex="10px">
+    <Col flex="10px" className="wide-view">
      <Divider type="vertical" style={{ height: "340px" }} />
     </Col>
     <Col flex="auto">

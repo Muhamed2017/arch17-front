@@ -38,7 +38,7 @@
     transform:scale(1)
 }
 .active-slide{
-    border: 2px solid rgb(0, 0, 0) !important;
+    border: 1.5px solid rgb(0, 0, 0) !important;
 }
 #cpm{
     grid-template-columns: repeat(3, auto);
@@ -127,6 +127,7 @@ font-weight: 600;
          }
          .only-mobile{
             display: block;
+            overflow-x: hidden;
          }
 
                  .ant-tabs-nav-more{
@@ -160,21 +161,32 @@ display: none;
 .only-mobile .save-btn.action-btn.bg-white{
 display: none;
 }
-.only-mobile .sv-mobile{
-    width: 43px;
-        height: 45px;
-        position: fixed;
-        border-radius: 6px;
-        right: 28px;
-        color: #fff;
-        font-size: 2.4rem;
-        border-radius: 50;
-        z-index: 5;
-        bottom: 42px;
-        background: #000;
-        text-align: center;
+.ui.sticky{
+    position: absolute !important;
+    top: 0 !important;
+    right: 12px !important;
+    z-index: 10000 !important;
+    max-height: 5px !important;
 }
 
+.only-mobile .sv-mobile{
+    right: 10px !important;
+    width: 40px;
+    height: 40px;
+    /* position: fixed; */
+    border-radius: 5px;
+    right: 28px;
+    color: #fff;
+    font-size: 2.2rem;
+    border-radius: 50;
+    z-index: 5;
+    bottom: 42px;
+    background: #000;
+    text-align: center;
+}
+.stuck-container .sv-mobile {
+    position: fixed;
+}
 #materials button{
     height:52px;
 }

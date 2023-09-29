@@ -14,7 +14,7 @@ class CompaniesTab extends Component {
   };
  }
  componentDidMount() {
-  axios.get(`${API}usercompanies/${this.props?.user_id}`).then((response) => {
+  axios.get(`${API}usercompanies/${this.props?.info?.id}`).then((response) => {
    console.log(response);
    this.setState({
     companies: response.data.companies,
