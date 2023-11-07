@@ -43,12 +43,6 @@ class ProjectSalesPurchasesTab extends Component {
             tp: parseFloat(response.data.purchases_total_with_tax).toFixed(2),
             tcvt: parseFloat(response.data.contracts_total_vat_tax).toFixed(2),
             tpvt: parseFloat(response.data.purchases_total_vat_tax).toFixed(2),
-            // sub_profit: parseFloat(
-            //   response.data.contracts_total_with_tax -
-            //     (response.data.purchases_total_with_tax +
-            //       response.data.contracts_total_vat_tax)
-            // ).toFixed(2),
-
             tpbc: parseFloat(
               this.calculateTotalValueBaseCurrency(
                 response.data.purchases_total_with_tax_currencies,

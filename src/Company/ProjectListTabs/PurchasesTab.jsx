@@ -5,6 +5,7 @@ import PurchasesOrdersTab from "./PurchasesOrdersTab";
 import PaymentTab from "./PaymentTab";
 import PoDeliveryTab from "./PoDeliveryTab";
 import PurchasesSummaryTab from "./PurchasesSummaryTab";
+import PoInvoicesTab from "./PoInvoicesTab";
 
 const { Option } = Select;
 class PurchasesTab extends Component {
@@ -14,6 +15,8 @@ class PurchasesTab extends Component {
   state = {
     // base_currency={this.state.project?.base_currency}
     base_currency: this.props?.base_currency,
+    po_deliveries: this.props.po_deliveries,
+    has_poinvoice_tab: this.props?.has_poinvoice_tab,
   };
 
   componentDidMount() {}
@@ -29,7 +32,7 @@ class PurchasesTab extends Component {
         <div className="sales-tab  po-tab  profile-tabs" id="po-tab">
           <Row justify="start">
             <Col md={24}>
-              <Tabs 
+              <Tabs
               // selectedIndex={3}
               >
                 <TabList
@@ -40,6 +43,7 @@ class PurchasesTab extends Component {
                   <Tab>Purchases Orders</Tab>
                   <Tab>Payments</Tab>
                   <Tab>Deliveries</Tab>
+                  {this.state.has_poinvoice_tab && <Tab>Tax Invoice</Tab>}
                   <Tab>Summary</Tab>
                 </TabList>
                 <TabPanel>
@@ -52,6 +56,7 @@ class PurchasesTab extends Component {
                     updateBaseCurrency={(base_currency) =>
                       this.updateBaseCurrency(base_currency)
                     }
+                    po_deliveries={this.state.po_deliveries}
                   />
                 </TabPanel>
                 <TabPanel>
@@ -59,7 +64,6 @@ class PurchasesTab extends Component {
                     suppliers_options={this.props?.suppliers_options}
                     id={this.props?.project_id}
                     base_currency={this.state.base_currency}
-
                   />
                 </TabPanel>
                 <TabPanel>
@@ -72,12 +76,21 @@ class PurchasesTab extends Component {
                     }
                   />
                 </TabPanel>
+                {this.state.has_poinvoice_tab && (
+                  <TabPanel>
+                    <PoInvoicesTab
+                      company_id={this.props?.company_id}
+                      project_id={this.props.project_id}
+                      base_currency={this.state.base_currency}
+                    />
+                  </TabPanel>
+                )}
                 <TabPanel>
-                  <PurchasesSummaryTab 
-                  project_id={this.props.project_id}
-                  company_id={this.props?.company_id}
-                  base_currency={this.state.base_currency} />
-                  
+                  <PurchasesSummaryTab
+                    project_id={this.props.project_id}
+                    company_id={this.props?.company_id}
+                    base_currency={this.state.base_currency}
+                  />
                 </TabPanel>
               </Tabs>
             </Col>

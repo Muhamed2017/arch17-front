@@ -4,6 +4,7 @@
  "version": "0.1.0",
  "private": true,
  "dependencies": {
+  "@ant-design/charts": "^1.4.2",
   "@ckeditor/ckeditor5-build-classic": "^33.0.0",
   "@ckeditor/ckeditor5-react": "^4.0.1",
   "@fortawesome/fontawesome-free": "^5.15.4",

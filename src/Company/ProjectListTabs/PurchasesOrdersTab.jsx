@@ -8,25 +8,27 @@ import {
   Col,
   Select,
   DatePicker,
-  Spin,
+  Radio,
   Collapse,
+  Dropdown,
 } from "antd";
+import "../pom.css";
 
 import ReactFlagsSelect from "react-flags-select";
 import {
   EditOutlined,
   ExclamationCircleFilled,
   DeleteOutlined,
-  LoadingOutlined,
   DownloadOutlined,
   CloseCircleOutlined,
   CaretDownOutlined,
   DownOutlined,
   UpOutlined,
 } from "@ant-design/icons";
-
+import { FaFilePdf } from "react-icons/fa";
+import { SiMicrosoftexcel } from "react-icons/si";
 import { customLabels } from "../../pages/CreateBrandFinish";
-import { API, VAT_TAX_OPTIONS } from "../../utitlties";
+import { API, VAT_TAX_OPTIONS, LAPI } from "../../utitlties";
 import axios from "axios";
 import { currency } from "../../contexts/currencies";
 
@@ -34,7 +36,6 @@ const { Option } = Select;
 const { confirm } = Modal;
 const { Panel } = Collapse;
 
-const text = "MSNAMMSN";
 class PurchasesOrdersTab extends Component {
   constructor(props) {
     super(props);
@@ -73,6 +74,8 @@ class PurchasesOrdersTab extends Component {
       currency_filter: "",
       base_currency: this.props?.base_currency ?? "",
       exchange_rates: {},
+      pos: [],
+      po_deliveries: this.props.po_deliveries,
     };
   }
   componentDidMount() {
@@ -96,13 +99,26 @@ class PurchasesOrdersTab extends Component {
             pos_sup_rows: Object.keys(response.data.suppliers_pos),
             pos_rows: Object.values(response.data.suppliers_pos),
             payments_rows: response.data.payments_pos,
+            pos: response.data.pos,
+            payments: response.data.payments,
             pos_currencies: response.data.pos_currencies,
             payments_currencies: response.data.payments_currencies,
-            exchange_rates: response.data.exchange_rates,
+            po_deliveries_values: Object.values(this.state.po_deliveries) ?? [],
+            purchases_with_exchange: response.data.pos?.reduce(
+              (accumulator, object) => {
+                return (
+                  parseFloat(accumulator) +
+                  parseFloat(object.total) * parseFloat(object.exchange_rate)
+                );
+              },
+              0
+            ),
             services: Object.values(response.data.suppliers_pos)
               ?.map((s) => {
                 return s?.map((ss) => {
+                 if (ss.items && ss.items?.length>0){
                   return ss.items[0];
+                 }
                 });
               })
               .flat(),
@@ -110,9 +126,157 @@ class PurchasesOrdersTab extends Component {
           () => {
             this.updateTotalSuppliers(this.state.pos_rows);
             console.log(this.state.services_filter_options);
-            this.setState({
-              services_filter_options: [...new Set(this.state.services)],
-            });
+            this.setState(
+              {
+                services_filter_options: [...new Set(this.state.services)],
+                total_paids: this.state.pos_sup_rows?.map((p) => {
+                  // return this.formatNumbers(
+                  return parseFloat(
+                    this.getKeyValue(p, this.state.payments_rows, "value")
+                  );
+                  // );
+                }),
+                total_currency_paids: Object.values(
+                  this.state.pos_currencies
+                )?.map((c, index) => {
+                  return parseFloat(
+                    this.getKeyValue(
+                      c[0]?.currency,
+                      this.state.payments_currencies,
+                      "coast"
+                    )
+                  );
+                }),
+                total_currency_balances: Object.values(
+                  this.state.pos_currencies
+                )?.map((c, index) => {
+                  return parseFloat(
+                    c?.reduce((accumulator, object) => {
+                      return parseFloat(accumulator) + parseFloat(object.total);
+                    }, 0) -
+                      this.getKeyValue(
+                        c[0]?.currency,
+                        this.state.payments_currencies,
+                        "coast"
+                      )
+                  );
+                }),
+                purchases_total_with_exchanges_values: Object.keys(
+                  this.state.po_deliveries
+                )?.map((vendor, index) => {
+                  return this.state.pos
+                    ?.filter((p) => {
+                      return p.supplier_name == vendor;
+                    })
+                    .reduce((accumulator, object) => {
+                      return parseFloat(
+                        parseFloat(accumulator) +
+                          parseFloat(object.total) *
+                            parseFloat(object.exchange_rate)
+                      );
+                    }, 0);
+                }),
+                purchases_total_with_exchanges_percentages: Object.keys(
+                  this.state.po_deliveries
+                )?.map((vendor, index) => {
+                  return (
+                    this.state.pos
+                      ?.filter((p) => {
+                        return p.supplier_name == vendor;
+                      })
+                      .reduce((accumulator, object) => {
+                        return parseFloat(
+                          parseFloat(accumulator) +
+                            parseFloat(object.total) *
+                              parseFloat(object.exchange_rate)
+                        );
+                      }, 0) / this.state.purchases_with_exchange
+                  );
+                }),
+                deliveries_percentages: Object.keys(
+                  this.state.po_deliveries
+                )?.map((vendor, index) => {
+                  return (
+                    (parseFloat(
+                      this.state.po_deliveries_values[index].reduce(
+                        (accumulator, object) => {
+                          return parseFloat(
+                            parseFloat(accumulator) + parseFloat(object.value)
+                          );
+                        },
+                        0
+                      )
+                    ) /
+                      (parseFloat(
+                        this.state.po_deliveries_values[index][0]?.leftp
+                      ) +
+                        parseFloat(
+                          this.state.po_deliveries_values[index].reduce(
+                            (accumulator, object) => {
+                              return parseFloat(
+                                parseFloat(accumulator) +
+                                  parseFloat(object.value)
+                              );
+                            },
+                            0
+                          )
+                        ))) *
+                    (this.state.pos
+                      ?.filter((p) => {
+                        return p.supplier_name == vendor;
+                      })
+                      .reduce((accumulator, object) => {
+                        return parseFloat(
+                          parseFloat(accumulator) +
+                            parseFloat(object.total) *
+                              parseFloat(object.exchange_rate)
+                        );
+                      }, 0) /
+                      this.state.purchases_with_exchange)
+                  );
+                }),
+              },
+              () => {
+                console.log(this.state.total_paids);
+                console.log(this.state.total_currency_paids);
+                console.log(this.state.total_currency_balances);
+
+                this.setState(
+                  {
+                    td:
+                      100 *
+                      this.state.deliveries_percentages?.reduce(
+                        (accumulator, object) => {
+                          return parseFloat(
+                            parseFloat(accumulator) + parseFloat(object)
+                          );
+                        },
+                        0
+                      ),
+                    tl:
+                      100 -
+                      100 *
+                        this.state.deliveries_percentages?.reduce(
+                          (accumulator, object) => {
+                            return parseFloat(
+                              parseFloat(accumulator) + parseFloat(object)
+                            );
+                          },
+                          0
+                        ),
+                  },
+                  () => {
+                    console.log(this.state.td);
+                    console.log(this.state.tl);
+                  }
+                );
+                console.log(this.state.purchases_with_exchange);
+                console.log(
+                  this.state.purchases_total_with_exchanges_percentages
+                );
+                console.log(this.state.deliveries_percentages);
+              }
+            );
           }
         );
       });
@@ -142,37 +306,48 @@ class PurchasesOrdersTab extends Component {
   onFinish = (values) => {
     console.log(values);
     let subtotal, total, vat_tax_value;
-    if (values.vat_tax_type === "in") {
-      subtotal =
-        parseFloat(values.pos_value) /
-        parseFloat(1 + parseFloat(values.vat_tax_percentage) / 100);
-      total = values.pos_value;
-      vat_tax_value = total - subtotal;
+    values["pos_value"] = values.pos_value?.replaceAll(",", "");
+    if (values.contract_taxable === "taxable") {
+      if (values.vat_tax_type === "in") {
+        subtotal =
+          parseFloat(values.pos_value) /
+          parseFloat(1 + parseFloat(values.vat_tax_percentage) / 100);
+          total = values.pos_value;
+          vat_tax_value = total - subtotal;
+      }
+  
+      if (values.vat_tax_type === "not") {
+        if (parseFloat(values.vat_tax_percentage) === 0) {
+          total = values.pos_value;
+          subtotal = values.pos_value;
+          vat_tax_value = 0;
+        }
+  
+        if (parseFloat(values.vat_tax_percentage) > 0) {
+          vat_tax_value =
+            (parseFloat(values.vat_tax_percentage) / 100) *
+            parseFloat(values.pos_value);
+          subtotal = values.pos_value;
+          total = parseFloat(values.pos_value) + vat_tax_value;
+        }
+      }
     }
-    // if (values.vat_tax_type === "not") {
-    //   total = values.pos_value;
-    //   values["vat_tax_percentage"] = 0;
-    //   subtotal = values.pos_value;
-    //   vat_tax_value = 0;
-    // }
+    else{
+      total = values.pos_value;
+      subtotal = values.pos_value;
+      vat_tax_value = 0;
+      values["vat_tax_percentage"] = 0;
+      values["vat_tax_type"] = "not";
+    }
 
-    if (values.vat_tax_type === "not") {
-      if (parseFloat(values.vat_tax_percentage) === 0) {
-       total = values.pos_value;
-       subtotal = values.pos_value;
-       vat_tax_value = 0;
-      }
-      if (parseFloat(values.vat_tax_percentage) > 0) {
-       vat_tax_value = ( parseFloat(values.vat_tax_percentage) /100 ) *  parseFloat(values.pos_value)
-       subtotal= values.pos_value;
-       total=parseFloat(values.pos_value) + vat_tax_value
-      }
-     }
     values["subtotal"] = subtotal;
     values["vat_tax_value"] = vat_tax_value;
     values["total"] = total;
-
     values["currency"] = this.state.selectedCurrency;
+
+    if (this.state.selectedCurrency === this.state.base_currency) {
+      values["exchange_rate"] = 1;
+    }
 
     console.log(values);
 
@@ -194,10 +369,12 @@ class PurchasesOrdersTab extends Component {
     fd.append("subtotal", values.subtotal);
     fd.append("total", values.total);
     fd.append("items[0]", values.items[0]);
+    fd.append("exchange_rate", values.exchange_rate);
     fd.append("value", values.pos_value);
     fd.append("order_number", values.pos_order_number);
     fd.append("referance", values.pos_referance);
     fd.append("currency", currency);
+    fd.append("contract_taxable", values.contract_taxable);
     axios.post(`${API}add-po/${this.state.project_id}`, fd).then((response) => {
       console.log(response);
       this.setState({ pos_rows, pos_sup_rows, add_modal: false }, () => {
@@ -208,33 +385,47 @@ class PurchasesOrdersTab extends Component {
     });
   };
   onFinishEdit = (values) => {
+    values["pos_value"] = values.pos_value?.replaceAll(",", "");
     const id = this.state.po_to_edit?.id;
     console.log(values);
     let subtotal, total, vat_tax_value;
-    if (values.vat_tax_type === "in") {
-      subtotal =
-        parseFloat(values.pos_value) /
-        parseFloat(1 + parseFloat(values.vat_tax_percentage) / 100);
-      total = values.pos_value;
-      vat_tax_value = total - subtotal;
+    if (values.contract_taxable === "taxable") {
+      if (values.vat_tax_type === "in") {
+        subtotal =
+          parseFloat(values.pos_value) /
+          parseFloat(1 + parseFloat(values.vat_tax_percentage) / 100);
+        total = values.pos_value;
+        vat_tax_value = total - subtotal;
+      }
+      if (values.vat_tax_type === "not") {
+        if (parseFloat(values.vat_tax_percentage) === 0) {
+          total = values.pos_value;
+          subtotal = values.pos_value;
+          vat_tax_value = 0;
+        }
+        if (parseFloat(values.vat_tax_percentage) > 0) {
+          vat_tax_value =
+            (parseFloat(values.vat_tax_percentage) / 100) *
+            parseFloat(values.pos_value);
+          subtotal = values.pos_value;
+          total = parseFloat(values.pos_value) + vat_tax_value;
+        }
+      }
     }
-    if (values.vat_tax_type === "not") {
-      if (parseFloat(values.vat_tax_percentage) === 0) {
-       total = values.pos_value;
-       subtotal = values.pos_value;
-       vat_tax_value = 0;
-      }
-      if (parseFloat(values.vat_tax_percentage) > 0) {
-       vat_tax_value = ( parseFloat(values.vat_tax_percentage) /100 ) *  parseFloat(values.pos_value)
-       subtotal= values.pos_value;
-       total=parseFloat(values.pos_value) + vat_tax_value
-      }
-     }
+    else{
+      total = values.pos_value;
+      subtotal = values.pos_value;
+      vat_tax_value = 0;
+      values["vat_tax_percentage"] = 0;
+    }
     values["subtotal"] = subtotal;
     values["vat_tax_value"] = vat_tax_value;
     values["total"] = total;
 
-    console.log(values)
+    if (this.state.selectedCurrency === this.state.base_currency) {
+      values["exchange_rate"] = 1;
+    }
+    console.log(values);
     const _index = this.state.suppliers_options.findIndex(
       (d) => values.pos_supplier === d.name
     );
@@ -249,11 +440,13 @@ class PurchasesOrdersTab extends Component {
     fd.append("items[0]", values.items[0]);
     fd.append("value", values.pos_value);
     fd.append("order_number", values.pos_order_number);
+    fd.append("exchange_rate", values.exchange_rate);
     fd.append("referance", values.pos_referance);
     fd.append("subtotal", values.subtotal);
     fd.append("vat_tax_type", values.vat_tax_type);
     fd.append("vat_tax_value", values.vat_tax_value);
     fd.append("vat_tax_percentage", values.vat_tax_percentage);
+    fd.append("contract_taxable", values.contract_taxable);
     fd.append("total", values.total);
 
     axios.post(`${API}edit-po/${id}`, fd).then((response) => {
@@ -265,6 +458,7 @@ class PurchasesOrdersTab extends Component {
       });
     });
   };
+
   updateCurrencyValue = (currency, value) => {
     const { pos_currencies } = this.state;
     const rows = pos_currencies[currency] ?? [];
@@ -276,10 +470,14 @@ class PurchasesOrdersTab extends Component {
   };
 
   SupplierChange = (selected_supplier) => {
-    const { pos_sup_rows, pos_rows } = this.state;
-    const index = pos_sup_rows.findIndex((d) => selected_supplier === d);
+    const { pos_sup_rows, pos_rows, suppliers_options } = this.state;
+    // const index = pos_sup_rows.findIndex((d) => selected_supplier === d);
+    const index = this.state.suppliers_options.findIndex(
+      (d) => selected_supplier === d.name
+    );
     if (index !== -1) {
-      const selectedCurrency = pos_rows[index][0].currency;
+      // const selectedCurrency = pos_rows[index][0].currency;
+      const selectedCurrency = suppliers_options[index].currency;
       this.setState({ selectedCurrency }, () => {
         console.log(this.state.selectedCurrency);
       });
@@ -386,7 +584,7 @@ class PurchasesOrdersTab extends Component {
                 .post(`${API}add-rate/${this.state.project_id}`, _fd)
                 .then((res) => {
                   this.setState({
-                    exchange_rates: res.data.exchange_rates,
+                    // exchange_rates: res.data.exchange_rates,
                   });
                   this.updateBaseCurrencyToParent();
                 });
@@ -394,32 +592,6 @@ class PurchasesOrdersTab extends Component {
         }
       }
     );
-  };
-  calculateTotalValueBaseCurrency = (currencies, rates) => {
-    let total = 0;
-    Object.values(currencies)?.map((c) => {
-      total +=
-        c?.reduce((accumulator, object) => {
-          return parseFloat(
-            parseFloat(accumulator) + parseFloat(object.total)
-          ).toFixed(2);
-        }, 0) * this.getValue(c[0]?.currency, rates);
-    });
-
-    return total;
-  };
-  calculateTotalPaidBaseCurrency = (currencies, rates) => {
-    let total = 0;
-    Object.values(currencies)?.map((c) => {
-      total +=
-        this.getKeyValue(
-          c[0]?.currency,
-          this.state.payments_currencies,
-          "coast"
-        ) * this.getValue(c[0]?.currency, rates);
-    });
-
-    return total;
   };
   rateChange = (e, currency) => {
     const value = e?.target?.value;
@@ -431,7 +603,7 @@ class PurchasesOrdersTab extends Component {
         .post(`${API}add-rate/${this.state.project_id}`, fd)
         .then((response) => {
           this.setState({
-            exchange_rates: response.data.exchange_rates,
+            // exchange_rates: response.data.exchange_rates,
           });
         });
     }
@@ -480,7 +652,54 @@ class PurchasesOrdersTab extends Component {
       }
     );
   };
+
   addPoValuesChange = (changedValues, allValues) => {
+    allValues["pos_value"] = allValues?.pos_value?.replaceAll(",", "");
+    this.setState(
+      {
+        taxable: allValues.contract_taxable === "taxable",
+      },
+      () => {
+        console.log(this.state.taxable);
+      }
+    );
+    let subtotal, total, vat_tax_value;
+    if (allValues.vat_tax_type === "in") {
+      if (allValues.pos_value && allValues.pos_value > 0) {
+        subtotal =
+          parseFloat(allValues.pos_value) /
+          parseFloat(1 + parseFloat(allValues.vat_tax_percentage) / 100);
+        total = allValues.pos_value;
+        vat_tax_value = total - subtotal;
+      }
+    }
+
+    if (allValues.vat_tax_type === "not") {
+      if (parseFloat(allValues.vat_tax_percentage) === 0) {
+        total = allValues.pos_value;
+        subtotal = allValues.pos_value;
+        vat_tax_value = 0;
+      }
+      if (parseFloat(allValues.vat_tax_percentage) > 0) {
+        vat_tax_value =
+          (parseFloat(allValues.vat_tax_percentage) / 100) *
+          parseFloat(allValues.pos_value);
+        subtotal = allValues.pos_value;
+        total = parseFloat(allValues.pos_value) + vat_tax_value;
+      }
+    }
+    this.setState(
+      {
+        subtotal,
+        total,
+        vat_tax_value,
+      },
+      () => {
+        console.log(this.state.total);
+        console.log(this.state.vat_tax_value);
+        console.log(this.state.subtotal);
+      }
+    );
     this.setState(
       {
         tax_disabled: allValues.vat_tax_type === "not",
@@ -494,6 +713,11 @@ class PurchasesOrdersTab extends Component {
   onValuesEditing = (changedValues, allValues) => {
     const { po_to_edit } = this.state;
     po_to_edit.vat_tax_type = allValues.vat_tax_type;
+    po_to_edit.contract_taxable = allValues.contract_taxable;
+
+    // allValues["vat_tax_type"] =
+    // allValues?.vat_tax_type || this.state.contract_to_edit?.vat_tax_type;
+
     this.setState(
       {
         po_to_edit,
@@ -502,17 +726,98 @@ class PurchasesOrdersTab extends Component {
         console.log(this.state.po_to_edit);
       }
     );
+    let subtotal, total, vat_tax_value;
+    if (allValues.vat_tax_type === "in") {
+      if (allValues.pos_value && allValues.pos_value > 0) {
+        subtotal =
+          parseFloat(allValues.pos_value) /
+          parseFloat(1 + parseFloat(allValues.vat_tax_percentage) / 100);
+        total = allValues.pos_value;
+        vat_tax_value = total - subtotal;
+      }
+    }
+    if (allValues.vat_tax_type === "not") {
+      if (parseFloat(allValues.vat_tax_percentage) === 0) {
+        total = allValues.pos_value;
+        subtotal = allValues.pos_value;
+        vat_tax_value = 0;
+      }
+      if (parseFloat(allValues.vat_tax_percentage) > 0) {
+        vat_tax_value =
+          (parseFloat(allValues.vat_tax_percentage) / 100) *
+          parseFloat(allValues.pos_value);
+        subtotal = allValues.pos_value;
+        total = parseFloat(allValues.pos_value) + vat_tax_value;
+      }
+    }
+    this.setState(
+      {
+        subtotal,
+        total,
+        vat_tax_value,
+      },
+      () => {
+        console.log(this.state.total);
+        console.log(this.state.vat_tax_value);
+        console.log(this.state.subtotal);
+      }
+    );
   };
+
   render() {
     return (
       <>
         <div className="tables-page">
           <div className="btns-actions">
             <button>
-              Download{" "}
-              <span>
-                <DownloadOutlined />
-              </span>
+              <Dropdown
+                overlayClassName="download-tables-menu"
+                placement="bottomLeft"
+                menu={{
+                  items: [
+                    {
+                      key: "1",
+                      label: (
+                        <div>
+                          <div className="menu-download-item">
+                            <a
+                              href={`${API}purchases-statement-xls/${
+                                this.state.project_id
+                              }?p=${[this.state.total_paids]}&cb=${
+                                this.state.total_currency_balances
+                              }&cp=${this.state.total_currency_paids}&dvp=${
+                                this.state.td
+                              }&dlp=${this.state.tl}`}
+                            >
+                              <SiMicrosoftexcel />
+                            </a>
+                          </div>
+                          <div className="menu-download-item">
+                            <a
+                              href={`${API}purchases-statement-pdf/${
+                                this.state.project_id
+                              }?p=${[this.state.total_paids]}&cb=${
+                                this.state.total_currency_balances
+                              }&cp=${this.state.total_currency_paids}&dvp=${
+                                this.state.td
+                              }&dlp=${this.state.tl}`}
+                            >
+                              <FaFilePdf />
+                            </a>
+                          </div>
+                        </div>
+                      ),
+                    },
+                  ],
+                }}
+              >
+                <a onClick={(e) => e.preventDefault()}>
+                  Download{" "}
+                  <span>
+                    <DownloadOutlined />
+                  </span>
+                </a>
+              </Dropdown>
             </button>
 
             <button onClick={this.openSupplierListAddModal}>
@@ -610,7 +915,6 @@ class PurchasesOrdersTab extends Component {
                     placeholder="Year"
                     size="large"
                     picker="year"
-                    // style={{ width: "100%" }}
                     onChange={this.onYearChange}
                     suffixIcon={<CaretDownOutlined />}
                   />
@@ -638,13 +942,14 @@ class PurchasesOrdersTab extends Component {
                 </Col>
               </Row>
             </div>
-            <div className="customized-table purchases-table">
+            <div className={"customized-table purchases-table"}>
               <div className="header-row table-row">
                 <div>Vendor</div>
                 <div>Product/Service Type</div>
                 <div>Order NO, Date</div>
                 <div>Referance</div>
-                <div>Value</div>
+                <div>Totl Value</div>
+                <div>{`EX.R / ${this.state.base_currency}`}</div>
                 <div>Paid</div>
                 <div>Balance</div>
               </div>
@@ -659,7 +964,29 @@ class PurchasesOrdersTab extends Component {
                         >
                           <Panel
                             header={
-                              <div className="table-row data-row collabser-row">
+                              <div className="table-row data-row collabser-row relative">
+                                <div className="edit-delete">
+                                  <Row align={"middle"}>
+                                    <Col md={8}>
+                                      <a
+                                        href={`${API}vendor-xls/${this.state.project_id}/${this.state.pos_rows[index][0].supplier_id}`}
+                                      >
+                                        <span>
+                                          <SiMicrosoftexcel />
+                                        </span>
+                                      </a>
+                                    </Col>
+                                    <Col md={8}>
+                                      <a
+                                        href={`${API}vendor-pdf/${this.state.project_id}/${this.state.pos_rows[index][0].supplier_id}`}
+                                      >
+                                        <span>
+                                          <FaFilePdf />
+                                        </span>
+                                      </a>
+                                    </Col>
+                                  </Row>
+                                </div>
                                 <div>
                                   <p className="main">{p}</p>
                                   <p className="sec">
@@ -694,8 +1021,6 @@ class PurchasesOrdersTab extends Component {
                                             return (
                                               parseFloat(accumulator) +
                                               parseFloat(object.total)
-                                              
-                                              // parseFloat(object.value)
                                             );
                                           },
                                           0
@@ -707,6 +1032,7 @@ class PurchasesOrdersTab extends Component {
                                     {this.state.pos_rows[index][0]?.currency}
                                   </p>
                                 </div>
+                                <div></div>
                                 <div>
                                   {this.state.payments_rows[p] ? (
                                     <>
@@ -807,6 +1133,10 @@ class PurchasesOrdersTab extends Component {
                                             this.setState(
                                               {
                                                 po_to_edit: t,
+                                                selectedCurrency: t?.currency,
+                                                subtotal: t?.subtotal,
+                                                total: t?.total,
+                                                vat_tax_value: t?.vat_tax_value,
                                               },
                                               () => {
                                                 this.setState({
@@ -835,20 +1165,31 @@ class PurchasesOrdersTab extends Component {
                                   </div>
                                   <div></div>
                                   <div>
-                                    <p className="main">{t.items[0]}</p>
+                                    {t?.items &&(t?.items?.length>0)&&(
+                                      <p className="main">{t.items[0]}</p>
+                                    )}
                                   </div>
                                   <div>
                                     <p className="main">{t.order_number}</p>
                                   </div>
+
                                   <div>
                                     <p className="main">{t.referance}</p>
                                   </div>
+
                                   <div>
-                                    <p className="main">{t.total}</p>
+                                    <p className="main">
+                                      {this.formatNumbers(t.total)}
+                                    </p>
+
                                     <p className="sec">
                                       {this.state.pos_rows[index][0]?.currency}
                                     </p>
                                   </div>
+                                  <div>
+                                    <p className="main">{t.exchange_rate}</p>
+                                  </div>
+
                                   <div></div>
                                   <div></div>
                                 </div>
@@ -864,17 +1205,34 @@ class PurchasesOrdersTab extends Component {
                             <div className="data-row table-row  relative">
                               <div className="edit-delete">
                                 <Row align={"middle"}>
-                                  <Col md={8}>
-                                    <span>
-                                      <DownloadOutlined />
-                                    </span>
+                                  <Col md={6}>
+                                    <a
+                                      href={`${API}vendor-xls/${this.state.project_id}/${this.state.pos_rows[index][0].supplier_id}`}
+                                    >
+                                      <span>
+                                        <SiMicrosoftexcel />
+                                      </span>
+                                    </a>
                                   </Col>
-                                  <Col md={8}>
+                                  <Col md={6}>
+                                    <a
+                                      href={`${API}vendor-pdf/${this.state.project_id}/${this.state.pos_rows[index][0].supplier_id}`}
+                                    >
+                                      <span>
+                                        <FaFilePdf />
+                                      </span>
+                                    </a>
+                                  </Col>
+                                  <Col md={6}>
                                     <EditOutlined
                                       onClick={() => {
                                         this.setState(
                                           {
                                             po_to_edit: o,
+                                            subtotal: o?.subtotal,
+                                            total: o?.total,
+                                            vat_tax_value: o?.vat_tax_value,
+                                            selectedCurrency: o?.currency,
                                           },
                                           () => {
                                             this.setState({
@@ -885,7 +1243,7 @@ class PurchasesOrdersTab extends Component {
                                       }}
                                     />
                                   </Col>
-                                  <Col md={8}>
+                                  <Col md={6}>
                                     <DeleteOutlined
                                       onClick={() => {
                                         this.setState(
@@ -916,6 +1274,7 @@ class PurchasesOrdersTab extends Component {
                               <div>
                                 <p className="main">{o.referance}</p>
                               </div>
+
                               <div>
                                 <p className="main total">
                                   {this.formatNumbers(
@@ -936,6 +1295,10 @@ class PurchasesOrdersTab extends Component {
                                   {this.state.pos_rows[index][0]?.currency}
                                 </p>
                               </div>
+                              <div>
+                                <p className="main">{o.exchange_rate}</p>
+                              </div>
+
                               <div>
                                 {this.state.payments_rows[p] ? (
                                   <>
@@ -1022,37 +1385,17 @@ class PurchasesOrdersTab extends Component {
           {Object.values(this.state.pos_currencies)?.length > 0 && (
             <div className="pom-table clientlist-table  base-currency">
               {this.state.base_currency && (
-                <span className="select-label">Total in </span>
+                <span className="select-label high">Total</span>
               )}
-              <Select
-                defaultValue={this.state.base_currency}
-                value={this.state.base_currency}
-                size="large"
-                placeholder="Select your base currency"
-                bordered={false}
-                style={{
-                  width: "250px",
-                }}
-                onChange={this.baseCurrencyChange}
-              >
-                {!this.state.base_currency && (
-                  <Option value="">Select your base currency</Option>
-                )}
 
-                {currency.map((p) => {
-                  return <Option value={p.code}>{p.code}</Option>;
-                })}
-              </Select>
               <table>
                 <tr>
                   <th className="width-50">Currency</th>
+                  <th className="width-130">Purchase Orders Subvalue</th>
+                  <th className="width-80">VAT</th>
                   <th className="width-100">Purcahse Orders Value</th>
                   <th className="width-100">Total Paid</th>
-                  <th className="width-100">Total Balance</th>
-                  <th className="width-300">
-                    {" "}
-                    EX.Rate to {this.state.base_currency}
-                  </th>
+                  <th className="width-250">Total Balance</th>
                 </tr>
                 {Object.values(this.state.pos_currencies)?.map((c, index) => {
                   return (
@@ -1067,7 +1410,38 @@ class PurchasesOrdersTab extends Component {
                               return (
                                 parseFloat(accumulator) +
                                 parseFloat(object.total)
-                                // parseFloat(object.value)
+                              ).toFixed(2);
+                            }, 0) -
+                              c?.reduce((accumulator, object) => {
+                                return (
+                                  parseFloat(accumulator) +
+                                  parseFloat(object.vat_tax_value)
+                                ).toFixed(2);
+                              }, 0)
+                          )}
+                        </p>
+                        <p className="sec">{c[0]?.currency}</p>
+                      </td>
+                      <td>
+                        <p className="main">
+                          {this.formatNumbers(
+                            c?.reduce((accumulator, object) => {
+                              return (
+                                parseFloat(accumulator) +
+                                parseFloat(object.vat_tax_value)
+                              ).toFixed(2);
+                            }, 0)
+                          )}
+                        </p>
+                        <p className="sec">{c[0]?.currency}</p>
+                      </td>
+                      <td>
+                        <p className="main">
+                          {this.formatNumbers(
+                            c?.reduce((accumulator, object) => {
+                              return (
+                                parseFloat(accumulator) +
+                                parseFloat(object.total)
                               ).toFixed(2);
                             }, 0)
                           )}
@@ -1106,40 +1480,11 @@ class PurchasesOrdersTab extends Component {
                         </p>
                         <p className="sec">{c[0]?.currency}</p>
                       </td>
-                      <td>
-                        {this.state.base_currency === c[0]?.currency ? (
-                          <Input
-                            bordered={false}
-                            className="factor-input"
-                            disabled
-                            size="large"
-                            placeholder="Type Exchange Rate"
-                            maxLength={16}
-                            value={1}
-                            defaultValue={1}
-                          />
-                        ) : (
-                          <Input
-                            bordered={false}
-                            className="factor-input"
-                            size="large"
-                            placeholder="Type Exchange Rate"
-                            maxLength={16}
-                            onChange={(e) => this.rateChange(e, c[0]?.currency)}
-                            defaultValue={
-                              this.getValue(
-                                c[0]?.currency,
-                                this.state.exchange_rates
-                              ) ?? 1
-                            }
-                          />
-                        )}
-                      </td>
                     </tr>
                   );
                 })}
                 {this.state.base_currency && (
-                  <tr>
+                  <tr className="border-top-1">
                     <td>
                       <p className="sale">Total in</p>
                       <p className="sec">{this.state.base_currency}</p>
@@ -1148,11 +1493,23 @@ class PurchasesOrdersTab extends Component {
                       <p className="main">
                         {this.formatNumbers(
                           parseFloat(
-                            this.calculateTotalValueBaseCurrency(
-                              this.state.pos_currencies,
-                              this.state.exchange_rates
+                            this.state.pos?.reduce((accumulator, object) => {
+                              return (
+                                parseFloat(accumulator) +
+                                parseFloat(object.total) *
+                                  parseFloat(object.exchange_rate)
+                              );
+                            }, 0)
+                          ) -
+                            parseFloat(
+                              this.state.pos?.reduce((accumulator, object) => {
+                                return (
+                                  parseFloat(accumulator) +
+                                  parseFloat(object.vat_tax_value) *
+                                    parseFloat(object.exchange_rate)
+                                );
+                              }, 0)
                             )
-                          ).toFixed(2)
                         )}
                       </p>
                       <p className="sec">{this.state.base_currency}</p>
@@ -1161,10 +1518,13 @@ class PurchasesOrdersTab extends Component {
                       <p className="main">
                         {this.formatNumbers(
                           parseFloat(
-                            this.calculateTotalPaidBaseCurrency(
-                              this.state.pos_currencies,
-                              this.state.exchange_rates
-                            )
+                            this.state.pos?.reduce((accumulator, object) => {
+                              return (
+                                parseFloat(accumulator) +
+                                parseFloat(object.vat_tax_value) *
+                                  parseFloat(object.exchange_rate)
+                              );
+                            }, 0)
                           ).toFixed(2)
                         )}
                       </p>
@@ -1173,14 +1533,51 @@ class PurchasesOrdersTab extends Component {
                     <td>
                       <p className="main">
                         {this.formatNumbers(
+                          this.state.pos?.reduce((accumulator, object) => {
+                            return (
+                              parseFloat(accumulator) +
+                              parseFloat(object.total) *
+                                parseFloat(object.exchange_rate)
+                            );
+                          }, 0)
+                        )}
+                      </p>
+                      <p className="sec">{this.state.base_currency}</p>
+                    </td>
+                    <td>
+                      <p className="main">
+                        {this.formatNumbers(
+                          this.state.payments?.reduce((accumulator, object) => {
+                            return (
+                              parseFloat(accumulator) +
+                              parseFloat(object.value) *
+                                parseFloat(object.exchange_rate)
+                            );
+                          }, 0)
+                        )}
+                      </p>
+                      <p className="sec">{this.state.base_currency}</p>
+                    </td>
+                    <td>
+                      <p className="main">
+                        {this.formatNumbers(
                           parseFloat(
-                            this.calculateTotalValueBaseCurrency(
-                              this.state.pos_currencies,
-                              this.state.exchange_rates
-                            ) -
-                              this.calculateTotalPaidBaseCurrency(
-                                this.state.pos_currencies,
-                                this.state.exchange_rates
+                            this.state.pos?.reduce((accumulator, object) => {
+                              return (
+                                parseFloat(accumulator) +
+                                parseFloat(object.total) *
+                                  parseFloat(object.exchange_rate)
+                              );
+                            }, 0) -
+                              this.state.payments?.reduce(
+                                (accumulator, object) => {
+                                  return (
+                                    parseFloat(accumulator) +
+                                    parseFloat(object.value) *
+                                      parseFloat(object.exchange_rate)
+                                  );
+                                },
+                                0
                               )
                           )
                         )}
@@ -1203,6 +1600,7 @@ class PurchasesOrdersTab extends Component {
           onCancel={() => {
             this.setState({
               add_modal: false,
+              selectedCurrency: "",
             });
           }}
           closable
@@ -1283,7 +1681,6 @@ class PurchasesOrdersTab extends Component {
             >
               <Input placeholder="type  payment referance" />
             </Form.Item>
-
             <Form.Item
               label="Order NO"
               name="pos_order_number"
@@ -1313,13 +1710,30 @@ class PurchasesOrdersTab extends Component {
               </Col>
             </Row>
 
-            <Form.Item name="vat_tax_type" label="Vat Tax" size="large">
+            {this.state.selectedCurrency?.length > 0 &&
+              this.state.selectedCurrency !== this.state.base_currency && (
+                <Form.Item
+                  rules={[
+                    {
+                      required: true,
+                      message: "Ex.Rate is required!",
+                    },
+                  ]}
+                  name="exchange_rate"
+                  label={`Ex. Rate to ${this.state.base_currency}`}
+                >
+                  <Input
+                    type="float"
+                    placeholder="Input the exchange rate to base currancy"
+                  />
+                </Form.Item>
+              )}
+            {/* <Form.Item name="vat_tax_type" label="Vat Tax" size="large">
               <Select
                 placeholder="Select whether tax included or not"
                 style={{
                   width: "100%",
                 }}
-                // onChange={this.SupplierChange}
               >
                 {VAT_TAX_OPTIONS.map((v) => {
                   return <Option value={v.value}>{v.label}</Option>;
@@ -1332,18 +1746,99 @@ class PurchasesOrdersTab extends Component {
                 suffix="%"
                 max={100}
                 min={0}
-                type="number"
-                // disabled={this.state.tax_disabled}
+                type="float"
               />
             </Form.Item>
-            <p className="sec">
-              If ‘tax included’ is selected, your contract value already
-              incorporates the special VAT. If ‘not included’ is selected, the
-              assigned percentage will supplement the contract’s total value.
-              Maintain tax at 0% if it won’t be appended later. Remember, this
-              applies only to the special VAT that could be refundable or
-              non-refundable.
-            </p>
+            {this.state.vat_tax_value &&
+              this.state.vat_tax_value > 0 &&
+              this.state.subtotal &&
+              this.state.subtotal > 0 &&
+              this.state.total &&
+              this.state.total > 0 && (
+                <p className="fs-18 monitor">
+                  <div>
+                    <span>Sub-total:</span>
+                    {` ${this.formatNumbers(this.state.subtotal)}`}
+                  </div>
+                  <div>
+                    <span>Vat Tax:</span>
+                    {` ${this.formatNumbers(this.state.vat_tax_value)}`}
+                  </div>
+                  <div>
+                    <span>Total:</span>
+                    {` ${this.formatNumbers(this.state.total)}`}
+                  </div>
+                </p>
+              )} */}
+               <Form.Item
+                    label="Contract Tax:"
+                    name="contract_taxable"
+                    layout="horizontal"
+                    labelCol={{
+                      span: 8,
+                    }}
+                    wrapperCol={{
+                      span: 10,
+                    }}
+                  >
+                    <Radio.Group>
+                      <Radio value="taxable"> Taxable</Radio>
+                      <Radio value="nontaxable">Non-taxable</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                  {this.state.taxable && (
+                    <>
+                      <Form.Item
+                        name="vat_tax_type"
+                        label="Vat Tax"
+                        size="large"
+                      >
+                        <Select
+                          placeholder="Select whether tax included or not"
+                          style={{
+                            width: "100%",
+                          }}
+                        >
+                          {VAT_TAX_OPTIONS.map((v) => {
+                            return <Option value={v.value}>{v.label}</Option>;
+                          })}
+                        </Select>
+                      </Form.Item>
+
+                      <Form.Item name="vat_tax_percentage" label="Add Tax %">
+                        <Input
+                          placeholder="Please add the Tax % of the total Contract"
+                          suffix="%"
+                          max={100.0}
+                          min={0.0}
+                          type="float"
+                        />
+                      </Form.Item>
+                      {this.state.vat_tax_value &&
+                        this.state.vat_tax_value > 0 &&
+                        this.state.subtotal &&
+                        this.state.subtotal > 0 &&
+                        this.state.total &&
+                        this.state.total > 0 && (
+                          <p className="fs-18 monitor">
+                            <div>
+                              <span>Sub-total:</span>
+                              {` ${this.formatNumbers(this.state.subtotal)}`}
+                            </div>
+                            <div>
+                              <span>Vat Tax:</span>
+                              {` ${this.formatNumbers(
+                                this.state.vat_tax_value
+                              )}`}
+                            </div>
+                            <div>
+                              <span>Total:</span>
+                              {` ${this.formatNumbers(this.state.total)}`}
+                            </div>
+                          </p>
+                        )}
+                    </>
+                  )}
 
             <Row justify={"end"}>
               <Col>
@@ -1364,6 +1859,10 @@ class PurchasesOrdersTab extends Component {
           onCancel={() => {
             this.setState({
               edit_po_modal: false,
+              selectedCurrency: "",
+              subtotal:0,
+              total:0,
+              vat_tax_value:0
             });
           }}
           closable
@@ -1476,6 +1975,25 @@ class PurchasesOrdersTab extends Component {
                 </Form.Item>
               </Col>
             </Row>
+            {this.state.selectedCurrency?.length > 0 &&
+              this.state.selectedCurrency !== this.state.base_currency && (
+                <Form.Item
+                  rules={[
+                    {
+                      required: true,
+                      message: "Ex.Rate is required!",
+                    },
+                  ]}
+                  name="exchange_rate"
+                  label={`Ex. Rate to ${this.state.base_currency}`}
+                  initialValue={this.state.po_to_edit?.exchange_rate}
+                >
+                  <Input
+                    type="float"
+                    placeholder="Input the exchange rate to base currancy"
+                  />
+                </Form.Item>
+              )}
 
             <Form.Item
               name="vat_tax_type"
@@ -1505,18 +2023,31 @@ class PurchasesOrdersTab extends Component {
                 suffix="%"
                 max={100}
                 min={0}
-                type="number"
+                type="float"
                 // disabled={this.state.po_to_edit?.vat_tax_type === "not"}
               />
             </Form.Item>
-            <p className="sec">
-                    If ‘tax included’ is selected, your contract value already
-                    incorporates the special VAT. If ‘not included’ is selected,
-                    the assigned percentage will supplement the contract’s total
-                    value. Maintain tax at 0% if it won’t be appended later.
-                    Remember, this applies only to the special VAT that could be
-                    refundable or non-refundable.
-                  </p>
+            {this.state.vat_tax_value &&
+              this.state.vat_tax_value > 0 &&
+              this.state.subtotal &&
+              this.state.subtotal > 0 &&
+              this.state.total &&
+              this.state.total > 0 && (
+                <p className="fs-18 monitor">
+                  <div>
+                    <span>Sub-total:</span>
+                    {` ${this.formatNumbers(this.state.subtotal)}`}
+                  </div>
+                  <div>
+                    <span>Vat Tax:</span>
+                    {` ${this.formatNumbers(this.state.vat_tax_value)}`}
+                  </div>
+                  <div>
+                    <span>Total:</span>
+                    {` ${this.formatNumbers(this.state.total)}`}
+                  </div>
+                </p>
+              )}
 
             <Row justify={"end"}>
               <Col>

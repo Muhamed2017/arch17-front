@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Button, Modal, Input, Form, Row, Col, Spin,
-  DatePicker } from "antd";
+  DatePicker,Dropdown } from "antd";
 import axios from "axios";
 import {
   DeleteOutlined,
@@ -12,9 +12,14 @@ import {
 
 import toast, { Toaster } from "react-hot-toast";
 
+import { FaFilePdf } from "react-icons/fa";
+import { SiMicrosoftexcel } from "react-icons/si";
+
 import { API } from "../../utitlties";
 import moment from "moment";
 const { confirm } = Modal;
+
+
 
 class DeliveryTab extends Component {
   constructor(props) {
@@ -69,6 +74,7 @@ class DeliveryTab extends Component {
   };
 
   onFinish = (values) => {
+    values["value"] = values.value?.replaceAll(",", "");
     const fd = new FormData();
     values["loading_date"] = this.state.loading_date;
 
@@ -101,6 +107,47 @@ class DeliveryTab extends Component {
       add_delivery_modal: true,
     });
   };
+
+  
+  items = [
+    {
+      key: "1",
+      label: (
+        <div
+        className="menu-download-item"
+        >
+          <span>
+             With EX.Rate
+          </span>
+          <a  href={`${API}export-sales/${this.props.id}`}>
+          <SiMicrosoftexcel />
+          </a>
+          <a  href={`${API}sales-pdf/${this.props.id}`}>
+          <FaFilePdf />
+          </a>
+        </div>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+       
+        <div
+        className="menu-download-item"
+        >
+          <span>
+            Without EX.Rate
+          </span>
+          <a  href={`${API}export-salesw/${this.props.id}`}>
+          <SiMicrosoftexcel />
+          </a>
+          <a  href={`${API}sales-pdfw/${this.props.id}`}>
+          <FaFilePdf />
+          </a>
+        </div>
+      ),
+    },
+  ];
 
   handleDeleteDelivery = (id) => {
     const delivery_rows = this.state.delivery_rows;
@@ -165,6 +212,8 @@ class DeliveryTab extends Component {
     });
   };
   editDeliveryFinish = (values) => {
+
+    values["value"] = values.value?.replaceAll(",", "");
     console.log(values);
     console.log(this.state.delivery_to_edit);
     const fd = new FormData();
@@ -252,10 +301,20 @@ class DeliveryTab extends Component {
               />
               <div className="btns-actions">
                 <button>
-                  Download{" "}
-                  <span>
-                    <DownloadOutlined />
-                  </span>
+                <Dropdown
+                  overlayClassName="download-tables-menu"
+                   placement="bottomLeft"
+                    menu={{
+                      items: this.items,
+                    }}
+                  >
+                    <a onClick={(e) => e.preventDefault()}>
+                      Download{" "}
+                      <span>
+                        <DownloadOutlined />
+                      </span>
+                    </a>
+                  </Dropdown>
                 </button>
 
                 <button onClick={this.openDeliveryAddModal}>
@@ -354,7 +413,7 @@ class DeliveryTab extends Component {
                       );
                     })}
                     {this.state.delivery_rows?.length > 0 && (
-                      <tr className="">
+                      <tr className="border-top-1">
                         <td colSpan={3}>
                           <p className="sale">Total Deilverd Value</p>
                         </td>

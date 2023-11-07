@@ -8,9 +8,14 @@ import {
   Col,
   Select,
   Spin,
+  Dropdown,
+  Space,
   DatePicker,
+  Radio,
 } from "antd";
 import axios from "axios";
+import { FaFilePdf } from "react-icons/fa";
+import { SiMicrosoftexcel } from "react-icons/si";
 import { API, VAT_TAX_OPTIONS } from "../../utitlties";
 import {
   DeleteOutlined,
@@ -30,7 +35,6 @@ class ContractTab extends Component {
     this.updatetotalContract.bind(this);
     this.state = {
       add_contract_modal: false,
-      // recieved_payment_modal: false,
       contract_rows: [],
       selectedCurrency: "",
       received_payment_total: 0,
@@ -42,9 +46,12 @@ class ContractTab extends Component {
       payment_to_edit: null,
       edit_contract_modal: false,
       loading: true,
-      // edit_recieved_payment_modal: false,
+      base_currency: this.props?.base_currency,
+      _currency: this.props?._currency,
+      project_id: this.props?.id,
     };
   }
+
   deleteModal = () => {
     confirm({
       title: `Do you Want to delete ${this.state.contract_to_delete?.contract_number}  Contract? `,
@@ -58,9 +65,45 @@ class ContractTab extends Component {
       },
     });
   };
+
   updatetotalContract = (contracts_total_value) => {
     this.props.changeTotalContract(contracts_total_value);
   };
+
+  updateHasTaxable = (taxable, total) => {
+    this.props.changeHasContractsTaxable(taxable, total);
+  };
+
+  items = [
+    {
+      key: "1",
+      label: (
+        <div className="menu-download-item">
+          <span>With EX.Rate</span>
+          <a href={`${API}export-sales/${this.props.id}`}>
+            <SiMicrosoftexcel />
+          </a>
+          <a href={`${API}sales-pdf/${this.props.id}`}>
+            <FaFilePdf />
+          </a>
+        </div>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+        <div className="menu-download-item">
+          <span>Without EX.Rate</span>
+          <a href={`${API}export-salesw/${this.props.id}`}>
+            <SiMicrosoftexcel />
+          </a>
+          <a href={`${API}sales-pdfw/${this.props.id}`}>
+            <FaFilePdf />
+          </a>
+        </div>
+      ),
+    },
+  ];
 
   updatetotalPayment = (received_payment_total) => {
     this.props.changeTotalPayment(received_payment_total);
@@ -69,7 +112,6 @@ class ContractTab extends Component {
   handleDeleteContract = (id) => {
     const contract_rows = this.state.contract_rows;
     const index = contract_rows.findIndex((contract) => id === contract.id);
-    // const value = this.state.contract_rows[index]?.contract_value;
     const value = this.state.contract_rows[index]?.total;
     axios.post(`${API}contract-delete/${id}`).then((response) => {
       console.log(response);
@@ -78,12 +120,36 @@ class ContractTab extends Component {
           contract_rows: this.state.contract_rows?.filter((r) => {
             return r.id !== id;
           }),
+
           contracts_total: (
             parseFloat(this.state.contracts_total) - parseFloat(value)
           ).toFixed(2),
         },
         () => {
           this.updatetotalContract(this.state.contracts_total);
+          this.props.changeTotalContractRows(this.state.contract_rows)
+          this.setState(
+            {
+              has_taxable_at_least:
+                this.state.contract_rows?.filter((c) => {
+                  return c.contract_taxable === "taxable";
+                }).length > 0,
+
+              uninvoicedvalue: this.state.contract_rows
+                ?.filter((c) => {
+                  return c.contract_taxable === "taxable";
+                })
+                .reduce((accumulator, object) => {
+                  return parseFloat(accumulator) + parseFloat(object.total);
+                }, 0),
+            },
+            () => {
+              this.updateHasTaxable(
+                this.state.has_taxable_at_least,
+                this.state.uninvoicedvalue
+              );
+            }
+          );
         }
       );
     });
@@ -96,7 +162,6 @@ class ContractTab extends Component {
         received_payment_rows: response.data.received_payment,
         first_currency: response.data.contracts[0]?.contract_currency,
         received_payment_total: response.data.received_payment_total,
-        // contracts_total: response.data.contracts_total,
         contracts_total: response.data.contracts_total_with_tax,
 
         loading: false,
@@ -107,34 +172,46 @@ class ContractTab extends Component {
   onFinish = (values) => {
     const fd = new FormData();
     values["date"] = this.state.date;
+    values["contract_value"] = values.contract_value?.replaceAll(",", "");
     let subtotal, total, vat_tax_value;
-    if (values.vat_tax_type === "in") {
-      subtotal =
-        parseFloat(values.contract_value) /
-        parseFloat(1 + parseFloat(values.vat_tax_percentage) / 100);
-      total = values.contract_value;
-      vat_tax_value = total - subtotal;
-    }
-    if (values.vat_tax_type === "not") {
-      if (parseFloat(values.vat_tax_percentage) === 0) {
+    if (values.contract_taxable === "taxable") {
+      if (values.vat_tax_type === "in") {
+        subtotal =
+          parseFloat(values.contract_value) /
+          parseFloat(1 + parseFloat(values.vat_tax_percentage) / 100);
         total = values.contract_value;
-        subtotal = values.contract_value;
-        vat_tax_value = 0;
+        vat_tax_value = total - subtotal;
       }
-      if (parseFloat(values.vat_tax_percentage) > 0) {
-        vat_tax_value =
-          (parseFloat(values.vat_tax_percentage) / 100) *
-          parseFloat(values.contract_value);
-        subtotal = values.contract_value;
-        total = parseFloat(values.contract_value) + vat_tax_value;
+      if (values.vat_tax_type === "not") {
+        if (parseFloat(values.vat_tax_percentage) === 0) {
+          total = values.contract_value;
+          subtotal = values.contract_value;
+          vat_tax_value = 0;
+        }
+        if (parseFloat(values.vat_tax_percentage) > 0) {
+          vat_tax_value =
+            (parseFloat(values.vat_tax_percentage) / 100) *
+            parseFloat(values.contract_value);
+          subtotal = values.contract_value;
+          total = parseFloat(values.contract_value) + vat_tax_value;
+        }
       }
+    } 
+    else {
+      total = values.contract_value;
+      subtotal = values.contract_value;
+      vat_tax_value = 0;
+      values["vat_tax_percentage"] = 0;
+      values["vat_tax_type"] = "not";
     }
-
     values["contract_currency"] = this.props._currency;
     values["subtotal"] = subtotal;
     values["vat_tax_value"] = vat_tax_value;
     values["total"] = total;
-
+    if (this.state._currency === this.state.base_currency) {
+      values["exchange_rate"] = 1;
+    }
+    fd.append("contract_taxable", values.contract_taxable);
     fd.append("contract_number", values.contract_number);
     fd.append("contract_referance", values.contract_referance);
     fd.append("contract_currency", values.contract_currency);
@@ -142,6 +219,7 @@ class ContractTab extends Component {
     fd.append("subtotal", values.subtotal);
     fd.append("vat_tax_value", values.vat_tax_value);
     fd.append("vat_tax_percentage", values.vat_tax_percentage);
+    fd.append("exchange_rate", values.exchange_rate);
     fd.append("total", values.total);
     fd.append("date", values.date);
     if (values.vat_tax_type) {
@@ -156,6 +234,19 @@ class ContractTab extends Component {
       this.setState(
         {
           contract_rows: [...this.state.contract_rows, values],
+          has_taxable_at_least:
+            [...this.state.contract_rows, values].filter((c) => {
+              return c.contract_taxable === "taxable";
+            }).length > 0,
+
+          uninvoicedvalue: [...this.state.contract_rows, values]
+            ?.filter((c) => {
+              return c.contract_taxable === "taxable";
+            })
+            .reduce((accumulator, object) => {
+              return parseFloat(accumulator) + parseFloat(object.total);
+            }, 0),
+
           contracts_total: (
             parseFloat(this.state.contracts_total) + parseFloat(values.total)
           ).toFixed(2),
@@ -166,6 +257,12 @@ class ContractTab extends Component {
             first_currency: this.state.contract_rows[0]?.contract_currency,
           });
           this.updatetotalContract(this.state.contracts_total);
+          this.props.changeTotalContractRows(this.state.contract_rows)
+
+          this.updateHasTaxable(
+            this.state.has_taxable_at_least,
+            this.state.uninvoicedvalue
+          );
         }
       );
     });
@@ -175,40 +272,56 @@ class ContractTab extends Component {
     console.log(values);
     console.log(this.state.contract_to_edit);
     let subtotal, total, vat_tax_value;
-    if (values.vat_tax_type === "in") {
-      subtotal =
-        parseFloat(values.contract_value) /
-        parseFloat(1 + parseFloat(values.vat_tax_percentage) / 100);
-      total = values.contract_value;
-      vat_tax_value = total - subtotal;
-    }
-    if (values.vat_tax_type === "not") {
-      if (parseFloat(values.vat_tax_percentage) === 0) {
+    values["contract_value"] = values.contract_value?.replaceAll(",", "");
+    if (values.contract_taxable === "taxable") {
+      if (values.vat_tax_type === "in") {
+        subtotal =
+          parseFloat(values.contract_value) /
+          parseFloat(1 + parseFloat(values.vat_tax_percentage) / 100);
         total = values.contract_value;
-        subtotal = values.contract_value;
-        vat_tax_value = 0;
+        vat_tax_value = total - subtotal;
       }
-      if (parseFloat(values.vat_tax_percentage) > 0) {
-        vat_tax_value =
-          (parseFloat(values.vat_tax_percentage) / 100) *
-          parseFloat(values.contract_value);
-        subtotal = values.contract_value;
-        total = parseFloat(values.contract_value) + vat_tax_value;
+      if (values.vat_tax_type === "not") {
+        if (parseFloat(values.vat_tax_percentage) === 0) {
+          total = values.contract_value;
+          subtotal = values.contract_value;
+          vat_tax_value = 0;
+        }
+        if (parseFloat(values.vat_tax_percentage) > 0) {
+          vat_tax_value =
+            (parseFloat(values.vat_tax_percentage) / 100) *
+            parseFloat(values.contract_value);
+          subtotal = values.contract_value;
+          total = parseFloat(values.contract_value) + vat_tax_value;
+        }
       }
+      // values["vat_tax_type"] = values?.vat_tax_type||this.state.contract_to_edit?.vat_tax_type;
+    } else {
+      total = values.contract_value;
+      subtotal = values.contract_value;
+      vat_tax_value = 0;
+      values["vat_tax_percentage"] = 0;
+      // values["vat_tax_type"] = values?.vat_tax_type||this.state.contract_to_edit?.vat_tax_type;
     }
 
     values["subtotal"] = subtotal;
     values["vat_tax_value"] = vat_tax_value;
     values["total"] = total;
+    if (this.state._currency === this.state.base_currency) {
+      values["exchange_rate"] = 1;
+    }
+
     const fd = new FormData();
     fd.append("contract_number", values.contract_number);
     fd.append("contract_referance", values.contract_referance);
     fd.append("subtotal", values.subtotal);
     fd.append("vat_tax_value", values.vat_tax_value);
     fd.append("vat_tax_percentage", values.vat_tax_percentage);
-    fd.append("total", values.total);
     fd.append("vat_tax_type", values.vat_tax_type);
-    fd.append("contract_referance", values.contract_referance);
+    fd.append("total", values.total);
+    // fd.append("vat_tax_type", values.vat_tax_type);
+    fd.append("contract_taxable", values.contract_taxable);
+    fd.append("exchange_rate", values.exchange_rate);
     fd.append("contract_value", values.contract_value);
     fd.append("date", this.state.edited_date);
 
@@ -219,9 +332,7 @@ class ContractTab extends Component {
       (contract) => this.state.contract_to_edit.id === contract.id
     );
 
-    // const less_value = this.state.contract_rows[index].contract_value;
     const less_value = this.state.contract_rows[index].total;
-    // const plus_value = values.contract_value;
     const plus_value = values.total;
     this.setState(
       {
@@ -233,6 +344,7 @@ class ContractTab extends Component {
       },
       () => {
         this.updatetotalContract(this.state.contracts_total);
+
       }
     );
 
@@ -241,15 +353,41 @@ class ContractTab extends Component {
     contract_rows[index].contract_value = values.contract_value;
     contract_rows[index].total = values.total;
     contract_rows[index].date = this.state.edited_date;
+    contract_rows[index].exchange_rate = values?.exchange_rate;
+    contract_rows[index].subtotal = values?.subtotal;
+    contract_rows[index].vat_tax_percentage = values?.vat_tax_percentage;
 
     axios
       .post(`${API}edit-contract/${this.state.contract_to_edit?.id}`, fd)
       .then((response) => {
         console.log(response);
-        this.setState({
-          contract_rows,
-          edit_contract_modal: false,
-        });
+        this.setState(
+          {
+            contract_rows,
+            has_taxable_at_least:
+              contract_rows?.filter((c) => {
+                return c.contract_taxable === "taxable";
+              }).length > 0,
+
+            uninvoicedvalue: contract_rows
+              ?.filter((c) => {
+                return c.contract_taxable === "taxable";
+              })
+              ?.reduce((accumulator, object) => {
+                return parseFloat(accumulator) + parseFloat(object.total);
+              }, 0),
+
+            edit_contract_modal: false,
+          },
+          () => {
+            this.updateHasTaxable(
+              this.state.has_taxable_at_least,
+              this.state.uninvoicedvalue
+            );
+        this.props.changeTotalContractRows(this.state.contract_rows)
+
+          }
+        );
       });
   };
 
@@ -325,7 +463,11 @@ class ContractTab extends Component {
 
   onValuesEditing = (changedValues, allValues) => {
     const { contract_to_edit } = this.state;
-    contract_to_edit.vat_tax_type = allValues.vat_tax_type;
+    let subtotal, total, vat_tax_value;
+    // contract_to_edit.vat_tax_type = allValues.vat_tax_type;
+    contract_to_edit.contract_taxable = allValues.contract_taxable;
+    allValues["vat_tax_type"] =
+      allValues?.vat_tax_type || this.state.contract_to_edit?.vat_tax_type;
     this.setState(
       {
         contract_to_edit,
@@ -334,17 +476,98 @@ class ContractTab extends Component {
         console.log(this.state.contract_to_edit);
       }
     );
+
+    if (allValues.vat_tax_type === "in") {
+      if (allValues.contract_value && allValues.contract_value > 0) {
+        subtotal =
+          parseFloat(allValues.contract_value) /
+          parseFloat(1 + parseFloat(allValues.vat_tax_percentage) / 100);
+        total = allValues.contract_value;
+        vat_tax_value = total - subtotal;
+      }
+    }
+    if (allValues.vat_tax_type === "not") {
+      if (parseFloat(allValues.vat_tax_percentage) === 0) {
+        total = allValues.contract_value;
+        subtotal = allValues.contract_value;
+        vat_tax_value = 0;
+      }
+      if (parseFloat(allValues.vat_tax_percentage) > 0) {
+        vat_tax_value =
+          (parseFloat(allValues.vat_tax_percentage) / 100) *
+          parseFloat(allValues.contract_value);
+        subtotal = allValues.contract_value;
+        total = parseFloat(allValues.contract_value) + vat_tax_value;
+      }
+    }
+    this.setState(
+      {
+        subtotal,
+        total,
+        vat_tax_value,
+      },
+      () => {
+        console.log(this.state.total);
+        console.log(this.state.vat_tax_value);
+        console.log(this.state.subtotal);
+      }
+    );
   };
 
   addContractValuesChange = (changedValues, allValues) => {
+    allValues["contract_value"] = allValues?.contract_value?.replaceAll(
+      ",",
+      ""
+    );
+    let subtotal, total, vat_tax_value;
+
     this.setState(
       {
-        tax_disabled: allValues.vat_tax_type === "not",
+        taxable: allValues.contract_taxable === "taxable",
       },
       () => {
-        console.log(this.state.contract_to_edit);
+        console.log(this.state.taxable);
       }
     );
+
+    if (allValues.vat_tax_type === "in") {
+      if (allValues.contract_value && allValues.contract_value > 0) {
+        subtotal =
+          parseFloat(allValues.contract_value) /
+          parseFloat(1 + parseFloat(allValues.vat_tax_percentage) / 100);
+        total = allValues.contract_value;
+        vat_tax_value = total - subtotal;
+      }
+    }
+    if (allValues.vat_tax_type === "not") {
+      if (parseFloat(allValues.vat_tax_percentage) === 0) {
+        total = allValues.contract_value;
+        subtotal = allValues.contract_value;
+        vat_tax_value = 0;
+      }
+      if (parseFloat(allValues.vat_tax_percentage) > 0) {
+        vat_tax_value =
+          (parseFloat(allValues.vat_tax_percentage) / 100) *
+          parseFloat(allValues.contract_value);
+        subtotal = allValues.contract_value;
+        total = parseFloat(allValues.contract_value) + vat_tax_value;
+      }
+    }
+    this.setState(
+      {
+        subtotal,
+        total,
+        vat_tax_value,
+      },
+      () => {
+        console.log(this.state.total);
+        console.log(this.state.vat_tax_value);
+        console.log(this.state.subtotal);
+      }
+    );
+  };
+  formateNumber = (number) => {
+    return Number(parseFloat(number).toFixed(2))?.toLocaleString();
   };
   render() {
     return (
@@ -375,12 +598,21 @@ class ContractTab extends Component {
               />
               <div className="btns-actions">
                 <button>
-                  Download{" "}
-                  <span>
-                    <DownloadOutlined />
-                  </span>
+                  <Dropdown
+                    overlayClassName="download-tables-menu"
+                    placement="bottomLeft"
+                    menu={{
+                      items: this.items,
+                    }}
+                  >
+                    <a onClick={(e) => e.preventDefault()}>
+                      Download{" "}
+                      <span>
+                        <DownloadOutlined />
+                      </span>
+                    </a>
+                  </Dropdown>
                 </button>
-
                 <button onClick={this.openContractAddModal}>
                   Add Contract +
                 </button>
@@ -393,12 +625,16 @@ class ContractTab extends Component {
                         <th className="num-col">NO.</th>
                         <th className="width-300">Contract NO, Date</th>
                         <th className="width-250">Referance</th>
-                        <th className="width-450">Value</th>
+                        <th className="width-200">Value</th>
+                        {this.state.base_currency &&
+                          this.state.base_currency !== this.state._currency && (
+                            <th className="width-300">{`EX.R / ${this.state.base_currency}`}</th>
+                          )}
                         <th>Files</th>
                       </tr>
                       {this.state.contract_rows?.map((c, index) => {
                         return (
-                          <tr className="white light-hover">
+                          <tr className="white light-hover table-border-row">
                             <td className="relative">
                               <div className="inline-block ">{index + 1}</div>
                             </td>
@@ -418,6 +654,9 @@ class ContractTab extends Component {
                                             row_index: index,
                                             contract_to_edit: c,
                                             edited_date: c?.date,
+                                            subtotal: c?.subtotal,
+                                            total: c?.total,
+                                            vat_tax_value: c?.vat_tax_value,
                                           },
                                           () => {
                                             this.setState({
@@ -446,25 +685,28 @@ class ContractTab extends Component {
                               </div>
 
                               <p className="main">{c.contract_number}</p>
-                              <p className="sec">
-                                {/* AUG 9, 2023 */}
-                                {c?.date}
-                              </p>
+                              <p className="sec">{c?.date}</p>
                             </td>
                             <td>
                               <p className="main">{c.contract_referance}</p>
                             </td>
                             <td>
                               <p className="main">
-                                {/* {Number(
-                                  parseFloat(c.contract_value).toFixed(2)
-                                )?.toLocaleString()} */}
                                 {Number(
                                   parseFloat(c.total)?.toFixed(2)
                                 )?.toLocaleString()}
                               </p>
                               <p className="sec">{c?.contract_currency}</p>
                             </td>
+
+                            {this.state.base_currency &&
+                              this.state.base_currency !==
+                                this.state._currency && (
+                                <td>
+                                  <p className="main">{c.exchange_rate}</p>
+                                </td>
+                              )}
+
                             <td>
                               {c?.contract_files_link ? (
                                 <a
@@ -490,20 +732,32 @@ class ContractTab extends Component {
 
                       {this.state.contract_rows.length > 0 && (
                         <>
-                          <tr>
+                          <tr className="border-top-1">
                             <td colSpan={3}>
-                              <p className="main">Total Contracts Subtotal</p>
+                              <p className="main">Subtotal Contracts Value</p>
                             </td>
-                            <td colSpan={4}>
+                            <td
+                              // colSpan={4}
+                              colSpan={
+                                this.state.base_currency &&
+                                this.state.base_currency !==
+                                  this.state._currency
+                                  ? ""
+                                  : 4
+                              }
+                            >
                               <p className="main">
                                 {Number(
                                   parseFloat(
-                                    this.state.contract_rows?.reduce((accumulator, object) => {
-                                      return (
-                                        parseFloat(accumulator) +
-                                        parseFloat(object.subtotal)
-                                      );
-                                    }, 0)
+                                    this.state.contract_rows?.reduce(
+                                      (accumulator, object) => {
+                                        return (
+                                          parseFloat(accumulator) +
+                                          parseFloat(object.subtotal)
+                                        );
+                                      },
+                                      0
+                                    )
                                   ).toFixed(2)
                                 )?.toLocaleString()}
                               </p>
@@ -511,35 +765,123 @@ class ContractTab extends Component {
                                 {this.state.contract_rows[0]?.contract_currency}
                               </p>
                             </td>
+                            {this.state.base_currency &&
+                              this.state.base_currency !==
+                                this.state._currency && (
+                                <td colSpan={2}>
+                                  <p className="main">
+                                    {Number(
+                                      parseFloat(
+                                        this.state.contract_rows?.reduce(
+                                          (accumulator, object) => {
+                                            return (
+                                              parseFloat(accumulator) +
+                                              parseFloat(object.subtotal) *
+                                                parseFloat(object.exchange_rate)
+                                            );
+                                          },
+                                          0
+                                        )
+                                      ).toFixed(2)
+                                    )?.toLocaleString()}
+                                  </p>
+                                  <p className="sec">
+                                    {this.state.base_currency}
+                                  </p>
+                                </td>
+                              )}
                           </tr>
-                          <tr>
-                            <td colSpan={3}>
-                              <p className="main">Total Contracts VAT Tax</p>
-                            </td>
-                            <td colSpan={4}>
-                              <p className="main">
-                                {Number(
-                                  parseFloat(
-                                    this.state.contract_rows?.reduce((accumulator, object) => {
-                                      return (
-                                        parseFloat(accumulator) +
-                                        parseFloat(object.vat_tax_value)
-                                      );
-                                    }, 0)
-                                  ).toFixed(2)
-                                )?.toLocaleString()}
-                              </p>
-                              <p className="sec">
-                                {this.state.contract_rows[0]?.contract_currency}
-                              </p>
-                            </td>
-                          </tr>
+                          {parseFloat(
+                            this.state.contract_rows?.reduce(
+                              (accumulator, object) => {
+                                return (
+                                  parseFloat(accumulator) +
+                                  parseFloat(object.vat_tax_value)
+                                );
+                              },
+                              0
+                            )
+                          ) > 0 && (
+                            <tr>
+                              <td colSpan={3}>
+                                <p className="main">Total VAT Tax</p>
+                              </td>
+                              <td
+                                colSpan={
+                                  this.state.base_currency &&
+                                  this.state.base_currency !==
+                                    this.state._currency
+                                    ? ""
+                                    : 4
+                                }
+                              >
+                                <p className="main">
+                                  {Number(
+                                    parseFloat(
+                                      this.state.contract_rows?.reduce(
+                                        (accumulator, object) => {
+                                          return (
+                                            parseFloat(accumulator) +
+                                            parseFloat(object.vat_tax_value)
+                                          );
+                                        },
+                                        0
+                                      )
+                                    ).toFixed(2)
+                                  )?.toLocaleString()}
+                                </p>
+                                <p className="sec">
+                                  {
+                                    this.state.contract_rows[0]
+                                      ?.contract_currency
+                                  }
+                                </p>
+                              </td>
+                              {this.state.base_currency &&
+                                this.state.base_currency !==
+                                  this.state._currency && (
+                                  <td colSpan={2}>
+                                    <p className="main">
+                                      {Number(
+                                        parseFloat(
+                                          this.state.contract_rows?.reduce(
+                                            (accumulator, object) => {
+                                              return (
+                                                parseFloat(accumulator) +
+                                                parseFloat(
+                                                  object.vat_tax_value
+                                                ) *
+                                                  parseFloat(
+                                                    object.exchange_rate
+                                                  )
+                                              );
+                                            },
+                                            0
+                                          )
+                                        ).toFixed(2)
+                                      )?.toLocaleString()}
+                                    </p>
+                                    <p className="sec">
+                                      {this.state.base_currency}
+                                    </p>
+                                  </td>
+                                )}
+                            </tr>
+                          )}
                           <tr></tr>
-                          <tr>
+                          <tr className="border-top-0">
                             <td colSpan={3}>
                               <p className="high">Total Contracts Value</p>
                             </td>
-                            <td colSpan={4}>
+                            <td
+                              colSpan={
+                                this.state.base_currency &&
+                                this.state.base_currency !==
+                                  this.state._currency
+                                  ? ""
+                                  : 4
+                              }
+                            >
                               <p className="high">
                                 {Number(
                                   parseFloat(
@@ -551,6 +893,31 @@ class ContractTab extends Component {
                                 {this.state.contract_rows[0]?.contract_currency}
                               </p>
                             </td>
+                            {this.state.base_currency &&
+                              this.state.base_currency !==
+                                this.state._currency && (
+                                <td colSpan={2}>
+                                  <p className="high">
+                                    {Number(
+                                      parseFloat(
+                                        this.state.contract_rows?.reduce(
+                                          (accumulator, object) => {
+                                            return (
+                                              parseFloat(accumulator) +
+                                              parseFloat(object.total) *
+                                                parseFloat(object.exchange_rate)
+                                            );
+                                          },
+                                          0
+                                        )
+                                      ).toFixed(2)
+                                    )?.toLocaleString()}
+                                  </p>
+                                  <p className="sec">
+                                    {this.state.base_currency}
+                                  </p>
+                                </td>
+                              )}
                           </tr>
                         </>
                       )}
@@ -580,7 +947,7 @@ class ContractTab extends Component {
                   onFinish={this.onFinish}
                   size="large"
                   layout="vertical"
-                  // onValuesChange={this.addContractValuesChange}
+                  onValuesChange={this.addContractValuesChange}
                 >
                   <Form.Item
                     name="contract_number"
@@ -637,37 +1004,87 @@ class ContractTab extends Component {
                       </Form.Item>
                     </Col>
                   </Row>
-                  <Form.Item name="vat_tax_type" label="Vat Tax" size="large">
-                    <Select
-                      placeholder="Select whether tax included or not"
-                      style={{
-                        width: "100%",
-                      }}
-                      // onChange={this.SupplierChange}
+
+                  {this.state._currency !== this.state.base_currency && (
+                    <Form.Item
+                      name="exchange_rate"
+                      label={`Ex. Rate to ${this.state.base_currency}`}
                     >
-                      {VAT_TAX_OPTIONS.map((v) => {
-                        return <Option value={v.value}>{v.label}</Option>;
-                      })}
-                    </Select>
+                      <Input
+                        type="float"
+                        placeholder="Input the exchange rate to base currancy"
+                      />
+                    </Form.Item>
+                  )}
+                  <Form.Item
+                    label="Contract Tax:"
+                    name="contract_taxable"
+                    layout="horizontal"
+                    labelCol={{
+                      span: 8,
+                    }}
+                    wrapperCol={{
+                      span: 10,
+                    }}
+                  >
+                    <Radio.Group>
+                      <Radio value="taxable"> Taxable</Radio>
+                      <Radio value="nontaxable">Non-taxable</Radio>
+                    </Radio.Group>
                   </Form.Item>
-                  <Form.Item name="vat_tax_percentage" label="Add Tax %">
-                    <Input
-                      placeholder="Please add the Tax % of the total Contract"
-                      suffix="%"
-                      max={100}
-                      min={0}
-                      type="number"
-                      disabled={this.state.tax_disabled}
-                    />
-                  </Form.Item>
-                  <p className="sec">
-                    If ‘tax included’ is selected, your contract value already
-                    incorporates the special VAT. If ‘not included’ is selected,
-                    the assigned percentage will supplement the contract’s total
-                    value. Maintain tax at 0% if it won’t be appended later.
-                    Remember, this applies only to the special VAT that could be
-                    refundable or non-refundable.
-                  </p>
+                  {this.state.taxable && (
+                    <>
+                      <Form.Item
+                        name="vat_tax_type"
+                        label="Vat Tax"
+                        size="large"
+                      >
+                        <Select
+                          placeholder="Select whether tax included or not"
+                          style={{
+                            width: "100%",
+                          }}
+                        >
+                          {VAT_TAX_OPTIONS.map((v) => {
+                            return <Option value={v.value}>{v.label}</Option>;
+                          })}
+                        </Select>
+                      </Form.Item>
+
+                      <Form.Item name="vat_tax_percentage" label="Add Tax %">
+                        <Input
+                          placeholder="Please add the Tax % of the total Contract"
+                          suffix="%"
+                          max={100.0}
+                          min={0.0}
+                          type="float"
+                        />
+                      </Form.Item>
+                      {this.state.vat_tax_value &&
+                        this.state.vat_tax_value > 0 &&
+                        this.state.subtotal &&
+                        this.state.subtotal > 0 &&
+                        this.state.total &&
+                        this.state.total > 0 && (
+                          <p className="fs-18 monitor">
+                            <div>
+                              <span>Sub-total:</span>
+                              {` ${this.formateNumber(this.state.subtotal)}`}
+                            </div>
+                            <div>
+                              <span>Vat Tax:</span>
+                              {` ${this.formateNumber(
+                                this.state.vat_tax_value
+                              )}`}
+                            </div>
+                            <div>
+                              <span>Total:</span>
+                              {` ${this.formateNumber(this.state.total)}`}
+                            </div>
+                          </p>
+                        )}
+                    </>
+                  )}
                   <Row justify={"end"}>
                     <Col>
                       <Button htmlType="submit" className="arch-btn">
@@ -682,11 +1099,15 @@ class ContractTab extends Component {
               <Modal
                 footer={false}
                 destroyOnClose
+                centered
                 className="file-modal border-radius"
                 open={this.state.edit_contract_modal}
                 onCancel={() => {
                   this.setState({
                     edit_contract_modal: false,
+                    subtotal:0,
+                    total:0,
+                    vat_tax_value:0
                   });
                 }}
                 closable
@@ -694,6 +1115,7 @@ class ContractTab extends Component {
                 <p className="modal-header">Edit Contract</p>
                 <Form
                   onFinish={this.editContractFinish}
+                  onValuesChange={this.onValuesEditing}
                   onChange={(values) => {
                     console.log(values);
                   }}
@@ -750,48 +1172,96 @@ class ContractTab extends Component {
                       </Form.Item>
                     </Col>
                   </Row>
-                  <Form.Item
-                    name="vat_tax_type"
-                    label="Vat Tax"
-                    size="large"
-                    initialValue={
-                      this.state.contract_to_edit?.vat_tax_type ?? ""
-                    }
-                  >
-                    <Select
-                      placeholder="Select whether tax included or not"
-                      style={{
-                        width: "100%",
-                      }}
+
+                  {this.state._currency !== this.state.base_currency && (
+                    <Form.Item
+                      name="exchange_rate"
+                      initialValue={this.state.contract_to_edit?.exchange_rate}
+                      label={`Ex. Rate to ${this.state.base_currency}`}
                     >
-                      {VAT_TAX_OPTIONS.map((v) => {
-                        return <Option value={v.value}>{v.label}</Option>;
-                      })}
-                    </Select>
-                  </Form.Item>
+                      <Input
+                        type="float"
+                        placeholder="Input the exchange rate to base currancy"
+                      />
+                    </Form.Item>
+                  )}
                   <Form.Item
-                    name="vat_tax_percentage"
-                    label="Add Tax %"
-                    initialValue={
-                      this.state.contract_to_edit?.vat_tax_percentage ?? 0
-                    }
+                    label="Contract Tax:"
+                    name="contract_taxable"
+                    layout="horizontal"
+                    initialValue={this.state.contract_to_edit?.contract_taxable}
+                    labelCol={{
+                      span: 8,
+                    }}
+                    wrapperCol={{
+                      span: 10,
+                    }}
                   >
-                    <Input
-                      placeholder="Please add the Tax % of the total Contract"
-                      suffix="%"
-                      max={100}
-                      min={0}
-                      type="number"
-                    />
+                    <Radio.Group>
+                      <Radio value="taxable"> Taxable</Radio>
+                      <Radio value="nontaxable">Non-taxable</Radio>
+                    </Radio.Group>
                   </Form.Item>
-                  <p className="sec">
-                    If ‘tax included’ is selected, your contract value already
-                    incorporates the special VAT. If ‘not included’ is selected,
-                    the assigned percentage will supplement the contract’s total
-                    value. Maintain tax at 0% if it won’t be appended later.
-                    Remember, this applies only to the special VAT that could be
-                    refundable or non-refundable.
-                  </p>
+                  {this.state.contract_to_edit?.contract_taxable ===
+                    "taxable" && (
+                    <>
+                      <Form.Item
+                        name="vat_tax_type"
+                        label="Vat Tax"
+                        size="large"
+                        initialValue={
+                          this.state.contract_to_edit?.vat_tax_type ?? ""
+                        }
+                      >
+                        <Select
+                          placeholder="Select whether tax included or not"
+                          style={{
+                            width: "100%",
+                          }}
+                        >
+                          {VAT_TAX_OPTIONS.map((v) => {
+                            return <Option value={v.value}>{v.label}</Option>;
+                          })}
+                        </Select>
+                      </Form.Item>
+                      <Form.Item
+                        name="vat_tax_percentage"
+                        label="Add Tax %"
+                        initialValue={
+                          this.state.contract_to_edit?.vat_tax_percentage ?? 0
+                        }
+                      >
+                        <Input
+                          placeholder="Please add the Tax % of the total Contract"
+                          suffix="%"
+                          max={100}
+                          min={0}
+                          type="float"
+                        />
+                      </Form.Item>
+                    </>
+                  )}
+                  {this.state.vat_tax_value &&
+                    this.state.vat_tax_value > 0 &&
+                    this.state.subtotal &&
+                    this.state.subtotal > 0 &&
+                    this.state.total &&
+                    this.state.total > 0 && (
+                      <p className="fs-18 monitor">
+                        <div>
+                          <span>Sub-total:</span>
+                          {` ${this.formateNumber(this.state.subtotal)}`}
+                        </div>
+                        <div>
+                          <span>Vat Tax:</span>
+                          {` ${this.formateNumber(this.state.vat_tax_value)}`}
+                        </div>
+                        <div>
+                          <span>Total:</span>
+                          {` ${this.formateNumber(this.state.total)}`}
+                        </div>
+                      </p>
+                    )}
                   <Row justify={"end"}>
                     <Col>
                       <Button htmlType="submit" className="arch-btn">

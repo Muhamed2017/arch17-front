@@ -4,6 +4,7 @@ export const hasNumeric = new RegExp("^(?=.*[0-9])");
 export const hasSpecial = new RegExp("^(?=.[!@#$%^&])|(?=.*[!@#$%^&*])");
 // export const API = "https://arch17-apis.herokuapp.com/api/";
 // export const API = "http://localhost:8000/api/";
+export const LAPI = "http://localhost:8000/api/";
 // export const API = "https://arch17test.live/api/"
 export const API = 'https://api.arch17.com/api/'
 
@@ -39,4 +40,9 @@ export const MONTHS=[
 export  const   VAT_TAX_OPTIONS=[
     {label:"Vat Tax included in the contract Value", value:"in"},
     {label:"Vat Tax not included in the contract Value", value:"not"}
+]
+export  const   POINVOICES_TYPES=[
+    'Non Deductible / non refundable',
+    'Deductible ( Deducted from sales Tax Value )',
+    'Refundable ( Refundable tax credits )'
 ]

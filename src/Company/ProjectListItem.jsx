@@ -29,6 +29,8 @@ class ProjecLisItem extends Component {
       currency: null,
       suppliers_options: [],
       company_id: this.props.company_id,
+      has_poinvoice_tab:false,
+      budget:0
     };
   }
 
@@ -46,19 +48,24 @@ class ProjecLisItem extends Component {
     this.setState({ suppliers_options });
   };
 
+ 
+
   componentDidMount() {
     axios.get(`${API}get-projectlist/${this.state.p_id}`).then((response) => {
       this.setState({
         project: response.data.project,
         loading: false,
         deliveries_total_value: parseFloat(response.data.deliveries_total_value),
-        // contracts_total_value: parseFloat(response.data.contracts_total),
         contracts_total_value: parseFloat(response.data.contracts_total_with_tax),
         received_payment_total: parseFloat(response.data.received_payment_total),
         currency: response.data.project?.currency,
+        po_deliveries:response.data.po_deliveries,
+        has_poinvoice_tab:response.data.has_poinvoice_tab,
+        budget:response.data.project?.budget
       });
     });
   }
+
   render() {
     return (
       <>
@@ -115,7 +122,9 @@ class ProjecLisItem extends Component {
                 </Col>
               </Row>
               <div className="tabs-wrapper mt-5">
-                <Tabs>
+                <Tabs
+                
+                >
                   <TabList>
                     {this.state.project?.business_type !== "Purchases Only" && (
                       <Tab>Sales</Tab>
@@ -134,19 +143,17 @@ class ProjecLisItem extends Component {
                         deliveries_total_value={
                           this.state.deliveries_total_value
                         }
+                        
                         contracts_total_value={this.state.contracts_total_value}
                         received_payment_total={
                           this.state.received_payment_total
                         }
                         company_id={this.state.company_id}
+                        base_currency={this.state.project?.base_currency}
+
                       />
                     </TabPanel>
-
-
-                    
-
                   )}
-
                    {this.state.project?.business_type !== "Sales Only" && (
                        <TabPanel>
                        <PurchasesTab
@@ -156,6 +163,8 @@ class ProjecLisItem extends Component {
                           changeTotalSupplirs={this.changeTotalSupplirs}
                           company_id={this.state.company_id}
                           suppliers_options={this.state.suppliers_options}
+                          po_deliveries={this.state.po_deliveries}
+                          has_poinvoice_tab={this.state.has_poinvoice_tab}
                        />
                      </TabPanel>
                     )}
@@ -164,6 +173,7 @@ class ProjecLisItem extends Component {
                       project_id={this.state.p_id}
                       base_currency={this.state.project?.base_currency}
                       currency={this.state.project?.currency}
+                      budget={this.state.project?.budget}
                       />
                     </TabPanel>
                 </Tabs>

@@ -6,6 +6,7 @@ import ProjectList from "./ProjectList";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 
 import "./pom.css";
+import POMOverview from "./POMOverview";
 class POM extends Component {
   constructor(props) {
     super(props);
@@ -30,10 +31,16 @@ class POM extends Component {
                     textALign:'left'
                 }}
                 >
+                  <Tab>Overview</Tab>
                   <Tab>Customers</Tab>
                   <Tab>Vendors</Tab>
                   <Tab>Projects</Tab>
                 </TabList>
+                <TabPanel>
+                  <POMOverview
+                  company_id={this.state.company_id}
+                  />
+                </TabPanel>
                 <TabPanel
                 forceRender
                 >
@@ -51,13 +58,14 @@ class POM extends Component {
             />
                 </TabPanel>
                 <TabPanel
-                forceRender
+                // forceRender
                 >
                   <ProjectList
                    entity_name="company"
                    entity_id={this.state.company_id}
                   />
                 </TabPanel>
+                
               </Tabs>
             </Col>
           </Row>

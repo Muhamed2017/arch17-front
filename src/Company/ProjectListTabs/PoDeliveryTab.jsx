@@ -9,8 +9,11 @@ import {
   Select,
   Collapse,
   DatePicker,
+  Dropdown
 } from "antd";
 import moment from "moment";
+import { SiMicrosoftexcel } from "react-icons/si";
+import { FaFilePdf } from "react-icons/fa";
 
 import {
   DeleteOutlined,
@@ -49,16 +52,20 @@ class PoDeliveryTab extends Component {
       country_filter: "",
       city_filter: "",
       name_filter: "",
+      vendor_filter: "",
       year_filter: "",
       currency_filter: "",
       ex_rates_valus: [],
       suppliers: [],
+      total_delivered_percentage: 0,
     };
   }
   componentDidMount() {
     this.getData();
   }
   onFinishEdit = (values) => {
+    values["value"] = values.value?.replaceAll(",", "");
+
     const id = this.state.del_to_edit?.id;
     console.log(values);
     const fd = new FormData();
@@ -81,8 +88,11 @@ class PoDeliveryTab extends Component {
     console.log(d, edited_loading_date);
     this.setState({
       edited_loading_date,
+      edited_date: edited_loading_date,
+
     });
   };
+
   getData = async () => {
     await axios
       .get(
@@ -93,12 +103,18 @@ class PoDeliveryTab extends Component {
         this.setState(
           {
             po_deliveries: response.data.po_deliveries,
+            vendors_options: [
+              ...new Set(
+              Object.keys(response.data.po_deliveries)
+              ),
+            ],
             po_deliveries_values:
               Object.values(response.data.po_deliveries) ?? [],
             exchange_rates: response.data.exchange_rates,
             po_deliveries_currencies: response.data.po_deliveries_currencies,
             suppliers_options: response.data.suppliers_options,
             suppliers: response.data.pos,
+            purchases: response.data?.purchases,
             services_filter_options: Object.values(response.data.po_deliveries)
               ?.map((s) => {
                 return s?.map((ss) => {
@@ -110,11 +126,155 @@ class PoDeliveryTab extends Component {
                 return p != null;
               })
               .flat(),
+            purchases_with_exchange: response.data.purchases?.reduce(
+              (accumulator, object) => {
+                return (
+                  parseFloat(accumulator) +
+                  parseFloat(object.total) * parseFloat(object.exchange_rate)
+                );
+              },
+              0
+            ),
+
+            total_paids: Object.keys(response.data.pos_sub)?.map((p) => {
+              return parseFloat(
+                this.getKeyValue(p, response.data.payments_pos, "value")
+              );
+            }),
+    
+            total_currency_paids: Object.values(
+              response.data.pos_currencies
+            )?.map((c, index) => {
+              return parseFloat(
+                this.getKeyValue(
+                  c[0]?.currency,
+                  response.data.payments_currencies,
+                  "coast"
+                )
+              );
+            }),
+            total_currency_balances: Object.values(
+              response.data.pos_currencies
+            )?.map((c, index) => {
+              return parseFloat(
+                c?.reduce((accumulator, object) => {
+                  return parseFloat(accumulator) + parseFloat(object.total);
+                }, 0) -
+                  this.getKeyValue(
+                    c[0]?.currency,
+                    response.data.payments_currencies,
+                    "coast"
+                  )
+              );
+            }),
           },
           () => {
             console.log(this.state.left_products_currencies);
             console.log(this.state.exchange_rates);
-            this.composeRates();
+            console.log(this.state.purchases_with_exchange);
+
+            this.setState(
+              {
+                purchases_total_with_exchanges_values: Object.keys(
+                  response.data.po_deliveries
+                )?.map((vendor, index) => {
+                  return this.state.purchases
+                    ?.filter((p) => {
+                      return p.supplier_name == vendor;
+                    })
+                    .reduce((accumulator, object) => {
+                      return parseFloat(
+                        parseFloat(accumulator) +
+                          parseFloat(object.total) *
+                            parseFloat(object.exchange_rate)
+                      );
+                    }, 0);
+                }),
+                purchases_total_with_exchanges_percentages: Object.keys(
+                  response.data.po_deliveries
+                )?.map((vendor, index) => {
+                  return (
+                    this.state.purchases
+                      ?.filter((p) => {
+                        return p.supplier_name == vendor;
+                      })
+                      .reduce((accumulator, object) => {
+                        return parseFloat(
+                          parseFloat(accumulator) +
+                            parseFloat(object.total) *
+                              parseFloat(object.exchange_rate)
+                        );
+                      }, 0) / this.state.purchases_with_exchange
+                  );
+                }),
+                deliveries_percentages: Object.keys(
+                  response.data.po_deliveries
+                )?.map((vendor, index) => {
+                  return (
+                    (parseFloat(
+                      this.state.po_deliveries_values[index].reduce(
+                        (accumulator, object) => {
+                          return parseFloat(
+                            parseFloat(accumulator) + parseFloat(object.value)
+                          );
+                        },
+                        0
+                      )
+                    ) /
+                      (parseFloat(
+                        this.state.po_deliveries_values[index][0]?.leftp
+                      ) +
+                        parseFloat(
+                          this.state.po_deliveries_values[index].reduce(
+                            (accumulator, object) => {
+                              return parseFloat(
+                                parseFloat(accumulator) +
+                                  parseFloat(object.value)
+                              );
+                            },
+                            0
+                          )
+                        ))) *
+                    (this.state.purchases
+                      ?.filter((p) => {
+                        return p.supplier_name == vendor;
+                      })
+                      .reduce((accumulator, object) => {
+                        return parseFloat(
+                          parseFloat(accumulator) +
+                            parseFloat(object.total) *
+                              parseFloat(object.exchange_rate)
+                        );
+                      }, 0) /
+                      this.state.purchases_with_exchange)
+                  );
+                }),
+              },
+              () => {
+             this.setState({
+              dvp:this.formatNumbers(
+                100*this.state.deliveries_percentages?.reduce(
+                  (accumulator, object) => {
+                    return parseFloat(
+                      parseFloat(accumulator) + parseFloat(object)
+                    );
+                  },
+                  0
+                )
+              ),
+              dlp:this.formatNumbers(
+                100- 100*this.state.deliveries_percentages?.reduce(
+                  (accumulator, object) => {
+                    return parseFloat(
+                      parseFloat(accumulator) + parseFloat(object)
+                    );
+                  },
+                  0
+                )
+              )
+             })
+              }
+            );
           }
         );
       });
@@ -136,6 +296,7 @@ class PoDeliveryTab extends Component {
   formatNumbers = (number) => {
     return Number(parseFloat(number).toFixed(2))?.toLocaleString();
   };
+  
 
   openDeliveryAddModal = () => {
     this.setState({
@@ -168,6 +329,7 @@ class PoDeliveryTab extends Component {
   };
 
   onFinish = (values) => {
+    values["value"] = values.value?.replaceAll(",", "");
     console.log(values);
     values["loading_date"] = this.state.loading_date;
     const fd = new FormData();
@@ -219,25 +381,20 @@ class PoDeliveryTab extends Component {
     return total;
   };
   calculateTotalLeftProductsBaseCurrency = (currencies, rates) => {
-
-    // c.filter(
-    //   (obj, index) =>
-    //     c.findIndex((item) => item.supplier_id === obj.supplier_id) === index
-    // ).reduce((accumulator, object)=>{
-    //   return (
-    //     parseFloat(accumulator) +
-    //     parseFloat(object.leftp)
-    //   );           
-    // },0)
     let total = 0;
     Object.values(currencies)?.map((c) => {
       total +=
-        c?.filter(
+        c
+          ?.filter(
             (obj, index) =>
-              c.findIndex((item) => item.supplier_id === obj.supplier_id) === index
-          ).reduce((accumulator, object) => {
-          return parseFloat(parseFloat(accumulator) + parseFloat(object.leftp));
-        }, 0) * this.getValue(c[0]?.currency, rates);
+              c.findIndex((item) => item.supplier_id === obj.supplier_id) ===
+              index
+          )
+          .reduce((accumulator, object) => {
+            return parseFloat(
+              parseFloat(accumulator) + parseFloat(object.leftp)
+            );
+          }, 0) * this.getValue(c[0]?.currency, rates);
     });
 
     return total;
@@ -254,27 +411,6 @@ class PoDeliveryTab extends Component {
     });
 
     return total;
-  };
-
-  rateChange = (e, currency) => {
-    const value = e?.target?.value;
-    const fd = new FormData();
-    fd.append("vlaue", value);
-    fd.append("currency", currency);
-    if (value > 0) {
-      axios
-        .post(`${API}add-rate/${this.state.project_id}`, fd)
-        .then((response) => {
-          this.setState(
-            {
-              exchange_rates: response.data.exchange_rates,
-            },
-            () => {
-              this.composeRates();
-            }
-          );
-        });
-    }
   };
 
   productsChange = (products_filter) => {
@@ -335,22 +471,6 @@ class PoDeliveryTab extends Component {
     return total;
   };
 
-  composeRates = () => {
-    let _flat_rates = [];
-
-    Object.values(this.state.exchange_rates)?.forEach((r) => {
-      _flat_rates.push(r);
-    });
-    this.setState(
-      {
-        ex_rates_valus: _flat_rates.flat(),
-      },
-      () => {
-        console.log(this.state.ex_rates_valus);
-      }
-    );
-  };
-
   filterList = () => {
     const {
       name_filter,
@@ -358,11 +478,12 @@ class PoDeliveryTab extends Component {
       country_filter,
       products_filter,
       currency_filter,
+      vendor_filter
     } = this.state;
 
     axios
       .get(
-        `${API}podelivery-filter/${this.state.project_id}?filter[country]=${country_filter}&filter[currency]=${currency_filter}&filter[loading_date]=${year_filter}&filter[products_services]=${products_filter}&filter[supplier_name]=${name_filter}`
+        `${API}podelivery-filter/${this.state.project_id}?filter[country]=${country_filter}&filter[currency]=${currency_filter}&filter[loading_date]=${year_filter}&filter[products_services]=${products_filter}&filter[supplier_name]=${vendor_filter}`
       )
       .then((response) => {
         this.setState(
@@ -390,16 +511,71 @@ class PoDeliveryTab extends Component {
     return total;
   };
 
+  vendorChange = (vendor_filter) => {
+    this.setState(
+      {
+        vendor_filter,
+      },
+      () => {
+        this.filterList();
+      }
+    );
+  };
+  
   render() {
     return (
       <>
         <div className="tables-page">
           <div className="btns-actions">
             <button>
-              Download{" "}
-              <span>
-                <DownloadOutlined />
-              </span>
+            <Dropdown
+              overlayClassName="download-tables-menu"
+              placement="bottomLeft"
+              menu={{
+                items: [
+                  {
+                    key: "1",
+                    label: (
+                      <div>
+                        <div className="menu-download-item">
+                          <a
+                            href={`${API}purchases-statement-xls/${
+                              this.state.project_id
+                            }?p=${[this.state.total_paids]}&cb=${
+                              this.state.total_currency_balances
+                            }&cp=${this.state.total_currency_paids}&dvp=${
+                              this.state.dvp
+                            }&dlp=${this.state.dlp}`}
+                          >
+                            <SiMicrosoftexcel />
+                          </a>
+                        </div>
+                        <div className="menu-download-item">
+                          <a
+                            href={`${API}purchases-statement-pdf/${
+                              this.state.project_id
+                            }?p=${[this.state.total_paids]}&cb=${
+                              this.state.total_currency_balances
+                            }&cp=${this.state.total_currency_paids}&dvp=${
+                              this.state.dvp
+                            }&dlp=${this.state.dlp}`}
+                          >
+                            <FaFilePdf />
+                          </a>
+                        </div>
+                      </div>
+                    ),
+                  },
+                ],
+              }}
+            >
+              <a onClick={(e) => e.preventDefault()}>
+                Download{" "}
+                <span>
+                  <DownloadOutlined />
+                </span>
+              </a>
+            </Dropdown>
             </button>
 
             <button onClick={this.openDeliveryAddModal}>Add Delivery +</button>
@@ -407,35 +583,31 @@ class PoDeliveryTab extends Component {
           <div className="pom-table pos pos-table">
             <div className="filters pos-tabs">
               <Row align={"top"} justify={"end"}>
-                <Col md={14}>
-                  <div className="list-head search-box">
-                    <Input
-                      autoFocus
-                      id="search_clients"
-                      size="large"
-                      placeholder="Type to search vendors"
-                      bordered={false}
-                      value={this.state.search_text_value}
-                      suffix={
-                        this.state.search_text_value?.length > 0 && (
-                          <CloseCircleOutlined
-                            onClick={() => {
-                              this.setState(
-                                {
-                                  search_text_value: "",
-                                  name_filter: "",
-                                },
-                                () => {
-                                  this.filterList();
-                                }
-                              );
-                            }}
-                          />
-                        )
+                <Col md={3}>
+                  <Select
+                    className="right  px-0"
+                    bordered={false}
+                    size="large"
+                    suffixIcon={<CaretDownOutlined />}
+                    placeholder="All Vendors"
+                    style={{
+                      width: "170px",
+                      textAlign: "right",
+                    }}
+                    value={this.state.vendor_filter}
+                    onChange={this.vendorChange}
+                  >
+                    <Option value="">All Vendors</Option>
+                    {this.state.vendors_options?.map((p) => {
+                      if (p) {
+                        return (
+                          <>
+                            <Option value={p}>{p}</Option>
+                          </>
+                        );
                       }
-                      onChange={(e) => this.handleSearchSuppliers(e)}
-                    />
-                  </div>
+                    })}
+                  </Select>
                 </Col>
 
                 <Col md={3}>
@@ -530,20 +702,43 @@ class PoDeliveryTab extends Component {
                 <div>Referance</div>
                 <div>Loading Date</div>
                 <div>Value</div>
-                <div>Total Left Products Value</div>
+                <div>%OF PO</div>
+                <div>Left Value</div>
+                <div>%OF PO</div>
               </div>
               {Object.keys(this.state.po_deliveries)?.map((d, index) => {
                 return (
                   <>
                     {this.state.po_deliveries_values[index]?.length > 1 ? (
-                      <>
                         <Collapse
                           onChange={() => this.onCollapseChange(d)}
                           activeKey={this.state.active_vendor}
                         >
                           <Panel
                             header={
-                              <div className="table-row data-row collabser-row">
+                              <div className="table-row data-row collabser-row relative">
+                                  <div className="edit-delete">
+                                  <Row align={"middle"}>
+                                    <Col md={8}>
+                                      <a
+                                        href={`${API}vendor-xls/${this.state.project_id}/${this.state.po_deliveries_values[index][0].supplier_id}`}
+                                      >
+                                        <span>
+                                          <SiMicrosoftexcel />
+                                        </span>
+                                      </a>
+                                    </Col>
+                                    <Col md={8}>
+                                      <a
+                                        href={`${API}vendor-pdf/${this.state.project_id}/${this.state.po_deliveries_values[index][0].supplier_id}`}
+                                      >
+                                        <span>
+                                          <FaFilePdf />
+                                        </span>
+                                      </a>
+                                    </Col>
+                                  </Row>
+                                </div>
                                 <div>
                                   <p className="main">{d}</p>
                                   <p className="sec">
@@ -596,6 +791,40 @@ class PoDeliveryTab extends Component {
                                 <div>
                                   <p className="main">
                                     {this.formatNumbers(
+                                      (parseFloat(
+                                        this.state.po_deliveries_values[
+                                          index
+                                        ].reduce((accumulator, object) => {
+                                          return parseFloat(
+                                            parseFloat(accumulator) +
+                                              parseFloat(object.value)
+                                          );
+                                        }, 0)
+                                      ) /
+                                        (parseFloat(
+                                          this.state.po_deliveries_values[
+                                            index
+                                          ][0]?.leftp
+                                        ) +
+                                          parseFloat(
+                                            this.state.po_deliveries_values[
+                                              index
+                                            ].reduce((accumulator, object) => {
+                                              return parseFloat(
+                                                parseFloat(accumulator) +
+                                                  parseFloat(object.value)
+                                              );
+                                            }, 0)
+                                          ))) *
+                                        100
+                                    )}
+                                     {" %"}
+                                  </p>
+                                 
+                                </div>
+                                <div>
+                                  <p className="main">
+                                    {this.formatNumbers(
                                       this.state.po_deliveries_values[index][0]
                                         ?.leftp
                                     )}
@@ -607,8 +836,44 @@ class PoDeliveryTab extends Component {
                                     }
                                   </p>
                                 </div>
-                                <div></div>
-                                <div></div>
+                                <div>
+                                  <p className="main">
+                                    {this.formatNumbers(
+                                      100 -
+                                        (parseFloat(
+                                          this.state.po_deliveries_values[
+                                            index
+                                          ].reduce((accumulator, object) => {
+                                            return parseFloat(
+                                              parseFloat(accumulator) +
+                                                parseFloat(object.value)
+                                            );
+                                          }, 0)
+                                        ) /
+                                          (parseFloat(
+                                            this.state.po_deliveries_values[
+                                              index
+                                            ][0]?.leftp
+                                          ) +
+                                            parseFloat(
+                                              this.state.po_deliveries_values[
+                                                index
+                                              ].reduce(
+                                                (accumulator, object) => {
+                                                  return parseFloat(
+                                                    parseFloat(accumulator) +
+                                                      parseFloat(object.value)
+                                                  );
+                                                },
+                                                0
+                                              )
+                                            ))) *
+                                          100
+                                    )}
+                                  {" %"}
+                                  </p>
+                                  
+                                </div>
                               </div>
                             }
                             key={d}
@@ -631,6 +896,8 @@ class PoDeliveryTab extends Component {
                                               this.setState(
                                                 {
                                                   del_to_edit: de,
+                                                  edited_date: de?.loading_date,
+                                                  edited_loading_date:de?.loading_date,
                                                 },
                                                 () => {
                                                   this.setState({
@@ -665,7 +932,7 @@ class PoDeliveryTab extends Component {
                                       <p className="main">{de.loading_date}</p>
                                     </div>
                                     <div>
-                                      <p className="main">{de.value}</p>
+                                      <p className="main">{this.formatNumbers(de.value)}</p>
                                       <p className="sec">
                                         {
                                           this.state.po_deliveries_values[
@@ -675,13 +942,14 @@ class PoDeliveryTab extends Component {
                                       </p>
                                     </div>
                                     <div></div>
+                                    <div></div>
+                                    <div></div>
                                   </div>
                                 );
                               }
                             )}
                           </Panel>
                         </Collapse>
-                      </>
                     ) : (
                       <>
                         {this.state.po_deliveries_values[index]?.map((de) => {
@@ -689,17 +957,31 @@ class PoDeliveryTab extends Component {
                             <div className="data-row table-row  relative">
                               <div className="edit-delete">
                                 <Row align={"middle"}>
-                                  <Col md={8}>
-                                    <span>
-                                      <DownloadOutlined />
-                                    </span>
-                                  </Col>
-                                  <Col md={8}>
+                                <Col md={6}>
+                                      <a
+                                        href={`${API}vendor-xls/${this.state.project_id}/${this.state.po_deliveries_values[index][0].supplier_id}`}
+                                      >
+                                        <span>
+                                          <SiMicrosoftexcel />
+                                        </span>
+                                      </a>
+                                    </Col>
+                                    <Col md={6}>
+                                      <a
+                                        href={`${API}vendor-pdf/${this.state.project_id}/${this.state.po_deliveries_values[index][0].supplier_id}`}
+                                      >
+                                        <span>
+                                          <FaFilePdf />
+                                        </span>
+                                      </a>
+                                    </Col>
+                                  <Col md={6}>
                                     <EditOutlined
                                       onClick={() => {
                                         this.setState(
                                           {
                                             del_to_edit: de,
+                                            edited_loading_date:de?.loading_date,
                                           },
                                           () => {
                                             this.setState({
@@ -710,7 +992,7 @@ class PoDeliveryTab extends Component {
                                       }}
                                     />
                                   </Col>
-                                  <Col md={8}>
+                                  <Col md={6}>
                                     <DeleteOutlined
                                       onClick={() => {
                                         this.setState(
@@ -742,13 +1024,38 @@ class PoDeliveryTab extends Component {
                                 <p className="main">{de.loading_date}</p>
                               </div>
                               <div>
-                                <p className="main total">{de.value}</p>
+                                <p className="main total">{this.formatNumbers(de.value)}</p>
                                 <p className="sec">
                                   {
                                     this.state.po_deliveries_values[index][0]
                                       ?.currency
                                   }
                                 </p>
+                              </div>
+
+                              <div>
+                                <p className="main">
+                                  {this.formatNumbers(
+                                    (parseFloat(
+                                      this.state.po_deliveries_values[index][0]
+                                        ?.value
+                                    ) /
+                                      (parseFloat(
+                                        this.state.po_deliveries_values[
+                                          index
+                                        ][0]?.leftp
+                                      ) +
+                                        parseFloat(
+                                          this.state.po_deliveries_values[
+                                            index
+                                          ][0]?.value
+                                        ))) *
+                                      100
+                                  )
+                                  }
+                                   {" %"}
+                                </p>
+                                
                               </div>
 
                               <div>
@@ -765,6 +1072,31 @@ class PoDeliveryTab extends Component {
                                   }
                                 </p>
                               </div>
+                              <div>
+                                <p className="main">
+                                  {this.formatNumbers(
+                                    100 -
+                                      (parseFloat(
+                                        this.state.po_deliveries_values[
+                                          index
+                                        ][0]?.value
+                                      ) /
+                                        (parseFloat(
+                                          this.state.po_deliveries_values[
+                                            index
+                                          ][0]?.leftp
+                                        ) +
+                                          parseFloat(
+                                            this.state.po_deliveries_values[
+                                              index
+                                            ][0]?.value
+                                          ))) *
+                                        100
+                                  )}
+                                   {" %"}
+                                </p>
+                               
+                              </div>
                             </div>
                           );
                         })}
@@ -773,152 +1105,48 @@ class PoDeliveryTab extends Component {
                   </>
                 );
               })}
+              <div className="header-row table-row" style={{
+                position:"relative",
+                top:"-2px"
+              }}>
+                <div>
+                  <p className="high">Total Delivered % of total PO</p>
+                </div>
+                <div>
+                  {this.formatNumbers(
+                    100 *
+                      this.state.deliveries_percentages?.reduce(
+                        (accumulator, object) => {
+                          return parseFloat(
+                            parseFloat(accumulator) + parseFloat(object)
+                          );
+                        },
+                        0
+                      )
+                  )}
+                  {"  %"}
+                </div>
+                <div>
+                  <p className="high">Total Left % of total PO</p>
+                </div>
+                <div>
+                  {this.formatNumbers(
+                    100 -
+                      100 *
+                        this.state.deliveries_percentages?.reduce(
+                          (accumulator, object) => {
+                            return parseFloat(
+                              parseFloat(accumulator) + parseFloat(object)
+                            );
+                          },
+                          0
+                        )
+                  )}
+                  {"  %"}
+                </div>
+              </div>
             </div>
           </div>
-
-          {Object.values(this.state.po_deliveries_currencies)?.length > 0 && (
-            <div className="pom-table clientlist-table base-currency">
-              {`Total in ${this.state.base_currency}`}
-              <table>
-                <tr>
-                  <th className="width-80">Currency</th>
-                  <th className="width-200">Total Delivered Products</th>
-                  <th className="width-200">Total Left Products</th>
-                  <th className="width-300">
-                    {" "}
-                    EX.Rate to {this.state.base_currency}
-                  </th>
-                </tr>
-                {Object.values(this.state.po_deliveries_currencies)?.map(
-                  (c, index) => {
-                    return (
-                      <tr>
-                        <td>
-                          <p className="sale">{c[0]?.currency}</p>
-                        </td>
-                        <td>
-                          <p className="main">
-                            {this.formatNumbers(
-                              parseFloat(
-                                c?.reduce((accumulator, object) => {
-                                  return (
-                                    parseFloat(accumulator) +
-                                    parseFloat(object.value)
-                                  );
-                                }, 0)
-                              ).toFixed(2)
-                            )}
-                          </p>
-                          <p className="sec">{c[0]?.currency}</p>
-                        </td>
-                        <td>
-                          <p className="main">
-                            {/* {parseFloat(this.getTotalLeft(c[0].currency,c[0]?.supplier_name)).toFixed(2)} */}
-                            {/* {this.formatNumbers(
-                              parseFloat(
-                                c?.reduce((accumulator, object) => {
-                                  return (
-                                    parseFloat(accumulator) +
-                                    parseFloat(object.leftp)
-                                  );              
-                                }, 0)
-                                // c[0]?.leftp
-
-                              ).toFixed(2)
-                            )} */}
-                            {
-                              
-                             this.formatNumbers(
-                              c.filter(
-                                (obj, index) =>
-                                  c.findIndex((item) => item.supplier_id === obj.supplier_id) === index
-                              ).reduce((accumulator, object)=>{
-                                return (
-                                  parseFloat(accumulator) +
-                                  parseFloat(object.leftp)
-                                );           
-                              },0)
-                             )
-                            }
-                          </p>
-                          <p className="sec">{c[0]?.currency}</p>
-                        </td>
-                        <td>
-                          {this.state.base_currency === c[0]?.currency ? (
-                            <Input
-                              // bordered={false}
-                              disabled
-                              className="factor-input"
-                              size="large"
-                              placeholder="Type Exchange Rate"
-                              maxLength={16}
-                              value={1}
-                              defaultValue={1}
-                            />
-                          ) : (
-                            <Input
-                              // bordered={false}
-                              className="factor-input"
-                              size="large"
-                              placeholder="Type Exchange Rate"
-                              maxLength={16}
-                              onChange={(e) =>
-                                this.rateChange(e, c[0]?.currency)
-                              }
-                              defaultValue={
-                                this.getValue(
-                                  c[0]?.currency,
-                                  this.state.exchange_rates
-                                ) ?? 1
-                              }
-                            />
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  }
-                )}
-                {this.state.base_currency && (
-                  <tr>
-                    <td>
-                      <p className="mian">Total in</p>
-                      <p className="sec">{this.state.base_currency}</p>
-                    </td>
-                    <td>
-                      <p className="main">
-                        {Number(
-                          parseFloat(
-                            this.calculateTotalValueBaseCurrency(
-                              this.state.po_deliveries_currencies,
-                              this.state.exchange_rates
-                            )
-                          ).toFixed(2)
-                        ).toLocaleString()}
-                      </p>
-                      <p className="sec">{this.state.base_currency}</p>
-                    </td>
-                    <td>
-                      <p className="main">
-                        {
-                          //  parseFloat(this.calculateTotaLeftBaseCurrency()).toFixed(2)
-
-                          Number(
-                            parseFloat(
-                              this.calculateTotalLeftProductsBaseCurrency(
-                                this.state.po_deliveries_currencies,
-                                this.state.exchange_rates
-                              )
-                            ).toFixed(2)
-                          ).toLocaleString()
-                        }
-                      </p>
-                      <p className="sec">{this.state.base_currency}</p>
-                    </td>
-                  </tr>
-                )}
-              </table>
-            </div>
-          )}
         </div>
 
         <Modal
@@ -957,13 +1185,10 @@ class PoDeliveryTab extends Component {
               >
                 {this.state.suppliers?.map((p) => {
                   return (
-                    <>
-                      {/* <Option value={p.id}>{p.name}</Option> */}
-                      {/* <Option value={p.id}>{`${p.name} | ${p?.currency}`}</Option> */}
+           
                       <Option
                         value={p.supplier_id}
                       >{`${p.supplier_name} | ${p?.currency}`}</Option>
-                    </>
                   );
                 })}
               </Select>

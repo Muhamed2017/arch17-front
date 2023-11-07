@@ -1,12 +1,15 @@
 import axios from "axios";
 import React, { Component } from "react";
 import { API } from "../../utitlties";
-import { Button, Modal, Input, Form, Row, Col, Select, DatePicker } from "antd";
+import { Button, Modal, Input, Form, Row, Col, Select, DatePicker, Dropdown,} from "antd";
+
+import { FaFilePdf } from "react-icons/fa";
+import { SiMicrosoftexcel } from "react-icons/si";
 import {
   DeleteOutlined,
   EditOutlined,
   DownloadOutlined,
-  ExclamationCircleFilled
+  ExclamationCircleFilled,
 } from "@ant-design/icons";
 import toast, { Toaster } from "react-hot-toast";
 import moment from "moment";
@@ -22,20 +25,23 @@ class RecievedPaymentsTab extends Component {
     changeTotalPayment: this.props?.changeTotalPayment,
     changePaymentRows: this.props?.changePaymentRows,
     _currency: this.props?._currency,
+    base_currency: this.props?.base_currency,
   };
+
   deleteModal = () => {
     confirm({
       title: `Do you Want to delete ${this.state.payment_to_delete?.referance}  Payment? `,
       icon: <ExclamationCircleFilled />,
       onOk: () => {
         const id = this.state.payment_to_delete?.id;
-      this.handleDeletePayment(id)
+        this.handleDeletePayment(id);
       },
       onCancel() {
         console.log("Cancel");
       },
     });
   };
+
   handleDeletePayment = (id) => {
     const received_payment_rows = this.state.received_payment_rows;
     const index = received_payment_rows.findIndex(
@@ -57,8 +63,7 @@ class RecievedPaymentsTab extends Component {
         },
         () => {
           this.updatetotalPayment(this.state.received_payment_total);
-          this.updatePaymentRows(this.state.received_payment_rows)
-
+          this.updatePaymentRows(this.state.received_payment_rows);
         }
       );
     });
@@ -71,13 +76,21 @@ class RecievedPaymentsTab extends Component {
   updatePaymentRows = (rows) => {
     this.state.changePaymentRows(rows);
   };
+
   editPaymentFinish = (values) => {
     console.log(values);
+    values['value']=values.value?.replaceAll(',','')
+
     console.log(this.state.payment_to_edit);
     const fd = new FormData();
+    if (this.state._currency === this.state.base_currency) {
+      values["exchange_rate"] = 1;
+    }
+
     fd.append("referance", values.referance);
     fd.append("value", values.value);
     fd.append("date", this.state.edited_date);
+    fd.append("exchange_rate", values.exchange_rate);
 
     const received_payment_rows = this.state.received_payment_rows;
     const index = received_payment_rows.findIndex(
@@ -88,6 +101,7 @@ class RecievedPaymentsTab extends Component {
     received_payment_rows[index].referance = values?.referance;
     received_payment_rows[index].value = values?.value;
     received_payment_rows[index].date = this.state.edited_date;
+    received_payment_rows[index].exchange_rate = values?.exchange_rate;
     const plus_value = values.value;
     this.setState(
       {
@@ -106,22 +120,32 @@ class RecievedPaymentsTab extends Component {
       .post(`${API}edit-rpayment/${this.state.payment_to_edit?.id}`, fd)
       .then((response) => {
         console.log(response);
-        this.setState({
-          received_payment_rows,
-          edit_recieved_payment_modal: false,
-        },()=>{
-          this.updatePaymentRows(this.state.received_payment_rows)
-        });
+        this.setState(
+          {
+            received_payment_rows,
+            edit_recieved_payment_modal: false,
+          },
+          () => {
+            this.updatePaymentRows(this.state.received_payment_rows);
+          }
+        );
       });
   };
 
   onPaymentFinish = (values) => {
+    values['value']=values.value?.replaceAll(',','')
     const fd = new FormData();
     values["date"] = this.state.date;
+
+    if (this.state._currency === this.state.base_currency) {
+      values["exchange_rate"] = 1;
+    }
 
     fd.append("referance", values.referance);
     fd.append("value", values.value);
     fd.append("date", values.date);
+    fd.append("exchange_rate", values.exchange_rate);
+
     axios.post(`${API}add-rpayment/${this.props.id}`, fd).then((response) => {
       values["id"] = response.data.received_payment.id;
       this.setState(
@@ -137,9 +161,7 @@ class RecievedPaymentsTab extends Component {
             recieved_payment_modal: false,
           });
           this.updatetotalPayment(this.state.received_payment_total);
-          this.updatePaymentRows(this.state.received_payment_rows)
-
-
+          this.updatePaymentRows(this.state.received_payment_rows);
         }
       );
     });
@@ -221,19 +243,66 @@ class RecievedPaymentsTab extends Component {
       date,
     });
   };
-
+  items = [
+    {
+      key: "1",
+      label: (
+        <div
+        className="menu-download-item"
+        >
+          <span>
+             With EX.Rate
+          </span>
+          <a  href={`${API}export-sales/${this.props.id}`}>
+          <SiMicrosoftexcel />
+          </a>
+          <a  href={`${API}sales-pdf/${this.props.id}`}>
+          <FaFilePdf />
+          </a>
+        </div>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+       
+        <div
+        className="menu-download-item"
+        >
+          <span>
+            Without EX.Rate
+          </span>
+          <a  href={`${API}export-salesw/${this.props.id}`}>
+          <SiMicrosoftexcel />
+          </a>
+          <a  href={`${API}sales-pdfw/${this.props.id}`}>
+          <FaFilePdf />
+          </a>
+        </div>
+      ),
+    },
+  ];
   render() {
     return (
       <>
         <div className="tables-page">
           <div className="btns-actions">
             <button>
-              Download{" "}
-              <span>
-                <DownloadOutlined />
-              </span>
+            <Dropdown
+                  overlayClassName="download-tables-menu"
+                   placement="bottomLeft"
+                    menu={{
+                      items: this.items,
+                    }}
+                  >
+                    <a onClick={(e) => e.preventDefault()}>
+                      Download{" "}
+                      <span>
+                        <DownloadOutlined />
+                      </span>
+                    </a>
+                  </Dropdown>
             </button>
-
             <button onClick={this.openPaymentAddModal}>Add Payment +</button>
           </div>
           <div>
@@ -243,7 +312,11 @@ class RecievedPaymentsTab extends Component {
                   <tr>
                     <th className="num-col">NO.</th>
                     <th className="width-220">Referance, Date</th>
-                    <th className="width-600">Value</th>
+                    <th className="width-300">Value</th>
+                    {this.state.base_currency &&
+                      this.state.base_currency !== this.state._currency && (
+                        <th className="width-300">{`EX.R / ${this.state.base_currency}`}</th>
+                      )}
                   </tr>
                   {this.state.received_payment_rows?.map((payment, index) => {
                     return (
@@ -281,11 +354,14 @@ class RecievedPaymentsTab extends Component {
                                 <DeleteOutlined
                                   onClick={() =>
                                     // this.handleDeletePayment(payment.id)
-                                    this.setState({
-                                      payment_to_delete:payment
-                                    },()=>{
-                                      this.deleteModal()
-                                    })
+                                    this.setState(
+                                      {
+                                        payment_to_delete: payment,
+                                      },
+                                      () => {
+                                        this.deleteModal();
+                                      }
+                                    )
                                   }
                                 />
                               </Col>
@@ -303,16 +379,22 @@ class RecievedPaymentsTab extends Component {
                           </p>
                           <p className="sec">{this.state?._currency}</p>
                         </td>
+                        {this.state.base_currency &&
+                          this.state.base_currency !== this.state._currency && (
+                            <td>
+                              <p className="main">{payment?.exchange_rate}</p>
+                            </td>
+                          )}
                       </tr>
                     );
                   })}
                   {this.state.received_payment_rows.length > 0 && (
-                    <tr>
+                    <tr className="border-top-1">
                       <td colSpan={2}>
                         <p className="sale">Total Recieved Payments</p>
                       </td>
                       <td colSpan={4}>
-                        <p className="main">
+                        <p className="high">
                           {Number(
                             parseFloat(
                               this.state.received_payment_total
@@ -323,11 +405,41 @@ class RecievedPaymentsTab extends Component {
                       </td>
                     </tr>
                   )}
+                  {this.state.base_currency &&
+                    this.state.base_currency !== this.state._currency && (
+                      <tr>
+                        <td colSpan={2}>
+                          <p className="sale">{`Total Recieved Payments in ${this.state.base_currency}`}</p>
+                        </td>
+                        <td colSpan={4}>
+                        <p className="high">
+                                {Number(
+                                  parseFloat(
+                                    this.state.received_payment_rows?.reduce(
+                                      (accumulator, object) => {
+                                        return (
+                                          parseFloat(accumulator) +
+                                              parseFloat(object.value) *
+                                                parseFloat(object.exchange_rate)
+                                        );
+                                      },
+                                      0
+                                    )
+                                  ).toFixed(2)
+                                )?.toLocaleString()}
+                              </p>
+                              <p className="sec">
+                                {this.state.base_currency}
+                              </p>
+                        </td>
+                      </tr>
+                    )}
                 </table>
               </div>
             </div>
           </div>
         </div>
+
         <Modal
           footer={false}
           destroyOnClose
@@ -382,6 +494,17 @@ class RecievedPaymentsTab extends Component {
             >
               <Input placeholder="Payment Value" />
             </Form.Item>
+            {this.state._currency !== this.state.base_currency && (
+              <Form.Item
+                name="exchange_rate"
+                label={`Ex. Rate to ${this.state.base_currency}`}
+              >
+                <Input
+                  type="float"
+                  placeholder="Input the exchange rate to base currancy"
+                />
+              </Form.Item>
+            )}
 
             <Row justify={"end"}>
               <Col>
@@ -446,6 +569,18 @@ class RecievedPaymentsTab extends Component {
             >
               <Input placeholder="Payment Value" />
             </Form.Item>
+            {this.state._currency !== this.state.base_currency && (
+              <Form.Item
+                name="exchange_rate"
+                initialValue={this.state.payment_to_edit?.exchange_rate}
+                label={`Ex. Rate to ${this.state.base_currency}`}
+              >
+                <Input
+                  type="float"
+                  placeholder="Input the exchange rate to base currancy"
+                />
+              </Form.Item>
+            )}
 
             <Row justify={"end"}>
               <Col>

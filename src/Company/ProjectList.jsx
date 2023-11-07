@@ -29,6 +29,7 @@ import moment from "moment";
 import { API } from "../utitlties";
 import { CSVLink } from "react-csv";
 import "./pom.css";
+import { currency } from "../contexts/currencies";
 
 const { Option } = Select;
 const { confirm } = Modal;
@@ -110,6 +111,7 @@ class ProjectList extends Component {
     fd.append("city", values.city);
     fd.append("business_type", values.business_type);
     fd.append("start_date", values.start_date);
+    fd.append("base_currency", values.base_currency);
     fd.append("pi_ci", values.pi_ci);
     const clients = this.state.clients_option;
     const index = clients.findIndex(
@@ -291,16 +293,12 @@ class ProjectList extends Component {
     fd.append("city", values.city);
     fd.append("start_date", values.start_date);
     fd.append("pi_ci", values.pi_ci);
+    fd.append("base_currency", values.base_currency);
 
     const clients = this.state.clients_option;
     const _index = clients.findIndex(
       (client) => values.client_name == client.id
     );
-
-    // values["currency"] = clients[_index]?.currency;
-    // fd.append("client_name", clients[_index]?.name);
-    // fd.append("client_id", values.client_name);
-    // fd.append("currency", values.currency);
     if(values.business_type!=='Purchases Only'){
       values["currency"] = clients[_index]?.currency;
     fd.append("client_name", clients[_index]?.name);
@@ -319,6 +317,7 @@ class ProjectList extends Component {
     );
     project_rows[index].name = values?.name;
     project_rows[index].country = values.country;
+    project_rows[index].base_currency = values.base_currency;
     project_rows[index].start_date = values.start_date;
     project_rows[index].pi_ci = values.pi_ci;
     project_rows[index].client_name = clients[_index].name;
@@ -847,7 +846,6 @@ class ProjectList extends Component {
           <Modal
             footer={false}
             centered
-           
             destroyOnClose
             className="file-modal border-radius"
             open={this.state.add_modal}
@@ -868,37 +866,27 @@ class ProjectList extends Component {
               <Form.Item label="PI/CI" name="pi_ci">
                 <Input placeholder="input number" />
               </Form.Item>
-              <Row gutter={10}>
-                <Col md={12}>
-                  <div className="ant-form-item-label">
-                    <label>Country, city</label>
-                  </div>
-                  <Form.Item>
-                    <ReactFlagsSelect
-                      selected={this.state.country}
-                      selectedSize={14}
-                      optionsSize={18}
-                      searchable
-                      customLabels={customLabels}
-                      placeholder="Country *"
-                      onSelect={(code) => {
-                        this.setState({ country: code });
-                      }}
-                    />
-                  </Form.Item>
-                </Col>
-                <Col md={12}>
-                  <div
-                    style={{ visibility: "hidden" }}
-                    className="ant-form-item-label"
-                  >
-                    <label>Country, city</label>
-                  </div>
-                  <Form.Item name={"city"}>
-                    <Input placeholder="City *" />
-                  </Form.Item>
-                </Col>
-              </Row>
+              <Form.Item
+                label="Base Currency"
+                name="base_currency"
+                className="form-label mb-4"
+              >
+                <Select
+                  showSearch
+                  placeholder="Select Project Base Currency not editable"
+                  style={{
+                    fontSize: "13px",
+                  }}
+                >
+                  {currency.map((p) => {
+                    return (
+                      <>
+                        <Option value={p.code}>{p.code}</Option>
+                      </>
+                    );
+                  })}
+                </Select>
+              </Form.Item>
               <Form.Item
                 label="Bussiness Type"
                 name="business_type"
@@ -954,6 +942,37 @@ class ProjectList extends Component {
                   })}
                 </Select>
               </Form.Item>
+              <Row gutter={10}>
+                <Col md={12}>
+                  <div className="ant-form-item-label">
+                    <label>Country, city</label>
+                  </div>
+                  <Form.Item>
+                    <ReactFlagsSelect
+                      selected={this.state.country}
+                      selectedSize={14}
+                      optionsSize={18}
+                      searchable
+                      customLabels={customLabels}
+                      placeholder="Country *"
+                      onSelect={(code) => {
+                        this.setState({ country: code });
+                      }}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col md={12}>
+                  <div
+                    style={{ visibility: "hidden" }}
+                    className="ant-form-item-label"
+                  >
+                    <label>Country, city</label>
+                  </div>
+                  <Form.Item name={"city"}>
+                    <Input placeholder="City *" />
+                  </Form.Item>
+                </Col>
+              </Row>
               <Form.Item label="Start Date" name="start_date">
                 <DatePicker
                   style={{ width: "100%" }}
@@ -1003,6 +1022,30 @@ class ProjectList extends Component {
                 initialValue={this.state.project_to_edit?.pi_ci}
               >
                 <Input placeholder="input number" />
+              </Form.Item>
+              <Form.Item
+                label="Base Currency"
+                name="base_currency"
+                initialValue={this.state.project_to_edit?.base_currency}
+                className="form-label mb-4"
+              >
+                <Select
+                
+                disabled={this.state.project_to_edit?.base_currency!=null}
+                  showSearch
+                  placeholder="Select Project Base Currency not editable"
+                  style={{
+                    fontSize: "13px",
+                  }}
+                >
+                  {currency.map((p) => {
+                    return (
+                      <>
+                        <Option value={p.code}>{p.code}</Option>
+                      </>
+                    );
+                  })}
+                </Select>
               </Form.Item>
               <Row gutter={10}>
                 <Col md={12}>

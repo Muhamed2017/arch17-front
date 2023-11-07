@@ -685,9 +685,9 @@ class Company extends Component {
               //  <Tab>Contacts</Tab>
              )}
              
-             {this.state.isOwner &&this.props.isLoggedIn&& ( 
+             {/* {this.state.isOwner &&this.props.isLoggedIn&& (  */}
              <Tab>PO Management</Tab>
-             )}  
+             {/* )}  */}
             </TabList>
             {(this.state.company?.about?.length > 4 ||
              this.state.company?.categories?.length > 0) && (
@@ -2228,12 +2228,11 @@ class Company extends Component {
             ) : (
              ""
             )}
-             {this.state.isOwner && this.props.isLoggedIn &&  (
+             {/* {this.state.isOwner && this.props.isLoggedIn &&  ( */}
              <TabPanel
              className="pom-panel"
-             
              ><POM company_id={this.state.company_id}/></TabPanel>
-               )} 
+             {/* )}  */}
            </Tabs>
           </div>
          </Col>

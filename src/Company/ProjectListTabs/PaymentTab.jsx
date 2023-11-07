@@ -11,14 +11,12 @@ import {
   Spin,
   Menu,
   Dropdown,
-
 } from "antd";
 import axios from "axios";
 import { API, MONTHS } from "../../utitlties";
 import ReactFlagsSelect from "react-flags-select";
 import dayjs from "dayjs";
 import { FaFilePdf } from "react-icons/fa";
-import { SiMicrosoftexcel } from "react-icons/si";
 import {
   DeleteOutlined,
   EditOutlined,
@@ -29,6 +27,7 @@ import {
   CaretUpOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
+import { SiMicrosoftexcel } from "react-icons/si";
 import toast, { Toaster } from "react-hot-toast";
 import { currency } from "../../contexts/currencies";
 import { customLabels } from "../../pages/CreateBrandFinish";
@@ -54,7 +53,7 @@ class PaymentTab extends Component {
     city_filter: "",
     name_filter: "",
     year_filter: "",
-    vendor_filter:"",
+    vendor_filter: "",
     month_filter: "",
     currency_filter: "",
     project_id: this.props.id,
@@ -63,9 +62,9 @@ class PaymentTab extends Component {
     base_currency: this.props?.base_currency,
   };
 
-  
   onFinish = (values) => {
     console.log(values);
+    values["value"] = values.value?.replaceAll(",", "");
     const fd = new FormData();
     values["paid_date"] = this.state.paid_date;
     values["currency"] = this.state.selectedCurrency;
@@ -75,14 +74,16 @@ class PaymentTab extends Component {
     fd.append("value", values.value);
     // fd.append("currency", values.currency);
     fd.append("name", values.name);
-
     const { suppliers_options } = this.state;
     const index = suppliers_options?.findIndex(
       (s) => s.supplier_name === values.name
     );
+    if (this.state.selectedCurrency === this.state.base_currency) {
+      values["exchange_rate"] = 1;
+    }
 
+    fd.append("exchange_rate", values.exchange_rate);
     fd.append("supplier_id", suppliers_options[index]?.supplier_id);
-
     fd.append("paid_date", values.paid_date);
     fd.append("status", "done");
     axios.post(`${API}add-payment/${this.props.id}`, fd).then((response) => {
@@ -100,10 +101,11 @@ class PaymentTab extends Component {
     });
   };
 
-
   onFinishRequest = (values) => {
     console.log(values);
     console.log(values);
+    values["value"] = values.value?.replaceAll(",", "");
+
     const fd = new FormData();
     fd.append("referance", values.referance);
     fd.append("value", values.value);
@@ -138,8 +140,12 @@ class PaymentTab extends Component {
     const id = this.state.payment_to_be_compteted.id;
     console.log(values);
     const fd = new FormData();
+    if (this.state.selectedCurrency === this.state.base_currency) {
+      values["exchange_rate"] = 1;
+    }
     values["paid_date"] = this.state.complete_paid_date;
     fd.append("paid_date", this.state.complete_paid_date);
+    fd.append("exchange_rate", values.exchange_rate);
     axios.post(`${API}done-payment/${id}`, fd).then((response) => {
       this.getData().then(() => {
         this.setState({
@@ -149,6 +155,10 @@ class PaymentTab extends Component {
     });
   };
 
+  
+  formatNumner = (number) => {
+    return Number(parseFloat(number).toFixed(2)).toLocaleString();
+  };
   handleMoveToPending = (values) => {
     const id = this.state.payment_to_be_deleted.id;
     console.log(values);
@@ -227,6 +237,14 @@ class PaymentTab extends Component {
     });
   };
 
+  getKeyValue = (name, obj, type) => {
+    let total = 0;
+    obj[name]?.map((p) => {
+      total += parseFloat(p.value);
+    });
+    return total;
+  };
+
   componentDidMount() {
     console.log(dayjs("2015-01-01", "YYYY-MM-DD"));
 
@@ -237,27 +255,55 @@ class PaymentTab extends Component {
     this.getData().then(() => {
       this.setState({
         loading: false,
+
+       
       });
+
     });
   }
 
   getData = async () => {
     await axios.get(`${API}get-payments/${this.props.id}`).then((response) => {
+    
+    this.setState({
+      po_deliveries_values:Object.values(response.data.po_deliveries)??[],
+      purchases_with_exchange: response.data.purchases?.reduce(
+        (accumulator, object) => {
+          return (
+            parseFloat(accumulator) +
+            parseFloat(object.total) * parseFloat(object.exchange_rate)
+          );
+        },
+        0
+      ),
+
+    },()=>{
       this.setState(
         {
           done_payment_rows: response.data.payments.filter((p) => {
             return p.status === "done";
           }),
-          vendors_options : [...new Set(response.data.payments.map((v)=>{
-            return  v.name
-          }))],
-          // [...new Set(this.state.services_filter)]
-          exchange_rates: response.data.exchange_rates,
+
+          pos_currencies:response.data.pos_currencies,
+          pos_sub:response.data.pos_sub,
+          purchases:response.data.purchases,
+          po_deliveries:response.data.po_deliveries,
+          deliveries_currencies:response.data.deliveries_currencies,
+          payments_currencies:response.data.payments_currencies,
+
+         
+          
+          vendors_options: [
+            ...new Set(
+              response.data.payments.map((v) => {
+                return v.name;
+              })
+            ),
+          ],
           request_payment_rows: response.data.payments.filter((p) => {
             return p.status === "pending";
           }),
           unique_supp: response.data.pos?.map((p) => {
-            // return p.supplier_name;
             return p;
           }),
           services_filter: response.data.payments
@@ -268,14 +314,145 @@ class PaymentTab extends Component {
               return p != null;
             })
             .flat(),
+
+            total_paids: Object.keys(response.data.pos_sub)?.map((p) => {
+              return parseFloat(
+                this.getKeyValue(p, response.data.payments_pos, "value")
+              );
+            }),
+    
+            total_currency_paids: Object.values(
+              response.data.pos_currencies
+            )?.map((c, index) => {
+              return parseFloat(
+                this.getKeyValue(
+                  c[0]?.currency,
+                  response.data.payments_currencies,
+                  "coast"
+                )
+              );
+            }),
+            total_currency_balances: Object.values(
+              response.data.pos_currencies
+            )?.map((c, index) => {
+              return parseFloat(
+                c?.reduce((accumulator, object) => {
+                  return parseFloat(accumulator) + parseFloat(object.total);
+                }, 0) -
+                  this.getKeyValue(
+                    c[0]?.currency,
+                    response.data.payments_currencies,
+                    "coast"
+                  )
+              );
+            }),
+            purchases_total_with_exchanges_values: Object.keys(
+              response.data.po_deliveries
+            )?.map((vendor, index) => {
+              return response.data.purchases
+                ?.filter((p) => {
+                  return p.supplier_name == vendor;
+                })
+                .reduce((accumulator, object) => {
+                  return parseFloat(
+                    parseFloat(accumulator) +
+                      parseFloat(object.total) *
+                        parseFloat(object.exchange_rate)
+                  );
+                }, 0);
+            }),
+            purchases_total_with_exchanges_percentages: Object.keys(
+              response.data.po_deliveries
+            )?.map((vendor, index) => {
+              return (
+                response.data.purchases
+                  ?.filter((p) => {
+                    return p.supplier_name == vendor;
+                  })
+                  .reduce((accumulator, object) => {
+                    return parseFloat(
+                      parseFloat(accumulator) +
+                        parseFloat(object.total) *
+                          parseFloat(object.exchange_rate)
+                    );
+                  }, 0) / this.state.purchases_with_exchange
+              );
+            }),
+            deliveries_percentages: Object.keys(
+              response.data.po_deliveries
+            )?.map((vendor, index) => {
+              return (
+                (parseFloat(
+                  this.state.po_deliveries_values[index].reduce(
+                    (accumulator, object) => {
+                      return parseFloat(
+                        parseFloat(accumulator) + parseFloat(object.value)
+                      );
+                    },
+                    0
+                  )
+                ) /
+                  (parseFloat(
+                    this.state.po_deliveries_values[index][0]?.leftp
+                  ) +
+                    parseFloat(
+                      this.state.po_deliveries_values[index].reduce(
+                        (accumulator, object) => {
+                          return parseFloat(
+                            parseFloat(accumulator) +
+                              parseFloat(object.value)
+                          );
+                        },
+                        0
+                      )
+                    ))) *
+                (response.data.purchases
+                  ?.filter((p) => {
+                    return p.supplier_name == vendor;
+                  })
+                  .reduce((accumulator, object) => {
+                    return parseFloat(
+                      parseFloat(accumulator) +
+                        parseFloat(object.total) *
+                          parseFloat(object.exchange_rate)
+                    );
+                  }, 0) /
+                  this.state.purchases_with_exchange)
+              );
+            }),
+           
+
         },
         () => {
           this.setState({
             services_filter_options: [...new Set(this.state.services_filter)],
+
+             dvp:this.formatNumner(
+              100*this.state.deliveries_percentages?.reduce(
+                (accumulator, object) => {
+                  return parseFloat(
+                    parseFloat(accumulator) + parseFloat(object)
+                  );
+                },
+                0
+              )
+            ),
+            dlp:this.formatNumner(
+              100- 100*this.state.deliveries_percentages?.reduce(
+                (accumulator, object) => {
+                  return parseFloat(
+                    parseFloat(accumulator) + parseFloat(object)
+                  );
+                },
+                0
+              )
+            )
           });
-          console.log(this.state.vendors_options)
+          console.log(this.state.vendors_options);
         }
       );
+    })
+     
     });
   };
 
@@ -306,30 +483,34 @@ class PaymentTab extends Component {
   };
 
   handleSupplierChange = (selectedSupplier) => {
-   
     this.setState({ selectedSupplier }, () => {
-
-      const total_payments_requests=this.state.request_payment_rows?.filter((s)=>{
-        return  s.name===selectedSupplier
-      }).reduce(
-        (accumulator, object) => {
+      const total_payments_requests = this.state.request_payment_rows
+        ?.filter((s) => {
+          return s.name === selectedSupplier;
+        })
+        .reduce((accumulator, object) => {
           return parseFloat(accumulator) + parseFloat(object.value);
-        },
-        0
-      )
+        }, 0);
       const { suppliers_options } = this.state;
       const index = suppliers_options?.findIndex(
         (s) => s.supplier_name === selectedSupplier
       );
-      axios.get(`${API}supplier-balance/${this.state.project_id}/${selectedSupplier}`).then((response)=>{
-        this.setState({
-          total_balance:response.data.supplier_balance,
-          left_balance_to_pay:response.data.supplier_balance  - parseFloat(total_payments_requests),
-          other_payment_in_raw:this.state.request_payment_rows?.filter((s)=>{
-            return  s.name===selectedSupplier
-          }).length>0
-        })
-      })
+      axios
+        .get(
+          `${API}supplier-balance/${this.state.project_id}/${selectedSupplier}`
+        )
+        .then((response) => {
+          this.setState({
+            total_balance: response.data.supplier_balance,
+            left_balance_to_pay:
+              response.data.supplier_balance -
+              parseFloat(total_payments_requests),
+            other_payment_in_raw:
+              this.state.request_payment_rows?.filter((s) => {
+                return s.name === selectedSupplier;
+              }).length > 0,
+          });
+        });
       this.setState({
         selectedCurrency: suppliers_options[index]?.currency,
         supplier_id: suppliers_options[index]?.supplier_id,
@@ -346,12 +527,17 @@ class PaymentTab extends Component {
   };
 
   onFinishEdit = (values) => {
+    values["value"] = values.value?.replaceAll(",", "");
     const id = this.state.payment_to_edit?.id;
-    // values["paid_date"] = this.state.paid_edit_date;
     console.log(values);
     const { name, paid_date, referance, value, currency } = values;
+    if (this.state.selectedCurrency === this.state.base_currency) {
+      values["exchange_rate"] = 1;
+    }
+
     const fd = new FormData();
-    // fd.append("paid_date", paid_date);
+    fd.append("exchange_rate", values.exchange_rate);
+
     fd.append("name", name);
     values["paid_date"] = this.state.edited_date;
     fd.append("paid_date", values.paid_date);
@@ -373,10 +559,17 @@ class PaymentTab extends Component {
   };
 
   onFinishRequestEdit = (values) => {
+    values["value"] = values.value?.replaceAll(",", "");
     const id = this.state.request_payment_to_edit?.id;
     console.log(values);
     const { name, referance, value, currency } = values;
+    if (this.state.selectedCurrency === this.state.base_currency) {
+      values["exchange_rate"] = 1;
+    }
+
+    fd.append("exchange_rate", values.exchange_rate);
     const fd = new FormData();
+
     fd.append("name", name);
     fd.append("referance", referance);
     fd.append("value", value);
@@ -394,35 +587,37 @@ class PaymentTab extends Component {
     });
   };
 
-  addPaymentValuesChange = (changedValues,allValues) =>{
-    const total_balance=this.state.total_balance
-    const total_payments_requests=this.state.request_payment_rows?.filter((s)=>{
-      return  s.name===this.state.selectedSupplier
-    }).reduce(
-      (accumulator, object) => {
-        return parseFloat(accumulator) + parseFloat(object.value);
-      },
-      0
-    )
-
-    if (parseFloat(allValues?.value)>0) {
-        this.setState({
-          left_balance_to_pay:  parseFloat(this.state.total_balance)  - (parseFloat(allValues.value) + parseFloat(total_payments_requests))
-        })
-    }
-    if ((!allValues?.value)||allValues.value=='') {
-      this.setState({
-        left_balance_to_pay:  parseFloat(this.state.total_balance) -parseFloat(total_payments_requests)
+  addPaymentValuesChange = (changedValues, allValues) => {
+    const total_balance = this.state.total_balance;
+    const total_payments_requests = this.state.request_payment_rows
+      ?.filter((s) => {
+        return s.name === this.state.selectedSupplier;
       })
+      .reduce((accumulator, object) => {
+        return parseFloat(accumulator) + parseFloat(object.value);
+      }, 0);
+
+    if (parseFloat(allValues?.value) > 0) {
+      this.setState({
+        left_balance_to_pay:
+          parseFloat(this.state.total_balance) -
+          (parseFloat(allValues.value) + parseFloat(total_payments_requests)),
+      });
+    }
+    if (!allValues?.value || allValues.value == "") {
+      this.setState({
+        left_balance_to_pay:
+          parseFloat(this.state.total_balance) -
+          parseFloat(total_payments_requests),
+      });
     }
     this.setState({
-      other_payment_in_raw:this.state.request_payment_rows?.filter((s)=>{
-        return  s.name===this.state.selectedSupplier
-      }).length>0
-    })
- 
- 
-  }
+      other_payment_in_raw:
+        this.state.request_payment_rows?.filter((s) => {
+          return s.name === this.state.selectedSupplier;
+        }).length > 0,
+    });
+  };
 
   filterList = () => {
     const {
@@ -432,7 +627,7 @@ class PaymentTab extends Component {
       products_filter,
       currency_filter,
       month_filter,
-      vendor_filter
+      vendor_filter,
     } = this.state;
     const _date = this.state.year_filter.concat(month_filter);
     console.log(_date);
@@ -489,6 +684,7 @@ class PaymentTab extends Component {
       }
     );
   };
+
   vendorChange = (vendor_filter) => {
     this.setState(
       {
@@ -499,6 +695,7 @@ class PaymentTab extends Component {
       }
     );
   };
+
   onYearChange = (d, year_filter) => {
     console.log(d);
 
@@ -512,6 +709,7 @@ class PaymentTab extends Component {
       }
     );
   };
+
   onMonthChange = (month_filter) => {
     this.setState(
       {
@@ -522,6 +720,7 @@ class PaymentTab extends Component {
       }
     );
   };
+
   handleSearchSuppliers = (e) => {
     console.log(e.target.value);
     this.setState(
@@ -542,6 +741,7 @@ class PaymentTab extends Component {
       collapsed: !collapsed,
     });
   };
+
   render() {
     return (
       <>
@@ -571,10 +771,54 @@ class PaymentTab extends Component {
               />
               <div className="btns-actions payments">
                 <button>
-                  Download{" "}
-                  <span>
-                    <DownloadOutlined />
-                  </span>
+                <Dropdown
+              overlayClassName="download-tables-menu"
+              placement="bottomLeft"
+              menu={{
+                items: [
+                  {
+                    key: "1",
+                    label: (
+                      <div>
+                        <div className="menu-download-item">
+                          <a
+                            href={`${API}purchases-statement-xls/${
+                              this.state.project_id
+                            }?p=${[this.state.total_paids]}&cb=${
+                              this.state.total_currency_balances
+                            }&cp=${this.state.total_currency_paids}&dvp=${
+                              this.state.dvp
+                            }&dlp=${this.state.dlp}`}
+                          >
+                            <SiMicrosoftexcel />
+                          </a>
+                        </div>
+                        <div className="menu-download-item">
+                          <a
+                            href={`${API}purchases-statement-pdf/${
+                              this.state.project_id
+                            }?p=${[this.state.total_paids]}&cb=${
+                              this.state.total_currency_balances
+                            }&cp=${this.state.total_currency_paids}&dvp=${
+                              this.state.dvp
+                            }&dlp=${this.state.dlp}`}
+                          >
+                            <FaFilePdf />
+                          </a>
+                        </div>
+                      </div>
+                    ),
+                  },
+                ],
+              }}
+            >
+              <a onClick={(e) => e.preventDefault()}>
+                Download{" "}
+                <span>
+                  <DownloadOutlined />
+                </span>
+              </a>
+            </Dropdown>
                 </button>
                 <button onClick={this.openDonePaymentModal}>
                   Add Done Payment +
@@ -584,13 +828,10 @@ class PaymentTab extends Component {
                 </button>
               </div>
               <div>
-                {/* <span className="table-name">Done Payments</span> */}
                 <div id="clientlis">
                   <div className="clientlist-table pom-table suppliers-list">
                     <div className="filters pos-tabs">
-                      <Row align={"top"} justify={"end"}
-                      gutter={20}
-                      >
+                      <Row align={"top"} justify={"end"} gutter={20}>
                         <Col md={3}>
                           <Select
                             className="right  px-0"
@@ -600,7 +841,7 @@ class PaymentTab extends Component {
                             placeholder="All Vendors"
                             style={{
                               width: "170px",
-                              textAlign:"right"
+                              textAlign: "right",
                             }}
                             value={this.state.vendor_filter}
                             onChange={this.vendorChange}
@@ -719,7 +960,7 @@ class PaymentTab extends Component {
                             })}
                           </Select>
                         </Col>
-                        ``{" "}
+                        
                       </Row>
                     </div>
                     <div className="table-wrapper">
@@ -728,8 +969,9 @@ class PaymentTab extends Component {
                           <th className="width-220">Vendor</th>
                           <th className="width-300">Referance</th>
                           <th className="width-150">Value</th>
+                          <th className="width-100">{`EX.R / ${this.state.base_currency}`}</th>
                           <th className="width-200">Paid Date</th>
-                          <th className="width-300  text-right pointer">
+                          <th className="width-200  text-right pointer">
                             <span onClick={this.alterCollapse}>
                               {this.state.collapsed ? (
                                 <>
@@ -765,6 +1007,7 @@ class PaymentTab extends Component {
                                                 row_index: index,
                                                 payment_to_edit: p,
                                                 edited_date: p?.paid_date,
+                                                selectedCurrency: p?.currency,
                                               },
                                               () => {
                                                 this.setState({
@@ -787,7 +1030,6 @@ class PaymentTab extends Component {
                                       </Col>
                                     </Row>
                                   </div>
-
                                   <p className="main">{p.name}</p>
                                 </td>
                                 <td>
@@ -800,6 +1042,9 @@ class PaymentTab extends Component {
                                     )?.toLocaleString()}
                                   </p>
                                   <p className="sec">{p.currency}</p>
+                                </td>
+                                <td>
+                                  {<p className="main">{p.exchange_rate}</p>}
                                 </td>
                                 <td>
                                   <p className="main">{p?.paid_date}</p>
@@ -828,6 +1073,7 @@ class PaymentTab extends Component {
                               <td></td>
                               <td></td>
                               <td></td>
+                              <td></td>
                             </tr>
                             <tr className="white light-hover">
                               <td>
@@ -837,24 +1083,29 @@ class PaymentTab extends Component {
                                 <p className="sec">Base Currency</p>
                               </td>
                               <td>
+                                
                                 <p className="main">
-                                  {this.state.total_done_value *
-                                    this.state.exchange_rates[
-                                      this.state.exchange_rates?.findIndex(
-                                        (e) => {
+                                  {Number(
+                                    parseFloat(
+                                      this.state.done_payment_rows?.reduce(
+                                        (accumulator, object) => {
                                           return (
-                                            e.currency ===
-                                            this.state.done_payment_rows[0]
-                                              ?.currency
+                                            parseFloat(accumulator) +
+                                            parseFloat(object.value) *
+                                              parseFloat(object.exchange_rate)
                                           );
-                                        }
+                                        },
+                                        0
                                       )
-                                    ]?.vlaue}
+                                    ).toFixed(2)
+                                  )?.toLocaleString()}
                                 </p>
+
                                 <p className="sec">
                                   {this.state.base_currency}
                                 </p>
                               </td>
+                              <td></td>
                               <td></td>
                               <td></td>
                               <td></td>
@@ -964,6 +1215,7 @@ class PaymentTab extends Component {
                                   this.setState({
                                     complete_modal: true,
                                     payment_to_be_compteted: p,
+                                    selectedCurrency:p?.currency
                                   });
                                 }}
                                 className="main pointer"
@@ -992,8 +1244,7 @@ class PaymentTab extends Component {
                 closable
               >
                 <p className="modal-header">Add Done Payment</p>
-                <Form onFinish={this.onFinish}
-                size="large" layout="vertical">
+                <Form onFinish={this.onFinish} size="large" layout="vertical">
                   <Form.Item label="Supplier">
                     <Select
                       showSearch
@@ -1021,12 +1272,29 @@ class PaymentTab extends Component {
                   <Row gutter={25}>
                     <Col md={24}>
                       <Form.Item label="Value" name="value">
-                        <Input placeholder="Payment Value" 
-                        
-                        />
+                        <Input placeholder="Payment Value" />
                       </Form.Item>
                     </Col>
                   </Row>
+                  {this.state.selectedCurrency?.length > 0 &&
+                    this.state.selectedCurrency !==
+                      this.state.base_currency && (
+                      <Form.Item
+                        rules={[
+                          {
+                            required: true,
+                            message: "Ex.Rate is required!",
+                          },
+                        ]}
+                        name="exchange_rate"
+                        label={`Ex. Rate to ${this.state.base_currency}`}
+                      >
+                        <Input
+                          type="number"
+                          placeholder="Input the exchange rate to base currancy"
+                        />
+                      </Form.Item>
+                    )}
                   <Form.Item
                     label="Paid Date"
                     // name='paid_date'
@@ -1054,6 +1322,7 @@ class PaymentTab extends Component {
                 onCancel={() => {
                   this.setState({
                     edit_payment_modal: false,
+                    selectedCurrency: "",
                   });
                 }}
                 closable
@@ -1062,7 +1331,6 @@ class PaymentTab extends Component {
                 <Form
                   onFinish={this.onFinishEdit}
                   size="large"
-
                   layout="vertical"
                 >
                   <Form.Item
@@ -1106,6 +1374,27 @@ class PaymentTab extends Component {
                       </Form.Item>
                     </Col>
                   </Row>
+                  {this.state.selectedCurrency?.length > 0 &&
+                    this.state.selectedCurrency !==
+                      this.state.base_currency && (
+                      <Form.Item
+                        rules={[
+                          {
+                            required: true,
+                            message: "Ex.Rate is required!",
+                          },
+                        ]}
+                        name="exchange_rate"
+                        label={`Ex. Rate to ${this.state.base_currency}`}
+                        initialValue={this.state.payment_to_edit?.exchange_rate}
+                      >
+                        <Input
+                          type="number"
+                          placeholder="Input the exchange rate to base currancy"
+                        />
+                      </Form.Item>
+                    )}
+
                   <Form.Item
                     name="paid_date"
                     initialValue={moment(
@@ -1137,6 +1426,7 @@ class PaymentTab extends Component {
                 onCancel={() => {
                   this.setState({
                     edit_request_payment_modal: false,
+                    selectedCurrency: "",
                   });
                 }}
                 closable
@@ -1217,8 +1507,7 @@ class PaymentTab extends Component {
                   onFinish={this.onFinishRequest}
                   size="large"
                   layout="vertical"
-                onValuesChange={this.addPaymentValuesChange}
-
+                  onValuesChange={this.addPaymentValuesChange}
                 >
                   <Form.Item label="Supplier">
                     <Select
@@ -1253,19 +1542,21 @@ class PaymentTab extends Component {
                     </Col>
                   </Row>
                   <p className="sec">
-                  {this.state.left_balance_to_pay&&(
-                    <>
-                    {Number(parseFloat(this.state.left_balance_to_pay).toFixed(2)).toLocaleString()
-                    }
-                    {"  "}{this.state.selectedCurrency}
-                    {/* {"  "}{this.state.unique_supp?.findIndex((s)=>{
+                    {this.state.left_balance_to_pay && (
+                      <>
+                        {Number(
+                          parseFloat(this.state.left_balance_to_pay).toFixed(2)
+                        ).toLocaleString()}
+                        {"  "}
+                        {this.state.selectedCurrency}
+                        {/* {"  "}{this.state.unique_supp?.findIndex((s)=>{
                       return  s.supplier_name===this.state.selectedCurrency
                     })} */}
-                    </>
-                  )}
+                      </>
+                    )}
                   </p>
                   <p className="sec my-2">
-                    {this.state.other_payment_in_raw&&(
+                    {this.state.other_payment_in_raw && (
                       <p>Other Payment Requests in the raw</p>
                     )}
                   </p>
@@ -1277,7 +1568,6 @@ class PaymentTab extends Component {
                     </Col>
                   </Row>
                 </Form>
-                
               </Modal>
 
               <Modal
@@ -1288,6 +1578,7 @@ class PaymentTab extends Component {
                 onCancel={() => {
                   this.setState({
                     complete_modal: false,
+                    selectedCurrency:""
                   });
                 }}
                 closable
@@ -1304,6 +1595,25 @@ class PaymentTab extends Component {
                       onChange={this.onPaidDateChange}
                     />
                   </Form.Item>
+                  {this.state.selectedCurrency?.length > 0 &&
+                    this.state.selectedCurrency !==
+                      this.state.base_currency && (
+                      <Form.Item
+                        rules={[
+                          {
+                            required: true,
+                            message: "Ex.Rate is required!",
+                          },
+                        ]}
+                        name="exchange_rate"
+                        label={`Ex. Rate to ${this.state.base_currency}`}
+                      >
+                        <Input
+                          type="number"
+                          placeholder="Input the exchange rate to base currancy"
+                        />
+                      </Form.Item>
+                    )}
 
                   <Row justify={"end"}>
                     <Col>

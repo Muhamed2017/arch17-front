@@ -46,6 +46,20 @@ span.download {
   margin: 15px auto 10px ;
 
 }
+.monitor{
+  font-size: 16px;
+  color: #707070a8;
+  font-weight: 500;
+}
+.monitor  span{
+  color: #000000ab;
+    display: inline-block;
+    width: 100px;
+}
+.monitor  div{
+  margin-bottom: 7.5px;
+}
+
 .suppliers-list table {
   margin: 20px auto 0px;
   position: relative;
@@ -886,14 +900,37 @@ td p.sale {
   text-align: left;
 }
 .purchases-table  .table-row{
-  grid-template-columns: 220px 220px 220px 220px 150px 150px 150px;
+  /* grid-template-columns: 220px 220px 220px 220px 150px 150px 150px; */
+
+  grid-template-columns: 190px 190px 190px 190px 120px  120px 130px 100px;
+}
+.purchases-table.ex  .table-row{
+  /* grid-template-columns: 220px 220px 220px 220px 100px  150px 150px 150px !important; */
 
 }
+
 .deliveries-table .table-row{
-  grid-template-columns: 250px 300px 250px 250px 200px;
+  grid-template-columns: 250px 250px 180px 150px  150px 150px 100px;  
 
 }
+.invoices-table .table-row{
+  grid-template-columns: 245px 200px 160px 150px  150px 150px 150px;  
 
+}
+.tag-name,.tag-desc{
+  color: #707070a1;
+  font-weight: 500;
+  padding: 0;
+  margin-bottom: 0;
+  font-size: 16px;
+  position: relative;
+  top: -16px;
+  
+}
+.my-100{
+  margin-bottom: 100px !important;
+  margin-top: 100px !important;
+}
 .customized-table {
   margin: 20px auto 50px;
 }
@@ -919,4 +956,129 @@ td p.sale {
 .ant-collapse-item-active .collabser-row{
   border-color: #7e7e7e16 ;
 }
+ .menu-download-item{
+  display: grid;
+  grid-template-columns: 150px auto auto;
+  font-size: 18px;
+  gap: 10px;
+}
+.add-btn-wide{
+  width: 400px;
+  margin: auto;
+  border:1px solid #C4C4C4;
+  border-radius: 20px;
+  text-align: center;
+  padding: 5px;
+  font-weight: 500;
+}
+.summary-progress .ant-progress-bg{
+height: 50px  !important;
+border-radius: 5px;
+}
+.summary-progress .ant-progress-inner{
+  border-radius: 30px;
+}
+.shadow-section{
+  border-color: #f2f2f2;
+  border-width: 1px;
+  border-style: solid;
+  filter: drop-shadow(0px 3px 3px rgba(0,0,0,0.16 ));
+  background: #ffffff
 
+}
+#overall-summary-page h6{
+  font-size: 19px;
+  font-weight: normal;
+  padding: 10px 0;
+}
+#overall-summary-page .outer-wrapper{
+  padding:20px;
+}
+#overall-summary-page .budget-container p , .side-cell p{
+  font-weight: bold;
+  color: #000;
+  font-size: 14px;
+  padding: 2px 0;
+  margin: 0 auto;
+  
+}
+#overall-summary-page .side-cell{
+  margin: 10px 0;
+}
+#overall-summary-page .budget-container .budget-row span , .side-cell > span{
+font-size: 21px;
+font-weight: 300;  
+color: #000;
+}
+.hidechart{
+  visibility: hidden;
+}
+.absolute-charts{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom:60px;
+  text-align: center;
+  padding: 0px 20px;
+  /* left: 20px; */
+  font-size: 13px;
+}
+.chart-inner{
+  padding-bottom: 30px !important;
+}
+.stack-side .shadow-section{
+  min-height: 554px;
+}
+.indicator {
+font-size: 13px !important;
+color: #6f6f6fc3 !important;
+font-weight: 400;
+display: block;
+width: 100%;
+text-align: left;
+}
+.indicator span{
+  color: #000 !important;
+font-size: 13px !important;
+font-weight: 500;
+display: inline-block;
+
+}
+.render_by span.active{
+text-decoration: underline;
+
+}
+.render_by span.inactive{
+  color: #55555589;
+  font-weight: 500;
+}
+.render_by span{
+  cursor: pointer;
+}
+.stack-side p{
+  font-weight: 500;
+}
+.border-top-row:last-child{
+  border-top: 1px solid #00000048 !important ;
+  top:-1px
+  
+}
+tr.border-top-1 td{
+border-top:3px solid #0000006e !important;
+position: relative;
+top:-2px;
+}
+tr.border-top-0 td{
+  border-top:0 !important;
+}
+.pom-overview .table-name{
+font-size: 27px;
+}
+.pom-overview th p.main{
+  font-size: 14px;
+
+}
+.pom-overview td p.sec{
+/* color: #393939; */
+opacity: .35;
+}
