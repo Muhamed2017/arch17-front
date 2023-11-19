@@ -1,13 +1,13 @@
 import React, { Component } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { Row, Col, Select } from "antd";
+import { Row, Col } from "antd";
 import PurchasesOrdersTab from "./PurchasesOrdersTab";
 import PaymentTab from "./PaymentTab";
 import PoDeliveryTab from "./PoDeliveryTab";
 import PurchasesSummaryTab from "./PurchasesSummaryTab";
 import PoInvoicesTab from "./PoInvoicesTab";
 
-const { Option } = Select;
+// const { Option } = Select;
 class PurchasesTab extends Component {
   constructor(props) {
     super(props);
@@ -17,6 +17,8 @@ class PurchasesTab extends Component {
     base_currency: this.props?.base_currency,
     po_deliveries: this.props.po_deliveries,
     has_poinvoice_tab: this.props?.has_poinvoice_tab,
+    entity_name: this.props.entity_name,
+    entity_id: this.props.entity_id,
   };
 
   componentDidMount() {}
@@ -52,6 +54,8 @@ class PurchasesTab extends Component {
                     project_id={this.props.project_id}
                     changeTotalSupplirs={this.props?.changeTotalSupplirs}
                     company_id={this.props?.company_id}
+                    entity_name={this.state.entity_name}
+                    entity_id={this.state.entity_id}
                     base_currency={this.state.base_currency}
                     updateBaseCurrency={(base_currency) =>
                       this.updateBaseCurrency(base_currency)
@@ -70,6 +74,8 @@ class PurchasesTab extends Component {
                   <PoDeliveryTab
                     project_id={this.props?.project_id}
                     company_id={this.props?.company_id}
+                     entity_name={this.state.entity_name}
+                     entity_id={this.state.entity_id}
                     base_currency={this.state.base_currency}
                     updateBaseCurrency={(base_currency) =>
                       this.updateBaseCurrency(base_currency)
@@ -81,6 +87,8 @@ class PurchasesTab extends Component {
                     <PoInvoicesTab
                       company_id={this.props?.company_id}
                       project_id={this.props.project_id}
+                      entity_name={this.state.entity_name}
+                      entity_id={this.state.entity_id}
                       base_currency={this.state.base_currency}
                     />
                   </TabPanel>

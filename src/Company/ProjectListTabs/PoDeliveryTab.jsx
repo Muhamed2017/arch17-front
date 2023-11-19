@@ -40,6 +40,8 @@ class PoDeliveryTab extends Component {
     super(props);
     this.state = {
       company_id: this.props.company_id,
+      entity_name: this.props.entity_name,
+      entity_id: this.props.entity_id,
       project_id: this.props.project_id,
       po_deliveries: {},
       po_deliveries_values: [],
@@ -94,9 +96,18 @@ class PoDeliveryTab extends Component {
   };
 
   getData = async () => {
+    let endpoint;
+
+    if(this.state.entity_name==='company'){
+      endpoint=`get-podelivery/${this.state.entity_id}/${this.state.project_id}`
+    }else{
+    
+      endpoint=`user-get-podelivery/${this.state.entity_id}/${this.state.project_id}`
+    }
     await axios
       .get(
-        `${API}get-podelivery/${this.state.company_id}/${this.state.project_id}`
+        // `${API}get-podelivery/${this.state.company_id}/${this.state.project_id}`
+        `${API}${endpoint}`
       )
       .then((response) => {
         console.log(response);

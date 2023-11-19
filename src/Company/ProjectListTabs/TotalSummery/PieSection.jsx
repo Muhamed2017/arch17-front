@@ -106,7 +106,7 @@ class PieSection extends Component {
     return (
       <>
         <div className="my-5">
-          <h6>Realized Profit/Loss</h6>
+          <h6>Product Deliveries</h6>
           <Row gutter={24}>
             <Col md={7} className="shadow-section">
               <div>

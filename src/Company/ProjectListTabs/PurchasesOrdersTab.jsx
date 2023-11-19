@@ -57,6 +57,8 @@ class PurchasesOrdersTab extends Component {
       coast_factore: 1,
       paid_factore: 1,
       company_id: this.props.company_id,
+      entity_name: this.props.entity_name,
+      entity_id: this.props.entity_id,
       cur_1: null,
       cur_2: null,
       total_coast_1: 0,
@@ -87,9 +89,18 @@ class PurchasesOrdersTab extends Component {
   };
 
   getData = async () => {
+    let endpoint;
+
+    if(this.state.entity_name==='company'){
+      endpoint=`suppliers-pos/${this.state.entity_id}/${this.state.project_id}`
+    }else{
+    
+      endpoint=`user-suppliers-pos/${this.state.entity_id}/${this.state.project_id}`
+    }
     await axios
       .get(
-        `${API}suppliers-pos/${this.state.company_id}/${this.state.project_id}`
+        // `${API}suppliers-pos/${this.state.company_id}/${this.state.project_id}`
+        `${API}${endpoint}`
       )
       .then((response) => {
         console.log(response);
@@ -116,9 +127,9 @@ class PurchasesOrdersTab extends Component {
             services: Object.values(response.data.suppliers_pos)
               ?.map((s) => {
                 return s?.map((ss) => {
-                 if (ss.items && ss.items?.length>0){
-                  return ss.items[0];
-                 }
+                  if (ss.items && ss.items?.length > 0) {
+                    return ss.items[0];
+                  }
                 });
               })
               .flat(),
@@ -312,17 +323,17 @@ class PurchasesOrdersTab extends Component {
         subtotal =
           parseFloat(values.pos_value) /
           parseFloat(1 + parseFloat(values.vat_tax_percentage) / 100);
-          total = values.pos_value;
-          vat_tax_value = total - subtotal;
+        total = values.pos_value;
+        vat_tax_value = total - subtotal;
       }
-  
+
       if (values.vat_tax_type === "not") {
         if (parseFloat(values.vat_tax_percentage) === 0) {
           total = values.pos_value;
           subtotal = values.pos_value;
           vat_tax_value = 0;
         }
-  
+
         if (parseFloat(values.vat_tax_percentage) > 0) {
           vat_tax_value =
             (parseFloat(values.vat_tax_percentage) / 100) *
@@ -331,8 +342,7 @@ class PurchasesOrdersTab extends Component {
           total = parseFloat(values.pos_value) + vat_tax_value;
         }
       }
-    }
-    else{
+    } else {
       total = values.pos_value;
       subtotal = values.pos_value;
       vat_tax_value = 0;
@@ -411,8 +421,7 @@ class PurchasesOrdersTab extends Component {
           total = parseFloat(values.pos_value) + vat_tax_value;
         }
       }
-    }
-    else{
+    } else {
       total = values.pos_value;
       subtotal = values.pos_value;
       vat_tax_value = 0;
@@ -1090,7 +1099,7 @@ class PurchasesOrdersTab extends Component {
                                   ) : (
                                     <>
                                       <p className="main">
-                                        {this.state.pos_rows[index].reduce(
+                                        {/* {this.state.pos_rows[index].reduce(
                                           (accumulator, object) => {
                                             return (
                                               <>
@@ -1107,6 +1116,24 @@ class PurchasesOrdersTab extends Component {
                                             );
                                           },
                                           0
+                                        )} */}
+                                        {this.formatNumbers(
+                                          parseFloat(
+                                            this.state.pos_rows[index].reduce(
+                                              (accumulator, object) => {
+                                                return (
+                                                  parseFloat(accumulator) +
+                                                  parseFloat(object.total)
+                                                );
+                                              },
+                                              0
+                                            ) -
+                                              this.getKeyValue(
+                                                p,
+                                                this.state.payments_rows,
+                                                "value"
+                                              )
+                                          ).toFixed(2)
                                         )}
                                       </p>
                                     </>
@@ -1165,7 +1192,7 @@ class PurchasesOrdersTab extends Component {
                                   </div>
                                   <div></div>
                                   <div>
-                                    {t?.items &&(t?.items?.length>0)&&(
+                                    {t?.items && t?.items?.length > 0 && (
                                       <p className="main">{t.items[0]}</p>
                                     )}
                                   </div>
@@ -1728,117 +1755,70 @@ class PurchasesOrdersTab extends Component {
                   />
                 </Form.Item>
               )}
-            {/* <Form.Item name="vat_tax_type" label="Vat Tax" size="large">
-              <Select
-                placeholder="Select whether tax included or not"
-                style={{
-                  width: "100%",
-                }}
-              >
-                {VAT_TAX_OPTIONS.map((v) => {
-                  return <Option value={v.value}>{v.label}</Option>;
-                })}
-              </Select>
+
+            <Form.Item
+              label="Contract Tax:"
+              name="contract_taxable"
+              layout="horizontal"
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 10,
+              }}
+            >
+              <Radio.Group>
+                <Radio value="taxable"> Taxable</Radio>
+                <Radio value="nontaxable">Non-taxable</Radio>
+              </Radio.Group>
             </Form.Item>
-            <Form.Item name="vat_tax_percentage" label="Add Tax %">
-              <Input
-                placeholder="Please add the Tax % of the total Contract"
-                suffix="%"
-                max={100}
-                min={0}
-                type="float"
-              />
-            </Form.Item>
-            {this.state.vat_tax_value &&
-              this.state.vat_tax_value > 0 &&
-              this.state.subtotal &&
-              this.state.subtotal > 0 &&
-              this.state.total &&
-              this.state.total > 0 && (
-                <p className="fs-18 monitor">
-                  <div>
-                    <span>Sub-total:</span>
-                    {` ${this.formatNumbers(this.state.subtotal)}`}
-                  </div>
-                  <div>
-                    <span>Vat Tax:</span>
-                    {` ${this.formatNumbers(this.state.vat_tax_value)}`}
-                  </div>
-                  <div>
-                    <span>Total:</span>
-                    {` ${this.formatNumbers(this.state.total)}`}
-                  </div>
-                </p>
-              )} */}
-               <Form.Item
-                    label="Contract Tax:"
-                    name="contract_taxable"
-                    layout="horizontal"
-                    labelCol={{
-                      span: 8,
-                    }}
-                    wrapperCol={{
-                      span: 10,
+            {this.state.taxable && (
+              <>
+                <Form.Item name="vat_tax_type" label="Vat Tax" size="large">
+                  <Select
+                    placeholder="Select whether tax included or not"
+                    style={{
+                      width: "100%",
                     }}
                   >
-                    <Radio.Group>
-                      <Radio value="taxable"> Taxable</Radio>
-                      <Radio value="nontaxable">Non-taxable</Radio>
-                    </Radio.Group>
-                  </Form.Item>
-                  {this.state.taxable && (
-                    <>
-                      <Form.Item
-                        name="vat_tax_type"
-                        label="Vat Tax"
-                        size="large"
-                      >
-                        <Select
-                          placeholder="Select whether tax included or not"
-                          style={{
-                            width: "100%",
-                          }}
-                        >
-                          {VAT_TAX_OPTIONS.map((v) => {
-                            return <Option value={v.value}>{v.label}</Option>;
-                          })}
-                        </Select>
-                      </Form.Item>
+                    {VAT_TAX_OPTIONS.map((v) => {
+                      return <Option value={v.value}>{v.label}</Option>;
+                    })}
+                  </Select>
+                </Form.Item>
 
-                      <Form.Item name="vat_tax_percentage" label="Add Tax %">
-                        <Input
-                          placeholder="Please add the Tax % of the total Contract"
-                          suffix="%"
-                          max={100.0}
-                          min={0.0}
-                          type="float"
-                        />
-                      </Form.Item>
-                      {this.state.vat_tax_value &&
-                        this.state.vat_tax_value > 0 &&
-                        this.state.subtotal &&
-                        this.state.subtotal > 0 &&
-                        this.state.total &&
-                        this.state.total > 0 && (
-                          <p className="fs-18 monitor">
-                            <div>
-                              <span>Sub-total:</span>
-                              {` ${this.formatNumbers(this.state.subtotal)}`}
-                            </div>
-                            <div>
-                              <span>Vat Tax:</span>
-                              {` ${this.formatNumbers(
-                                this.state.vat_tax_value
-                              )}`}
-                            </div>
-                            <div>
-                              <span>Total:</span>
-                              {` ${this.formatNumbers(this.state.total)}`}
-                            </div>
-                          </p>
-                        )}
-                    </>
+                <Form.Item name="vat_tax_percentage" label="Add Tax %">
+                  <Input
+                    placeholder="Please add the Tax % of the total Contract"
+                    suffix="%"
+                    max={100.0}
+                    min={0.0}
+                    type="float"
+                  />
+                </Form.Item>
+                {this.state.vat_tax_value &&
+                  this.state.vat_tax_value > 0 &&
+                  this.state.subtotal &&
+                  this.state.subtotal > 0 &&
+                  this.state.total &&
+                  this.state.total > 0 && (
+                    <p className="fs-18 monitor">
+                      <div>
+                        <span>Sub-total:</span>
+                        {` ${this.formatNumbers(this.state.subtotal)}`}
+                      </div>
+                      <div>
+                        <span>Vat Tax:</span>
+                        {` ${this.formatNumbers(this.state.vat_tax_value)}`}
+                      </div>
+                      <div>
+                        <span>Total:</span>
+                        {` ${this.formatNumbers(this.state.total)}`}
+                      </div>
+                    </p>
                   )}
+              </>
+            )}
 
             <Row justify={"end"}>
               <Col>
@@ -1860,9 +1840,9 @@ class PurchasesOrdersTab extends Component {
             this.setState({
               edit_po_modal: false,
               selectedCurrency: "",
-              subtotal:0,
-              total:0,
-              vat_tax_value:0
+              subtotal: 0,
+              total: 0,
+              vat_tax_value: 0,
             });
           }}
           closable
@@ -1996,58 +1976,78 @@ class PurchasesOrdersTab extends Component {
               )}
 
             <Form.Item
-              name="vat_tax_type"
-              label="Vat Tax"
-              size="large"
-              initialValue={this.state.po_to_edit?.vat_tax_type ?? ""}
+              label="Contract Tax:"
+              name="contract_taxable"
+              layout="horizontal"
+              initialValue={this.state.po_to_edit?.contract_taxable}
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 10,
+              }}
             >
-              <Select
-                placeholder="Select whether tax included or not"
-                style={{
-                  width: "100%",
-                }}
-                // onChange={this.SupplierChange}
-              >
-                {VAT_TAX_OPTIONS.map((v) => {
-                  return <Option value={v.value}>{v.label}</Option>;
-                })}
-              </Select>
+              <Radio.Group>
+                <Radio value="taxable"> Taxable</Radio>
+                <Radio value="nontaxable">Non-taxable</Radio>
+              </Radio.Group>
             </Form.Item>
-            <Form.Item
-              name="vat_tax_percentage"
-              label="Add Tax %"
-              initialValue={this.state.po_to_edit?.vat_tax_percentage ?? 0}
-            >
-              <Input
-                placeholder="Please add the Tax % of the total Contract"
-                suffix="%"
-                max={100}
-                min={0}
-                type="float"
-                // disabled={this.state.po_to_edit?.vat_tax_type === "not"}
-              />
-            </Form.Item>
-            {this.state.vat_tax_value &&
-              this.state.vat_tax_value > 0 &&
-              this.state.subtotal &&
-              this.state.subtotal > 0 &&
-              this.state.total &&
-              this.state.total > 0 && (
-                <p className="fs-18 monitor">
-                  <div>
-                    <span>Sub-total:</span>
-                    {` ${this.formatNumbers(this.state.subtotal)}`}
-                  </div>
-                  <div>
-                    <span>Vat Tax:</span>
-                    {` ${this.formatNumbers(this.state.vat_tax_value)}`}
-                  </div>
-                  <div>
-                    <span>Total:</span>
-                    {` ${this.formatNumbers(this.state.total)}`}
-                  </div>
-                </p>
-              )}
+            {this.state.po_to_edit?.contract_taxable === "taxable" && (
+              <>
+                <Form.Item
+                  name="vat_tax_type"
+                  label="Vat Tax"
+                  size="large"
+                  initialValue={this.state.po_to_edit?.vat_tax_type ?? ""}
+                >
+                  <Select
+                    placeholder="Select whether tax included or not"
+                    style={{
+                      width: "100%",
+                    }}
+                  >
+                    {VAT_TAX_OPTIONS.map((v) => {
+                      return <Option value={v.value}>{v.label}</Option>;
+                    })}
+                  </Select>
+                </Form.Item>
+                <Form.Item
+                  name="vat_tax_percentage"
+                  label="Add Tax %"
+                  initialValue={this.state.po_to_edit?.vat_tax_percentage ?? 0}
+                >
+                  <Input
+                    placeholder="Please add the Tax % of the total Contract"
+                    suffix="%"
+                    max={100}
+                    min={0}
+                    type="float"
+                    // disabled={this.state.po_to_edit?.vat_tax_type === "not"}
+                  />
+                </Form.Item>
+                {this.state.vat_tax_value &&
+                  this.state.vat_tax_value > 0 &&
+                  this.state.subtotal &&
+                  this.state.subtotal > 0 &&
+                  this.state.total &&
+                  this.state.total > 0 && (
+                    <p className="fs-18 monitor">
+                      <div>
+                        <span>Sub-total:</span>
+                        {` ${this.formatNumbers(this.state.subtotal)}`}
+                      </div>
+                      <div>
+                        <span>Vat Tax:</span>
+                        {` ${this.formatNumbers(this.state.vat_tax_value)}`}
+                      </div>
+                      <div>
+                        <span>Total:</span>
+                        {` ${this.formatNumbers(this.state.total)}`}
+                      </div>
+                    </p>
+                  )}
+              </>
+            )}
 
             <Row justify={"end"}>
               <Col>

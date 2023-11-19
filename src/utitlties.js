@@ -22,7 +22,7 @@ export const BRAND_TYPES= [
  "General Design Products"
 ]
 
-export const MONTHS=[
+export const MONTHS = [
     {label:"JAN",value:'01'},
     {label:"FEB",value:'02'},
     {label:"MAR",value:'03'},
@@ -37,12 +37,20 @@ export const MONTHS=[
     {label:"DEC",value:'12'},
 ]
 
-export  const   VAT_TAX_OPTIONS=[
+export const VAT_TAX_OPTIONS=[
     {label:"Vat Tax included in the contract Value", value:"in"},
     {label:"Vat Tax not included in the contract Value", value:"not"}
 ]
-export  const   POINVOICES_TYPES=[
+export const POINVOICES_TYPES=[
     'Non Deductible / non refundable',
     'Deductible ( Deducted from sales Tax Value )',
     'Refundable ( Refundable tax credits )'
+]
+export const POM_SHARE_TYPES=[
+    {label:"All Projects", value:"all"},
+    {label:"Sales With EX-Rate", value:"sales_with_ex"},
+    {label:"Sales Without EX-Rate", value:"sales_without_ex"},
+    {label:"All Purchases", value:"all_purchases"},
+    {label:"Tax Invoice", value:"tax_invoices"},
+    {label:"Vendor", value:"vendor"}
 ]

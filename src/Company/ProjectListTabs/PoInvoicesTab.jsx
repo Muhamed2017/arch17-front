@@ -46,7 +46,9 @@ class PoInvoicesTab extends Component {
       render_by: "vendor",
       show_type:true,
       edit_show_type:true,
-      total_refandable_poinvoices_amount:[]
+      total_refandable_poinvoices_amount:[],
+      entity_name: this.props.entity_name,
+      entity_id: this.props.entity_id,
     };
   }
 
@@ -123,9 +125,18 @@ class PoInvoicesTab extends Component {
   }
 
   getData = async () => {
+    let endpoint;
+
+    if(this.state.entity_name==='company'){
+      endpoint=`get-poinvoices/${this.state.entity_id}/${this.state.project_id}`
+    }else{
+    
+      endpoint=`user-get-poinvoices/${this.state.project_id}`
+    }
     await axios
       .get(
-        `${API}get-poinvoices/${this.state.company_id}/${this.state.project_id}`
+        // `${API}get-poinvoices/${this.state.company_id}/${this.state.project_id}`
+        `${API}${endpoint}`
       )
       .then((response) => {
         console.log(response);
@@ -324,6 +335,7 @@ class PoInvoicesTab extends Component {
     }
     fd.append("date", values.date);
     fd.append("exchange_rate", values.exchange_rate);
+    fd.append("projectlist_id", this.state.project_id);
     fd.append("refunded_value", values.refunded_value);
     axios.post(`${API}mark-refunded`, fd).then((response) => {
       console.log(response);

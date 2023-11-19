@@ -55,6 +55,7 @@ class SupplierList extends Component {
       search_text_value: "",
       entity_id: this.props.entity_id,
       entity_name: this.props.entity_name,
+      name_filter:"",
       cvData: [],
     };
   }
@@ -121,6 +122,10 @@ class SupplierList extends Component {
   };
 
   getData = async () => {
+    // let api_endpoint;
+    // if(this.state.entity_name==='company'){
+    //   api_endpoint=`user-`
+    // }
     await axios
       .get(
         `${API}${this.state.entity_name}-suppliers-list/${this.state.entity_id}`
@@ -227,9 +232,10 @@ class SupplierList extends Component {
     const country_filter = this.state.country_filter;
     const products_filter = this.state.products_filter;
     const name_filter = this.state.name_filter;
+    let endpoint_start= this.state.entity_name==='company'?"":'user-'
     axios
       .get(
-        `${API}suppliers-filter/${this.state.entity_id}?filter[country]=${country_filter}&filter[products]=${products_filter}&filter[name]=${name_filter}`
+        `${API}${endpoint_start}suppliers-filter/${this.state.entity_id}?filter[country]=${country_filter}&filter[products]=${products_filter}&filter[name]=${name_filter}`
       )
       .then((response) => {
         this.setState({

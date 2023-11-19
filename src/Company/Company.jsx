@@ -222,6 +222,7 @@ class Company extends Component {
     const { company } = response.data;
     console.log(response);
     this.setState({
+      company_cashflow_base_currency:company.cashflow_base_currency,
      company,
      blogs: company.projects?.filter((p) => {
       return p.article_type === "blog";
@@ -685,9 +686,9 @@ class Company extends Component {
               //  <Tab>Contacts</Tab>
              )}
              
-             {/* {this.state.isOwner &&this.props.isLoggedIn&& (  */}
+             {this.state.isOwner &&this.props.isLoggedIn&& ( 
              <Tab>PO Management</Tab>
-             {/* )}  */}
+               )} 
             </TabList>
             {(this.state.company?.about?.length > 4 ||
              this.state.company?.categories?.length > 0) && (
@@ -2228,11 +2229,11 @@ class Company extends Component {
             ) : (
              ""
             )}
-             {/* {this.state.isOwner && this.props.isLoggedIn &&  ( */}
+             {this.state.isOwner && this.props.isLoggedIn &&  (
              <TabPanel
              className="pom-panel"
-             ><POM company_id={this.state.company_id}/></TabPanel>
-             {/* )}  */}
+             ><POM company_id={this.state.company_id} company_cashflow_base_currency={this.state.company_cashflow_base_currency} entity_id={this.state.company_id} entity_name={'company'}/></TabPanel>
+             )} 
            </Tabs>
           </div>
          </Col>

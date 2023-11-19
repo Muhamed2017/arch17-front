@@ -31,6 +31,8 @@ class DeliveryTab extends Component {
       loading: true,
       edit_delivery_modal: false,
       delivery_to_edit: null,
+      entity_name:this.props.entity_name,
+      entity_id:this.props.entity_id,
       delivery_to_file: null,
       add_file_modal: false,
       contracts_total_value: parseFloat(

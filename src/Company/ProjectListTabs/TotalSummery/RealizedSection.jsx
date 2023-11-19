@@ -346,7 +346,7 @@ class RealizedSection extends Component {
       <>
         <div className="my-5">
           <div className="unrealized-container mb-5">
-            <h6>Unrealized Profit/Loss</h6>
+            <h6>Unrealized</h6>
             <Row gutter={24}>
               <Col md={7}>
                 <div className="stack-side">
@@ -438,7 +438,7 @@ class RealizedSection extends Component {
             </Row>
           </div>
           <div className="unrealized-container my-3">
-            <h6>Realized Profit/Loss</h6>
+            <h6>Realized</h6>
             <Row gutter={24}>
               <Col md={7}>
                 <div className="stack-side">

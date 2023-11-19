@@ -192,11 +192,12 @@ class ClientList extends Component {
 
   filterList = () => {
     const { country_filter, search_text_value } = this.state;
+    let endpoint_start= this.state.entity_name==='company'?"":'user-'
     this.setState({
     });
     axios
       .get(
-        `${API}clients-filter/${this.state.entity_id}?filter[country]=${country_filter}&filter[name]=${search_text_value}`
+        `${API}${endpoint_start}clients-filter/${this.state.entity_id}?filter[country]=${country_filter}&filter[name]=${search_text_value}`
       )
       .then((response) => {
         this.setState({

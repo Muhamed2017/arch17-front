@@ -24,6 +24,8 @@ class SalesTab extends Component {
     received_payment_total: this.props?.received_payment_total,
     received_payment_rows: [],
     company_id: this.props?.company_id,
+    entity_name: this.props.entity_name,
+    entity_id: this.props.entity_id,
     currency: this.props?._currency,
     base_currency: this.props?.base_currency,
     contract_rows: [],
@@ -32,7 +34,7 @@ class SalesTab extends Component {
     this.setState({ contracts_total_value });
   };
 
-  changeTotalContractRows= (contract_rows) => {
+  changeTotalContractRows = (contract_rows) => {
     this.setState({ contract_rows });
   };
   changeTotalPayment = (received_payment_total) => {
@@ -44,15 +46,15 @@ class SalesTab extends Component {
   changeTotalSupplirs = (suppliers_options) => {
     this.setState({ suppliers_options });
   };
-  
-  changeHasContractsTaxable = (has_contracts_taxable,uninvoicedvalue) => {
-    this.setState({ has_contracts_taxable,uninvoicedvalue });
+
+  changeHasContractsTaxable = (has_contracts_taxable, uninvoicedvalue) => {
+    this.setState({ has_contracts_taxable, uninvoicedvalue });
   };
 
-  changeTotalInvoices=(issued_tax_invoice_value) => {
+  changeTotalInvoices = (issued_tax_invoice_value) => {
     this.setState({ issued_tax_invoice_value });
   };
-  
+
   componentDidMount() {
     axios.get(`${API}get-contracts/${this.props.id}`).then((response) => {
       this.setState({
@@ -62,8 +64,8 @@ class SalesTab extends Component {
         received_payment_total: response.data.received_payment_total,
         contracts_total: response.data.contracts_total_with_tax,
         contracts_total_value: response.data.contracts_total_with_tax,
-        issued_tax_invoice_value:response.data.issued_tax_invoice_value,
-        uninvoicedvalue:response.data.uninvoicedvalue,
+        issued_tax_invoice_value: response.data.issued_tax_invoice_value,
+        uninvoicedvalue: response.data.uninvoicedvalue,
         has_contracts_taxable:
           response.data.contract_has_one_taxable_at_least > 0,
         loading: false,
@@ -125,6 +127,8 @@ class SalesTab extends Component {
                 received_payment_total={this.state.received_payment_total}
                 _currency={this.state.currency}
                 company_id={this.state.company_id}
+                entity_name={this.state.entity_name}
+                entity_id={this.state.entity_id}
                 changeTotalContract={this.changeTotalContract}
                 changeTotalPayment={this.changeTotalPayment}
                 changeTotalDelivery={this.changeTotalDelivery}
@@ -140,7 +144,6 @@ class SalesTab extends Component {
                   changeTotalPayment={this.changeTotalPayment}
                   changeTotalDelivery={this.changeTotalDelivery}
                   changeTotalInvoices={this.changeTotalInvoices}
-
                   changeTotalSupplirs={this.changeTotalSupplirs}
                   base_currency={this.state.base_currency}
                 />
