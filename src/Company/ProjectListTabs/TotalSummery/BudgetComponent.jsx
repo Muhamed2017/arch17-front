@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Row, Col ,Modal,Button,Form,Input} from "antd";
-import { Bar } from "@ant-design/charts/node_modules/@ant-design/plots";
+// import { Bar } from "@ant-design/charts/node_modules/@ant-design/plots";
+import {Bar} from '@ant-design/plots'
 import axios from "axios";
 import { API } from "../../../utitlties";
 
