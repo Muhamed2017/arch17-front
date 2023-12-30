@@ -52,7 +52,6 @@ export const POM_SHARE_TYPES=[
     {label:"Sales Without EX-Rate", value:"sales_without_ex"},
     {label:"All Purchases", value:"purchases"},
     {label:"Tax Invoice", value:"poinvoices"},
-    // {label:"Vendor", value:"vendor"}
 ]
 
 export const email_format=/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g

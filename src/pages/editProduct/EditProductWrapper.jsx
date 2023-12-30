@@ -13,9 +13,7 @@ import axios from "axios";
 import { API } from "./../../utitlties";
 import { SET_ROWS } from "../../redux/constants";
 import EditIdentity from "./EditIdentity";
-// import OptionsPrice from "./../addProduct/OptionsPrice";
 import Preview from "./../addProduct/Preview";
-// import TableStep from "./../TableStep";
 import OptionsStep from "./../addProduct/OptionsStep";
 import ProductFiles from "./../addProduct/ProductFiles";
 import FilesUpload from "./../addProduct/FilesUpload";
@@ -74,7 +72,6 @@ const EditProductWrapper = (props) => {
  };
  return (
   <React.Fragment>
-   {/* <ReactNotification /> */}
    <div id="add-product-wrapper">
     <Tabs OnSelect={(index) => setTabIndex(index)}>
      <div id="tabs-wrapper">
@@ -109,7 +106,6 @@ const EditProductWrapper = (props) => {
        </Tab>
        <Tab
         onClick={() => {
-         //  props.dispatchMoveToTab(4);
         }}
        >
         5. Product Cover
@@ -120,7 +116,6 @@ const EditProductWrapper = (props) => {
       <EditIdentity
        id={params.id}
        data={props?.location?.state?.product?.identity[0]}
-       //  designers={props?.location?.state?.product?.designers}
        selected_companies={props?.location?.state?.product?.companies}
        collections={props?.location?.state?.product?.store?.collections}
        store={props?.location?.state?.product?.store}
@@ -131,7 +126,6 @@ const EditProductWrapper = (props) => {
       />
      </TabPanel>
      <TabPanel forceRender>
-      {/* <TableStep */}
       <OptionsStep
        id={props?.location?.state?.product?.id}
        rows={props?.location?.state?.product?.options}
@@ -140,7 +134,6 @@ const EditProductWrapper = (props) => {
      </TabPanel>
      <TabPanel forceRender>
       <ProductFiles
-       //  id={props?.location?.state?.product?.id}
        id={params.id}
        edit={true}
        galleries={props?.location?.state?.product?.gallery}
@@ -213,7 +206,6 @@ const mapStateToProps = (state) => {
  return {
   tabIndex: state.addProduct.tabIndex,
   identity: state.addProduct.identity,
-  // tabIndex: 1,
  };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(EditProductWrapper);

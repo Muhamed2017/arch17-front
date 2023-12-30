@@ -1,39 +1,25 @@
 import React, { Component, Suspense } from "react";
 import { Img } from "react-image";
-import axios from "axios";
-import { API } from "../utitlties";
 
+import { herors_data } from "../images/cdnsrcs";
 class HeroSection extends Component {
  constructor(props) {
   super(props);
   this.state = {
-   heros: [],
   };
  }
 
- //  componentDidMount() {
- //   console.log(this.props.homepage);
- //   this.setState({ fetching: true });
-
- //   axios.get(`${API}dashboard/homepage/heros`).then((response) => {
- //    console.log(response);
- //    const { slides } = response.data;
- //    this.setState({
- //     slides,
- //    });
- //   });
- //  }
  render() {
   return (
    <>
-    {this.props.heros?.map((hero, index) => {
+    {herors_data?.map((hero, index) => {
      return (
       <div key={index}>
        <div className="media-section-item">
         <Suspense fallback={<p> loading images from supsencd </p>}>
          <a href={hero.link && hero.link !== "null" ? hero.link : "#"}>
           <Img
-           src={hero?.hero_image}
+           src={hero?.image}
            key={0}
            loader={<p> loading images from supsencd </p>}
            unloader={<button> failed </button>}
@@ -44,24 +30,24 @@ class HeroSection extends Component {
         <div
          className="media-item-desc text-left pl-3 last-row"
          style={{
-          color: hero.color && hero.color !== "null" ? hero.color : "white",
+          color: hero.text_color && hero.text_color !== "null" ? hero.text_color : "white",
           //  hero?.color,
          }}
         >
-         {hero?.main_title && hero?.main_title !== "null" && (
+         {hero?.title && hero?.title !== "null" && (
           <h3
            className="media-item-desc-heading"
            style={{
             color:
              //  color: hero?.color,
-             hero.color && hero.color !== "null" ? hero.color : "white",
+             hero.text_color && hero.text_color !== "null" ? hero.text_color : "white",
            }}
           >
-           {hero?.main_title}
+           {hero?.title}
           </h3>
          )}
 
-         {hero?.sub_title && hero?.sub_title !== "null" && (
+         {hero?.desc && hero?.desc !== "null" && (
           <p
            className="text-left w-100 m-0 d-block media-item-desc-desc  mg-p mb-3"
            style={{
@@ -69,11 +55,11 @@ class HeroSection extends Component {
             fontSize: "1.01rem !important",
            }}
           >
-           {hero?.sub_title}
+           {hero?.desc}
           </p>
          )}
 
-         {hero?.button && hero?.button !== "null" && hero?.button !== "none" && (
+         {/* {hero?.button && hero?.button !== "null" && hero?.button !== "none" && (
           <button
            className="btn py-1"
            style={{
@@ -83,7 +69,7 @@ class HeroSection extends Component {
           >
            {hero?.button}
           </button>
-         )}
+         )} */}
         </div>
        </div>
       </div>

@@ -405,19 +405,6 @@ const Register = (props) => {
         </button>
         <div id="recaptch-container"></div>
         <div className="form-separator"></div>
-        {/* <button
-         className="coninue-btn facebook-auth"
-         onClick={(e) => {
-          e.preventDefault();
-          props.dispatchFacebookSignup();
-         }}
-        >
-         <span>
-          <FaFacebookF />
-         </span>
-         Continue With Facebook
-        </button> */}
-
         <button
          className="coninue-btn google-auth mb-4"
          onClick={(e) => {
@@ -474,17 +461,6 @@ const Register = (props) => {
     <Modal.Body>
      <div className="modal-wrapper" style={{ padding: "30px", margin: "" }}>
       <h6>Enter Code</h6>
-      {/* <Form.Row as={Row} style={{ margin: "20px 0" }}>
-       <Form.Label column md={2}>
-        Code
-       </Form.Label>
-       <Col md={10}>
-        <Form.Control
-         placeholder="SMS CODE"
-         onChange={(e) => setVCode(e.target.value)}
-        />
-       </Col>
-      </Form.Row> */}
       <VerificationPin
        type="number"
        inputsNumber={6}
@@ -493,20 +469,7 @@ const Register = (props) => {
        subTitle="Your subtitle here"
        onFinish={handleOnFinish}
       />
-      {/* <Button
-       variant="danger"
-       //  onClick={() => validateCode()}
-       type="submit"
-       style={{
-        textAlign: "right",
-        background: "#E41E15",
-        display: "block",
-        float: "right",
-        marginRight: "12px",
-       }}
-      >
-       Continue
-      </Button> */}
+      
      </div>
     </Modal.Body>
    </Modal>

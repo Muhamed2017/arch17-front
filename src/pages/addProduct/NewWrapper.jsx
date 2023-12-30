@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 
 import Identity from "./Identity";
@@ -12,13 +11,9 @@ import { useParams } from "react-router-dom";
 import ReactNotification, { store } from "react-notifications-component";
 import "react-notifications-component/dist/theme.css";
 import Preview from "./Preview";
-// import IdentityStep from "./IdentityStep";
 import axios from "axios";
 import { API } from "./../../utitlties";
 import { Tabs } from "antd";
-// import Identity from "./../addProduct/Identity";
-// import OptionsPrice from "./../addProduct/OptionsPrice";
-// import OptionStep from "./Steps/OptionRow";
 
 const { TabPane } = Tabs;
 const NewWrapper = (props) => {

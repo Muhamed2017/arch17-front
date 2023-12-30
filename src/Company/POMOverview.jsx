@@ -3,18 +3,21 @@ import React, { Component } from "react";
 import axios from "axios";
 
 import { API } from "./../utitlties";
-import { Input, Row, Col, Select, Modal } from "antd";
+import { Input, Row, Col, Select, Modal, Collapse } from "antd";
 import { currency } from "../contexts/currencies";
 import ProjectListItem from "./ProjectListItem";
 import {
   CaretDownOutlined,
   CaretUpOutlined,
   EyeOutlined,
+  UpOutlined,
+  DownOutlined,
 } from "@ant-design/icons";
-import { regionNames,returnCountryName } from "./../redux/constants";
-
+import { regionNames, returnCountryName } from "./../redux/constants";
 
 const { Option } = Select;
+const { Panel } = Collapse;
+
 class POMOverview extends Component {
   constructor(props) {
     super(props);
@@ -26,33 +29,101 @@ class POMOverview extends Component {
       cashflows: [],
       collapsed: false,
       project_id: null,
-      entity_name:this.props.entity_name,
-      entity_id:this.props.entity_id
+      entity_name: this.props.entity_name,
+      entity_id: this.props.entity_id,
+      allProjects: [],
+      flat_poinvoices: [],
+      active_project: "",
     };
   }
 
+  calculateInFlow = (cash_currency) => {
+    const { allProjects } = this.state;
+    let values = allProjects
+      ?.filter((pr) => {
+        return pr.currency === cash_currency;
+      })
+      ?.map((p) => {
+        return p.overview?.total_sales - p?.overview?.total_received_payment;
+      });
 
-  getData = () => {
-    const { company_id,entity_id,entity_name} = this.state;
+    if (values?.length > 0) {
+      return values.reduce((acc, item) => {
+        return acc + item;
+      });
+    } else {
+      return 0;
+    }
+  };
+
+  calculateRefundableInFlow = (cash_currency) => {
+    let values = this.state.flat_poinvoices?.filter((p) => {
+      return p.currency === cash_currency;
+    });
+
+    if (values?.length > 0) {
+      return values.reduce((acc, item) => {
+        return acc + parseFloat(item.vat_tax_value);
+      }, 0);
+    } else {
+      return 0;
+    }
+  };
+
+  calculateOutFlow = (cash_currency) => {
+    const { _allprojects } = this.state;
+    let values = _allprojects
+      ?.filter((pr) => {
+        return pr.base_currency === cash_currency;
+      })
+      ?.map((p) => {
+        return (
+          p.overview?.purchases_total_with_exchange -
+          p?.overview?.payments_total_with_exchange
+        );
+      });
+
+    if (values?.length > 0) {
+      return values?.reduce((acc, item) => {
+        return acc + item;
+      });
+    } else {
+      return 0;
+    }
+  };
+
+  calculateNetflowInBaseCurrency = () => {
+    return this.state.cashflows.reduce((accumulator, object) => {
+      let inflow =
+        parseFloat(this.calculateInFlow(object.currency_name)) +
+        parseFloat(this.calculateRefundableInFlow(object.currency_name));
+      let outflow = parseFloat(this.calculateOutFlow(object.currency_name));
+      let exchange_rate = object.exchange_rate ?? 1;
+      return parseFloat(
+        parseFloat(accumulator) + parseFloat(inflow - outflow) * exchange_rate
+      );
+    }, 0);
+  };
+  getData = async () => {
+    const { company_id, entity_id, entity_name } = this.state;
     let api_endpoint;
 
-   
-    if(entity_name==='company'){
-      api_endpoint=`pom-overview/${entity_id}`
-      console.log(api_endpoint)
+    if (entity_name === "company") {
+      api_endpoint = `pom-overview/${entity_id}`;
+      console.log(api_endpoint);
+    } else {
+      api_endpoint = `user-pom-overview/${entity_id}`;
+      console.log(api_endpoint);
     }
-    else{
-      api_endpoint=`user-pom-overview/${entity_id}`
-      console.log(api_endpoint)
-
-    }
-    axios.get(`${API}${api_endpoint}`).then((response) => {
+    await axios.get(`${API}${api_endpoint}`).then((response) => {
       console.log(response);
       this.setState(
         {
           projects: response.data.projects?.filter((p) => {
             return p?.status === "running";
           }),
+          allProjects: response.data.projects,
+          _allprojects: response.data.projects,
           poinvoices: response.data.projects?.filter((p) => {
             return p.overview?.refundable_invoices?.length > 0;
           }),
@@ -75,18 +146,24 @@ class POMOverview extends Component {
             );
           }),
         },
+        () => {
+          // console.log(this.calculateInFlow("RMB"))
+          // console.log(this.calculateOutFlow("USD"))
+          console.log(this.calculateRefundableInFlow("RMB"));
+          console.log(this.state.flat_poinvoices);
+        }
       );
     });
   };
 
   componentDidMount() {
-    this.getData()
-    
+    this.getData();
   }
 
   formateNumber = (number) => {
     return Number(parseFloat(number).toFixed(2))?.toLocaleString();
   };
+
   alterCollapse = () => {
     const { collapsed } = this.state;
 
@@ -119,6 +196,7 @@ class POMOverview extends Component {
         });
     }
   };
+
   handleCompanyCashflowBaseCurrency = (company_cashflow_base_currency) => {
     const fd = new FormData();
     fd.append("cashflow_base_currency", company_cashflow_base_currency);
@@ -132,6 +210,19 @@ class POMOverview extends Component {
         this.setState({ company_cashflow_base_currency });
       });
   };
+  onCollapseChange = (active_project) => {
+    if (active_project === this.state.active_project) {
+      this.setState({
+        active_project: "",
+      });
+    } else {
+      this.setState({
+        active_project,
+      });
+    }
+    console.log(active_project);
+  };
+
   render() {
     return (
       <>
@@ -202,7 +293,9 @@ class POMOverview extends Component {
                         <p className="sale">{p.name}</p>
                         <p className="sec">{p.pi_ci}</p>
                         <p className="sec">{p.start_date}</p>
-                        <p className="sec">{returnCountryName(p?.country,p?.city)}</p>
+                        <p className="sec">
+                          {returnCountryName(p?.country, p?.city)}
+                        </p>
                         <p className="sec">{p?.client_name}</p>
                       </td>
                       <td>
@@ -272,7 +365,7 @@ class POMOverview extends Component {
               </table>
             </div>
 
-            <div id="clinetlist-table" className="clientlist-table pom-table">
+            {/* <div id="clinetlist-table" className="clientlist-table pom-table">
               <span className="table-name">Tax Refund</span>
               <table id="client-lists">
                 <tr>
@@ -320,7 +413,6 @@ class POMOverview extends Component {
                           </td>
                           <td>
                             <p className="main">
-                              {/* {this.formateNumber(po?.total)} */}
                               {this.formateNumber(po?.vat_tax_value)}
                             </p>
                           </td>
@@ -335,17 +427,117 @@ class POMOverview extends Component {
                       );
                     });
                   })}
-                {/* <tr>
-                  <td>
-                    {this.state.flat_poinvoices?.reduce((accumulator, object) => {
-                      return parseFloat(
-                        accumulator + parseFloat(object.vat_tax_value)
-                      );
-                    }, 0)}
-                  </td>
-                </tr> */}
-
               </table>
+            </div> */}
+
+            <span className="table-name">Tax Refund</span>
+            <div className={"customized-table purchases-table"}>
+              <div className="header-row table-row">
+                <div>Project</div>
+                <div>Tag</div>
+                <div>Refundable Value</div>
+                <div>Currency</div>
+                <div>Status</div>
+                <div></div>
+              </div>
+              {this.state.poinvoices?.map((p, index) => {
+                return (
+                  <>
+                    {p?.overview?.refundable_invoices?.length > 0 &&
+                    p?.overview?.refundable_invoices?.length > 1 ? (
+                      <>
+                        <Collapse
+                          onChange={() => this.onCollapseChange(p?.name)}
+                          activeKey={this.state.active_project}
+                        >
+                          <Panel
+                            header={
+                              <div className="table-row data-row collabser-row relative">
+                                <div>
+                                  <p className="main">{p?.name}</p>
+                                </div>
+                                <div>
+                                  {p?.name === this.state.active_project ? (
+                                    <p className="expand-btn open">
+                                      <span className="txt">Hide Content</span>
+                                      <span>
+                                        <DownOutlined />
+                                      </span>
+                                    </p>
+                                  ) : (
+                                    <p className="expand-btn close">
+                                      <span className="txt">Show Content</span>{" "}
+                                      <span>
+                                        <UpOutlined />
+                                      </span>
+                                    </p>
+                                  )}
+                                </div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                              </div>
+                            }
+                            key={p?.name}
+                            showArrow={false}
+                          >
+                            {p?.overview?.refundable_invoices?.map((r) => {
+                              return (
+                                <div className="data-row relative table-row">
+                                  <div>
+                                    <p className="main"></p>
+                                  </div>
+                                  <div>
+                                    <p className="main">{r?.tag}</p>
+                                  </div>
+                                  <div>
+                                    <p className="main">{this.formateNumber(r?.vat_tax_value)}</p>
+                                  </div>
+
+                                  <div>
+                                    <p className="main">{r?.currency}</p>
+                                  </div>
+
+                                  <div>
+                                    <p className="main">Processing</p>
+                                  </div>
+                                  <div></div>
+                                </div>
+                              );
+                            })}
+                          </Panel>
+                        </Collapse>
+                      </>
+                    ) : (
+                      <>
+                        {p?.overview?.refundable_invoices.map((r) => {
+                          return (
+                            <div className="data-row table-row  relative">
+                              <div>
+                                <p className="main">{r.name}</p>
+                              </div>
+                              <div>
+                                <p className="main">{r?.tag}</p>
+                              </div>
+                              <div>
+                                <p className="main">{this.formateNumber(r?.vat_tax_value)}</p>
+                              </div>
+                              <div>
+                                <p className="main">{r?.currency}</p>
+                              </div>
+
+                              <div>Processing</div>
+
+                              <div></div>
+                            </div>
+                          );
+                        })}
+                      </>
+                    )}
+                  </>
+                );
+              })}
             </div>
 
             <div id="clinetlist-table" className="clientlist-table pom-table">
@@ -358,11 +550,6 @@ class POMOverview extends Component {
                     bordered={false}
                     defaultValue={this.state.company_cashflow_base_currency}
                     suffixIcon={<CaretDownOutlined />}
-                    // onChange={(company_cashflow_base_currency)=>{
-                    //   this.setState({
-                    //     company_cashflow_base_currency
-                    //   })
-                    // }}
                     onChange={this.handleCompanyCashflowBaseCurrency}
                     size="large"
                     showSearch
@@ -373,12 +560,8 @@ class POMOverview extends Component {
                       width: 80,
                     }}
                   >
-                    {currency.map((p) => {
-                      return (
-                        <>
-                          <Option value={p.code}>{p.code}</Option>
-                        </>
-                      );
+                    {currency?.map((p) => {
+                      return <Option value={p.code}>{p.code}</Option>;
                     })}
                   </Select>
                 </Col>
@@ -413,26 +596,24 @@ class POMOverview extends Component {
                       <td>
                         <p className="main">
                           {this.formateNumber(
-                            c.total_sales -
-                              c.total_received_payments +
-                              parseFloat(c?.total_refundable)
+                            this.calculateInFlow(c?.currency_name) +
+                              this.calculateRefundableInFlow(c?.currency_name)
                           )}
                         </p>
                       </td>
                       <td>
                         <p className="main">
                           {this.formateNumber(
-                            c.total_purchases - c.total_done_payments
+                            this.calculateOutFlow(c?.currency_name)
                           )}
                         </p>
                       </td>
                       <td>
                         <p className="main">
                           {this.formateNumber(
-                            c.total_sales -
-                              c.total_received_payments -
-                              (c.total_purchases - c.total_done_payments) +
-                              parseFloat(c?.total_refundable)
+                            this.calculateInFlow(c.currency_name) +
+                              this.calculateRefundableInFlow(c.currency_name) -
+                              this.calculateOutFlow(c.currency_name)
                           )}
                         </p>
                       </td>
@@ -464,7 +645,7 @@ class POMOverview extends Component {
                   <td></td>
                   <td>
                     <p className="main">
-                      {this.formateNumber(
+                      {/* {this.formateNumber(
                         this.state.cashflows?.reduce((accumulator, object) => {
                           let inflow = parseFloat(
                             parseFloat(object.total_sales) -
@@ -481,6 +662,9 @@ class POMOverview extends Component {
                               parseFloat(inflow - outflow) * exchange_rate
                           );
                         }, 0)
+                      )} */}
+                      {this.formateNumber(
+                        this.calculateNetflowInBaseCurrency()
                       )}
                     </p>
                   </td>
@@ -507,7 +691,6 @@ class POMOverview extends Component {
           }}
         >
           <ProjectListItem
-            // company_id={this.state.company_id}
             entity_name={this.state.entity_name}
             entity_id={this.state.entity_id}
             project_id={this.state.project_id}

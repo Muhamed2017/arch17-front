@@ -375,6 +375,9 @@ tr:hover .edit-delete-pos.inner {
 }
 .pom-table .ant-collapse > .ant-collapse-item > .ant-collapse-header,
 #shared-with-me-tab .ant-collapse > .ant-collapse-item > .ant-collapse-header,
+
+.pom-overview .ant-collapse > .ant-collapse-item > .ant-collapse-header,
+#shared-with-me-tab .ant-collapse > .ant-collapse-item > .ant-collapse-header,
 .pom-table
   .ant-collapse
   > .ant-collapse-item.ant-collapse-no-arrow
@@ -826,9 +829,13 @@ td p.sale {
 .expand-btn.open {
   background-color: #fff;
 }
-.pos-table .ant-collapse-content > .ant-collapse-content-box ,#shared-with-me-tab .ant-collapse-content > .ant-collapse-content-box {
+.pos-table .ant-collapse-content > .ant-collapse-content-box ,#shared-with-me-tab .ant-collapse-content > .ant-collapse-content-box 
+{
   padding-bottom: 0;
   padding-top: 0;
+}
+.pom-overview .ant-collapse-content > .ant-collapse-content-box {
+  padding: 0;
 }
 .vendor-modal-content p.name {
   font-size: 30px;

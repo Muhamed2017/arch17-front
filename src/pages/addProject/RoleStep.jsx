@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Row, Col, Button, Modal, Input } from "antd";
-import Draggable from "react-draggable";
+// import Draggable from "react-draggable";
 import { DeleteOutlined } from "@ant-design/icons";
 import { IoLocation } from "react-icons/io5";
 import { connect } from "react-redux";
@@ -499,37 +499,23 @@ class RoleStep extends Component {
        Designers / Design Companies
       </div>
      }
-     visible={designesModal}
+     open={designesModal}
      onOk={this.handleOk}
      footer={null}
      onCancel={this.handleCancel}
-     modalRender={(modal) => (
-      <Draggable
-       disabled={disabled}
-       bounds={bounds}
-       onStart={(event, uiData) => this.onStart(event, uiData)}
-      >
-       <div ref={this.draggleRef}>{modal}</div>
-      </Draggable>
-     )}
+    //  modalRender={(modal) => (
+    //   <Draggable
+    //    disabled={disabled}
+    //    bounds={bounds}
+    //    onStart={(event, uiData) => this.onStart(event, uiData)}
+    //   >
+    //    <div ref={this.draggleRef}>{modal}</div>
+    //   </Draggable>
+    //  )}
     >
      <Input
       placeholder="Search Desigers / Design company"
       size="large"
-      // onChange={(e) => {
-      //  console.log(e);
-      //  this.setState({
-      //   filteredDesigners:
-      //    e.target.value.length > 0
-      //     ? this.state.designers?.filter((d) => {
-      //        return d.displayName
-      //         .toLowerCase()
-      //         ?.includes(e.target.value.toLowerCase());
-      //       })
-      //     : [],
-      //  });
-      // }}
-
       onChange={(e) => this.handleSearchDesignerCompanies(e.target.value)}
      />
      {this.state.designers?.map((d, key) => {
@@ -601,18 +587,18 @@ class RoleStep extends Component {
        Brands
       </div>
      }
-     visible={brandsModal}
+     open={brandsModal}
      onOk={this.handleBrandOk}
      onCancel={this.handleBrandCancel}
-     modalRender={(modal) => (
-      <Draggable
-       disabled={disabled}
-       bounds={bounds}
-       onStart={(event, uiData) => this.onStart(event, uiData)}
-      >
-       <div ref={this.draggleRef}>{modal}</div>
-      </Draggable>
-     )}
+    //  modalRender={(modal) => (
+    //   <Draggable
+    //    disabled={disabled}
+    //    bounds={bounds}
+    //    onStart={(event, uiData) => this.onStart(event, uiData)}
+    //   >
+    //    <div ref={this.draggleRef}>{modal}</div>
+    //   </Draggable>
+    //  )}
     >
      <Input
       placeholder="Search Brands"

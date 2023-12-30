@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 
-// import EditIdentity from "../editProduct/EditIdentity";
 import ProductFiles from "./ProductFiles";
 import { connect } from "react-redux";
 import {
@@ -11,10 +10,8 @@ import {
 } from "../../redux/actions/addProductActions";
 import FilesUpload from "./FilesUpload";
 import { useParams } from "react-router-dom";
-// import ReactNotification from "react-notifications-component";
 import "react-notifications-component/dist/theme.css";
 import Preview from "./Preview";
-// import TableStep from "../TableStep";
 import OptionsStep from "../addProduct/OptionsStep";
 import axios from "axios";
 import { API } from "./../../utitlties";
@@ -74,7 +71,6 @@ const AddProductWrapper = (props) => {
        </Tab>
        <Tab
         onClick={() => {
-         //  props.dispatchMoveToTab(2);
          if (props.tabIndex > 2) {
           props.dispatchMoveToTab(2);
          }
@@ -84,7 +80,6 @@ const AddProductWrapper = (props) => {
        </Tab>
        <Tab
         onClick={() => {
-         //  props.dispatchMoveToTab(3);
          if (props.tabIndex > 3) {
           props.dispatchMoveToTab(3);
          }
@@ -96,30 +91,18 @@ const AddProductWrapper = (props) => {
       </TabList>
      </div>
      <TabPanel forceRender>
-      {/* <EditIdentity
-       id={params.id}
-       data={{ params }}
-       store={store}
-       collections={props.location.state?.collections}
-       //  designers={designers}
-       selected_collections={props.location.state?.selected_collections}
-       category={props.location.state?.category}
-      /> */}
-
       <IdentityStep
        id={params.id}
        data={{ params }}
        store={store}
        pidentity={JSON.parse(localStorage.getItem("identity"))}
        collections={props.location.state?.collections}
-       //  designers={designers}
        selected_collections={props.location.state?.selected_collections}
        category={props.location.state?.category}
       />
      </TabPanel>
      <TabPanel forceRender id="options-step">
       <OptionsStep edit={false} id={params.id} rows={rows} />
-      {/* <TableStep edit={false} id={params.id} rows={rows} /> */}
      </TabPanel>
      <TabPanel forceRender>
       <ProductFiles id={params.id} edit={false} />

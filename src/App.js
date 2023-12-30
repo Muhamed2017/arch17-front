@@ -16,14 +16,14 @@ import NavigationBar from './components/NavigationBar';
 import AddProductWrapper from './pages/addProduct/AddProductWrapper';
 import AddProjectWrapper from './pages/addProject/AddProjectWrapper';
 
-import { LinkedInPopUp } from 'react-linkedin-login-oauth2';
+// import { LinkedInPopUp } from 'react-linkedin-login-oauth2';
 import CreateBrand from './pages/CreateBrand'
 import Kind from './pages/addProduct/Kind'
 import Product from './pages/Product'
 import Project from './pages/Project'
 import TextEditor from './pages/TextEditor';
-import TestCrop from './pages/TestCrop';
-import TestUpload from './pages/TestUpload';
+// import TestCrop from './pages/TestCrop';
+// import TestUpload from './pages/TestUpload';
 import "react-notifications-component/dist/theme.css";
 import UserProfile from './pages/UserProfile';
 import 'react-toastify/dist/ReactToastify.css';
@@ -34,7 +34,7 @@ import  Categories from './pages/Categories'
 import 'antd-country-phone-input/dist/index.css'
 
 import Search from './pages/Search';
-import TableStep from './pages/TableStep';
+// import TableStep from './pages/TableStep';
 import EditKind from './pages/editProduct/EditKind';
 import EditProductWrapper from './pages/editProduct/EditProductWrapper';
 import { ParallaxProvider } from "react-scroll-parallax";
@@ -57,10 +57,10 @@ import DesignSelected from './pages/helpPages/DesignSelected';
 
 import CreateDesigneCompanyWrapper from './Company/CreateDesigneCompanyWrapper';
 import Company from './Company/Company'
-import ClientList from './Company/ClientList'
-import SupplierList from './Company/SupplierList'
-import ProjectList from './Company/ProjectList'
-import ProjectListItem from './Company/ProjectListItem'
+// import ClientList from './Company/ClientList'
+// import SupplierList from './Company/SupplierList'
+// import ProjectList from './Company/ProjectList'
+// import ProjectListItem from './Company/ProjectListItem'
 import 'react-phone-input-2/lib/style.css'
 
 class App extends Component {
@@ -88,7 +88,7 @@ class App extends Component {
               <Route path="/signin" exact>
                 {this.props.isLoggedIn ? <Redirect to="/" /> : <Login />}
               </Route>
-              <Route exact path="/callback" component={LinkedInPopUp} />
+              {/* <Route exact path="/callback" component={LinkedInPopUp} /> */}
               
               
               <Route path='/product/:id' component={Product} exact/>
@@ -115,12 +115,7 @@ class App extends Component {
               <Route path='/products' 
               render={(state)=> <Search {...state}/>}
               exact />
-               {/* <Route path='/products/:category' 
-              render={(state)=> <Search {...state}/>}
-              exact />
-               <Route path='/products/:category/:type' 
-              render={(state)=> <Search {...state}/>}
-               exact /> */}
+              
               <Route path='/identity/:id' 
               render={(state)=><AddProductWrapper {...state}/>}
               exact />
@@ -151,14 +146,14 @@ class App extends Component {
              
               <Route path="/editor" exact><TextEditor />
               </Route>
-              <Route path="/clientlist/:entity/:id" component={ClientList} exact  />
-              <Route path="/supplierlist/:entity/:id" component={SupplierList} exact  />
-              <Route path="/projectList/:entity/:id" component={ProjectList} exact  />
-              <Route path="/plistitem/:id" component={ProjectListItem} exact  />
-              <Route path="/test" exact><TestCrop />
-              </Route>
-              <Route path="/htmltoimage" exact><TestUpload />
-              </Route>
+              {/* <Route path="/clientlist/:entity/:id" component={ClientList} exact  /> */}
+              {/* <Route path="/supplierlist/:entity/:id" component={SupplierList} exact  /> */}
+              {/* <Route path="/projectList/:entity/:id" component={ProjectList} exact  /> */}
+              {/* <Route path="/plistitem/:id" component={ProjectListItem} exact  /> */}
+              {/* <Route path="/test" exact><TestCrop />
+              </Route> */}
+              {/* <Route path="/htmltoimage" exact><TestUpload />
+              </Route> */}
               <Route path='/' exact>
                 <Home/>
               </Route>
@@ -169,18 +164,14 @@ class App extends Component {
               <Route path='/collection/:id' component={Collection} exact />
               <Route path='/profile' component={UserProfile} exact />
               <Route path='/company/:id' component={Company} exact />
-              {/* <Route path='/usercollection/:id' component={UserCollection} exact /> */}
-              {/* <Route path='/projectcollection/:id' component={BoardProjects} exact /> */}
-
               <Route path='/:username/:collectionname/collections/:id' component={UserCollection} exact />
               <Route path='/:username/:collectionname/sets/:id' component={BoardProjects} exact />
-
               <Route path='/designerproducts/:id' component={DesignerProducts} exact />
               <Route path='/companyproducts/:id' component={DesignerProducts} exact />
               <Route path='/types/:store_id/:type_name' component={Type} exact />
-               <Route path='/product/edit/122' exact>
+               {/* <Route path='/product/edit/122' exact>
                 <TableStep/>
-              </Route>
+              </Route> */}
               
               
             </Switch>

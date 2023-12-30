@@ -90,7 +90,6 @@ else if (req.originalUrl.includes('/user/')){
   else if(req.originalUrl.includes('/collection/')){
     const _urlArray = req.originalUrl.split("/")
     endPointName = "collection-meta-tags"
-    // collection_cover = `https://api.arch17.com/uploads/brandcollections/cover_${collection_id}.png`
   }
 }
 
@@ -175,17 +174,6 @@ else{
 
   }
   
-//   app.get('/', function (req, res) {
-    
-//     if(req.header("host")=="arch17.com"){
-//     res.redirect(req.protocol + "://"+'www.arch17.com');
-//     console.log(req.header("host"))
-//     }
-//     else{
-//       console.log(req.header("host"))
-//       return ;
-//     }
-// });
 app.use("^/$", renderContent); // step 2
 app.use(express.static(path.resolve(__dirname, "../build"))); // step 3
 app.use("*", renderContent); // step 2

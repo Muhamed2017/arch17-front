@@ -17,6 +17,7 @@ class HomeProducts extends Component {
    authModal: false,
    to_save_cover: "",
    to_save_productId: null,
+   stores:[]
   };
  }
 
@@ -31,11 +32,12 @@ class HomeProducts extends Component {
   }
  };
  componentDidMount() {
-  axios.get(`${API}dashboard/homepage/products`).then((response) => {
+  axios.get(`${API}dashboard/homepage/productss`).then((response) => {
    console.log(response);
-   const { products } = response.data;
+   const { products ,stores} = response.data;
    this.setState({
     products,
+    stores
    });
   });
  }
@@ -53,11 +55,11 @@ class HomeProducts extends Component {
         return (
           <Col key={index} className="gutter-row mb-3" md={6} sm={12} xs={12}>
            <div className="product">
-            <a href={`/product/${product?.id}`}>
+            <a href={`/product/${product?.product_id}`}>
              <div
               className="p-img"
               style={{
-               background: `url(${product?.identity[0]?.preview_cover})`,
+               background: `url(${product?.preview_cover})`,
               }}
              >
               <div className="prlayer"></div>
@@ -67,8 +69,8 @@ class HomeProducts extends Component {
                 e.preventDefault();
                 this.setState(
                  {
-                  to_save_cover: product.identity[0]?.preview_cover,
-                  to_save_productId: product?.identity[0],
+                  to_save_cover: product?.preview_cover,
+                  to_save_productId: product,
                  },
                  () => {
                   this.saveToCollection();
@@ -78,7 +80,7 @@ class HomeProducts extends Component {
               >
                Save +
               </div>
-              {product?.identity[0]?.file?.length > 0 ? (
+              {product?.file?.length > 0 ? (
                <>
                 <div className="actns-btn file-btn cad">
                   <p>CAD</p>
@@ -93,27 +95,27 @@ class HomeProducts extends Component {
 
             <h5 className="product-store">
              <a href={`/brand/${product?.store_id}`}>
-              {product?.identity[0]?.store_name?.store_name}
+              {this.state.stores[index]}
              </a>
             </h5>
-            {product?.identity[0]?.name?.length < 40 ? (
-             <p className="product-name">{product?.identity[0]?.name}</p>
+            {product?.name?.length < 40 ? (
+             <p className="product-name">{product?.name}</p>
             ) : (
-             <p className="product-name">{`${product?.identity[0]?.name?.slice(
+             <p className="product-name">{`${product?.name?.slice(
               0,
               35
              )}...`}</p>
             )}
             <div className="product-price">
-             {product?.identity[0]?.preview_price &&
-             product?.identity[0]?.preview_price > 0 ? (
+             {product?.preview_price &&
+             product?.preview_price > 0 ? (
               <>
-               <span>¥ {product?.identity[0]?.preview_price}</span>
+               <span>¥ {product?.preview_price}</span>
               </>
              ) : (
               <Link
                to={{
-                pathname: `/product/${product?.identity[0]?.product_id}`,
+                pathname: `/product/${product?.product_id}`,
                 state: {
                  request_price: true,
                 },

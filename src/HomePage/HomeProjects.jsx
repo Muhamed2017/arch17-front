@@ -32,7 +32,7 @@ class HomeProjects extends Component {
 
   console.log(`width:${innerWidth} - height:${innerHeight}`);
 
-  axios.get(`${API}dashboard/homepage/projects`).then((response) => {
+  axios.get(`${API}dashboard/homepage/projectss`).then((response) => {
    console.log(response);
    const { projects } = response.data;
    this.setState({
@@ -84,8 +84,6 @@ class HomeProjects extends Component {
              ></div>
             </div>
             <div className="info p-3 left mb-0">
-             {/* <p className="project-name left">{p.name}</p> */}
-
              {window?.innerWidth > 500 ? (
               <>
                {p?.name?.length < 85 ? (
@@ -111,7 +109,7 @@ class HomeProjects extends Component {
              )}
              <div className="project-cover-footer">
               <p>
-               {p.kind?.slice(0, 2)?.map((k, index) => {
+               {JSON.parse(p?.kind)?.map((k, index) => {
                 return <span className="px-1">{k}</span>;
                })}
               </p>

@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { Container, Form, Row, Col } from "react-bootstrap";
 import { Form as FormAnt, Input } from "antd";
-import { FaLinkedinIn, FaFacebookF } from "react-icons/fa";
+import {FaFacebookF } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { LinkedIn } from "react-linkedin-login-oauth2";
+// import { LinkedIn } from "react-linkedin-login-oauth2";
 import { connect } from "react-redux";
 import axios from "axios";
 import HashLoader from "react-spinners/HashLoader";
@@ -263,24 +263,6 @@ class CreateBrandRegister extends Component {
           </span>
           Continue With Facebook
          </button>
-         <LinkedIn
-          disabled={{ disabled: true }}
-          clientId="78elnnx8q5k0w5"
-          redirectUri="http://localhost:3000/callback"
-          scope="r_emailaddress"
-          className="coninue-btn linkedin-auth"
-          redirectPath="http://localhost:3000/callback"
-         >
-          <button
-           className="coninue-btn linkedin-auth"
-           disabled={{ disabled: true }}
-          >
-           <span>
-            <FaLinkedinIn />
-           </span>
-           Continue With Linkedin
-          </button>
-         </LinkedIn>
          <button
           className="coninue-btn google-auth"
           onClick={(e) => {
