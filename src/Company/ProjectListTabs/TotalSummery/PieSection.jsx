@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Pie } from "@ant-design/charts/node_modules/@ant-design/plots";
+import { Pie } from "@ant-design/plots";
 
 import { Row, Col } from "antd";
 const data = [

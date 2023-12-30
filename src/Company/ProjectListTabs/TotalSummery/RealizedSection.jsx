@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
 import { Row, Col } from "antd";
-import { Column, Bar } from "@ant-design/charts/node_modules/@ant-design/plots";
+import { Column, Bar } from "@ant-design/plots";
 
 const _config1 = {
   height: 500,
