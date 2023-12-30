@@ -49,6 +49,9 @@ class ContractTab extends Component {
       base_currency: this.props?.base_currency,
       _currency: this.props?._currency,
       project_id: this.props?.id,
+      shared: this.props.shared,
+      scope: this.props.scope,
+      permission:this.props.permission,
     };
   }
 
@@ -73,6 +76,23 @@ class ContractTab extends Component {
   updateHasTaxable = (taxable, total) => {
     this.props.changeHasContractsTaxable(taxable, total);
   };
+
+ items_without_ex=[
+  {
+    key: "2",
+    label: (
+      <div className="menu-download-item">
+        <span>Without EX.Rate</span>
+        <a href={`${API}export-salesw/${this.props.id}`}>
+          <SiMicrosoftexcel />
+        </a>
+        <a href={`${API}sales-pdfw/${this.props.id}`}>
+          <FaFilePdf />
+        </a>
+      </div>
+    ),
+  }
+ ]
 
   items = [
     {
@@ -602,7 +622,7 @@ class ContractTab extends Component {
                     overlayClassName="download-tables-menu"
                     placement="bottomLeft"
                     menu={{
-                      items: this.items,
+                      items: this.state.scope=='sales_without_ex'?this.items_without_ex:this.items 
                     }}
                   >
                     <a onClick={(e) => e.preventDefault()}>
@@ -613,9 +633,11 @@ class ContractTab extends Component {
                     </a>
                   </Dropdown>
                 </button>
-                <button onClick={this.openContractAddModal}>
-                  Add Contract +
-                </button>
+               {(!this.state.shared || this.state.permission=='write')&&(
+                 <button onClick={this.openContractAddModal}>
+                 Add Contract +
+               </button>
+               )}
               </div>
               <div>
                 <div className="pom-table">
@@ -626,10 +648,17 @@ class ContractTab extends Component {
                         <th className="width-300">Contract NO, Date</th>
                         <th className="width-250">Referance</th>
                         <th className="width-200">Value</th>
+                       {!this.state.shared?(<>
                         {this.state.base_currency &&
                           this.state.base_currency !== this.state._currency && (
                             <th className="width-300">{`EX.R / ${this.state.base_currency}`}</th>
                           )}
+                       </>):(<>
+                       {this.state.scope=='sales_with_ex' &&this.state.base_currency &&
+                          this.state.base_currency !== this.state._currency && (
+                            <th className="width-300">{`EX.R / ${this.state.base_currency}`}</th>
+                          )}
+                       </>)}
                         <th>Files</th>
                       </tr>
                       {this.state.contract_rows?.map((c, index) => {
@@ -639,7 +668,8 @@ class ContractTab extends Component {
                               <div className="inline-block ">{index + 1}</div>
                             </td>
                             <td>
-                              <div className="edit-delete">
+                              {(!this.state.shared || this.state.permission=='write' )&&(
+                                <div className="edit-delete">
                                 <Row gutter={5}>
                                   <Col md={8}>
                                     <span>
@@ -683,6 +713,7 @@ class ContractTab extends Component {
                                   </Col>
                                 </Row>
                               </div>
+                              )}
 
                               <p className="main">{c.contract_number}</p>
                               <p className="sec">{c?.date}</p>
@@ -699,6 +730,8 @@ class ContractTab extends Component {
                               <p className="sec">{c?.contract_currency}</p>
                             </td>
 
+                           {!this.state.shared?(<>
+                           
                             {this.state.base_currency &&
                               this.state.base_currency !==
                                 this.state._currency && (
@@ -706,6 +739,16 @@ class ContractTab extends Component {
                                   <p className="main">{c.exchange_rate}</p>
                                 </td>
                               )}
+                           </>):(<>
+                           
+                            {this.state.scope==='sales_with_ex' &&this.state.base_currency &&
+                              this.state.base_currency !==
+                                this.state._currency && (
+                                <td>
+                                  <p className="main">{c.exchange_rate}</p>
+                                </td>
+                              )}
+                           </>)}
 
                             <td>
                               {c?.contract_files_link ? (

@@ -147,6 +147,7 @@ class UserCollection extends Component {
    });
  };
 
+
  render() {
   if (this.state.deleted) return <Redirect to="/profile" />;
   if (!this.state.fetched)
@@ -222,7 +223,7 @@ class UserCollection extends Component {
                <div
                 className="p-img"
                 style={{
-                 background: `url(${product?.identity[0].preview_cover})`,
+                 background: `url(${product?.preview_cover})`,
                 }}
                >
                 <div className="prlayer"></div>
@@ -276,18 +277,21 @@ class UserCollection extends Component {
                 )}
                </div>
                <h5 className="product-store">{product.stores?.name}</h5>
-               <p className="product-name">{product?.identity[0].name}</p>
+               {/* <p className="product-name">{product?.identity[0].name}</p> */}
+               <p className="product-name">{product?.name}</p>
                <div className="product-price">
-                {product.identity[0].preview_price &&
-                product.identity[0].preview_price > 0 ? (
+                {product?.preview_price &&
+                product?.preview_price > 0 ? (
                  <>
-                  <span>¥ {product.identity[0].preview_price}</span>
+                  {/* <span>¥ {product.identity[0].preview_price}</span> */}
+                  <span>¥ {product?.preview_price}</span>
                  </>
                 ) : (
                  <>
                   <Link
                    to={{
-                    pathname: `/product/${product?.identity[0].product_id}`,
+                    // pathname: `/product/${product?.identity[0].product_id}`,
+                    pathname: `/product/${product?.product_id}`,
                     state: {
                      request_price: true,
                     },

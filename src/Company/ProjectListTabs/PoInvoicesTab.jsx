@@ -12,12 +12,10 @@ import {
 } from "antd";
 import { SiMicrosoftexcel } from "react-icons/si";
 import { FaFilePdf } from "react-icons/fa";
-
 import {
   DeleteOutlined,
   EditOutlined,
   DownloadOutlined,
-  // CaretDownOutlined,
   DownOutlined,
   UpOutlined,
   ExclamationCircleFilled,
@@ -49,6 +47,11 @@ class PoInvoicesTab extends Component {
       total_refandable_poinvoices_amount:[],
       entity_name: this.props.entity_name,
       entity_id: this.props.entity_id,
+      shared: this.props.shared,
+      scope: this.props.scope,
+      permission: this.props.permission,
+      vendor_name:this.props.vendor_name,
+      vendor_id:this.props.vendor_id,
     };
   }
 
@@ -146,8 +149,14 @@ class PoInvoicesTab extends Component {
 
           poinvoices_tags: response.data.poinvoices_tags,
           payments: response.data.payments,
-          poinvoices_sub_keys: Object.keys(response.data.poinvoices_sub),
-          poinvoices_sub_values: Object.values(response.data.poinvoices_sub),
+          // poinvoices_sub_keys: Object.keys(response.data.poinvoices_sub),
+          // poinvoices_sub_values: Object.values(response.data.poinvoices_sub),
+          poinvoices_sub_keys:this.state.scope!=='vendor'?Object.keys(response.data.poinvoices_sub):Object.keys(response.data.poinvoices_sub).filter((p)=>{
+            return p===this.state.vendor_name
+          }),
+          poinvoices_sub_values:this.state.scope!=='vendor'?Object.values(response.data.poinvoices_sub):Object.values(response.data.poinvoices_sub).filter((p)=>{
+            return p[0]?.supplier_name===this.state.vendor_name
+          }),
           poinvoices_currencies: response.data.poinvoices_currencies,
           poinvoices_curr_values: Object.values(
             response.data.poinvoices_currencies
@@ -415,7 +424,11 @@ class PoInvoicesTab extends Component {
       <>
         <div className="tables-page">
           <div className="btns-actions">
-            <button onClick={this.openAddModal}>Add Invoice +</button>
+            {(!this.state.shared || this.state.permission == "write") && (
+              <button onClick={this.openAddModal}>
+               Add Invoice +
+              </button>
+            )}
           </div>
 
           {this.state.poinvoices_sub_keys?.length > 0 && (
@@ -433,7 +446,8 @@ class PoInvoicesTab extends Component {
                   <div>Total Invoiced Value</div>
                   <div>Total uninvoiced Value</div>
                 </div>
-                {Object.keys(this.state.poinvoices_sub)?.map((d, index) => {
+                {/* {Object.keys(this.state.poinvoices_sub)?.map((d, index) => { */}
+                {this.state.poinvoices_sub_keys?.map((d, index) => {
                   return (
                     <>
                       {this.state.poinvoices_sub_values[index]?.length > 1 ? (
@@ -615,7 +629,10 @@ class PoInvoicesTab extends Component {
                                             <DownloadOutlined />
                                           </span>
                                         </Col>
-                                        <Col md={8}>
+                                      {(this.state.scope !== "vendor" ||
+                                        this.state.permission === "write") &&(
+                                        <>
+                                          <Col md={8}>
                                           <EditOutlined
                                             onClick={() => {
                                               this.setState(
@@ -650,6 +667,8 @@ class PoInvoicesTab extends Component {
                                             }}
                                           />
                                         </Col>
+                                        </>
+                                      )}
                                       </Row>
                                     </div>
                                     <div></div>
@@ -734,7 +753,10 @@ class PoInvoicesTab extends Component {
                                           </span>
                                         </a>
                                       </Col>
-                                      <Col md={6}>
+                                      {(this.state.scope !== "vendor" ||
+                                        this.state.permission === "write")&&(
+                                          <>
+                                           <Col md={6}>
                                         <EditOutlined
                                           onClick={() => {
                                             this.setState(
@@ -769,6 +791,9 @@ class PoInvoicesTab extends Component {
                                           }}
                                         />
                                       </Col>
+                                          </>
+                                        )}
+                                     
                                     </Row>
                                   </div>
                                   <div>

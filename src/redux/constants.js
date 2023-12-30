@@ -122,3 +122,25 @@ export const SET_PROJECT_TYPE_SEARCH= 'SET_PROJECT_TYPE_SEARCH'
 // functional constatnts
 
 export const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+
+export const returnCountryName=(country,city="")=>{
+
+    let full_country;
+    let full_city;
+
+    if (country && country!=='null' && country!='undefined' && country?.length<5) {
+        full_country= regionNames.of(country)
+    }
+    else{
+        full_country= country
+    }
+
+    if(city && city!='null' && city!='undefined'){
+        // full_city=`, ${city}`
+        full_city=`, ${city?.charAt(0).toUpperCase() + city?.slice(1)}`
+    }else{
+        full_city=''
+    }
+
+    return `${full_country}${full_city}`;
+}

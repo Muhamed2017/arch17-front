@@ -60,6 +60,11 @@ class PaymentTab extends Component {
     payments_suppliers: [],
     collapsed: false,
     base_currency: this.props?.base_currency,
+    shared: this.props.shared,
+    scope: this.props.scope,
+    permission: this.props.permission,
+    vendor_id: this.props.vendor_id,
+    vendor_name: this.props.vendor_name,
   };
 
   onFinish = (values) => {
@@ -155,7 +160,6 @@ class PaymentTab extends Component {
     });
   };
 
-  
   formatNumner = (number) => {
     return Number(parseFloat(number).toFixed(2)).toLocaleString();
   };
@@ -255,117 +259,120 @@ class PaymentTab extends Component {
     this.getData().then(() => {
       this.setState({
         loading: false,
-
-       
       });
-
     });
   }
 
   getData = async () => {
     await axios.get(`${API}get-payments/${this.props.id}`).then((response) => {
-    
-    this.setState({
-      po_deliveries_values:Object.values(response.data.po_deliveries)??[],
-      purchases_with_exchange: response.data.purchases?.reduce(
-        (accumulator, object) => {
-          return (
-            parseFloat(accumulator) +
-            parseFloat(object.total) * parseFloat(object.exchange_rate)
-          );
-        },
-        0
-      ),
-
-    },()=>{
       this.setState(
         {
-          done_payment_rows: response.data.payments.filter((p) => {
-            return p.status === "done";
-          }),
-
-          pos_currencies:response.data.pos_currencies,
-          pos_sub:response.data.pos_sub,
-          purchases:response.data.purchases,
-          po_deliveries:response.data.po_deliveries,
-          deliveries_currencies:response.data.deliveries_currencies,
-          payments_currencies:response.data.payments_currencies,
-
-         
-          
-          vendors_options: [
-            ...new Set(
-              response.data.payments.map((v) => {
-                return v.name;
-              })
-            ),
-          ],
-          request_payment_rows: response.data.payments.filter((p) => {
-            return p.status === "pending";
-          }),
-          unique_supp: response.data.pos?.map((p) => {
-            return p;
-          }),
-          services_filter: response.data.payments
-            ?.map((p) => {
-              return JSON.parse(p?.products_services);
-            })
-            .filter((p) => {
-              return p != null;
-            })
-            .flat(),
-
-            total_paids: Object.keys(response.data.pos_sub)?.map((p) => {
-              return parseFloat(
-                this.getKeyValue(p, response.data.payments_pos, "value")
+          po_deliveries_values:
+            Object.values(response.data.po_deliveries) ?? [],
+          purchases_with_exchange: response.data.purchases?.reduce(
+            (accumulator, object) => {
+              return (
+                parseFloat(accumulator) +
+                parseFloat(object.total) * parseFloat(object.exchange_rate)
               );
-            }),
-    
-            total_currency_paids: Object.values(
-              response.data.pos_currencies
-            )?.map((c, index) => {
-              return parseFloat(
-                this.getKeyValue(
-                  c[0]?.currency,
-                  response.data.payments_currencies,
-                  "coast"
-                )
-              );
-            }),
-            total_currency_balances: Object.values(
-              response.data.pos_currencies
-            )?.map((c, index) => {
-              return parseFloat(
-                c?.reduce((accumulator, object) => {
-                  return parseFloat(accumulator) + parseFloat(object.total);
-                }, 0) -
+            },
+            0
+          ),
+        },
+        () => {
+          this.setState(
+            {
+              // done_payment_rows: response.data.payments.filter((p) => {
+              //   return p.status === "done";
+              // }),
+
+              done_payment_rows:
+                this.state.scope === "vendor"
+                  ? response.data.payments.filter((p) => {
+                      return (
+                        p.status === "done" && p.name === this.state.vendor_name
+                      );
+                    })
+                  : response.data.payments.filter((p) => {
+                      return p.status === "done";
+                    }),
+
+              pos_currencies: response.data.pos_currencies,
+              pos_sub: response.data.pos_sub,
+              purchases: response.data.purchases,
+              po_deliveries: response.data.po_deliveries,
+              deliveries_currencies: response.data.deliveries_currencies,
+              payments_currencies: response.data.payments_currencies,
+
+              vendors_options: [
+                ...new Set(
+                  response.data.payments.map((v) => {
+                    return v.name;
+                  })
+                ),
+              ],
+              // request_payment_rows: response.data.payments.filter((p) => {
+              //   return p.status === "pending";
+              // }),
+
+              request_payment_rows:
+                this.state.scope === "vendor"
+                  ? response.data.payments.filter((p) => {
+                      return (
+                        p.status === "pending" &&
+                        p.name === this.state.vendor_name
+                      );
+                    })
+                  : response.data.payments.filter((p) => {
+                      return p.status === "pending";
+                    }),
+              unique_supp: response.data.pos?.map((p) => {
+                return p;
+              }),
+              services_filter: response.data.payments
+                ?.map((p) => {
+                  return JSON.parse(p?.products_services);
+                })
+                .filter((p) => {
+                  return p != null;
+                })
+                .flat(),
+
+              total_paids: Object.keys(response.data.pos_sub)?.map((p) => {
+                return parseFloat(
+                  this.getKeyValue(p, response.data.payments_pos, "value")
+                );
+              }),
+
+              total_currency_paids: Object.values(
+                response.data.pos_currencies
+              )?.map((c, index) => {
+                return parseFloat(
                   this.getKeyValue(
                     c[0]?.currency,
                     response.data.payments_currencies,
                     "coast"
                   )
-              );
-            }),
-            purchases_total_with_exchanges_values: Object.keys(
-              response.data.po_deliveries
-            )?.map((vendor, index) => {
-              return response.data.purchases
-                ?.filter((p) => {
-                  return p.supplier_name == vendor;
-                })
-                .reduce((accumulator, object) => {
-                  return parseFloat(
-                    parseFloat(accumulator) +
-                      parseFloat(object.total) *
-                        parseFloat(object.exchange_rate)
-                  );
-                }, 0);
-            }),
-            purchases_total_with_exchanges_percentages: Object.keys(
-              response.data.po_deliveries
-            )?.map((vendor, index) => {
-              return (
-                response.data.purchases
+                );
+              }),
+              total_currency_balances: Object.values(
+                response.data.pos_currencies
+              )?.map((c, index) => {
+                return parseFloat(
+                  c?.reduce((accumulator, object) => {
+                    return parseFloat(accumulator) + parseFloat(object.total);
+                  }, 0) -
+                    this.getKeyValue(
+                      c[0]?.currency,
+                      response.data.payments_currencies,
+                      "coast"
+                    )
+                );
+              }),
+              purchases_total_with_exchanges_values: Object.keys(
+                response.data.po_deliveries
+              )?.map((vendor, index) => {
+                return response.data.purchases
                   ?.filter((p) => {
                     return p.supplier_name == vendor;
                   })
@@ -375,84 +382,102 @@ class PaymentTab extends Component {
                         parseFloat(object.total) *
                           parseFloat(object.exchange_rate)
                     );
-                  }, 0) / this.state.purchases_with_exchange
-              );
-            }),
-            deliveries_percentages: Object.keys(
-              response.data.po_deliveries
-            )?.map((vendor, index) => {
-              return (
-                (parseFloat(
-                  this.state.po_deliveries_values[index].reduce(
-                    (accumulator, object) => {
+                  }, 0);
+              }),
+              purchases_total_with_exchanges_percentages: Object.keys(
+                response.data.po_deliveries
+              )?.map((vendor, index) => {
+                return (
+                  response.data.purchases
+                    ?.filter((p) => {
+                      return p.supplier_name == vendor;
+                    })
+                    .reduce((accumulator, object) => {
                       return parseFloat(
-                        parseFloat(accumulator) + parseFloat(object.value)
+                        parseFloat(accumulator) +
+                          parseFloat(object.total) *
+                            parseFloat(object.exchange_rate)
                       );
-                    },
-                    0
-                  )
-                ) /
+                    }, 0) / this.state.purchases_with_exchange
+                );
+              }),
+              deliveries_percentages: Object.keys(
+                response.data.po_deliveries
+              )?.map((vendor, index) => {
+                return (
                   (parseFloat(
-                    this.state.po_deliveries_values[index][0]?.leftp
-                  ) +
-                    parseFloat(
-                      this.state.po_deliveries_values[index].reduce(
+                    this.state.po_deliveries_values[index].reduce(
+                      (accumulator, object) => {
+                        return parseFloat(
+                          parseFloat(accumulator) + parseFloat(object.value)
+                        );
+                      },
+                      0
+                    )
+                  ) /
+                    (parseFloat(
+                      this.state.po_deliveries_values[index][0]?.leftp
+                    ) +
+                      parseFloat(
+                        this.state.po_deliveries_values[index].reduce(
+                          (accumulator, object) => {
+                            return parseFloat(
+                              parseFloat(accumulator) + parseFloat(object.value)
+                            );
+                          },
+                          0
+                        )
+                      ))) *
+                  (response.data.purchases
+                    ?.filter((p) => {
+                      return p.supplier_name == vendor;
+                    })
+                    .reduce((accumulator, object) => {
+                      return parseFloat(
+                        parseFloat(accumulator) +
+                          parseFloat(object.total) *
+                            parseFloat(object.exchange_rate)
+                      );
+                    }, 0) /
+                    this.state.purchases_with_exchange)
+                );
+              }),
+            },
+            () => {
+              this.setState({
+                services_filter_options: [
+                  ...new Set(this.state.services_filter),
+                ],
+
+                dvp: this.formatNumner(
+                  100 *
+                    this.state.deliveries_percentages?.reduce(
+                      (accumulator, object) => {
+                        return parseFloat(
+                          parseFloat(accumulator) + parseFloat(object)
+                        );
+                      },
+                      0
+                    )
+                ),
+                dlp: this.formatNumner(
+                  100 -
+                    100 *
+                      this.state.deliveries_percentages?.reduce(
                         (accumulator, object) => {
                           return parseFloat(
-                            parseFloat(accumulator) +
-                              parseFloat(object.value)
+                            parseFloat(accumulator) + parseFloat(object)
                           );
                         },
                         0
                       )
-                    ))) *
-                (response.data.purchases
-                  ?.filter((p) => {
-                    return p.supplier_name == vendor;
-                  })
-                  .reduce((accumulator, object) => {
-                    return parseFloat(
-                      parseFloat(accumulator) +
-                        parseFloat(object.total) *
-                          parseFloat(object.exchange_rate)
-                    );
-                  }, 0) /
-                  this.state.purchases_with_exchange)
-              );
-            }),
-           
-
-        },
-        () => {
-          this.setState({
-            services_filter_options: [...new Set(this.state.services_filter)],
-
-             dvp:this.formatNumner(
-              100*this.state.deliveries_percentages?.reduce(
-                (accumulator, object) => {
-                  return parseFloat(
-                    parseFloat(accumulator) + parseFloat(object)
-                  );
-                },
-                0
-              )
-            ),
-            dlp:this.formatNumner(
-              100- 100*this.state.deliveries_percentages?.reduce(
-                (accumulator, object) => {
-                  return parseFloat(
-                    parseFloat(accumulator) + parseFloat(object)
-                  );
-                },
-                0
-              )
-            )
-          });
-          console.log(this.state.vendors_options);
+                ),
+              });
+              console.log(this.state.vendors_options);
+            }
+          );
         }
       );
-    })
-     
     });
   };
 
@@ -639,9 +664,9 @@ class PaymentTab extends Component {
         this.setState(
           {
             loading: false,
-            done_payment_rows: response.data.payments.filter((p) => {
-              return p.status === "done";
-            }),
+            // done_payment_rows: response.data.payments.filter((p) => {
+            //   return p.status === "done";
+            // }),
 
             payments_suppliers: [
               ...new Set(
@@ -650,9 +675,31 @@ class PaymentTab extends Component {
                 })
               ),
             ],
-            request_payment_rows: response.data.payments.filter((p) => {
-              return p.status === "pending";
-            }),
+            // request_payment_rows: response.data.payments.filter((p) => {
+            //   return p.status === "pending";
+            // }),
+
+            done_payment_rows:
+              this.state.scope === "vendor"
+                ? response.data.payments.filter((p) => {
+                    return (
+                      p.status === "done" && p.name === this.state.vendor_name
+                    );
+                  })
+                : response.data.payments.filter((p) => {
+                    return p.status === "done";
+                  }),
+            request_payment_rows:
+              this.state.scope === "vendor"
+                ? response.data.payments.filter((p) => {
+                    return (
+                      p.status === "pending" &&
+                      p.name === this.state.vendor_name
+                    );
+                  })
+                : response.data.payments.filter((p) => {
+                    return p.status === "pending";
+                  }),
           },
           () => {
             this.setState(
@@ -771,61 +818,90 @@ class PaymentTab extends Component {
               />
               <div className="btns-actions payments">
                 <button>
-                <Dropdown
-              overlayClassName="download-tables-menu"
-              placement="bottomLeft"
-              menu={{
-                items: [
-                  {
-                    key: "1",
-                    label: (
-                      <div>
-                        <div className="menu-download-item">
-                          <a
-                            href={`${API}purchases-statement-xls/${
-                              this.state.project_id
-                            }?p=${[this.state.total_paids]}&cb=${
-                              this.state.total_currency_balances
-                            }&cp=${this.state.total_currency_paids}&dvp=${
-                              this.state.dvp
-                            }&dlp=${this.state.dlp}`}
-                          >
-                            <SiMicrosoftexcel />
-                          </a>
-                        </div>
-                        <div className="menu-download-item">
-                          <a
-                            href={`${API}purchases-statement-pdf/${
-                              this.state.project_id
-                            }?p=${[this.state.total_paids]}&cb=${
-                              this.state.total_currency_balances
-                            }&cp=${this.state.total_currency_paids}&dvp=${
-                              this.state.dvp
-                            }&dlp=${this.state.dlp}`}
-                          >
-                            <FaFilePdf />
-                          </a>
-                        </div>
-                      </div>
-                    ),
-                  },
-                ],
-              }}
-            >
-              <a onClick={(e) => e.preventDefault()}>
-                Download{" "}
-                <span>
-                  <DownloadOutlined />
-                </span>
-              </a>
-            </Dropdown>
+                  <Dropdown
+                    overlayClassName="download-tables-menu"
+                    placement="bottomLeft"
+                    menu={{
+                      items: [
+                        {
+                          key: "1",
+                          label: (
+                            <div>
+                              <div className="menu-download-item">
+                                {this.state.scope !== "vendor" ? (
+                                  <>
+                                    <a
+                                      href={`${API}purchases-statement-xls/${
+                                        this.state.project_id
+                                      }?p=${[this.state.total_paids]}&cb=${
+                                        this.state.total_currency_balances
+                                      }&cp=${
+                                        this.state.total_currency_paids
+                                      }&dvp=${this.state.dvp}&dlp=${
+                                        this.state.dlp
+                                      }`}
+                                    >
+                                      <SiMicrosoftexcel />
+                                    </a>
+                                  </>
+                                ) : (
+                                  <>
+                                    <a
+                                      href={`${API}vendor-xls/${this.state.project_id}/${this.state.vendor_id}`}
+                                    >
+                                      <SiMicrosoftexcel />
+                                    </a>
+                                  </>
+                                )}
+                              </div>
+                              <div className="menu-download-item">
+                                {this.state.scope !== "vendor" ? (
+                                  <a
+                                    href={`${API}purchases-statement-pdf/${
+                                      this.state.project_id
+                                    }?p=${[this.state.total_paids]}&cb=${
+                                      this.state.total_currency_balances
+                                    }&cp=${
+                                      this.state.total_currency_paids
+                                    }&dvp=${this.state.dvp}&dlp=${
+                                      this.state.dlp
+                                    }`}
+                                  >
+                                    <FaFilePdf />
+                                  </a>
+                                ) : (
+                                  <a
+                                    href={`${API}vendor-pdf/${this.state.project_id}/${this.state.vendor_id}`}
+                                  >
+                                    <FaFilePdf />
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          ),
+                        },
+                      ],
+                    }}
+                  >
+                    <a onClick={(e) => e.preventDefault()}>
+                      Download{" "}
+                      <span>
+                        <DownloadOutlined />
+                      </span>
+                    </a>
+                  </Dropdown>
                 </button>
-                <button onClick={this.openDonePaymentModal}>
-                  Add Done Payment +
-                </button>
-                <button onClick={this.openRequestPaymentModal}>
-                  Add Payment Request +
-                </button>
+
+                {(!this.state.shared || this.state.permission == "write") && (
+                  <>
+                    <button onClick={this.openDonePaymentModal}>
+                      Add Done Payment +
+                    </button>
+                    <button onClick={this.openRequestPaymentModal}>
+                      Add Payment Request +
+                    </button>
+                  </>
+                )}
               </div>
               <div>
                 <div id="clientlis">
@@ -960,7 +1036,6 @@ class PaymentTab extends Component {
                             })}
                           </Select>
                         </Col>
-                        
                       </Row>
                     </div>
                     <div className="table-wrapper">
@@ -969,7 +1044,9 @@ class PaymentTab extends Component {
                           <th className="width-220">Vendor</th>
                           <th className="width-300">Referance</th>
                           <th className="width-150">Value</th>
-                          <th className="width-100">{`EX.R / ${this.state.base_currency}`}</th>
+                          {this.state.scope !== "vendor" && (
+                            <th className="width-100">{`EX.R / ${this.state.base_currency}`}</th>
+                          )}
                           <th className="width-200">Paid Date</th>
                           <th className="width-200  text-right pointer">
                             <span onClick={this.alterCollapse}>
@@ -999,35 +1076,41 @@ class PaymentTab extends Component {
                                           <DownloadOutlined />
                                         </span>
                                       </Col>
-                                      <Col md={8}>
-                                        <EditOutlined
-                                          onClick={() => {
-                                            this.setState(
-                                              {
-                                                row_index: index,
-                                                payment_to_edit: p,
-                                                edited_date: p?.paid_date,
-                                                selectedCurrency: p?.currency,
-                                              },
-                                              () => {
+                                      {(this.state.scope !== "vendor" ||
+                                        this.state.permission === "write") && (
+                                        <>
+                                          <Col md={8}>
+                                            <EditOutlined
+                                              onClick={() => {
+                                                this.setState(
+                                                  {
+                                                    row_index: index,
+                                                    payment_to_edit: p,
+                                                    edited_date: p?.paid_date,
+                                                    selectedCurrency:
+                                                      p?.currency,
+                                                  },
+                                                  () => {
+                                                    this.setState({
+                                                      edit_payment_modal: true,
+                                                    });
+                                                  }
+                                                );
+                                              }}
+                                            />
+                                          </Col>
+                                          <Col md={8}>
+                                            <DeleteOutlined
+                                              onClick={() => {
                                                 this.setState({
-                                                  edit_payment_modal: true,
+                                                  delete_modal: true,
+                                                  payment_to_be_deleted: p,
                                                 });
-                                              }
-                                            );
-                                          }}
-                                        />
-                                      </Col>
-                                      <Col md={8}>
-                                        <DeleteOutlined
-                                          onClick={() => {
-                                            this.setState({
-                                              delete_modal: true,
-                                              payment_to_be_deleted: p,
-                                            });
-                                          }}
-                                        />
-                                      </Col>
+                                              }}
+                                            />
+                                          </Col>
+                                        </>
+                                      )}
                                     </Row>
                                   </div>
                                   <p className="main">{p.name}</p>
@@ -1043,9 +1126,11 @@ class PaymentTab extends Component {
                                   </p>
                                   <p className="sec">{p.currency}</p>
                                 </td>
-                                <td>
-                                  {<p className="main">{p.exchange_rate}</p>}
-                                </td>
+                                {this.state.scope !== "vendor" && (
+                                  <td>
+                                    {<p className="main">{p.exchange_rate}</p>}
+                                  </td>
+                                )}
                                 <td>
                                   <p className="main">{p?.paid_date}</p>
                                 </td>
@@ -1083,7 +1168,6 @@ class PaymentTab extends Component {
                                 <p className="sec">Base Currency</p>
                               </td>
                               <td>
-                                
                                 <p className="main">
                                   {Number(
                                     parseFloat(
@@ -1162,34 +1246,39 @@ class PaymentTab extends Component {
                                       </a>
                                     </span>
                                   </Col>
-                                  <Col md={6}>
-                                    <EditOutlined
-                                      onClick={() => {
-                                        this.setState(
-                                          {
-                                            row_index: index,
-                                            request_payment_to_edit: p,
-                                            edited_date: p?.paid_date,
-                                          },
-                                          () => {
+                                  {(this.state.scope !== "vendor" ||
+                                    this.state.permission === "write") && (
+                                    <>
+                                      <Col md={6}>
+                                        <EditOutlined
+                                          onClick={() => {
+                                            this.setState(
+                                              {
+                                                row_index: index,
+                                                request_payment_to_edit: p,
+                                                edited_date: p?.paid_date,
+                                              },
+                                              () => {
+                                                this.setState({
+                                                  edit_request_payment_modal: true,
+                                                });
+                                              }
+                                            );
+                                          }}
+                                        />
+                                      </Col>
+                                      <Col md={6}>
+                                        <DeleteOutlined
+                                          onClick={() => {
                                             this.setState({
-                                              edit_request_payment_modal: true,
+                                              warning_delete: true,
+                                              payment_to_be_deleted: p,
                                             });
-                                          }
-                                        );
-                                      }}
-                                    />
-                                  </Col>
-                                  <Col md={6}>
-                                    <DeleteOutlined
-                                      onClick={() => {
-                                        this.setState({
-                                          warning_delete: true,
-                                          payment_to_be_deleted: p,
-                                        });
-                                      }}
-                                    />
-                                  </Col>
+                                          }}
+                                        />
+                                      </Col>
+                                    </>
+                                  )}
                                 </Row>
                               </div>
 
@@ -1215,7 +1304,7 @@ class PaymentTab extends Component {
                                   this.setState({
                                     complete_modal: true,
                                     payment_to_be_compteted: p,
-                                    selectedCurrency:p?.currency
+                                    selectedCurrency: p?.currency,
                                   });
                                 }}
                                 className="main pointer"
@@ -1578,7 +1667,7 @@ class PaymentTab extends Component {
                 onCancel={() => {
                   this.setState({
                     complete_modal: false,
-                    selectedCurrency:""
+                    selectedCurrency: "",
                   });
                 }}
                 closable

@@ -9,7 +9,7 @@ import {
   Select,
   Collapse,
   DatePicker,
-  Dropdown
+  Dropdown,
 } from "antd";
 import moment from "moment";
 import { SiMicrosoftexcel } from "react-icons/si";
@@ -45,6 +45,7 @@ class PoDeliveryTab extends Component {
       project_id: this.props.project_id,
       po_deliveries: {},
       po_deliveries_values: [],
+      po_deliveries_keys: [],
       add_modal: false,
       base_currency: this.props?.base_currency ?? "",
       exchange_rates: {},
@@ -60,10 +61,19 @@ class PoDeliveryTab extends Component {
       ex_rates_valus: [],
       suppliers: [],
       total_delivered_percentage: 0,
+      shared: this.props.shared,
+      scope: this.props.scope,
+      permission: this.props.permission,
+      vendor_id: this.props.vendor_id,
+      vendor_name: this.props.vendor_name,
     };
   }
   componentDidMount() {
     this.getData();
+    console.log(this.state.vendor_name);
+    console.log(this.state.vendor_id);
+    console.log(this.state.scope);
+    console.log(this.state.permission);
   }
   onFinishEdit = (values) => {
     values["value"] = values.value?.replaceAll(",", "");
@@ -91,99 +101,102 @@ class PoDeliveryTab extends Component {
     this.setState({
       edited_loading_date,
       edited_date: edited_loading_date,
-
     });
   };
 
   getData = async () => {
     let endpoint;
 
-    if(this.state.entity_name==='company'){
-      endpoint=`get-podelivery/${this.state.entity_id}/${this.state.project_id}`
-    }else{
-    
-      endpoint=`user-get-podelivery/${this.state.entity_id}/${this.state.project_id}`
+    if (this.state.entity_name === "company") {
+      endpoint = `get-podelivery/${this.state.entity_id}/${this.state.project_id}`;
+    } else {
+      endpoint = `user-get-podelivery/${this.state.entity_id}/${this.state.project_id}`;
     }
-    await axios
-      .get(
-        // `${API}get-podelivery/${this.state.company_id}/${this.state.project_id}`
-        `${API}${endpoint}`
-      )
-      .then((response) => {
-        console.log(response);
-        this.setState(
-          {
-            po_deliveries: response.data.po_deliveries,
-            vendors_options: [
-              ...new Set(
-              Object.keys(response.data.po_deliveries)
-              ),
-            ],
-            po_deliveries_values:
-              Object.values(response.data.po_deliveries) ?? [],
-            exchange_rates: response.data.exchange_rates,
-            po_deliveries_currencies: response.data.po_deliveries_currencies,
-            suppliers_options: response.data.suppliers_options,
-            suppliers: response.data.pos,
-            purchases: response.data?.purchases,
-            services_filter_options: Object.values(response.data.po_deliveries)
-              ?.map((s) => {
-                return s?.map((ss) => {
-                  // return JSON.parse(ss?.products_services);
-                  return ss?.products_services;
-                });
-              })
-              .filter((p) => {
-                return p != null;
-              })
-              .flat(),
-            purchases_with_exchange: response.data.purchases?.reduce(
-              (accumulator, object) => {
-                return (
-                  parseFloat(accumulator) +
-                  parseFloat(object.total) * parseFloat(object.exchange_rate)
-                );
-              },
-              0
-            ),
+    await axios.get(`${API}${endpoint}`).then((response) => {
+      console.log(response);
+      this.setState(
+        {
+          po_deliveries: response.data.po_deliveries,
+          vendors_options: [
+            ...new Set(Object.keys(response.data.po_deliveries)),
+          ],
+          // po_deliveries_values:
+          //   Object.values(response.data.po_deliveries) ?? [],
+          //   po_deliveries_keys:
+          //   Object.keys(response.data.po_deliveries) ?? [],
+          po_deliveries_values:
+            this.state.scope !== "vendor"
+              ? Object.values(response.data.po_deliveries)
+              : Object.values(response.data.po_deliveries).filter((p) => {
+                  return p[0]?.supplier_name == this.state.vendor_name;
+                }),
 
-            total_paids: Object.keys(response.data.pos_sub)?.map((p) => {
-              return parseFloat(
-                this.getKeyValue(p, response.data.payments_pos, "value")
+          po_deliveries_keys:
+            this.state.scope !== "vendor"
+              ? Object.keys(response.data.po_deliveries)
+              : Object.keys(response.data.po_deliveries).filter((p) => {
+                  return p == this.state.vendor_name;
+                }),
+          exchange_rates: response.data.exchange_rates,
+          po_deliveries_currencies: response.data.po_deliveries_currencies,
+          suppliers_options: response.data.suppliers_options,
+          suppliers: response.data.pos,
+          purchases: response.data?.purchases,
+          services_filter_options: Object.values(response.data.po_deliveries)
+            ?.map((s) => {
+              return s?.map((ss) => {
+                // return JSON.parse(ss?.products_services);
+                return ss?.products_services;
+              });
+            })
+            .filter((p) => {
+              return p != null;
+            })
+            .flat(),
+          purchases_with_exchange: response.data.purchases?.reduce(
+            (accumulator, object) => {
+              return (
+                parseFloat(accumulator) +
+                parseFloat(object.total) * parseFloat(object.exchange_rate)
               );
-            }),
-    
-            total_currency_paids: Object.values(
-              response.data.pos_currencies
-            )?.map((c, index) => {
-              return parseFloat(
+            },
+            0
+          ),
+
+          total_paids: Object.keys(response.data.pos_sub)?.map((p) => {
+            return parseFloat(
+              this.getKeyValue(p, response.data.payments_pos, "value")
+            );
+          }),
+
+          total_currency_paids: Object.values(
+            response.data.pos_currencies
+          )?.map((c, index) => {
+            return parseFloat(
+              this.getKeyValue(
+                c[0]?.currency,
+                response.data.payments_currencies,
+                "coast"
+              )
+            );
+          }),
+          total_currency_balances: Object.values(
+            response.data.pos_currencies
+          )?.map((c, index) => {
+            return parseFloat(
+              c?.reduce((accumulator, object) => {
+                return parseFloat(accumulator) + parseFloat(object.total);
+              }, 0) -
                 this.getKeyValue(
                   c[0]?.currency,
                   response.data.payments_currencies,
                   "coast"
                 )
-              );
-            }),
-            total_currency_balances: Object.values(
-              response.data.pos_currencies
-            )?.map((c, index) => {
-              return parseFloat(
-                c?.reduce((accumulator, object) => {
-                  return parseFloat(accumulator) + parseFloat(object.total);
-                }, 0) -
-                  this.getKeyValue(
-                    c[0]?.currency,
-                    response.data.payments_currencies,
-                    "coast"
-                  )
-              );
-            }),
-          },
-          () => {
-            console.log(this.state.left_products_currencies);
-            console.log(this.state.exchange_rates);
-            console.log(this.state.purchases_with_exchange);
-
+            );
+          }),
+        },
+        () => {
+          if (this.state.scope !== "vendor") {
             this.setState(
               {
                 purchases_total_with_exchanges_values: Object.keys(
@@ -223,7 +236,7 @@ class PoDeliveryTab extends Component {
                 )?.map((vendor, index) => {
                   return (
                     (parseFloat(
-                      this.state.po_deliveries_values[index].reduce(
+                      this.state.po_deliveries_values[index]?.reduce(
                         (accumulator, object) => {
                           return parseFloat(
                             parseFloat(accumulator) + parseFloat(object.value)
@@ -262,33 +275,37 @@ class PoDeliveryTab extends Component {
                 }),
               },
               () => {
-             this.setState({
-              dvp:this.formatNumbers(
-                100*this.state.deliveries_percentages?.reduce(
-                  (accumulator, object) => {
-                    return parseFloat(
-                      parseFloat(accumulator) + parseFloat(object)
-                    );
-                  },
-                  0
-                )
-              ),
-              dlp:this.formatNumbers(
-                100- 100*this.state.deliveries_percentages?.reduce(
-                  (accumulator, object) => {
-                    return parseFloat(
-                      parseFloat(accumulator) + parseFloat(object)
-                    );
-                  },
-                  0
-                )
-              )
-             })
+                this.setState({
+                  dvp: this.formatNumbers(
+                    100 *
+                      this.state.deliveries_percentages?.reduce(
+                        (accumulator, object) => {
+                          return parseFloat(
+                            parseFloat(accumulator) + parseFloat(object)
+                          );
+                        },
+                        0
+                      )
+                  ),
+                  dlp: this.formatNumbers(
+                    100 -
+                      100 *
+                        this.state.deliveries_percentages?.reduce(
+                          (accumulator, object) => {
+                            return parseFloat(
+                              parseFloat(accumulator) + parseFloat(object)
+                            );
+                          },
+                          0
+                        )
+                  ),
+                });
               }
             );
           }
-        );
-      });
+        }
+      );
+    });
   };
 
   onCollapseChange = (active_vendor) => {
@@ -307,7 +324,6 @@ class PoDeliveryTab extends Component {
   formatNumbers = (number) => {
     return Number(parseFloat(number).toFixed(2))?.toLocaleString();
   };
-  
 
   openDeliveryAddModal = () => {
     this.setState({
@@ -489,7 +505,7 @@ class PoDeliveryTab extends Component {
       country_filter,
       products_filter,
       currency_filter,
-      vendor_filter
+      vendor_filter,
     } = this.state;
 
     axios
@@ -501,8 +517,21 @@ class PoDeliveryTab extends Component {
           {
             loading: false,
             po_deliveries: response.data.po_deliveries,
+            // po_deliveries_values:
+            //   Object.values(response.data.po_deliveries) ?? [],
             po_deliveries_values:
-              Object.values(response.data.po_deliveries) ?? [],
+              this.state.scope !== "vendor"
+                ? Object.values(response.data.po_deliveries)
+                : Object.values(response.data.po_deliveries).filter((p) => {
+                    return p[0]?.supplier_name == this.state.vendor_name;
+                  }),
+
+            po_deliveries_keys:
+              this.state.scope !== "vendor"
+                ? Object.keys(response.data.po_deliveries)
+                : Object.keys(response.data.po_deliveries).filter((p) => {
+                    return p == this.state.vendor_name;
+                  }),
             po_deliveries_currencies: response.data.po_deliveries_currencies,
           },
           () => {}
@@ -532,64 +561,84 @@ class PoDeliveryTab extends Component {
       }
     );
   };
-  
+
   render() {
     return (
       <>
         <div className="tables-page">
           <div className="btns-actions">
             <button>
-            <Dropdown
-              overlayClassName="download-tables-menu"
-              placement="bottomLeft"
-              menu={{
-                items: [
-                  {
-                    key: "1",
-                    label: (
-                      <div>
-                        <div className="menu-download-item">
-                          <a
-                            href={`${API}purchases-statement-xls/${
-                              this.state.project_id
-                            }?p=${[this.state.total_paids]}&cb=${
-                              this.state.total_currency_balances
-                            }&cp=${this.state.total_currency_paids}&dvp=${
-                              this.state.dvp
-                            }&dlp=${this.state.dlp}`}
-                          >
-                            <SiMicrosoftexcel />
-                          </a>
+              <Dropdown
+                overlayClassName="download-tables-menu"
+                placement="bottomLeft"
+                menu={{
+                  items: [
+                    {
+                      key: "1",
+                      label: (
+                        <div>
+                          <div className="menu-download-item">
+                            {this.state.scope !== "vendor" ? (
+                              <a
+                                href={`${API}purchases-statement-xls/${
+                                  this.state.project_id
+                                }?p=${[this.state.total_paids]}&cb=${
+                                  this.state.total_currency_balances
+                                }&cp=${this.state.total_currency_paids}&dvp=${
+                                  this.state.dvp
+                                }&dlp=${this.state.dlp}`}
+                              >
+                                <SiMicrosoftexcel />
+                              </a>
+                            ) : (
+                              <a
+                                href={`${API}vendor-xls/${this.state.project_id}/${this.state.vendor_id}`}
+                              >
+                                <SiMicrosoftexcel />
+                              </a>
+                            )}
+                          </div>
+                          <div className="menu-download-item">
+                            {this.state.scope !== "vendor" ? (
+                              <a
+                                href={`${API}purchases-statement-pdf/${
+                                  this.state.project_id
+                                }?p=${[this.state.total_paids]}&cb=${
+                                  this.state.total_currency_balances
+                                }&cp=${this.state.total_currency_paids}&dvp=${
+                                  this.state.dvp
+                                }&dlp=${this.state.dlp}`}
+                              >
+                                <FaFilePdf />
+                              </a>
+                            ) : (
+                              <a
+                                href={`${API}vendor-pdf/${this.state.project_id}/${this.state.vendor_id}`}
+                              >
+                                <FaFilePdf />
+                              </a>
+                            )}
+                          </div>
                         </div>
-                        <div className="menu-download-item">
-                          <a
-                            href={`${API}purchases-statement-pdf/${
-                              this.state.project_id
-                            }?p=${[this.state.total_paids]}&cb=${
-                              this.state.total_currency_balances
-                            }&cp=${this.state.total_currency_paids}&dvp=${
-                              this.state.dvp
-                            }&dlp=${this.state.dlp}`}
-                          >
-                            <FaFilePdf />
-                          </a>
-                        </div>
-                      </div>
-                    ),
-                  },
-                ],
-              }}
-            >
-              <a onClick={(e) => e.preventDefault()}>
-                Download{" "}
-                <span>
-                  <DownloadOutlined />
-                </span>
-              </a>
-            </Dropdown>
+                      ),
+                    },
+                  ],
+                }}
+              >
+                <a onClick={(e) => e.preventDefault()}>
+                  Download{" "}
+                  <span>
+                    <DownloadOutlined />
+                  </span>
+                </a>
+              </Dropdown>
             </button>
 
-            <button onClick={this.openDeliveryAddModal}>Add Delivery +</button>
+            {(!this.state.shared || this.state.permission == "write") && (
+              <button onClick={this.openDeliveryAddModal}>
+                Add Delivery +
+              </button>
+            )}
           </div>
           <div className="pom-table pos pos-table">
             <div className="filters pos-tabs">
@@ -678,7 +727,6 @@ class PoDeliveryTab extends Component {
                     placeholder="Year"
                     size="large"
                     picker="year"
-                    // style={{ width: "100%" }}
                     onChange={this.onYearChange}
                     suffixIcon={<CaretDownOutlined />}
                   />
@@ -717,91 +765,140 @@ class PoDeliveryTab extends Component {
                 <div>Left Value</div>
                 <div>%OF PO</div>
               </div>
-              {Object.keys(this.state.po_deliveries)?.map((d, index) => {
+              {/* {Object.keys(this.state.po_deliveries)?.map((d, index) => { */}
+              {this.state.po_deliveries_keys?.map((d, index) => {
                 return (
                   <>
                     {this.state.po_deliveries_values[index]?.length > 1 ? (
-                        <Collapse
-                          onChange={() => this.onCollapseChange(d)}
-                          activeKey={this.state.active_vendor}
-                        >
-                          <Panel
-                            header={
-                              <div className="table-row data-row collabser-row relative">
-                                  <div className="edit-delete">
-                                  <Row align={"middle"}>
-                                    <Col md={8}>
-                                      <a
-                                        href={`${API}vendor-xls/${this.state.project_id}/${this.state.po_deliveries_values[index][0].supplier_id}`}
-                                      >
-                                        <span>
-                                          <SiMicrosoftexcel />
-                                        </span>
-                                      </a>
-                                    </Col>
-                                    <Col md={8}>
-                                      <a
-                                        href={`${API}vendor-pdf/${this.state.project_id}/${this.state.po_deliveries_values[index][0].supplier_id}`}
-                                      >
-                                        <span>
-                                          <FaFilePdf />
-                                        </span>
-                                      </a>
-                                    </Col>
-                                  </Row>
-                                </div>
-                                <div>
-                                  <p className="main">{d}</p>
-                                  <p className="sec">
-                                    {
-                                      this.state.po_deliveries_values[index][0]
-                                        ?.currency
-                                    }
+                      <Collapse
+                        onChange={() => this.onCollapseChange(d)}
+                        activeKey={this.state.active_vendor}
+                      >
+                        <Panel
+                          header={
+                            <div className="table-row data-row collabser-row relative">
+                              <div className="edit-delete">
+                                <Row align={"middle"}>
+                                  <Col md={8}>
+                                    <a
+                                      href={`${API}vendor-xls/${this.state.project_id}/${this.state.po_deliveries_values[index][0].supplier_id}`}
+                                    >
+                                      <span>
+                                        <SiMicrosoftexcel />
+                                      </span>
+                                    </a>
+                                  </Col>
+                                  <Col md={8}>
+                                    <a
+                                      href={`${API}vendor-pdf/${this.state.project_id}/${this.state.po_deliveries_values[index][0].supplier_id}`}
+                                    >
+                                      <span>
+                                        <FaFilePdf />
+                                      </span>
+                                    </a>
+                                  </Col>
+                                </Row>
+                              </div>
+                              <div>
+                                <p className="main">{d}</p>
+                                <p className="sec">
+                                  {
+                                    this.state.po_deliveries_values[index][0]
+                                      ?.currency
+                                  }
+                                </p>
+                              </div>
+                              <div>
+                                {d === this.state.active_vendor ? (
+                                  <p className="expand-btn open">
+                                    <span className="txt">Hide Content</span>
+                                    <span>
+                                      <DownOutlined />
+                                    </span>
                                   </p>
-                                </div>
-                                <div>
-                                  {d === this.state.active_vendor ? (
-                                    <p className="expand-btn open">
-                                      <span className="txt">Hide Content</span>
-                                      <span>
-                                        <DownOutlined />
-                                      </span>
-                                    </p>
-                                  ) : (
-                                    <p className="expand-btn close">
-                                      <span className="txt">Show Content</span>{" "}
-                                      <span>
-                                        <UpOutlined />
-                                      </span>
-                                    </p>
+                                ) : (
+                                  <p className="expand-btn close">
+                                    <span className="txt">Show Content</span>{" "}
+                                    <span>
+                                      <UpOutlined />
+                                    </span>
+                                  </p>
+                                )}
+                              </div>
+                              <div></div>
+                              <div>
+                                <p className="main total">
+                                  {this.formatNumbers(
+                                    parseFloat(
+                                      this.state.po_deliveries_values[
+                                        index
+                                      ].reduce((accumulator, object) => {
+                                        return parseFloat(
+                                          parseFloat(accumulator) +
+                                            parseFloat(object.value)
+                                        );
+                                      }, 0)
+                                    ).toFixed(2)
                                   )}
-                                </div>
-                                <div></div>
-                                <div>
-                                  <p className="main total">
-                                    {this.formatNumbers(
-                                      parseFloat(
+                                </p>
+                                <p className="sec">
+                                  {
+                                    this.state.po_deliveries_values[index][0]
+                                      ?.currency
+                                  }
+                                </p>
+                              </div>
+                              <div>
+                                <p className="main">
+                                  {this.formatNumbers(
+                                    (parseFloat(
+                                      this.state.po_deliveries_values[
+                                        index
+                                      ].reduce((accumulator, object) => {
+                                        return parseFloat(
+                                          parseFloat(accumulator) +
+                                            parseFloat(object.value)
+                                        );
+                                      }, 0)
+                                    ) /
+                                      (parseFloat(
                                         this.state.po_deliveries_values[
                                           index
-                                        ].reduce((accumulator, object) => {
-                                          return parseFloat(
-                                            parseFloat(accumulator) +
-                                              parseFloat(object.value)
-                                          );
-                                        }, 0)
-                                      ).toFixed(2)
-                                    )}
-                                  </p>
-                                  <p className="sec">
-                                    {
-                                      this.state.po_deliveries_values[index][0]
-                                        ?.currency
-                                    }
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="main">
-                                    {this.formatNumbers(
+                                        ][0]?.leftp
+                                      ) +
+                                        parseFloat(
+                                          this.state.po_deliveries_values[
+                                            index
+                                          ].reduce((accumulator, object) => {
+                                            return parseFloat(
+                                              parseFloat(accumulator) +
+                                                parseFloat(object.value)
+                                            );
+                                          }, 0)
+                                        ))) *
+                                      100
+                                  )}
+                                  {" %"}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="main">
+                                  {this.formatNumbers(
+                                    this.state.po_deliveries_values[index][0]
+                                      ?.leftp
+                                  )}
+                                </p>
+                                <p className="sec">
+                                  {
+                                    this.state.po_deliveries_values[index][0]
+                                      ?.currency
+                                  }
+                                </p>
+                              </div>
+                              <div>
+                                <p className="main">
+                                  {this.formatNumbers(
+                                    100 -
                                       (parseFloat(
                                         this.state.po_deliveries_values[
                                           index
@@ -828,79 +925,28 @@ class PoDeliveryTab extends Component {
                                             }, 0)
                                           ))) *
                                         100
-                                    )}
-                                     {" %"}
-                                  </p>
-                                 
-                                </div>
-                                <div>
-                                  <p className="main">
-                                    {this.formatNumbers(
-                                      this.state.po_deliveries_values[index][0]
-                                        ?.leftp
-                                    )}
-                                  </p>
-                                  <p className="sec">
-                                    {
-                                      this.state.po_deliveries_values[index][0]
-                                        ?.currency
-                                    }
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="main">
-                                    {this.formatNumbers(
-                                      100 -
-                                        (parseFloat(
-                                          this.state.po_deliveries_values[
-                                            index
-                                          ].reduce((accumulator, object) => {
-                                            return parseFloat(
-                                              parseFloat(accumulator) +
-                                                parseFloat(object.value)
-                                            );
-                                          }, 0)
-                                        ) /
-                                          (parseFloat(
-                                            this.state.po_deliveries_values[
-                                              index
-                                            ][0]?.leftp
-                                          ) +
-                                            parseFloat(
-                                              this.state.po_deliveries_values[
-                                                index
-                                              ].reduce(
-                                                (accumulator, object) => {
-                                                  return parseFloat(
-                                                    parseFloat(accumulator) +
-                                                      parseFloat(object.value)
-                                                  );
-                                                },
-                                                0
-                                              )
-                                            ))) *
-                                          100
-                                    )}
+                                  )}
                                   {" %"}
-                                  </p>
-                                  
-                                </div>
+                                </p>
                               </div>
-                            }
-                            key={d}
-                            showArrow={false}
-                          >
-                            {this.state.po_deliveries_values[index]?.map(
-                              (de) => {
-                                return (
-                                  <div className="data-row relative table-row">
-                                    <div className="edit-delete">
-                                      <Row align={"middle"}>
-                                        <Col md={8}>
-                                          <span>
-                                            <DownloadOutlined />
-                                          </span>
-                                        </Col>
+                            </div>
+                          }
+                          key={d}
+                          showArrow={false}
+                        >
+                          {this.state.po_deliveries_values[index]?.map((de) => {
+                            return (
+                              <div className="data-row relative table-row">
+                                <div className="edit-delete">
+                                  <Row align={"middle"}>
+                                    <Col md={8}>
+                                      <span>
+                                        <DownloadOutlined />
+                                      </span>
+                                    </Col>
+                                    {(this.state.scope !== "vendor" ||
+                                      this.state.permission === "write") && (
+                                      <>
                                         <Col md={8}>
                                           <EditOutlined
                                             onClick={() => {
@@ -908,7 +954,8 @@ class PoDeliveryTab extends Component {
                                                 {
                                                   del_to_edit: de,
                                                   edited_date: de?.loading_date,
-                                                  edited_loading_date:de?.loading_date,
+                                                  edited_loading_date:
+                                                    de?.loading_date,
                                                 },
                                                 () => {
                                                   this.setState({
@@ -933,34 +980,36 @@ class PoDeliveryTab extends Component {
                                             }}
                                           />
                                         </Col>
-                                      </Row>
-                                    </div>
-                                    <div></div>
-                                    <div>
-                                      <p className="main">{de.referance}</p>
-                                    </div>
-                                    <div>
-                                      <p className="main">{de.loading_date}</p>
-                                    </div>
-                                    <div>
-                                      <p className="main">{this.formatNumbers(de.value)}</p>
-                                      <p className="sec">
-                                        {
-                                          this.state.po_deliveries_values[
-                                            index
-                                          ][0]?.currency
-                                        }
-                                      </p>
-                                    </div>
-                                    <div></div>
-                                    <div></div>
-                                    <div></div>
-                                  </div>
-                                );
-                              }
-                            )}
-                          </Panel>
-                        </Collapse>
+                                      </>
+                                    )}
+                                  </Row>
+                                </div>
+                                <div></div>
+                                <div>
+                                  <p className="main">{de.referance}</p>
+                                </div>
+                                <div>
+                                  <p className="main">{de.loading_date}</p>
+                                </div>
+                                <div>
+                                  <p className="main">
+                                    {this.formatNumbers(de.value)}
+                                  </p>
+                                  <p className="sec">
+                                    {
+                                      this.state.po_deliveries_values[index][0]
+                                        ?.currency
+                                    }
+                                  </p>
+                                </div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                              </div>
+                            );
+                          })}
+                        </Panel>
+                      </Collapse>
                     ) : (
                       <>
                         {this.state.po_deliveries_values[index]?.map((de) => {
@@ -968,25 +1017,29 @@ class PoDeliveryTab extends Component {
                             <div className="data-row table-row  relative">
                               <div className="edit-delete">
                                 <Row align={"middle"}>
-                                <Col md={6}>
-                                      <a
-                                        href={`${API}vendor-xls/${this.state.project_id}/${this.state.po_deliveries_values[index][0].supplier_id}`}
-                                      >
-                                        <span>
-                                          <SiMicrosoftexcel />
-                                        </span>
-                                      </a>
-                                    </Col>
-                                    <Col md={6}>
-                                      <a
-                                        href={`${API}vendor-pdf/${this.state.project_id}/${this.state.po_deliveries_values[index][0].supplier_id}`}
-                                      >
-                                        <span>
-                                          <FaFilePdf />
-                                        </span>
-                                      </a>
-                                    </Col>
                                   <Col md={6}>
+                                    <a
+                                      href={`${API}vendor-xls/${this.state.project_id}/${this.state.po_deliveries_values[index][0].supplier_id}`}
+                                    >
+                                      <span>
+                                        <SiMicrosoftexcel />
+                                      </span>
+                                    </a>
+                                  </Col>
+                                  <Col md={6}>
+                                    <a
+                                      href={`${API}vendor-pdf/${this.state.project_id}/${this.state.po_deliveries_values[index][0].supplier_id}`}
+                                    >
+                                      <span>
+                                        <FaFilePdf />
+                                      </span>
+                                    </a>
+                                  </Col>
+                                 
+                                  {(this.state.scope !== "vendor" ||
+                                    this.state.permission === "write") && (
+                                    <>
+                                      <Col md={6}>
                                     <EditOutlined
                                       onClick={() => {
                                         this.setState(
@@ -1017,6 +1070,8 @@ class PoDeliveryTab extends Component {
                                       }}
                                     />
                                   </Col>
+                                    </>
+                                  )}
                                 </Row>
                               </div>
                               <div>
@@ -1035,7 +1090,9 @@ class PoDeliveryTab extends Component {
                                 <p className="main">{de.loading_date}</p>
                               </div>
                               <div>
-                                <p className="main total">{this.formatNumbers(de.value)}</p>
+                                <p className="main total">
+                                  {this.formatNumbers(de.value)}
+                                </p>
                                 <p className="sec">
                                   {
                                     this.state.po_deliveries_values[index][0]
@@ -1062,11 +1119,9 @@ class PoDeliveryTab extends Component {
                                           ][0]?.value
                                         ))) *
                                       100
-                                  )
-                                  }
-                                   {" %"}
+                                  )}
+                                  {" %"}
                                 </p>
-                                
                               </div>
 
                               <div>
@@ -1104,9 +1159,8 @@ class PoDeliveryTab extends Component {
                                           ))) *
                                         100
                                   )}
-                                   {" %"}
+                                  {" %"}
                                 </p>
-                               
                               </div>
                             </div>
                           );
@@ -1116,33 +1170,19 @@ class PoDeliveryTab extends Component {
                   </>
                 );
               })}
-              <div className="header-row table-row" style={{
-                position:"relative",
-                top:"-2px"
-              }}>
-                <div>
-                  <p className="high">Total Delivered % of total PO</p>
-                </div>
-                <div>
-                  {this.formatNumbers(
-                    100 *
-                      this.state.deliveries_percentages?.reduce(
-                        (accumulator, object) => {
-                          return parseFloat(
-                            parseFloat(accumulator) + parseFloat(object)
-                          );
-                        },
-                        0
-                      )
-                  )}
-                  {"  %"}
-                </div>
-                <div>
-                  <p className="high">Total Left % of total PO</p>
-                </div>
-                <div>
-                  {this.formatNumbers(
-                    100 -
+              {this.state.scope !== "vendor" && (
+                <div
+                  className="header-row table-row"
+                  style={{
+                    position: "relative",
+                    top: "-2px",
+                  }}
+                >
+                  <div>
+                    <p className="high">Total Delivered % of total PO</p>
+                  </div>
+                  <div>
+                    {this.formatNumbers(
                       100 *
                         this.state.deliveries_percentages?.reduce(
                           (accumulator, object) => {
@@ -1152,10 +1192,29 @@ class PoDeliveryTab extends Component {
                           },
                           0
                         )
-                  )}
-                  {"  %"}
+                    )}
+                    {"  %"}
+                  </div>
+                  <div>
+                    <p className="high">Total Left % of total PO</p>
+                  </div>
+                  <div>
+                    {this.formatNumbers(
+                      100 -
+                        100 *
+                          this.state.deliveries_percentages?.reduce(
+                            (accumulator, object) => {
+                              return parseFloat(
+                                parseFloat(accumulator) + parseFloat(object)
+                              );
+                            },
+                            0
+                          )
+                    )}
+                    {"  %"}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -1196,10 +1255,9 @@ class PoDeliveryTab extends Component {
               >
                 {this.state.suppliers?.map((p) => {
                   return (
-           
-                      <Option
-                        value={p.supplier_id}
-                      >{`${p.supplier_name} | ${p?.currency}`}</Option>
+                    <Option
+                      value={p.supplier_id}
+                    >{`${p.supplier_name} | ${p?.currency}`}</Option>
                   );
                 })}
               </Select>

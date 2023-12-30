@@ -11,6 +11,8 @@ import {
   CaretUpOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
+import { regionNames,returnCountryName } from "./../redux/constants";
+
 
 const { Option } = Select;
 class POMOverview extends Component {
@@ -45,7 +47,6 @@ class POMOverview extends Component {
 
     }
     axios.get(`${API}${api_endpoint}`).then((response) => {
-      // axios.get(`${API}pom-overview/${company_id}`).then((response) => {
       console.log(response);
       this.setState(
         {
@@ -64,7 +65,6 @@ class POMOverview extends Component {
             })
             .flat(),
           cashflows: response.data.cashflow?.filter((c) => {
-            // return c.total_sales || c.total_sales>0 || c.total_purchases || c.total_purchases>0 || c.total_done_payments || c.total_done_payments>0 || c.total_received_payments||c.total_received_payments>0;
             return (
               (c.total_sales && parseFloat(c.total_sales) > 0) ||
               (c.total_purchases && parseFloat(c.total_purchases) > 0) ||
@@ -75,11 +75,6 @@ class POMOverview extends Component {
             );
           }),
         },
-        () => {
-          console.log(this.state.poinvoices);
-          console.log(this.state.cashflows);
-          console.log(this.state.flat_poinvoices);
-        }
       );
     });
   };
@@ -207,7 +202,8 @@ class POMOverview extends Component {
                         <p className="sale">{p.name}</p>
                         <p className="sec">{p.pi_ci}</p>
                         <p className="sec">{p.start_date}</p>
-                        <p className="sec">{p.country}</p>
+                        <p className="sec">{returnCountryName(p?.country,p?.city)}</p>
+                        <p className="sec">{p?.client_name}</p>
                       </td>
                       <td>
                         <p className="sale">
@@ -348,6 +344,7 @@ class POMOverview extends Component {
                     }, 0)}
                   </td>
                 </tr> */}
+
               </table>
             </div>
 
@@ -510,7 +507,9 @@ class POMOverview extends Component {
           }}
         >
           <ProjectListItem
-            company_id={this.state.company_id}
+            // company_id={this.state.company_id}
+            entity_name={this.state.entity_name}
+            entity_id={this.state.entity_id}
             project_id={this.state.project_id}
           />
         </Modal>

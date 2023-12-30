@@ -13,7 +13,7 @@ import {
 import ReactFlagsSelect from "react-flags-select";
 import { customLabels } from "../pages/CreateBrandFinish";
 import axios from "axios";
-import { regionNames } from "./../redux/constants";
+import { regionNames,returnCountryName } from "./../redux/constants";
 import {
   LoadingOutlined,
   DeleteOutlined,
@@ -696,7 +696,8 @@ class ProjectList extends Component {
                             </p>
                             <p className="sec">{row?.pi_ci}</p>
                             <p className="sec">{row?.start_date}</p>
-                            <p className="sec">{row?.country&&`${regionNames.of(row?.country)},${row?.city}`}</p>
+                            {/* <p className="sec">{row?.country&&`${regionNames.of(row?.country)},${row?.city}`}</p> */}
+                            <p className="sec">{returnCountryName(row?.country,row?.city)}</p>
                             <p className="sec">{row?.client_name}</p>
                            
                           </td>

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Row, Col, Input, Spin } from "antd";
 import { connect } from "react-redux";
 import Cropper from "react-cropper";
-import slide from "../../../src/slide1.jpg";
+// import slide from "../../../src/slide1.jpg";
 import "cropperjs/dist/cropper.css";
 import axios from "axios";
 import { goToProjectStep } from "../../redux/actions/addProjectActions";
@@ -17,7 +17,7 @@ class CoverStep extends Component {
   this.state = {
    slides: this.props.covers,
    cropped_cover: "",
-   active: slide,
+  //  active: slide,
    displayName: this.props.info?.name,
    created: false,
    creating: false,

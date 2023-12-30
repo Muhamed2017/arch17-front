@@ -3,18 +3,6 @@ import { Row, Col } from "antd";
 import "./../helpPages/statichelp.css";
 import "./../static_pages/help.css";
 import Footer from "../../components/Footer";
-const img1 =
-  "https://res.cloudinary.com/azharuniversity/image/upload/v1661377860/Screen_Shot_2022-08-22_at_08.48.08_fr31oi.png";
-const img2 =
-  "https://res.cloudinary.com/azharuniversity/image/upload/v1661377836/Screen_Shot_2022-08-21_at_19.50.10_vdflbn.jpg";
-const img3 =
-  "https://res.cloudinary.com/azharuniversity/image/upload/v1661377833/Screen_Shot_2022-08-21_at_19.50.22_qz71qy.jpg";
-const img4 =
-  "https://res.cloudinary.com/azharuniversity/image/upload/v1661377833/Screen_Shot_2022-08-21_at_19.50.32_uua7o9.jpg";
-const img5 =
-  "https://res.cloudinary.com/azharuniversity/image/upload/v1661377844/Screen_Shot_2022-08-21_at_19.50.42_ck8jax.jpg";
-const img6 =
-  "https://res.cloudinary.com/azharuniversity/image/upload/v1661377834/Screen_Shot_2022-08-21_at_19.50.57_kmwawh.jpg";
 class Arch17com extends Component {
   constructor(props) {
     super(props);

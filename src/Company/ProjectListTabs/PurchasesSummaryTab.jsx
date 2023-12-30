@@ -25,8 +25,14 @@ class PurchasesSummaryTab extends Component {
       suppliers_options: [],
       suppliers: [],
       currency: this.props?.base_currency,
+      // currency: this.props?.currency,
       entity_name: this.props.entity_name,
       entity_id: this.props.entity_id,
+      shared: this.props.shared,
+      scope: this.props.scope,
+      permission: this.props.permission,
+      vendor_id: this.props.vendor_id,
+      vendor_name: this.props.vendor_name,
     };
   }
 
@@ -37,7 +43,18 @@ class PurchasesSummaryTab extends Component {
   };
 
   componentDidMount() {
-    this.getData(0);
+    if (this.state.scope !== "vendor") {
+      this.getData(0);
+    } else {
+      this.setState(
+        {
+          supplier_name: this.props.vendor_name,
+        },
+        () => {
+          this.getData(1);
+        }
+      );
+    }
   }
 
   getData = (flag) => {
@@ -49,169 +66,173 @@ class PurchasesSummaryTab extends Component {
     } else {
       endpoint = `user-pos-summary/${this.state.project_id}`;
       fd.append("user_id", this.state.entity_id);
-
     }
     fd.append("supplier_name", this.state.supplier_name);
-    axios
-      .post(`${API}${endpoint}`, fd)
-      .then((response) => {
-        console.log(response);
-        if (flag === 0) {
-          this.setState({
-            suppliers_options: response.data.suppliers_options,
-            suppliers: response.data.pos,
+    axios.post(`${API}${endpoint}`, fd).then((response) => {
+      console.log(response);
+      if (flag === 0) {
+        this.setState({
+          suppliers_options: response.data.suppliers_options,
+          suppliers: response.data.pos,
 
-            total_paids: Object.keys(response.data.pos_sub)?.map((p) => {
-              return parseFloat(
-                this.getKeyValue(p, response.data.payments_pos, "value")
-              );
-            }),
+          total_paids: Object.keys(response.data.pos_sub)?.map((p) => {
+            return parseFloat(
+              this.getKeyValue(p, response.data.payments_pos, "value")
+            );
+          }),
 
-            total_currency_paids: Object.values(
-              response.data.pos_currencies
-            )?.map((c, index) => {
-              return parseFloat(
+          total_currency_paids: Object.values(
+            response.data.pos_currencies
+          )?.map((c, index) => {
+            return parseFloat(
+              this.getKeyValue(
+                c[0]?.currency,
+                response.data.payments_currencies,
+                "coast"
+              )
+            );
+          }),
+          total_currency_balances: Object.values(
+            response.data.pos_currencies
+          )?.map((c, index) => {
+            return parseFloat(
+              c?.reduce((accumulator, object) => {
+                return parseFloat(accumulator) + parseFloat(object.total);
+              }, 0) -
                 this.getKeyValue(
                   c[0]?.currency,
                   response.data.payments_currencies,
                   "coast"
                 )
+            );
+          }),
+        });
+      }
+      this.setState(
+        {
+          deliveries_currencies: response.data.deliveries_currencies,
+          payments_currencies: response.data.payments_currencies,
+          pos_currencies: response.data.pos_currencies,
+          all_vendors: response.data.name ? false : true,
+          purchases: response.data.purchases,
+          payments: response.data.payments,
+          deliveries: response.data.deliveries,
+          po_deliveries_values:
+            Object.values(response.data.po_deliveries) ?? [],
+          purchases_with_exchange: response.data.purchases?.reduce(
+            (accumulator, object) => {
+              return (
+                parseFloat(accumulator) +
+                parseFloat(object.total) * parseFloat(object.exchange_rate)
               );
-            }),
-            total_currency_balances: Object.values(
-              response.data.pos_currencies
-            )?.map((c, index) => {
-              return parseFloat(
-                c?.reduce((accumulator, object) => {
-                  return parseFloat(accumulator) + parseFloat(object.total);
-                }, 0) -
-                  this.getKeyValue(
-                    c[0]?.currency,
-                    response.data.payments_currencies,
-                    "coast"
-                  )
-              );
-            }),
-          });
-        }
-        this.setState(
-          {
-            deliveries_currencies: response.data.deliveries_currencies,
-            payments_currencies: response.data.payments_currencies,
-            pos_currencies: response.data.pos_currencies,
-            all_vendors: response.data.name ? false : true,
-            purchases: response.data.purchases,
-            payments: response.data.payments,
-            deliveries: response.data.deliveries,
-            po_deliveries_values:
-              Object.values(response.data.po_deliveries) ?? [],
-            purchases_with_exchange: response.data.purchases?.reduce(
-              (accumulator, object) => {
+            },
+            0
+          ),
+        },
+        () => {
+          this.setState(
+            {
+              deliveries_percentages: Object.keys(
+                response.data.po_deliveries
+              )?.map((vendor, index) => {
                 return (
-                  parseFloat(accumulator) +
-                  parseFloat(object.total) * parseFloat(object.exchange_rate)
-                );
-              },
-              0
-            ),
-          },
-          () => {
-            this.setState(
-              {
-                deliveries_percentages: Object.keys(
-                  response.data.po_deliveries
-                )?.map((vendor, index) => {
-                  return (
-                    (parseFloat(
-                      this.state.po_deliveries_values[index].reduce(
-                        (accumulator, object) => {
-                          return parseFloat(
-                            parseFloat(accumulator) + parseFloat(object.value)
-                          );
-                        },
-                        0
-                      )
-                    ) /
-                      (parseFloat(
-                        this.state.po_deliveries_values[index][0]?.leftp
-                      ) +
-                        parseFloat(
-                          this.state.po_deliveries_values[index].reduce(
-                            (accumulator, object) => {
-                              return parseFloat(
-                                parseFloat(accumulator) +
-                                  parseFloat(object.value)
-                              );
-                            },
-                            0
-                          )
-                        ))) *
-                    (this.state.purchases
-                      ?.filter((p) => {
-                        return p.supplier_name == vendor;
-                      })
-                      .reduce((accumulator, object) => {
+                  (parseFloat(
+                    this.state.po_deliveries_values[index].reduce(
+                      (accumulator, object) => {
                         return parseFloat(
-                          parseFloat(accumulator) +
-                            parseFloat(object.total) *
-                              parseFloat(object.exchange_rate)
-                        );
-                      }, 0) /
-                      this.state.purchases_with_exchange)
-                  );
-                }),
-              },
-              () => {
-                this.setState({
-                  currency: this.state.all_vendors
-                    ? this.state.base_currency
-                    : response.data.suppliers_options[0]?.currency,
-                  _tpu: this.state.all_vendors
-                    ? this.state.purchases?.reduce((accumulator, object) => {
-                        return (
-                          parseFloat(accumulator) +
-                          parseFloat(object.total) *
-                            parseFloat(object.exchange_rate)
-                        );
-                      }, 0)
-                    : this.state.purchases?.reduce((accumulator, object) => {
-                        return (
-                          parseFloat(accumulator) + parseFloat(object.total)
-                        );
-                      }, 0),
-                  _tpa: this.state.all_vendors
-                    ? this.state.payments?.reduce((accumulator, object) => {
-                        return (
-                          parseFloat(accumulator) +
-                          parseFloat(object.value) *
-                            parseFloat(object.exchange_rate)
-                        );
-                      }, 0)
-                    : this.state.payments?.reduce((accumulator, object) => {
-                        return (
                           parseFloat(accumulator) + parseFloat(object.value)
                         );
-                      }, 0),
-                  _td: this.state.deliveries?.reduce((accumulator, object) => {
-                    return parseFloat(accumulator) + parseFloat(object.value);
-                  }, 0),
-
-                  _tl:
-                    this.state.purchases?.reduce((accumulator, object) => {
+                      },
+                      0
+                    )
+                  ) /
+                    (parseFloat(
+                      this.state.po_deliveries_values[index][0]?.leftp
+                    ) +
+                      parseFloat(
+                        this.state.po_deliveries_values[index].reduce(
+                          (accumulator, object) => {
+                            return parseFloat(
+                              parseFloat(accumulator) + parseFloat(object.value)
+                            );
+                          },
+                          0
+                        )
+                      ))) *
+                  (this.state.purchases
+                    ?.filter((p) => {
+                      return p.supplier_name == vendor;
+                    })
+                    .reduce((accumulator, object) => {
+                      return parseFloat(
+                        parseFloat(accumulator) +
+                          parseFloat(object.total) *
+                            parseFloat(object.exchange_rate)
+                      );
+                    }, 0) /
+                    this.state.purchases_with_exchange)
+                );
+              }),
+            },
+            () => {
+              this.setState({
+                currency: this.state.all_vendors
+                  ? this.state.base_currency
+                  : response.data.suppliers_options[0]?.currency,
+                _tpu: this.state.all_vendors
+                  ? this.state.purchases?.reduce((accumulator, object) => {
+                      return (
+                        parseFloat(accumulator) +
+                        parseFloat(object.total) *
+                          parseFloat(object.exchange_rate)
+                      );
+                    }, 0)
+                  : this.state.purchases?.reduce((accumulator, object) => {
                       return parseFloat(accumulator) + parseFloat(object.total);
-                    }, 0) -
-                    this.state.deliveries?.reduce((accumulator, object) => {
+                    }, 0),
+                _tpa: this.state.all_vendors
+                  ? this.state.payments?.reduce((accumulator, object) => {
+                      return (
+                        parseFloat(accumulator) +
+                        parseFloat(object.value) *
+                          parseFloat(object.exchange_rate)
+                      );
+                    }, 0)
+                  : this.state.payments?.reduce((accumulator, object) => {
                       return parseFloat(accumulator) + parseFloat(object.value);
                     }, 0),
-                });
-              }
-            );
-          }
-        );
+                _td: this.state.deliveries?.reduce((accumulator, object) => {
+                  return parseFloat(accumulator) + parseFloat(object.value);
+                }, 0),
 
-        if (flag === 0) {
-          this.setState({
-            dvp: this.formatNumner(
+                _tl:
+                  this.state.purchases?.reduce((accumulator, object) => {
+                    return parseFloat(accumulator) + parseFloat(object.total);
+                  }, 0) -
+                  this.state.deliveries?.reduce((accumulator, object) => {
+                    return parseFloat(accumulator) + parseFloat(object.value);
+                  }, 0),
+              });
+            }
+          );
+        }
+      );
+
+      if (flag === 0) {
+        this.setState({
+          dvp: this.formatNumner(
+            100 *
+              this.state.deliveries_percentages?.reduce(
+                (accumulator, object) => {
+                  return parseFloat(
+                    parseFloat(accumulator) + parseFloat(object)
+                  );
+                },
+                0
+              )
+          ),
+          dlp: this.formatNumner(
+            100 -
               100 *
                 this.state.deliveries_percentages?.reduce(
                   (accumulator, object) => {
@@ -221,22 +242,10 @@ class PurchasesSummaryTab extends Component {
                   },
                   0
                 )
-            ),
-            dlp: this.formatNumner(
-              100 -
-                100 *
-                  this.state.deliveries_percentages?.reduce(
-                    (accumulator, object) => {
-                      return parseFloat(
-                        parseFloat(accumulator) + parseFloat(object)
-                      );
-                    },
-                    0
-                  )
-            ),
-          });
-        }
-      });
+          ),
+        });
+      }
+    });
   };
   getKeyValue = (name, obj, type) => {
     let total = 0;
@@ -275,30 +284,46 @@ class PurchasesSummaryTab extends Component {
                     label: (
                       <div>
                         <div className="menu-download-item">
-                          <a
-                            href={`${API}purchases-statement-xls/${
-                              this.state.project_id
-                            }?p=${[this.state.total_paids]}&cb=${
-                              this.state.total_currency_balances
-                            }&cp=${this.state.total_currency_paids}&dvp=${
-                              this.state.dvp
-                            }&dlp=${this.state.dlp}`}
-                          >
-                            <SiMicrosoftexcel />
-                          </a>
+                          {this.state.scope !== "vendor" ? (
+                            <a
+                              href={`${API}purchases-statement-xls/${
+                                this.state.project_id
+                              }?p=${[this.state.total_paids]}&cb=${
+                                this.state.total_currency_balances
+                              }&cp=${this.state.total_currency_paids}&dvp=${
+                                this.state.dvp
+                              }&dlp=${this.state.dlp}`}
+                            >
+                              <SiMicrosoftexcel />
+                            </a>
+                          ) : (
+                            <a
+                              href={`${API}vendor-xls/${this.state.project_id}/${this.state.vendor_id}`}
+                            >
+                              <SiMicrosoftexcel />
+                            </a>
+                          )}
                         </div>
                         <div className="menu-download-item">
-                          <a
-                            href={`${API}purchases-statement-pdf/${
-                              this.state.project_id
-                            }?p=${[this.state.total_paids]}&cb=${
-                              this.state.total_currency_balances
-                            }&cp=${this.state.total_currency_paids}&dvp=${
-                              this.state.dvp
-                            }&dlp=${this.state.dlp}`}
-                          >
-                            <FaFilePdf />
-                          </a>
+                          {this.state.scope !== "vendor" ? (
+                            <a
+                              href={`${API}purchases-statement-pdf/${
+                                this.state.project_id
+                              }?p=${[this.state.total_paids]}&cb=${
+                                this.state.total_currency_balances
+                              }&cp=${this.state.total_currency_paids}&dvp=${
+                                this.state.dvp
+                              }&dlp=${this.state.dlp}`}
+                            >
+                              <FaFilePdf />
+                            </a>
+                          ) : (
+                            <a
+                              href={`${API}vendor-pdf/${this.state.project_id}/${this.state.vendor_id}`}
+                            >
+                              <FaFilePdf />
+                            </a>
+                          )}
                         </div>
                       </div>
                     ),
@@ -317,35 +342,37 @@ class PurchasesSummaryTab extends Component {
         </div>
         <div className="pom-table">
           <div className="filters pos-tabs">
-            <Row align={"top"} justify={"end"}>
-              <Col md={21}>
-                <div className="list-head search-box"></div>
-              </Col>
-              <Col md={3}>
-                <Select
-                  style={{
-                    width: "100%",
-                  }}
-                  className="right  px-0"
-                  bordered={false}
-                  size="large"
-                  suffixIcon={<CaretDownOutlined />}
-                  placeholder="All Vendors"
-                  onChange={this.onVendorChange}
-                >
-                  <Option value="">All Vendors</Option>
-                  {this.state.suppliers?.map((p) => {
-                    return (
-                      <>
-                        <Option value={p.supplier_name}>
-                          {p.supplier_name}
-                        </Option>
-                      </>
-                    );
-                  })}
-                </Select>
-              </Col>
-            </Row>
+            {this.state.scope !== "vendor" && (
+              <Row align={"top"} justify={"end"}>
+                <Col md={21}>
+                  <div className="list-head search-box"></div>
+                </Col>
+                <Col md={3}>
+                  <Select
+                    style={{
+                      width: "100%",
+                    }}
+                    className="right  px-0"
+                    bordered={false}
+                    size="large"
+                    suffixIcon={<CaretDownOutlined />}
+                    placeholder="All Vendors"
+                    onChange={this.onVendorChange}
+                  >
+                    <Option value="">All Vendors</Option>
+                    {this.state.suppliers?.map((p) => {
+                      return (
+                        <>
+                          <Option value={p.supplier_name}>
+                            {p.supplier_name}
+                          </Option>
+                        </>
+                      );
+                    })}
+                  </Select>
+                </Col>
+              </Row>
+            )}
           </div>
           <div className="table-wrapper">
             {this.state.base_currency ? (

@@ -1,13 +1,22 @@
 import React, { Component } from "react";
-import { Button, Modal, Input, Form, Row, Col, Spin,
-  DatePicker,Dropdown } from "antd";
+import {
+  Button,
+  Modal,
+  Input,
+  Form,
+  Row,
+  Col,
+  Spin,
+  DatePicker,
+  Dropdown,
+} from "antd";
 import axios from "axios";
 import {
   DeleteOutlined,
   EditOutlined,
   LoadingOutlined,
   DownloadOutlined,
-  ExclamationCircleFilled
+  ExclamationCircleFilled,
 } from "@ant-design/icons";
 
 import toast, { Toaster } from "react-hot-toast";
@@ -19,8 +28,6 @@ import { API } from "../../utitlties";
 import moment from "moment";
 const { confirm } = Modal;
 
-
-
 class DeliveryTab extends Component {
   constructor(props) {
     super(props);
@@ -31,8 +38,8 @@ class DeliveryTab extends Component {
       loading: true,
       edit_delivery_modal: false,
       delivery_to_edit: null,
-      entity_name:this.props.entity_name,
-      entity_id:this.props.entity_id,
+      entity_name: this.props.entity_name,
+      entity_id: this.props.entity_id,
       delivery_to_file: null,
       add_file_modal: false,
       contracts_total_value: parseFloat(
@@ -45,6 +52,10 @@ class DeliveryTab extends Component {
         this.props.received_payment_total
       ).toFixed(2),
       _currency: this.props?._currency,
+
+      shared: this.props.shared,
+      scope: this.props.scope,
+      permission: this.props.permission,
     };
   }
 
@@ -60,14 +71,14 @@ class DeliveryTab extends Component {
       });
     });
   }
-  
+
   deleteModal = () => {
     confirm({
       title: `Do you Want to delete ${this.state.delivery_to_delete?.referance} Delivery? `,
       icon: <ExclamationCircleFilled />,
       onOk: () => {
         const id = this.state.delivery_to_delete?.id;
-      this.handleDeleteDelivery(id)
+        this.handleDeleteDelivery(id);
       },
       onCancel() {
         console.log("Cancel");
@@ -109,23 +120,18 @@ class DeliveryTab extends Component {
       add_delivery_modal: true,
     });
   };
-
-  
+ 
   items = [
     {
       key: "1",
       label: (
-        <div
-        className="menu-download-item"
-        >
-          <span>
-             With EX.Rate
-          </span>
-          <a  href={`${API}export-sales/${this.props.id}`}>
-          <SiMicrosoftexcel />
+        <div className="menu-download-item">
+          <span>With EX.Rate</span>
+          <a href={`${API}export-sales/${this.props.id}`}>
+            <SiMicrosoftexcel />
           </a>
-          <a  href={`${API}sales-pdf/${this.props.id}`}>
-          <FaFilePdf />
+          <a href={`${API}sales-pdf/${this.props.id}`}>
+            <FaFilePdf />
           </a>
         </div>
       ),
@@ -133,18 +139,30 @@ class DeliveryTab extends Component {
     {
       key: "2",
       label: (
-       
-        <div
-        className="menu-download-item"
-        >
-          <span>
-            Without EX.Rate
-          </span>
-          <a  href={`${API}export-salesw/${this.props.id}`}>
-          <SiMicrosoftexcel />
+        <div className="menu-download-item">
+          <span>Without EX.Rate</span>
+          <a href={`${API}export-salesw/${this.props.id}`}>
+            <SiMicrosoftexcel />
           </a>
-          <a  href={`${API}sales-pdfw/${this.props.id}`}>
-          <FaFilePdf />
+          <a href={`${API}sales-pdfw/${this.props.id}`}>
+            <FaFilePdf />
+          </a>
+        </div>
+      ),
+    },
+  ];
+
+  items_without_ex = [
+    {
+      key: "2",
+      label: (
+        <div className="menu-download-item">
+          <span>Without EX.Rate</span>
+          <a href={`${API}export-salesw/${this.props.id}`}>
+            <SiMicrosoftexcel />
+          </a>
+          <a href={`${API}sales-pdfw/${this.props.id}`}>
+            <FaFilePdf />
           </a>
         </div>
       ),
@@ -214,7 +232,6 @@ class DeliveryTab extends Component {
     });
   };
   editDeliveryFinish = (values) => {
-
     values["value"] = values.value?.replaceAll(",", "");
     console.log(values);
     console.log(this.state.delivery_to_edit);
@@ -303,11 +320,15 @@ class DeliveryTab extends Component {
               />
               <div className="btns-actions">
                 <button>
-                <Dropdown
-                  overlayClassName="download-tables-menu"
-                   placement="bottomLeft"
+                  <Dropdown
+                    overlayClassName="download-tables-menu"
+                    placement="bottomLeft"
                     menu={{
-                      items: this.items,
+                      // items: this.items,
+                      items:
+                        this.state.scope == "sales_without_ex"
+                          ? this.items_without_ex
+                          : this.items,
                     }}
                   >
                     <a onClick={(e) => e.preventDefault()}>
@@ -319,9 +340,14 @@ class DeliveryTab extends Component {
                   </Dropdown>
                 </button>
 
-                <button onClick={this.openDeliveryAddModal}>
+                {/* <button onClick={this.openDeliveryAddModal}>
                   Add Delivery +
-                </button>
+                </button> */}
+                {(!this.state.shared || this.state.permission == "write") && (
+                  <button onClick={this.openDeliveryAddModal}>
+                    Add Delivery +
+                  </button>
+                )}
               </div>
               <div>
                 <div className="pom-table">
@@ -355,7 +381,7 @@ class DeliveryTab extends Component {
                                         {
                                           row_index: index,
                                           delivery_to_edit: d,
-                                          edited_loading_date:d?.loading_date
+                                          edited_loading_date: d?.loading_date,
                                         },
                                         () => {
                                           this.setState({
@@ -370,11 +396,14 @@ class DeliveryTab extends Component {
                                   <DeleteOutlined
                                     onClick={() =>
                                       // this.handleDeleteDelivery(d.id)
-                                      this.setState({
-                                        delivery_to_delete:d
-                                      },()=>{
-                                        this.deleteModal()
-                                      })
+                                      this.setState(
+                                        {
+                                          delivery_to_delete: d,
+                                        },
+                                        () => {
+                                          this.deleteModal();
+                                        }
+                                      )
                                     }
                                   />
                                 </Col>
@@ -449,35 +478,40 @@ class DeliveryTab extends Component {
               >
                 <p className="modal-header">Add Delivery</p>
                 <Form onFinish={this.onFinish} size="large" layout="vertical">
-                  <Form.Item name="referance" label="Referance"
-                  
-                  rules={[
-                    {
-                      required: true,
-                      message: "Referance is required!",
-                    },
-                  ]}
+                  <Form.Item
+                    name="referance"
+                    label="Referance"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Referance is required!",
+                      },
+                    ]}
                   >
                     <Input placeholder="input referance" />
                   </Form.Item>
 
-                  <Form.Item label="Commercial No" name="ci_no"
-                   rules={[
-                    {
-                      required: true,
-                      message: "Commercial Number is required!",
-                    },
-                  ]}
+                  <Form.Item
+                    label="Commercial No"
+                    name="ci_no"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Commercial Number is required!",
+                      },
+                    ]}
                   >
                     <Input placeholder="input placeholder" />
                   </Form.Item>
-                  <Form.Item label="Value" name="value"
-                   rules={[
-                    {
-                      required: true,
-                      message: "Value is required!",
-                    },
-                  ]}
+                  <Form.Item
+                    label="Value"
+                    name="value"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Value is required!",
+                      },
+                    ]}
                   >
                     <Input placeholder="Value" />
                   </Form.Item>

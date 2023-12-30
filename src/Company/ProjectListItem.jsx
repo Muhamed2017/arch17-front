@@ -4,7 +4,7 @@ import "./pom.css";
 import axios from "axios";
 import { LoadingOutlined } from "@ant-design/icons";
 
-import { API, POM_SHARE_TYPES } from "../utitlties";
+import { API, POM_SHARE_TYPES, email_format } from "../utitlties";
 import {
   Spin,
   Row,
@@ -43,6 +43,8 @@ class ProjecLisItem extends Component {
       received_payment_total: 0,
       currency: null,
       suppliers_options: [],
+      vendors: [],
+      searching: false,
       company_id: this.props.company_id,
       entity_name: this.props.entity_name,
       entity_id: this.props.entity_id,
@@ -51,6 +53,11 @@ class ProjecLisItem extends Component {
       share_modal: false,
       shared_with: [],
       shared_with_modal: false,
+      shared: this.props.shared,
+      scope: this.props.scope,
+      permission: this.props.permission,
+      vendor_name: this.props.vendor_name,
+      vendor_id: this.props.vendor_id,
     };
   }
 
@@ -71,26 +78,73 @@ class ProjecLisItem extends Component {
   };
 
   onShareFinish = (values) => {
-    console.log(this.state.p_id);
-    console.log(this.state.selected_entity);
-    console.log(this.state.selected_entity_id);
-    console.log(this.state.selected_entity_name);
-    console.log(this.state.selected_entity_type);
-    console.log(values);
-
     const fd = new FormData();
-    fd.append("share_for_type", this.state.share_for_type);
-    fd.append("share_for_id", this.state.share_for_id);
+    fd.append("share_for_type", this.state.selected_entity_type);
+    fd.append("share_for_id", this.state.selected_entity_id);
+    fd.append("manageable_email", this.state.selected_entity_email);
+    fd.append("manageable_profile", this.state.selected_entity_profile);
+    fd.append("manageable_country", this.state.selected_entity_country);
+    fd.append("manageable_city", this.state.selected_entity_city);
+    fd.append("manageable_phone", this.state.selected_entity_phone);
+    fd.append("manageable_name", this.state.selected_entity_name);
     fd.append("projectlist_id", this.state.p_id);
-    fd.append("sharer_type", this.state.entity_name);
+
+    if (this.state.entity_name === "user") {
+      fd.append("sharer_type", "People");
+    } else {
+      fd.append("sharer_type", "Company");
+    }
     fd.append("sharer_id", this.state.entity_id);
     fd.append("permission", values.permission);
+    if (Number.isInteger(values.scope)) {
+      let index = this.state.vendors?.findIndex((v) => v.id == values.scope);
+      let vendor = this.state.vendors[index] ?? {};
+      fd.append("vendor_name", vendor?.name);
+      fd.append("vendor_id", vendor?.id);
+      values["scope"] = "vendor";
+    }
+
     fd.append("scope", values.scope);
-    console.log(fd);
+    if (
+      email_format.test(this.state.selected_entity_name) 
+      && !this.state.selected_entity
+    ) {
+      this.sendShareInvitation(this.state.selected_entity_name);
+      console.log("EMAIL NOT REGISTERED");
+      console.log(this.state.selected_entity_name)
+    } else {
+      axios.post(`${API}add-share/${this.state.p_id}`, fd).then((response) => {
+        console.log(response);
+        this.setState({
+          share_modal: false,
+        });
+      });
+    }
   };
   addShareValuesChange = (changedValues, allValues) => {
     console.log(allValues);
   };
+
+  sendShareInvitation=(email)=>{
+    const fd=new FormData()
+    const {name,start_date,client_name,pi_ci}=this.state.project
+    fd.append('email',email)
+    fd.append('project_name',name)
+    fd.append('client_name',client_name)
+    fd.append('project_pi_ci',pi_ci)
+    fd.append('project_date',start_date)
+    fd.append('owner_type',this.state.entity_name)
+    fd.append('owner_name',"Lanbs")
+    fd.append('owner_id',this.state.entity_id)
+    axios.post(`${API}share-invite`,fd).then((response)=>{
+      console.log(response)
+      this.setState({
+        selected_entity_name:"",
+        share_modal:false,
+        // selected_entity:null
+      })
+    })
+  }
 
   handleSearchForShare = (e) => {
     console.log(e.target.value);
@@ -100,16 +154,30 @@ class ProjecLisItem extends Component {
       selected_entity: null,
     });
     if (keyword.length > 0) {
+      this.setState({
+        searching: true,
+      });
       axios.get(`${API}sshare/${keyword}`).then((response) => {
         console.log(response);
         this.setState({
           search_result_companies: response.data.companies,
           search_result_users: response.data.users,
+          searching: false,
         });
+      });
+    } else {
+      this.setState({
+        search_result_companies: [],
+        search_result_users: [],
+        selected_entity: null,
       });
     }
   };
   componentDidMount() {
+    console.log(this.props.shared);
+    console.log(this.props.scope);
+    console.log(this.props.permission);
+
     axios.get(`${API}get-projectlist/${this.state.p_id}`).then((response) => {
       this.setState({
         project: response.data.project,
@@ -127,12 +195,14 @@ class ProjecLisItem extends Component {
         po_deliveries: response.data.po_deliveries,
         has_poinvoice_tab: response.data.has_poinvoice_tab,
         budget: response.data.project?.budget,
+        vendors: response.data?.suppliers_options,
       });
     });
   }
 
   render() {
-    const { share_modal, shared_with_modal } = this.state;
+    const { share_modal, shared_with_modal, shared, scope } = this.state;
+
     return (
       <>
         {this.state.loading ? (
@@ -174,88 +244,188 @@ class ProjecLisItem extends Component {
                   </div>
                 </Col>
                 <Col md={12}>
-                  <div className="icons">
-                    <span>
-                      <AiOutlineDownload />
-                    </span>
-                    <span className="pointer" disabled="disabled">
-                      <IoIosShareAlt
+                  {!this.state.shared && (
+                    <>
+                      <div className="icons">
+                        <span>
+                          <AiOutlineDownload />
+                        </span>
+                        <span className="pointer" disabled="disabled">
+                          <IoIosShareAlt
+                            onClick={() => {
+                              this.setState({ share_modal: true });
+                            }}
+                          />
+                        </span>
+                      </div>
+                      <p
+                        className="text-right pointer light-text py-1"
+                        disabled={true}
                         onClick={() => {
-                          this.setState({ share_modal: true });
+                          this.setState({
+                            shared_with_modal: true,
+                          });
                         }}
-                      />
-                    </span>
-                  </div>
-                  <p
-                    className="text-right pointer light-text py-1"
-                    disabled={true}
-                    onClick={() => {
-                      this.setState({
-                        shared_with_modal: true,
-                      });
-                    }}
-                  >
-                    Shared With List
-                  </p>
+                      >
+                        Shared With List
+                      </p>
+                    </>
+                  )}
                 </Col>
               </Row>
               <div className="tabs-wrapper mt-5">
                 <Tabs>
                   <TabList>
-                    {this.state.project?.business_type !== "Purchases Only" && (
-                      <Tab>Sales</Tab>
+                    {this.state.shared ? (
+                      <>
+                        {this.state.project?.business_type !==
+                          "Purchases Only" &&
+                          (scope == "all" ||
+                            scope == "sales_with_ex" ||
+                            scope == "sales_without_ex") && <Tab>Sales</Tab>}
+                      </>
+                    ) : (
+                      <>
+                        {this.state.project?.business_type !==
+                          "Purchases Only" && <Tab>Sales</Tab>}
+                      </>
                     )}
-                    {this.state.project?.business_type !== "Sales Only" && (
+                    {shared ? (
+                      <>
+                        {this.state.project?.business_type !== "Sales Only" &&
+                          (scope == "all" ||
+                            scope == "purchases" ||
+                            scope == "poinvoices") && <Tab>Purchases</Tab>}
+                      </>
+                    ) : (
+                      <>
+                        {this.state.project?.business_type !== "Sales Only" && (
+                          <Tab>Purchases</Tab>
+                        )}
+                      </>
+                    )}
+                    {/* {this.state.project?.business_type !== "Sales Only" && (
                       <Tab>Purchases</Tab>
-                    )}
-                    <Tab>Summery</Tab>
+                    )} */}
+                    {(!shared || scope == "all") && <Tab>Summery</Tab>}
                   </TabList>
 
-                  {this.state.project?.business_type !== "Purchases Only" && (
-                    <TabPanel>
-                      <SalesTab
-                        id={this.state.p_id}
-                        _currency={this.state.project?.currency}
-                        deliveries_total_value={
-                          this.state.deliveries_total_value
-                        }
-                        contracts_total_value={this.state.contracts_total_value}
-                        received_payment_total={
-                          this.state.received_payment_total
-                        }
-                        company_id={this.state.company_id}
-                        entity_name={this.state.entity_name}
-                        entity_id={this.state.entity_id}
-                        base_currency={this.state.project?.base_currency}
-                      />
-                    </TabPanel>
+                  {this.state.shared ? (
+                    <>
+                      {this.state.project?.business_type !== "Purchases Only" &&
+                        (scope == "all" ||
+                          scope == "sales_with_ex" ||
+                          scope == "sales_without_ex") && (
+                          <TabPanel>
+                            <SalesTab
+                              id={this.state.p_id}
+                              _currency={this.state.project?.currency}
+                              deliveries_total_value={
+                                this.state.deliveries_total_value
+                              }
+                              contracts_total_value={
+                                this.state.contracts_total_value
+                              }
+                              received_payment_total={
+                                this.state.received_payment_total
+                              }
+                              company_id={this.state.company_id}
+                              entity_name={this.state.entity_name}
+                              entity_id={this.state.entity_id}
+                              base_currency={this.state.project?.base_currency}
+                              shared={this.state.shared}
+                              scope={this.state.scope}
+                              permission={this.state.permission}
+                            />
+                          </TabPanel>
+                        )}
+                    </>
+                  ) : (
+                    <>
+                      {this.state.project?.business_type !==
+                        "Purchases Only" && (
+                        <TabPanel>
+                          <SalesTab
+                            id={this.state.p_id}
+                            _currency={this.state.project?.currency}
+                            deliveries_total_value={
+                              this.state.deliveries_total_value
+                            }
+                            contracts_total_value={
+                              this.state.contracts_total_value
+                            }
+                            received_payment_total={
+                              this.state.received_payment_total
+                            }
+                            company_id={this.state.company_id}
+                            entity_name={this.state.entity_name}
+                            entity_id={this.state.entity_id}
+                            base_currency={this.state.project?.base_currency}
+                          />
+                        </TabPanel>
+                      )}
+                    </>
                   )}
-                  {this.state.project?.business_type !== "Sales Only" && (
+                  {shared ? (
+                    <>
+                      {this.state.project?.business_type !== "Sales Only" &&
+                        (scope == "all" ||
+                          scope == "purchases" ||
+                          scope == "vendor" ||
+                          scope == "poinvoices") && (
+                          <TabPanel>
+                            <PurchasesTab
+                              contract_currency={this.state.currency}
+                              base_currency={this.state.project?.base_currency}
+                              project_id={this.state.p_id}
+                              changeTotalSupplirs={this.changeTotalSupplirs}
+                              company_id={this.state.company_id}
+                              entity_name={this.state.entity_name}
+                              entity_id={this.state.entity_id}
+                              suppliers_options={this.state.suppliers_options}
+                              po_deliveries={this.state.po_deliveries}
+                              has_poinvoice_tab={this.state.has_poinvoice_tab}
+                              shared={this.state.shared}
+                              scope={this.state.scope}
+                              permission={this.state.permission}
+                              vendor_id={this.state.vendor_id}
+                              vendor_name={this.state.vendor_name}
+                            />
+                          </TabPanel>
+                        )}
+                    </>
+                  ) : (
+                    <>
+                      {this.state.project?.business_type !== "Sales Only" && (
+                        <TabPanel>
+                          <PurchasesTab
+                            contract_currency={this.state.currency}
+                            base_currency={this.state.project?.base_currency}
+                            project_id={this.state.p_id}
+                            changeTotalSupplirs={this.changeTotalSupplirs}
+                            company_id={this.state.company_id}
+                            entity_name={this.state.entity_name}
+                            entity_id={this.state.entity_id}
+                            suppliers_options={this.state.suppliers_options}
+                            po_deliveries={this.state.po_deliveries}
+                            has_poinvoice_tab={this.state.has_poinvoice_tab}
+                          />
+                        </TabPanel>
+                      )}
+                    </>
+                  )}
+                  {(!shared || scope == "all") && (
                     <TabPanel>
-                      <PurchasesTab
-                        contract_currency={this.state.currency}
-                        base_currency={this.state.project?.base_currency}
+                      <ProjectSummaryTab
                         project_id={this.state.p_id}
-                        changeTotalSupplirs={this.changeTotalSupplirs}
-                        company_id={this.state.company_id}
+                        base_currency={this.state.project?.base_currency}
+                        currency={this.state.project?.currency}
+                        budget={this.state.project?.budget}
                         entity_name={this.state.entity_name}
                         entity_id={this.state.entity_id}
-                        suppliers_options={this.state.suppliers_options}
-                        po_deliveries={this.state.po_deliveries}
-                        has_poinvoice_tab={this.state.has_poinvoice_tab}
                       />
                     </TabPanel>
                   )}
-                  <TabPanel>
-                    <ProjectSummaryTab
-                      project_id={this.state.p_id}
-                      base_currency={this.state.project?.base_currency}
-                      currency={this.state.project?.currency}
-                      budget={this.state.project?.budget}
-                      entity_name={this.state.entity_name}
-                      entity_id={this.state.entity_id}
-                    />
-                  </TabPanel>
                 </Tabs>
               </div>
             </div>
@@ -263,7 +433,7 @@ class ProjecLisItem extends Component {
         )}
 
         <Modal
-          open={!share_modal}
+          open={share_modal}
           destroyOnClose
           className="file-modal border-radius"
           onCancel={() => {
@@ -290,24 +460,50 @@ class ProjecLisItem extends Component {
                 placeholder="E-mail / Name"
                 value={this.state.selected_entity_name}
                 onChange={this.handleSearchForShare}
+                suffix={this.state.searching && <LoadingOutlined />}
+                allowClear
+                autoFocus
               />
-              {this.state.search_result_companies?.length+this.state.search_result_users?.length > 0 &&
+              {this.state.search_result_companies?.length +
+                this.state.search_result_users?.length >
+                0 &&
                 !this.state.selected_entity && (
                   <div className="list-search absolute">
                     {this.state.search_result_companies?.map((r) => {
                       return (
                         <div
-                          className="result-item"
+                          className="result-item pointer"
                           onClick={() => {
                             this.setState({
                               selected_entity: r,
-                              selected_entity_type:"company",
+                              selected_entity_type: "company",
                               selected_entity_name: r?.name,
                               selected_entity_id: r?.id,
+                              selected_entity_email: r?.email,
+                              selected_entity_country: r?.country,
+                              selected_entity_city: r?.city,
+                              selected_entity_profile: r?.profile,
+                              selected_entity_phone: `${r?.phone}`,
                             });
                           }}
                         >
-                          {r?.name}
+                          <div
+                            className="row-avatar"
+                            style={{
+                              backgroundImage: `url(${r?.profile})`,
+                            }}
+                          >
+                            {r?.profile && r?.profile?.length > 6
+                              ? ""
+                              : r?.name[0]}
+                          </div>
+                          <div className="row-text">
+                            <p className="name"> {r?.name}</p>
+                            <p className="email">
+                              {r?.email || r?.country || r?.phone}
+                            </p>
+                            <p className="type">Company</p>
+                          </div>
                         </div>
                       );
                     })}
@@ -315,17 +511,36 @@ class ProjecLisItem extends Component {
                     {this.state.search_result_users?.map((r) => {
                       return (
                         <div
-                          className="result-item"
+                          className="result-item pointer"
                           onClick={() => {
                             this.setState({
                               selected_entity: r,
-                              selected_entity_type:"user",
+                              selected_entity_type: "user",
                               selected_entity_name: r?.displayName,
                               selected_entity_id: r?.id,
+                              selected_entity_email: r?.email,
+                              selected_entity_country: r?.country,
+                              selected_entity_city: r?.city,
+                              selected_entity_phone: `${r?.phoneCode}${r?.phoneNumber}`,
+                              selected_entity_profile: r?.photoURL,
                             });
                           }}
                         >
-                          {r?.displayName}
+                          <div
+                            className="row-avatar"
+                            style={{
+                              backgroundImage: `url(${r?.photoURL})`,
+                            }}
+                          >
+                            {r?.photoURL && r?.photoURL?.length > 6
+                              ? ""
+                              : r?.displayName[0]}
+                          </div>
+                          <div className="row-text">
+                            <p className="name">{r?.displayName}</p>
+                            <p className="email">{r?.email}</p>
+                            <p className="type">People</p>
+                          </div>
                         </div>
                       );
                     })}
@@ -343,15 +558,26 @@ class ProjecLisItem extends Component {
                 style={{
                   fontSize: "13px",
                 }}
+                onSelect={(e) => {
+                  console.log(e);
+                }}
               >
                 {POM_SHARE_TYPES.map((t) => {
                   return <Option value={t.value}>{t.label}</Option>;
+                })}
+                <Option disabled={true}>Vendor</Option>
+                {this.state.vendors?.map((vendor) => {
+                  return (
+                    <Option value={vendor.id} type="vendor">
+                      {vendor.name}
+                    </Option>
+                  );
                 })}
               </Select>
             </Form.Item>
             <Form.Item name="permission">
               <Radio.Group>
-                <Radio value="edit">Can Edit</Radio>
+                <Radio value="write">Can Edit</Radio>
                 <Radio value="read">View Only</Radio>
               </Radio.Group>
             </Form.Item>
@@ -376,7 +602,11 @@ class ProjecLisItem extends Component {
           closable
           footer={false}
         >
-          <SharedWithPOM />
+          <SharedWithPOM
+            entity_name={this.state.entity_name}
+            entity_id={this.state.entity_id}
+            project_id={this.state.p_id}
+          />
         </Modal>
       </>
     );

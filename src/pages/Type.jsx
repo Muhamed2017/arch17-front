@@ -7,11 +7,7 @@ import axios from "axios";
 import { LoadingOutlined } from "@ant-design/icons";
 
 import { Row, Col, Modal, Tooltip, Select, Spin } from "antd";
-import slide1 from "./../slide1.jpg";
-import slide2 from "./../slide2.jpg";
-import slide3 from "./../slide3.jpg";
-import slide4 from "./../slide4.jpg";
-import slide5 from "./../slide1.jpg";
+
 import { Link } from "react-router-dom";
 import { API } from "./../utitlties";
 import SaveToCollection from "./../components/Modals/SaveToCollection";
@@ -26,7 +22,6 @@ class Type extends Component {
  constructor(props) {
   super(props);
   this.state = {
-   pics: [slide1, slide3, slide2, slide4, slide5],
    save_to_collection_modal: false,
    to_save_cover: null,
    to_save_productId: null,

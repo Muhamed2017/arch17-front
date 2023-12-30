@@ -17,7 +17,7 @@ import "react-notifications-component/dist/theme.css";
 import { Form, Col, Row, Modal, Button } from "react-bootstrap";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
-import slide4 from "../../../src/slide4.jpg";
+// import slide4 from "../../../src/slide4.jpg";
 import { connect } from "react-redux";
 import axios from "axios";
 import { compressImage } from "./OptionsPrice";
@@ -105,7 +105,7 @@ class OptionRow extends Component {
   }
   const reader = new FileReader();
   reader.onload = () => {
-   this.setState({ src: slide4 });
+  //  this.setState({ src: slide4 });
   };
   reader.readAsDataURL(files[0]);
  }

@@ -3,6 +3,7 @@ import { Row, Col, Modal } from "antd";
 import ClientList from "./ClientList";
 import SupplierList from "./SupplierList";
 import ProjectList from "./ProjectList";
+import SharedProjectsWithMe from "./SharedProjectsWithMe";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 
 import "./pom.css";
@@ -38,6 +39,7 @@ class POM extends Component {
                   <Tab>Customers</Tab>
                   <Tab>Vendors</Tab>
                   <Tab>Projects</Tab>
+                  <Tab>Shared With Me</Tab>
                 </TabList>
                 <TabPanel>
                   <POMOverview
@@ -75,7 +77,13 @@ class POM extends Component {
                 entity_name={this.state.entity_name}
                 entity_id={this.state.entity_id}
 
-                  //  entity_id={this.state.company_id}
+
+                  />
+                </TabPanel>
+                <TabPanel>
+                  <SharedProjectsWithMe
+                   entity_id={this.state.entity_id}
+                   entity_name={this.state.entity_name}
                   />
                 </TabPanel>
                 

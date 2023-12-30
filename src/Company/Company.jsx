@@ -657,9 +657,7 @@ class Company extends Component {
               <>{this.state.blogs?.length > 0 && <Tab>Blogs</Tab>}</>
              )}
              {this.state.isOwner ? (
-              <>
                <Tab>Team</Tab>
-              </>
              ) : (
               <>
                {this.state.company?.members?.length > 0 && (

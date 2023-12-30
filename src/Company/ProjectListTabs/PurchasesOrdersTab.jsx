@@ -78,6 +78,11 @@ class PurchasesOrdersTab extends Component {
       exchange_rates: {},
       pos: [],
       po_deliveries: this.props.po_deliveries,
+      shared: this.props.shared,
+      scope: this.props.scope,
+      permission: this.props.permission,
+      vendor_id: this.props.vendor_id,
+      vendor_name: this.props.vendor_name,
     };
   }
   componentDidMount() {
@@ -91,91 +96,116 @@ class PurchasesOrdersTab extends Component {
   getData = async () => {
     let endpoint;
 
-    if(this.state.entity_name==='company'){
-      endpoint=`suppliers-pos/${this.state.entity_id}/${this.state.project_id}`
-    }else{
-    
-      endpoint=`user-suppliers-pos/${this.state.entity_id}/${this.state.project_id}`
+    if (this.state.entity_name === "company") {
+      endpoint = `suppliers-pos/${this.state.entity_id}/${this.state.project_id}`;
+    } else {
+      endpoint = `user-suppliers-pos/${this.state.entity_id}/${this.state.project_id}`;
     }
-    await axios
-      .get(
-        // `${API}suppliers-pos/${this.state.company_id}/${this.state.project_id}`
-        `${API}${endpoint}`
-      )
-      .then((response) => {
-        console.log(response);
-        this.setState(
-          {
-            suppliers_options: response.data.suppliers_options,
-            pos_sup_rows: Object.keys(response.data.suppliers_pos),
-            pos_rows: Object.values(response.data.suppliers_pos),
-            payments_rows: response.data.payments_pos,
-            pos: response.data.pos,
-            payments: response.data.payments,
-            pos_currencies: response.data.pos_currencies,
-            payments_currencies: response.data.payments_currencies,
-            po_deliveries_values: Object.values(this.state.po_deliveries) ?? [],
-            purchases_with_exchange: response.data.pos?.reduce(
-              (accumulator, object) => {
-                return (
-                  parseFloat(accumulator) +
-                  parseFloat(object.total) * parseFloat(object.exchange_rate)
-                );
-              },
-              0
-            ),
-            services: Object.values(response.data.suppliers_pos)
-              ?.map((s) => {
-                return s?.map((ss) => {
-                  if (ss.items && ss.items?.length > 0) {
-                    return ss.items[0];
-                  }
-                });
-              })
-              .flat(),
-          },
-          () => {
-            this.updateTotalSuppliers(this.state.pos_rows);
-            console.log(this.state.services_filter_options);
-            this.setState(
-              {
-                services_filter_options: [...new Set(this.state.services)],
-                total_paids: this.state.pos_sup_rows?.map((p) => {
-                  // return this.formatNumbers(
-                  return parseFloat(
-                    this.getKeyValue(p, this.state.payments_rows, "value")
+    await axios.get(`${API}${endpoint}`).then((response) => {
+      console.log(response);
+      this.setState(
+        {
+          suppliers_options: response.data.suppliers_options,
+          // pos_sup_rows: Object.keys(response.data.suppliers_pos),
+          pos_sup_rows:
+            this.state.scope === "vendor"
+              ? Object.keys(response.data.suppliers_pos)?.filter((p) => {
+                  return p === this.state.vendor_name;
+                })
+              : Object.keys(response.data.suppliers_pos),
+          // pos_rows: Object.values(response.data.suppliers_pos),
+          pos_rows:
+            this.state.scope === "vendor"
+              ? Object.values(response.data.suppliers_pos)?.filter((v) => {
+                  return (
+                    v[0]?.supplier_name === this.state.vendor_name &&
+                    v[0]?.supplier_id === this.state.vendor_id
                   );
-                  // );
-                }),
-                total_currency_paids: Object.values(
-                  this.state.pos_currencies
-                )?.map((c, index) => {
-                  return parseFloat(
+                })
+              : Object.values(response.data.suppliers_pos),
+          payments_rows: response.data.payments_pos,
+          pos: response.data.pos,
+          payments: response.data.payments,
+          pos_currencies: response.data.pos_currencies,
+          payments_currencies: response.data.payments_currencies,
+          po_deliveries_values: Object.values(this.state.po_deliveries) ?? [],
+          purchases_with_exchange: response.data.pos?.reduce(
+            (accumulator, object) => {
+              return (
+                parseFloat(accumulator) +
+                parseFloat(object.total) * parseFloat(object.exchange_rate)
+              );
+            },
+            0
+          ),
+          services: Object.values(response.data.suppliers_pos)
+            ?.map((s) => {
+              return s?.map((ss) => {
+                if (ss.items && ss.items?.length > 0) {
+                  return ss.items[0];
+                }
+              });
+            })
+            .flat(),
+        },
+        () => {
+          this.updateTotalSuppliers(this.state.pos_rows);
+          console.log(this.state.services_filter_options);
+          this.setState(
+            {
+              services_filter_options: [...new Set(this.state.services)],
+              total_paids: this.state.pos_sup_rows?.map((p) => {
+                // return this.formatNumbers(
+                return parseFloat(
+                  this.getKeyValue(p, this.state.payments_rows, "value")
+                );
+                // );
+              }),
+              total_currency_paids: Object.values(
+                this.state.pos_currencies
+              )?.map((c, index) => {
+                return parseFloat(
+                  this.getKeyValue(
+                    c[0]?.currency,
+                    this.state.payments_currencies,
+                    "coast"
+                  )
+                );
+              }),
+              total_currency_balances: Object.values(
+                this.state.pos_currencies
+              )?.map((c, index) => {
+                return parseFloat(
+                  c?.reduce((accumulator, object) => {
+                    return parseFloat(accumulator) + parseFloat(object.total);
+                  }, 0) -
                     this.getKeyValue(
                       c[0]?.currency,
                       this.state.payments_currencies,
                       "coast"
                     )
-                  );
-                }),
-                total_currency_balances: Object.values(
-                  this.state.pos_currencies
-                )?.map((c, index) => {
-                  return parseFloat(
-                    c?.reduce((accumulator, object) => {
-                      return parseFloat(accumulator) + parseFloat(object.total);
-                    }, 0) -
-                      this.getKeyValue(
-                        c[0]?.currency,
-                        this.state.payments_currencies,
-                        "coast"
-                      )
-                  );
-                }),
-                purchases_total_with_exchanges_values: Object.keys(
-                  this.state.po_deliveries
-                )?.map((vendor, index) => {
-                  return this.state.pos
+                );
+              }),
+              purchases_total_with_exchanges_values: Object.keys(
+                this.state.po_deliveries
+              )?.map((vendor, index) => {
+                return this.state.pos
+                  ?.filter((p) => {
+                    return p.supplier_name == vendor;
+                  })
+                  .reduce((accumulator, object) => {
+                    return parseFloat(
+                      parseFloat(accumulator) +
+                        parseFloat(object.total) *
+                          parseFloat(object.exchange_rate)
+                    );
+                  }, 0);
+              }),
+              purchases_total_with_exchanges_percentages: Object.keys(
+                this.state.po_deliveries
+              )?.map((vendor, index) => {
+                return (
+                  this.state.pos
                     ?.filter((p) => {
                       return p.supplier_name == vendor;
                     })
@@ -185,77 +215,71 @@ class PurchasesOrdersTab extends Component {
                           parseFloat(object.total) *
                             parseFloat(object.exchange_rate)
                       );
-                    }, 0);
-                }),
-                purchases_total_with_exchanges_percentages: Object.keys(
-                  this.state.po_deliveries
-                )?.map((vendor, index) => {
-                  return (
-                    this.state.pos
-                      ?.filter((p) => {
-                        return p.supplier_name == vendor;
-                      })
-                      .reduce((accumulator, object) => {
+                    }, 0) / this.state.purchases_with_exchange
+                );
+              }),
+              deliveries_percentages: Object.keys(
+                this.state.po_deliveries
+              )?.map((vendor, index) => {
+                return (
+                  (parseFloat(
+                    this.state.po_deliveries_values[index].reduce(
+                      (accumulator, object) => {
                         return parseFloat(
-                          parseFloat(accumulator) +
-                            parseFloat(object.total) *
-                              parseFloat(object.exchange_rate)
+                          parseFloat(accumulator) + parseFloat(object.value)
                         );
-                      }, 0) / this.state.purchases_with_exchange
-                  );
-                }),
-                deliveries_percentages: Object.keys(
-                  this.state.po_deliveries
-                )?.map((vendor, index) => {
-                  return (
+                      },
+                      0
+                    )
+                  ) /
                     (parseFloat(
-                      this.state.po_deliveries_values[index].reduce(
-                        (accumulator, object) => {
-                          return parseFloat(
-                            parseFloat(accumulator) + parseFloat(object.value)
-                          );
-                        },
-                        0
-                      )
-                    ) /
-                      (parseFloat(
-                        this.state.po_deliveries_values[index][0]?.leftp
-                      ) +
-                        parseFloat(
-                          this.state.po_deliveries_values[index].reduce(
-                            (accumulator, object) => {
-                              return parseFloat(
-                                parseFloat(accumulator) +
-                                  parseFloat(object.value)
-                              );
-                            },
-                            0
-                          )
-                        ))) *
-                    (this.state.pos
-                      ?.filter((p) => {
-                        return p.supplier_name == vendor;
-                      })
-                      .reduce((accumulator, object) => {
-                        return parseFloat(
-                          parseFloat(accumulator) +
-                            parseFloat(object.total) *
-                              parseFloat(object.exchange_rate)
-                        );
-                      }, 0) /
-                      this.state.purchases_with_exchange)
-                  );
-                }),
-              },
-              () => {
-                console.log(this.state.total_paids);
-                console.log(this.state.total_currency_paids);
-                console.log(this.state.total_currency_balances);
+                      this.state.po_deliveries_values[index][0]?.leftp
+                    ) +
+                      parseFloat(
+                        this.state.po_deliveries_values[index].reduce(
+                          (accumulator, object) => {
+                            return parseFloat(
+                              parseFloat(accumulator) + parseFloat(object.value)
+                            );
+                          },
+                          0
+                        )
+                      ))) *
+                  (this.state.pos
+                    ?.filter((p) => {
+                      return p.supplier_name == vendor;
+                    })
+                    .reduce((accumulator, object) => {
+                      return parseFloat(
+                        parseFloat(accumulator) +
+                          parseFloat(object.total) *
+                            parseFloat(object.exchange_rate)
+                      );
+                    }, 0) /
+                    this.state.purchases_with_exchange)
+                );
+              }),
+            },
+            () => {
+              console.log(this.state.total_paids);
+              console.log(this.state.total_currency_paids);
+              console.log(this.state.total_currency_balances);
 
-                this.setState(
-                  {
-                    td:
-                      100 *
+              this.setState(
+                {
+                  td:
+                    100 *
+                    this.state.deliveries_percentages?.reduce(
+                      (accumulator, object) => {
+                        return parseFloat(
+                          parseFloat(accumulator) + parseFloat(object)
+                        );
+                      },
+                      0
+                    ),
+                  tl:
+                    100 -
+                    100 *
                       this.state.deliveries_percentages?.reduce(
                         (accumulator, object) => {
                           return parseFloat(
@@ -264,33 +288,22 @@ class PurchasesOrdersTab extends Component {
                         },
                         0
                       ),
-                    tl:
-                      100 -
-                      100 *
-                        this.state.deliveries_percentages?.reduce(
-                          (accumulator, object) => {
-                            return parseFloat(
-                              parseFloat(accumulator) + parseFloat(object)
-                            );
-                          },
-                          0
-                        ),
-                  },
-                  () => {
-                    console.log(this.state.td);
-                    console.log(this.state.tl);
-                  }
-                );
-                console.log(this.state.purchases_with_exchange);
-                console.log(
-                  this.state.purchases_total_with_exchanges_percentages
-                );
-                console.log(this.state.deliveries_percentages);
-              }
-            );
-          }
-        );
-      });
+                },
+                () => {
+                  console.log(this.state.td);
+                  console.log(this.state.tl);
+                }
+              );
+              console.log(this.state.purchases_with_exchange);
+              console.log(
+                this.state.purchases_total_with_exchanges_percentages
+              );
+              console.log(this.state.deliveries_percentages);
+            }
+          );
+        }
+      );
+    });
     console.log(this.state.project_id);
   };
 
@@ -533,9 +546,25 @@ class PurchasesOrdersTab extends Component {
         this.setState({
           supplier_rows: response.data.suppliers,
           loading: false,
-          pos_sup_rows: Object.keys(response.data.suppliers_pos),
-          pos_rows: Object.values(response.data.suppliers_pos),
-          pos_currencies: response.data.pos_currencies,
+          // pos_sup_rows: Object.keys(response.data.suppliers_pos),
+          // pos_rows: Object.values(response.data.suppliers_pos),
+          // pos_currencies: response.data.pos_currencies,
+          // pos_currencies: response.data.pos_currencies,
+          pos_sup_rows:
+            this.state.scope === "vendor"
+              ? Object.keys(response.data.suppliers_pos)?.filter((p) => {
+                  return p === this.state.vendor_name;
+                })
+              : Object.keys(response.data.suppliers_pos),
+          pos_rows:
+            this.state.scope === "vendor"
+              ? Object.values(response.data.suppliers_pos)?.filter((v) => {
+                  return (
+                    v[0]?.supplier_name === this.state.vendor_name &&
+                    v[0]?.supplier_id === this.state.vendor_id
+                  );
+                })
+              : Object.values(response.data.suppliers_pos),
         });
       });
   };
@@ -789,30 +818,54 @@ class PurchasesOrdersTab extends Component {
                       label: (
                         <div>
                           <div className="menu-download-item">
-                            <a
-                              href={`${API}purchases-statement-xls/${
-                                this.state.project_id
-                              }?p=${[this.state.total_paids]}&cb=${
-                                this.state.total_currency_balances
-                              }&cp=${this.state.total_currency_paids}&dvp=${
-                                this.state.td
-                              }&dlp=${this.state.tl}`}
-                            >
-                              <SiMicrosoftexcel />
-                            </a>
+                            {this.state.scope !== "vendor" ? (
+                              <>
+                                <a
+                                  href={`${API}purchases-statement-xls/${
+                                    this.state.project_id
+                                  }?p=${[this.state.total_paids]}&cb=${
+                                    this.state.total_currency_balances
+                                  }&cp=${this.state.total_currency_paids}&dvp=${
+                                    this.state.td
+                                  }&dlp=${this.state.tl}`}
+                                >
+                                  <SiMicrosoftexcel />
+                                </a>
+                              </>
+                            ) : (
+                              <>
+                                <a
+                                  href={`${API}vendor-xls/${this.state.project_id}/${this.state.vendor_id}`}
+                                >
+                                  <SiMicrosoftexcel />
+                                </a>
+                              </>
+                            )}
                           </div>
                           <div className="menu-download-item">
-                            <a
-                              href={`${API}purchases-statement-pdf/${
-                                this.state.project_id
-                              }?p=${[this.state.total_paids]}&cb=${
-                                this.state.total_currency_balances
-                              }&cp=${this.state.total_currency_paids}&dvp=${
-                                this.state.td
-                              }&dlp=${this.state.tl}`}
-                            >
-                              <FaFilePdf />
-                            </a>
+                            {this.state.scope !== "vendor" ? (
+                              <>
+                                <a
+                                  href={`${API}purchases-statement-pdf/${
+                                    this.state.project_id
+                                  }?p=${[this.state.total_paids]}&cb=${
+                                    this.state.total_currency_balances
+                                  }&cp=${this.state.total_currency_paids}&dvp=${
+                                    this.state.td
+                                  }&dlp=${this.state.tl}`}
+                                >
+                                  <FaFilePdf />
+                                </a>
+                              </>
+                            ) : (
+                              <>
+                                <a
+                                  href={`${API}vendor-pdf/${this.state.project_id}/${this.state.vendor_id}`}
+                                >
+                                  <FaFilePdf />
+                                </a>
+                              </>
+                            )}
                           </div>
                         </div>
                       ),
@@ -828,10 +881,11 @@ class PurchasesOrdersTab extends Component {
                 </a>
               </Dropdown>
             </button>
-
-            <button onClick={this.openSupplierListAddModal}>
-              Add Purchase Order +
-            </button>
+            {(!this.state.shared || this.state.permission == "write") && (
+              <button onClick={this.openSupplierListAddModal}>
+                Add Purchase Order +
+              </button>
+            )}
           </div>
           <div className="pom-table pos pos-table">
             <div className="filters pos-tabs">
@@ -957,8 +1011,10 @@ class PurchasesOrdersTab extends Component {
                 <div>Product/Service Type</div>
                 <div>Order NO, Date</div>
                 <div>Referance</div>
-                <div>Totl Value</div>
-                <div>{`EX.R / ${this.state.base_currency}`}</div>
+                <div>Total Value</div>
+                {this.state.scope !== "vendor" && (
+                  <div>{`EX.R / ${this.state.base_currency}`}</div>
+                )}
                 <div>Paid</div>
                 <div>Balance</div>
               </div>
@@ -1041,7 +1097,7 @@ class PurchasesOrdersTab extends Component {
                                     {this.state.pos_rows[index][0]?.currency}
                                   </p>
                                 </div>
-                                <div></div>
+                                {this.state.scope !== "vendor" && <div></div>}
                                 <div>
                                   {this.state.payments_rows[p] ? (
                                     <>
@@ -1154,40 +1210,47 @@ class PurchasesOrdersTab extends Component {
                                           <DownloadOutlined />
                                         </span>
                                       </Col>
-                                      <Col md={8}>
-                                        <EditOutlined
-                                          onClick={() => {
-                                            this.setState(
-                                              {
-                                                po_to_edit: t,
-                                                selectedCurrency: t?.currency,
-                                                subtotal: t?.subtotal,
-                                                total: t?.total,
-                                                vat_tax_value: t?.vat_tax_value,
-                                              },
-                                              () => {
-                                                this.setState({
-                                                  edit_po_modal: true,
-                                                });
-                                              }
-                                            );
-                                          }}
-                                        />
-                                      </Col>
-                                      <Col md={8}>
-                                        <DeleteOutlined
-                                          onClick={() => {
-                                            this.setState(
-                                              {
-                                                po_to_delete: t,
-                                              },
-                                              () => {
-                                                this.deleteModal();
-                                              }
-                                            );
-                                          }}
-                                        />
-                                      </Col>
+                                      {(this.state.scope !== "vendor" ||
+                                        this.state.permission === "write") && (
+                                        <>
+                                          <Col md={6}>
+                                            <EditOutlined
+                                              onClick={() => {
+                                                this.setState(
+                                                  {
+                                                    po_to_edit: t,
+                                                    subtotal: t?.subtotal,
+                                                    total: t?.total,
+                                                    vat_tax_value:
+                                                      t?.vat_tax_value,
+                                                    selectedCurrency:
+                                                      t?.currency,
+                                                  },
+                                                  () => {
+                                                    this.setState({
+                                                      edit_po_modal: true,
+                                                    });
+                                                  }
+                                                );
+                                              }}
+                                            />
+                                          </Col>
+                                          <Col md={6}>
+                                            <DeleteOutlined
+                                              onClick={() => {
+                                                this.setState(
+                                                  {
+                                                    po_to_delete: t,
+                                                  },
+                                                  () => {
+                                                    this.deleteModal();
+                                                  }
+                                                );
+                                              }}
+                                            />
+                                          </Col>
+                                        </>
+                                      )}
                                     </Row>
                                   </div>
                                   <div></div>
@@ -1213,9 +1276,11 @@ class PurchasesOrdersTab extends Component {
                                       {this.state.pos_rows[index][0]?.currency}
                                     </p>
                                   </div>
-                                  <div>
-                                    <p className="main">{t.exchange_rate}</p>
-                                  </div>
+                                  {this.state.scope !== "vendor" && (
+                                    <div>
+                                      <p className="main">{t.exchange_rate}</p>
+                                    </div>
+                                  )}
 
                                   <div></div>
                                   <div></div>
@@ -1250,40 +1315,45 @@ class PurchasesOrdersTab extends Component {
                                       </span>
                                     </a>
                                   </Col>
-                                  <Col md={6}>
-                                    <EditOutlined
-                                      onClick={() => {
-                                        this.setState(
-                                          {
-                                            po_to_edit: o,
-                                            subtotal: o?.subtotal,
-                                            total: o?.total,
-                                            vat_tax_value: o?.vat_tax_value,
-                                            selectedCurrency: o?.currency,
-                                          },
-                                          () => {
-                                            this.setState({
-                                              edit_po_modal: true,
-                                            });
-                                          }
-                                        );
-                                      }}
-                                    />
-                                  </Col>
-                                  <Col md={6}>
-                                    <DeleteOutlined
-                                      onClick={() => {
-                                        this.setState(
-                                          {
-                                            po_to_delete: o,
-                                          },
-                                          () => {
-                                            this.deleteModal();
-                                          }
-                                        );
-                                      }}
-                                    />
-                                  </Col>
+                                  {(this.state.scope !== "vendor" ||
+                                    this.state.permission === "write") && (
+                                    <>
+                                      <Col md={6}>
+                                        <EditOutlined
+                                          onClick={() => {
+                                            this.setState(
+                                              {
+                                                po_to_edit: o,
+                                                subtotal: o?.subtotal,
+                                                total: o?.total,
+                                                vat_tax_value: o?.vat_tax_value,
+                                                selectedCurrency: o?.currency,
+                                              },
+                                              () => {
+                                                this.setState({
+                                                  edit_po_modal: true,
+                                                });
+                                              }
+                                            );
+                                          }}
+                                        />
+                                      </Col>
+                                      <Col md={6}>
+                                        <DeleteOutlined
+                                          onClick={() => {
+                                            this.setState(
+                                              {
+                                                po_to_delete: o,
+                                              },
+                                              () => {
+                                                this.deleteModal();
+                                              }
+                                            );
+                                          }}
+                                        />
+                                      </Col>
+                                    </>
+                                  )}
                                 </Row>
                               </div>
                               <div>
@@ -1322,9 +1392,11 @@ class PurchasesOrdersTab extends Component {
                                   {this.state.pos_rows[index][0]?.currency}
                                 </p>
                               </div>
-                              <div>
-                                <p className="main">{o.exchange_rate}</p>
-                              </div>
+                              {this.state.scope !== "vendor" && (
+                                <div>
+                                  <p className="main">{o.exchange_rate}</p>
+                                </div>
+                              )}
 
                               <div>
                                 {this.state.payments_rows[p] ? (
@@ -1409,193 +1481,184 @@ class PurchasesOrdersTab extends Component {
               })}
             </div>
           </div>
-          {Object.values(this.state.pos_currencies)?.length > 0 && (
-            <div className="pom-table clientlist-table  base-currency">
-              {this.state.base_currency && (
-                <span className="select-label high">Total</span>
-              )}
+          {this.state.scope !== "vendor" && (
+            <>
+              {Object.values(this.state.pos_currencies)?.length > 0 && (
+                <div className="pom-table clientlist-table  base-currency">
+                  {this.state.base_currency && (
+                    <span className="select-label high">Total</span>
+                  )}
 
-              <table>
-                <tr>
-                  <th className="width-50">Currency</th>
-                  <th className="width-130">Purchase Orders Subvalue</th>
-                  <th className="width-80">VAT</th>
-                  <th className="width-100">Purcahse Orders Value</th>
-                  <th className="width-100">Total Paid</th>
-                  <th className="width-250">Total Balance</th>
-                </tr>
-                {Object.values(this.state.pos_currencies)?.map((c, index) => {
-                  return (
+                  <table>
                     <tr>
-                      <td>
-                        <p className="sale">{c[0]?.currency}</p>
-                      </td>
-                      <td>
-                        <p className="main">
-                          {this.formatNumbers(
-                            c?.reduce((accumulator, object) => {
-                              return (
-                                parseFloat(accumulator) +
-                                parseFloat(object.total)
-                              ).toFixed(2);
-                            }, 0) -
-                              c?.reduce((accumulator, object) => {
-                                return (
-                                  parseFloat(accumulator) +
-                                  parseFloat(object.vat_tax_value)
-                                ).toFixed(2);
-                              }, 0)
-                          )}
-                        </p>
-                        <p className="sec">{c[0]?.currency}</p>
-                      </td>
-                      <td>
-                        <p className="main">
-                          {this.formatNumbers(
-                            c?.reduce((accumulator, object) => {
-                              return (
-                                parseFloat(accumulator) +
-                                parseFloat(object.vat_tax_value)
-                              ).toFixed(2);
-                            }, 0)
-                          )}
-                        </p>
-                        <p className="sec">{c[0]?.currency}</p>
-                      </td>
-                      <td>
-                        <p className="main">
-                          {this.formatNumbers(
-                            c?.reduce((accumulator, object) => {
-                              return (
-                                parseFloat(accumulator) +
-                                parseFloat(object.total)
-                              ).toFixed(2);
-                            }, 0)
-                          )}
-                        </p>
-                        <p className="sec">{c[0]?.currency}</p>
-                      </td>
-                      <td>
-                        <p className="main">
-                          {this.formatNumbers(
-                            this.getKeyValue(
-                              c[0]?.currency,
-                              this.state.payments_currencies,
-                              "coast"
-                            )
-                          )}
-                        </p>
-                        <p className="sec">{c[0]?.currency}</p>
-                      </td>
-                      <td>
-                        <p className="main">
-                          {this.formatNumbers(
-                            parseFloat(
-                              c?.reduce((accumulator, object) => {
-                                return (
-                                  parseFloat(accumulator) +
-                                  parseFloat(object.total)
-                                );
-                              }, 0) -
-                                this.getKeyValue(
-                                  c[0]?.currency,
-                                  this.state.payments_currencies,
-                                  "coast"
-                                )
-                            ).toFixed(2)
-                          )}
-                        </p>
-                        <p className="sec">{c[0]?.currency}</p>
-                      </td>
+                      <th className="width-50">Currency</th>
+                      <th className="width-130">Purchase Orders Subvalue</th>
+                      <th className="width-80">VAT</th>
+                      <th className="width-100">Purcahse Orders Value</th>
+                      <th className="width-100">Total Paid</th>
+                      <th className="width-250">Total Balance</th>
                     </tr>
-                  );
-                })}
-                {this.state.base_currency && (
-                  <tr className="border-top-1">
-                    <td>
-                      <p className="sale">Total in</p>
-                      <p className="sec">{this.state.base_currency}</p>
-                    </td>
-                    <td>
-                      <p className="main">
-                        {this.formatNumbers(
-                          parseFloat(
-                            this.state.pos?.reduce((accumulator, object) => {
-                              return (
-                                parseFloat(accumulator) +
-                                parseFloat(object.total) *
-                                  parseFloat(object.exchange_rate)
-                              );
-                            }, 0)
-                          ) -
-                            parseFloat(
+                    {Object.values(this.state.pos_currencies)?.map(
+                      (c, index) => {
+                        return (
+                          <tr>
+                            <td>
+                              <p className="sale">{c[0]?.currency}</p>
+                            </td>
+                            <td>
+                              <p className="main">
+                                {this.formatNumbers(
+                                  c?.reduce((accumulator, object) => {
+                                    return (
+                                      parseFloat(accumulator) +
+                                      parseFloat(object.total)
+                                    ).toFixed(2);
+                                  }, 0) -
+                                    c?.reduce((accumulator, object) => {
+                                      return (
+                                        parseFloat(accumulator) +
+                                        parseFloat(object.vat_tax_value)
+                                      ).toFixed(2);
+                                    }, 0)
+                                )}
+                              </p>
+                              <p className="sec">{c[0]?.currency}</p>
+                            </td>
+                            <td>
+                              <p className="main">
+                                {this.formatNumbers(
+                                  c?.reduce((accumulator, object) => {
+                                    return (
+                                      parseFloat(accumulator) +
+                                      parseFloat(object.vat_tax_value)
+                                    ).toFixed(2);
+                                  }, 0)
+                                )}
+                              </p>
+                              <p className="sec">{c[0]?.currency}</p>
+                            </td>
+                            <td>
+                              <p className="main">
+                                {this.formatNumbers(
+                                  c?.reduce((accumulator, object) => {
+                                    return (
+                                      parseFloat(accumulator) +
+                                      parseFloat(object.total)
+                                    ).toFixed(2);
+                                  }, 0)
+                                )}
+                              </p>
+                              <p className="sec">{c[0]?.currency}</p>
+                            </td>
+                            <td>
+                              <p className="main">
+                                {this.formatNumbers(
+                                  this.getKeyValue(
+                                    c[0]?.currency,
+                                    this.state.payments_currencies,
+                                    "coast"
+                                  )
+                                )}
+                              </p>
+                              <p className="sec">{c[0]?.currency}</p>
+                            </td>
+                            <td>
+                              <p className="main">
+                                {this.formatNumbers(
+                                  parseFloat(
+                                    c?.reduce((accumulator, object) => {
+                                      return (
+                                        parseFloat(accumulator) +
+                                        parseFloat(object.total)
+                                      );
+                                    }, 0) -
+                                      this.getKeyValue(
+                                        c[0]?.currency,
+                                        this.state.payments_currencies,
+                                        "coast"
+                                      )
+                                  ).toFixed(2)
+                                )}
+                              </p>
+                              <p className="sec">{c[0]?.currency}</p>
+                            </td>
+                          </tr>
+                        );
+                      }
+                    )}
+                    {this.state.base_currency && (
+                      <tr className="border-top-1">
+                        <td>
+                          <p className="sale">Total in</p>
+                          <p className="sec">{this.state.base_currency}</p>
+                        </td>
+                        <td>
+                          <p className="main">
+                            {this.formatNumbers(
+                              parseFloat(
+                                this.state.pos?.reduce(
+                                  (accumulator, object) => {
+                                    return (
+                                      parseFloat(accumulator) +
+                                      parseFloat(object.total) *
+                                        parseFloat(object.exchange_rate)
+                                    );
+                                  },
+                                  0
+                                )
+                              ) -
+                                parseFloat(
+                                  this.state.pos?.reduce(
+                                    (accumulator, object) => {
+                                      return (
+                                        parseFloat(accumulator) +
+                                        parseFloat(object.vat_tax_value) *
+                                          parseFloat(object.exchange_rate)
+                                      );
+                                    },
+                                    0
+                                  )
+                                )
+                            )}
+                          </p>
+                          <p className="sec">{this.state.base_currency}</p>
+                        </td>
+                        <td>
+                          <p className="main">
+                            {this.formatNumbers(
+                              parseFloat(
+                                this.state.pos?.reduce(
+                                  (accumulator, object) => {
+                                    return (
+                                      parseFloat(accumulator) +
+                                      parseFloat(object.vat_tax_value) *
+                                        parseFloat(object.exchange_rate)
+                                    );
+                                  },
+                                  0
+                                )
+                              ).toFixed(2)
+                            )}
+                          </p>
+                          <p className="sec">{this.state.base_currency}</p>
+                        </td>
+                        <td>
+                          <p className="main">
+                            {this.formatNumbers(
                               this.state.pos?.reduce((accumulator, object) => {
                                 return (
                                   parseFloat(accumulator) +
-                                  parseFloat(object.vat_tax_value) *
+                                  parseFloat(object.total) *
                                     parseFloat(object.exchange_rate)
                                 );
                               }, 0)
-                            )
-                        )}
-                      </p>
-                      <p className="sec">{this.state.base_currency}</p>
-                    </td>
-                    <td>
-                      <p className="main">
-                        {this.formatNumbers(
-                          parseFloat(
-                            this.state.pos?.reduce((accumulator, object) => {
-                              return (
-                                parseFloat(accumulator) +
-                                parseFloat(object.vat_tax_value) *
-                                  parseFloat(object.exchange_rate)
-                              );
-                            }, 0)
-                          ).toFixed(2)
-                        )}
-                      </p>
-                      <p className="sec">{this.state.base_currency}</p>
-                    </td>
-                    <td>
-                      <p className="main">
-                        {this.formatNumbers(
-                          this.state.pos?.reduce((accumulator, object) => {
-                            return (
-                              parseFloat(accumulator) +
-                              parseFloat(object.total) *
-                                parseFloat(object.exchange_rate)
-                            );
-                          }, 0)
-                        )}
-                      </p>
-                      <p className="sec">{this.state.base_currency}</p>
-                    </td>
-                    <td>
-                      <p className="main">
-                        {this.formatNumbers(
-                          this.state.payments?.reduce((accumulator, object) => {
-                            return (
-                              parseFloat(accumulator) +
-                              parseFloat(object.value) *
-                                parseFloat(object.exchange_rate)
-                            );
-                          }, 0)
-                        )}
-                      </p>
-                      <p className="sec">{this.state.base_currency}</p>
-                    </td>
-                    <td>
-                      <p className="main">
-                        {this.formatNumbers(
-                          parseFloat(
-                            this.state.pos?.reduce((accumulator, object) => {
-                              return (
-                                parseFloat(accumulator) +
-                                parseFloat(object.total) *
-                                  parseFloat(object.exchange_rate)
-                              );
-                            }, 0) -
+                            )}
+                          </p>
+                          <p className="sec">{this.state.base_currency}</p>
+                        </td>
+                        <td>
+                          <p className="main">
+                            {this.formatNumbers(
                               this.state.payments?.reduce(
                                 (accumulator, object) => {
                                   return (
@@ -1606,15 +1669,45 @@ class PurchasesOrdersTab extends Component {
                                 },
                                 0
                               )
-                          )
-                        )}
-                      </p>
-                      <p className="sec">{this.state.base_currency}</p>
-                    </td>
-                  </tr>
-                )}
-              </table>
-            </div>
+                            )}
+                          </p>
+                          <p className="sec">{this.state.base_currency}</p>
+                        </td>
+                        <td>
+                          <p className="main">
+                            {this.formatNumbers(
+                              parseFloat(
+                                this.state.pos?.reduce(
+                                  (accumulator, object) => {
+                                    return (
+                                      parseFloat(accumulator) +
+                                      parseFloat(object.total) *
+                                        parseFloat(object.exchange_rate)
+                                    );
+                                  },
+                                  0
+                                ) -
+                                  this.state.payments?.reduce(
+                                    (accumulator, object) => {
+                                      return (
+                                        parseFloat(accumulator) +
+                                        parseFloat(object.value) *
+                                          parseFloat(object.exchange_rate)
+                                      );
+                                    },
+                                    0
+                                  )
+                              )
+                            )}
+                          </p>
+                          <p className="sec">{this.state.base_currency}</p>
+                        </td>
+                      </tr>
+                    )}
+                  </table>
+                </div>
+              )}
+            </>
           )}
         </div>
 

@@ -1,7 +1,17 @@
 import axios from "axios";
 import React, { Component } from "react";
 import { API } from "../../utitlties";
-import { Button, Modal, Input, Form, Row, Col, Select, DatePicker, Dropdown,} from "antd";
+import {
+  Button,
+  Modal,
+  Input,
+  Form,
+  Row,
+  Col,
+  Select,
+  DatePicker,
+  Dropdown,
+} from "antd";
 
 import { FaFilePdf } from "react-icons/fa";
 import { SiMicrosoftexcel } from "react-icons/si";
@@ -26,6 +36,9 @@ class RecievedPaymentsTab extends Component {
     changePaymentRows: this.props?.changePaymentRows,
     _currency: this.props?._currency,
     base_currency: this.props?.base_currency,
+    shared: this.props.shared,
+    scope: this.props.scope,
+    permission: this.props.permission,
   };
 
   deleteModal = () => {
@@ -79,7 +92,7 @@ class RecievedPaymentsTab extends Component {
 
   editPaymentFinish = (values) => {
     console.log(values);
-    values['value']=values.value?.replaceAll(',','')
+    values["value"] = values.value?.replaceAll(",", "");
 
     console.log(this.state.payment_to_edit);
     const fd = new FormData();
@@ -133,7 +146,7 @@ class RecievedPaymentsTab extends Component {
   };
 
   onPaymentFinish = (values) => {
-    values['value']=values.value?.replaceAll(',','')
+    values["value"] = values.value?.replaceAll(",", "");
     const fd = new FormData();
     values["date"] = this.state.date;
 
@@ -247,17 +260,13 @@ class RecievedPaymentsTab extends Component {
     {
       key: "1",
       label: (
-        <div
-        className="menu-download-item"
-        >
-          <span>
-             With EX.Rate
-          </span>
-          <a  href={`${API}export-sales/${this.props.id}`}>
-          <SiMicrosoftexcel />
+        <div className="menu-download-item">
+          <span>With EX.Rate</span>
+          <a href={`${API}export-sales/${this.props.id}`}>
+            <SiMicrosoftexcel />
           </a>
-          <a  href={`${API}sales-pdf/${this.props.id}`}>
-          <FaFilePdf />
+          <a href={`${API}sales-pdf/${this.props.id}`}>
+            <FaFilePdf />
           </a>
         </div>
       ),
@@ -265,18 +274,29 @@ class RecievedPaymentsTab extends Component {
     {
       key: "2",
       label: (
-       
-        <div
-        className="menu-download-item"
-        >
-          <span>
-            Without EX.Rate
-          </span>
-          <a  href={`${API}export-salesw/${this.props.id}`}>
-          <SiMicrosoftexcel />
+        <div className="menu-download-item">
+          <span>Without EX.Rate</span>
+          <a href={`${API}export-salesw/${this.props.id}`}>
+            <SiMicrosoftexcel />
           </a>
-          <a  href={`${API}sales-pdfw/${this.props.id}`}>
-          <FaFilePdf />
+          <a href={`${API}sales-pdfw/${this.props.id}`}>
+            <FaFilePdf />
+          </a>
+        </div>
+      ),
+    },
+  ];
+  items_without_ex = [
+    {
+      key: "2",
+      label: (
+        <div className="menu-download-item">
+          <span>Without EX.Rate</span>
+          <a href={`${API}export-salesw/${this.props.id}`}>
+            <SiMicrosoftexcel />
+          </a>
+          <a href={`${API}sales-pdfw/${this.props.id}`}>
+            <FaFilePdf />
           </a>
         </div>
       ),
@@ -288,22 +308,28 @@ class RecievedPaymentsTab extends Component {
         <div className="tables-page">
           <div className="btns-actions">
             <button>
-            <Dropdown
-                  overlayClassName="download-tables-menu"
-                   placement="bottomLeft"
-                    menu={{
-                      items: this.items,
-                    }}
-                  >
-                    <a onClick={(e) => e.preventDefault()}>
-                      Download{" "}
-                      <span>
-                        <DownloadOutlined />
-                      </span>
-                    </a>
-                  </Dropdown>
+              <Dropdown
+                overlayClassName="download-tables-menu"
+                placement="bottomLeft"
+                menu={{
+                  // items: this.items,
+                  items:
+                    this.state.scope == "sales_without_ex"
+                      ? this.items_without_ex
+                      : this.items,
+                }}
+              >
+                <a onClick={(e) => e.preventDefault()}>
+                  Download{" "}
+                  <span>
+                    <DownloadOutlined />
+                  </span>
+                </a>
+              </Dropdown>
             </button>
-            <button onClick={this.openPaymentAddModal}>Add Payment +</button>
+            {(this.state.permission == "write" || !this.state.shared) && (
+              <button onClick={this.openPaymentAddModal}>Add Payment +</button>
+            )}
           </div>
           <div>
             <div className="pom-table">
@@ -313,10 +339,26 @@ class RecievedPaymentsTab extends Component {
                     <th className="num-col">NO.</th>
                     <th className="width-220">Referance, Date</th>
                     <th className="width-300">Value</th>
-                    {this.state.base_currency &&
+                    {/* {this.state.base_currency &&
                       this.state.base_currency !== this.state._currency && (
                         <th className="width-300">{`EX.R / ${this.state.base_currency}`}</th>
-                      )}
+                      )} */}
+                    {!this.state.shared ? (
+                      <>
+                        {this.state.base_currency &&
+                          this.state.base_currency !== this.state._currency && (
+                            <th className="width-300">{`EX.R / ${this.state.base_currency}`}</th>
+                          )}
+                      </>
+                    ) : (
+                      <>
+                        {this.state.scope == "sales_with_ex" &&
+                          this.state.base_currency &&
+                          this.state.base_currency !== this.state._currency && (
+                            <th className="width-300">{`EX.R / ${this.state.base_currency}`}</th>
+                          )}
+                      </>
+                    )}
                   </tr>
                   {this.state.received_payment_rows?.map((payment, index) => {
                     return (
@@ -379,12 +421,35 @@ class RecievedPaymentsTab extends Component {
                           </p>
                           <p className="sec">{this.state?._currency}</p>
                         </td>
-                        {this.state.base_currency &&
+                        {/* {this.state.base_currency &&
                           this.state.base_currency !== this.state._currency && (
                             <td>
                               <p className="main">{payment?.exchange_rate}</p>
                             </td>
-                          )}
+                          )} */}
+
+                        {!this.state.shared ? (
+                          <>
+                            {this.state.base_currency &&
+                              this.state.base_currency !==
+                                this.state._currency && (
+                                <td>
+                                  <p className="main">{payment?.exchange_rate}</p>
+                                </td>
+                              )}
+                          </>
+                        ) : (
+                          <>
+                            {this.state.scope === "sales_with_ex" &&
+                              this.state.base_currency &&
+                              this.state.base_currency !==
+                                this.state._currency && (
+                                <td>
+                                 <p className="main">{payment?.exchange_rate}</p>
+                                </td>
+                              )}
+                          </>
+                        )}
                       </tr>
                     );
                   })}
@@ -405,32 +470,30 @@ class RecievedPaymentsTab extends Component {
                       </td>
                     </tr>
                   )}
-                  {this.state.base_currency &&
+                  {(!this.state.shared || this.state.scope=='sales_with_ex')&&this.state.base_currency &&
                     this.state.base_currency !== this.state._currency && (
                       <tr>
                         <td colSpan={2}>
                           <p className="sale">{`Total Recieved Payments in ${this.state.base_currency}`}</p>
                         </td>
                         <td colSpan={4}>
-                        <p className="high">
-                                {Number(
-                                  parseFloat(
-                                    this.state.received_payment_rows?.reduce(
-                                      (accumulator, object) => {
-                                        return (
-                                          parseFloat(accumulator) +
-                                              parseFloat(object.value) *
-                                                parseFloat(object.exchange_rate)
-                                        );
-                                      },
-                                      0
-                                    )
-                                  ).toFixed(2)
-                                )?.toLocaleString()}
-                              </p>
-                              <p className="sec">
-                                {this.state.base_currency}
-                              </p>
+                          <p className="high">
+                            {Number(
+                              parseFloat(
+                                this.state.received_payment_rows?.reduce(
+                                  (accumulator, object) => {
+                                    return (
+                                      parseFloat(accumulator) +
+                                      parseFloat(object.value) *
+                                        parseFloat(object.exchange_rate)
+                                    );
+                                  },
+                                  0
+                                )
+                              ).toFixed(2)
+                            )?.toLocaleString()}
+                          </p>
+                          <p className="sec">{this.state.base_currency}</p>
                         </td>
                       </tr>
                     )}

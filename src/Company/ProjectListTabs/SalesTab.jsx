@@ -29,6 +29,9 @@ class SalesTab extends Component {
     currency: this.props?._currency,
     base_currency: this.props?.base_currency,
     contract_rows: [],
+    shared: this.props.shared,
+    scope: this.props.scope,
+    permission:this.props.permission,
   };
   changeTotalContract = (contracts_total_value) => {
     this.setState({ contracts_total_value });
@@ -102,6 +105,9 @@ class SalesTab extends Component {
                 changeTotalDelivery={this.changeTotalDelivery}
                 changeHasContractsTaxable={this.changeHasContractsTaxable}
                 base_currency={this.state.base_currency}
+                shared={this.state.shared}
+                scope={this.state.scope}
+                permission={this.state.permission}
               />
             </TabPanel>
             <TabPanel>
@@ -117,6 +123,9 @@ class SalesTab extends Component {
                 changeTotalDelivery={this.changeTotalDelivery}
                 changeTotalSupplirs={this.changeTotalSupplirs}
                 base_currency={this.state.base_currency}
+                shared={this.state.shared}
+                scope={this.state.scope}
+                permission={this.state.permission}
               />
             </TabPanel>
             <TabPanel>
@@ -133,6 +142,9 @@ class SalesTab extends Component {
                 changeTotalPayment={this.changeTotalPayment}
                 changeTotalDelivery={this.changeTotalDelivery}
                 changeTotalSupplirs={this.changeTotalSupplirs}
+                shared={this.state.shared}
+                scope={this.state.scope}
+                permission={this.state.permission}
               />
             </TabPanel>
             {this.state.has_contracts_taxable && (
@@ -146,6 +158,9 @@ class SalesTab extends Component {
                   changeTotalInvoices={this.changeTotalInvoices}
                   changeTotalSupplirs={this.changeTotalSupplirs}
                   base_currency={this.state.base_currency}
+                  shared={this.state.shared}
+                  scope={this.state.scope}
+                  permission={this.state.permission}
                 />
               </TabPanel>
             )}
@@ -165,6 +180,9 @@ class SalesTab extends Component {
                 contract_rows={this.state.contract_rows}
                 received_payment_rows={this.state.received_payment_rows}
                 id={this.props.id}
+                shared={this.state.shared}
+                scope={this.state.scope}
+                permission={this.state.permission}
               />
             </TabPanel>
           </Tabs>
